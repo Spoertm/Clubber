@@ -1,4 +1,4 @@
-﻿namespace Clubber.DDroleupdater
+﻿namespace Clubber.DdRoleUpdater
 {
     public class DdUser
     {

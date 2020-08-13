@@ -10,14 +10,14 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Reflection;
 
-namespace Clubber.DDroleupdater
+namespace Clubber.DdRoleUpdater
 {
     [Name("Role Management")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public class RoleUpdater : ModuleBase<SocketCommandContext>
     {
-        private static Dictionary<ulong, DdUser> DdPlayerDatabase = new Dictionary<ulong, DdUser>();
-        private static Dictionary<int, ulong> ScoreRoleDict = new Dictionary<int, ulong>();
+        public static Dictionary<ulong, DdUser> DdPlayerDatabase = new Dictionary<ulong, DdUser>();
+        public static Dictionary<int, ulong> ScoreRoleDict = new Dictionary<int, ulong>();
         private static readonly HttpClient Client = new HttpClient();
         private readonly UTF8Encoding UTF8 = new UTF8Encoding(true, true);
         private readonly string DBJsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/DdPlayerDataBase.json");
@@ -46,7 +46,7 @@ namespace Clubber.DDroleupdater
                 var member = GetGuildUser(user.Value.DiscordId);
                 foreach (var item in ScoreRoleDict)
                 {
-                    var memberHasRole = MemberHasRole(member, item.Value);
+                    var memberHasRole = RoleUpdaterHelper.MemberHasRole(member, item.Value);
                     if (user.Value.Score >= item.Key && memberHasRole)
                         break;
 
@@ -55,7 +55,7 @@ namespace Clubber.DDroleupdater
                         updatedRoles = true;
                         numberOfRoleUpdates++;
 
-                        List<SocketRole> removedRolesList = RemoveScoreRoles(member);
+                        List<SocketRole> removedRolesList = RoleUpdaterHelper.RemoveScoreRoles(member);
                         SocketRole roleToAdd = Context.Guild.GetRole(item.Value);
                         if (roleToAdd != null) await member.AddRoleAsync(roleToAdd);
 
@@ -89,7 +89,7 @@ namespace Clubber.DDroleupdater
         [Summary("Obtains user from their rank and adds them to the database.")]
         public async Task AddUserByRank(uint rank, ulong discordId)
         {
-            if (UserExists(discordId))
+            if (RoleUpdaterHelper.UserExists(discordId))
             {
                 await ReplyAsync($"User {discordId} already exists in the DB.");
                 return;
@@ -120,7 +120,7 @@ namespace Clubber.DDroleupdater
         [Summary("Obtains user from their leaderboard ID and adds them to the database.")]
         public async Task AddUserByID(uint lbID, ulong discordId)
         {
-            if (UserExists(discordId))
+            if (RoleUpdaterHelper.UserExists(discordId))
             {
                 await ReplyAsync($"User {discordId} already exists in the DB.");
                 return;
@@ -170,7 +170,7 @@ namespace Clubber.DDroleupdater
         [Summary("Remove user from database based on their Discord ID.")]
         public async Task RemoveUserByDiscordId(ulong discordId)
         {
-            if (!UserExists(discordId))
+            if (!RoleUpdaterHelper.UserExists(discordId))
             {
                 await ReplyAsync($"User {discordId} doesn't exist in the database.");
                 return;
@@ -252,24 +252,10 @@ namespace Clubber.DDroleupdater
 
             EmbedBuilder embed = new EmbedBuilder { Title = "DD player database" };
 
-            embed.AddField(fld =>
-            {
-                fld.Name = "`User`";
-                fld.Value = $"{string.Join('\n', GetDbNameMentionList())}";
-                fld.IsInline = true;
-            })
-            .AddField(fld =>
-            {
-                fld.Name = $"`{"DiscordId",-18}\t{"LB-ID",-7}\t{"Score",-5}`";
-                fld.Value = builder.Append("").ToString();
-                fld.IsInline = true;
-            })
-            .AddField(fld =>
-            {
-                fld.Name = "`Role`";
-                fld.Value = $"{string.Join('\n', GetDbRoleMentionList())}";
-                fld.IsInline = true;
-            });
+            embed.AddField(RoleUpdaterHelper.BuildEmbed("`User`", $"{string.Join('\n', GetDbNameMentionList())}", true))
+                 .AddField(RoleUpdaterHelper.BuildEmbed($"`{"DiscordId",-18}\t{"LB-ID",-7}\t{"Score",-5}`", builder.Append("").ToString(), true))
+                 .AddField(RoleUpdaterHelper.BuildEmbed("`Role`", $"{string.Join('\n', GetDbRoleMentionList())}", true));
+
             await ReplyAsync(null, false, embed.Build());
         }
 
@@ -295,16 +281,11 @@ namespace Clubber.DDroleupdater
             else await msg.ModifyAsync(mssg => mssg.Content = $"{msg.Content[0..^36]}❌ Failed to serialize database.");
         }
 
-        public bool UserExists(ulong discordId)
-        {
-            return DdPlayerDatabase.ContainsKey(discordId);
-        }
-
         public List<string> GetDbNameMentionList()
         {
             List<string> dbNameMentionList = new List<string>();
 
-            foreach (DdUser user in DdPlayerDatabase.Values)
+            foreach (DdUser user in RoleUpdater.DdPlayerDatabase.Values)
             {
                 dbNameMentionList.Add(GetGuildUser(user.DiscordId).Mention);
             }
@@ -312,41 +293,23 @@ namespace Clubber.DDroleupdater
             return dbNameMentionList;
         }
 
-        public SocketGuildUser GetGuildUser(ulong Id)
+        public string GetMemberScoreRoleMention(ulong memberId)
         {
-            return Context.Guild.GetUser(Id);
-        }
-
-        public bool MemberHasRole(SocketGuildUser member, ulong roleId)
-        {
-            foreach (SocketRole role in member.Roles)
+            foreach (SocketRole userRole in GetGuildUser(memberId).Roles)
             {
-                if (role.Id == roleId)
-                    return true;
-            }
-            return false;
-        }
-
-        public List<SocketRole> RemoveScoreRoles(SocketGuildUser member)
-        {
-            List<SocketRole> removedRoles = new List<SocketRole>();
-
-            foreach (var role in member.Roles)
-            {
-                if (ScoreRoleDict.ContainsValue(role.Id))
+                foreach (ulong roleId in RoleUpdater.ScoreRoleDict.Values)
                 {
-                    member.RemoveRoleAsync(role);
-                    removedRoles.Add(role);
+                    if (userRole.Id == roleId) return userRole.Mention;
                 }
             }
-            return removedRoles;
+            return "No role";
         }
 
         public List<string> GetDbRoleMentionList()
         {
             List<string> dbMemberRoleMentionList = new List<string>();
 
-            foreach (DdUser user in DdPlayerDatabase.Values)
+            foreach (DdUser user in RoleUpdater.DdPlayerDatabase.Values)
             {
                 dbMemberRoleMentionList.Add(GetMemberScoreRoleMention(user.DiscordId));
             }
@@ -354,35 +317,9 @@ namespace Clubber.DDroleupdater
             return dbMemberRoleMentionList;
         }
 
-        public string GetMemberScoreRoleMention(ulong memberId)
+        public SocketGuildUser GetGuildUser(ulong Id)
         {
-            foreach (SocketRole userRole in GetGuildUser(memberId).Roles)
-            {
-                foreach (ulong roleId in ScoreRoleDict.Values)
-                {
-                    if (userRole.Id == roleId) return userRole.Mention;
-                }
-            }
-            return "No role";
+            return Context.Guild.GetUser(Id);
         }
-    }
-
-    public class DdPlayer
-    {
-        public int Rank { get; set; }
-        public int Id { get; set; }
-        public string Username { get; set; }
-        public int Time { get; set; }
-        public int Kills { get; set; }
-        public int Gems { get; set; }
-        public int DeathType { get; set; }
-        public int ShotsHit { get; set; }
-        public int ShotsFired { get; set; }
-        public long TimeTotal { get; set; }
-        public int KillsTotal { get; set; }
-        public int GemsTotal { get; set; }
-        public int DeathsTotal { get; set; }
-        public int ShotsHitTotal { get; set; }
-        public int ShotsFiredTotal { get; set; }
     }
 }
