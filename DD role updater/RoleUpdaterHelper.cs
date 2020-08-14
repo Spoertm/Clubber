@@ -7,12 +7,7 @@ using Discord.WebSocket;
 namespace Clubber.DdRoleUpdater
 {
     public static class RoleUpdaterHelper
-    {
-        public static bool UserExistsInDb(ulong discordId)
-        {
-            return RoleUpdater.DdPlayerDatabase.ContainsKey(discordId);
-        }
-
+    
         public static bool MemberHasRole(SocketGuildUser member, ulong roleId)
         {
             foreach (SocketRole role in member.Roles)

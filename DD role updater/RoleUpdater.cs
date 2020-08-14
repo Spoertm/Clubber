@@ -281,5 +281,9 @@ namespace Clubber.DdRoleUpdater
         {
             return Context.Guild.GetUser(Id);
         }
+        public static bool UserExistsInDb(ulong discordId)
+        {
+            return DdPlayerDatabase.ContainsKey(discordId);
+        }
     }
 }
