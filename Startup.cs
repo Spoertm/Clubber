@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Clubber.DdRoleUpdater;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -56,6 +57,7 @@ namespace Clubber
             .AddSingleton<CommandHandler>()         // Add the command handler to the collection
             .AddSingleton<StartupService>()         // Add startupservice to the collection
             .AddSingleton<LoggingService>()         // Add loggingservice to the collection
+            .AddSingleton<RoleUpdater>()
             .AddSingleton<Random>()                 // Add random to the collection
             .AddSingleton(Configuration);           // Add the configuration to the collection
         }

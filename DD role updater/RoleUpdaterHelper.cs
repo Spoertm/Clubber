@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 
 namespace Clubber.DdRoleUpdater
@@ -59,6 +61,11 @@ namespace Clubber.DdRoleUpdater
                 Value = value,
                 IsInline = inline
             };
+        }
+
+        public static string GetCommandAndParameterString(CommandInfo cmd) // Returns the command and its params in the format: commandName <requiredParam> [optionalParam]
+        {
+            return $"{cmd.Name} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**[{p.Name}]**" : $"**[{p.Name} = {p.DefaultValue}]**" : $"**<{p.Name}>**"))}";
         }
     }
 }

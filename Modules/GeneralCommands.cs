@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Clubber.DdRoleUpdater;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -12,23 +13,25 @@ namespace Clubber.Modules
     [Name("General Commands")]
     public class GeneralCommands : ModuleBase<SocketCommandContext>
     {
-        public readonly CommandService service;
-        public readonly IConfigurationRoot config;
+        public readonly CommandService Service;
+        public readonly IConfigurationRoot Config;
+        public readonly RoleUpdater RUpdater;
         private static readonly HttpClient Client = new HttpClient();
 
-        public GeneralCommands(CommandService _service, IConfigurationRoot _config)
+        public GeneralCommands(CommandService service, IConfigurationRoot config, RoleUpdater roleUpdater)
         {
-            service = _service;
-            config = _config;
+            Service = service;
+            Config = config;
+            RUpdater = roleUpdater;
         }
 
-        [Command("help")]
+        [Command("Help")]
         [Summary("Shows info about command, otherwise command list.")]
         public async Task HelpAsync([Remainder] string command = null)
         {
             if (!string.IsNullOrWhiteSpace(command))    // If command exists
             {
-                var result = service.Search(Context, command);
+                var result = Service.Search(Context, command);
                 var preCondCheck = result.IsSuccess ? await result.Commands[0].Command.CheckPreconditionsAsync(Context) : null;
 
                 if (!result.IsSuccess)
@@ -36,24 +39,24 @@ namespace Clubber.Modules
                 else if (!preCondCheck.IsSuccess)
                 { await ReplyAsync($"The command `{command}` couldn't be executed.\nReason: " + preCondCheck.ErrorReason); return; }
 
-                string prefix = config["prefix"], aliases = "";
+                string prefix = Config["prefix"], aliases = "";
                 var builder = new EmbedBuilder();
 
-                var cmd = result.Commands[0].Command;
+                var cmd = result.Commands.First().Command;
                 if (cmd.Aliases.Count > 1) aliases = $"\nAliases: {string.Join(", ", cmd.Aliases)}";
 
-                builder.Title = $"{cmd.Name} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**[{p.Name}]**" : $"**[{p.Name} = {p.DefaultValue}]**" : $"**<{p.Name}>**"))}{aliases}";
-
+                builder.Title = $"{string.Join("\n", result.Commands.Select(c => RoleUpdaterHelper.GetCommandAndParameterString(c.Command)))}{(result.Commands.Count == 1 ? aliases : null)}";
                 builder.Description = cmd.Summary;
 
-                if (cmd.Parameters.Count > 0)
+                //if (cmd.Parameters.Count > 0)
+                if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
                     builder.Footer = new EmbedFooterBuilder() { Text = "<>: Required⠀⠀[]: Optional\nText within \" \" will be counted as one argument." };
 
                 await ReplyAsync("", false, builder.Build());
             }
             else    // If command doesnt exist
             {
-                string prefix = config["prefix"];
+                string prefix = Config["prefix"];
                 EmbedBuilder builder = new EmbedBuilder
                 {
                     Author = new EmbedAuthorBuilder
@@ -63,14 +66,17 @@ namespace Clubber.Modules
                     }
                 };
 
-                foreach (ModuleInfo module in service.Modules)
+                foreach (ModuleInfo module in Service.Modules)
                 {
                     string description = null;
                     foreach (var cmd in module.Commands)
                     {
                         PreconditionResult result = await cmd.CheckPreconditionsAsync(Context);
                         if (result.IsSuccess)
-                            description += $"{cmd.Remarks}{(cmd.Remarks == null ? prefix : "")}{string.Join("/", cmd.Aliases)}\n";
+                        {
+                            description += $"{cmd.Remarks}{(cmd.Remarks == null ? prefix : "")}{string.Join("/", cmd.Aliases)} ";
+                            description += $"{string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"[{p.Name}]" : $"[{p.Name} = {p.DefaultValue}]" : $"<{p.Name}>"))}\n";
+                        }
                     }
 
                     if (!string.IsNullOrWhiteSpace(description))
@@ -83,17 +89,18 @@ namespace Clubber.Modules
                         });
                     }
                 }
-                builder.AddField("\u200B", $"Mentioning the bot works as well as using the prefix.\nUse `{prefix}help [command]` or call a command to get more info.");
+
+                builder.AddField("\u200B", $"<>: Required⠀⠀[]: Optional\nText within \" \" will be counted as one argument.\n\nMentioning the bot works as well as using the prefix.\nUse `{prefix}help [command]` or call a command to get more info.");
                 await ReplyAsync("", false, builder.Build());
             }
         }
 
-        [Command("whyareyou")]
+        [Command("WhyAreYou")]
         [Summary("Describes what the bot does.")]
         public async Task WhyAreYou()
             => await ReplyAsync("I periodically update people's score/club roles. Most of my commands are admin-only, which means you can't see/use them if you're not an admin.");
 
-        [Command("changebotname")]
+        [Command("ChangebotName")]
         [Summary("Changes the bot's username.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ChangeBotName(string username)
@@ -105,7 +112,7 @@ namespace Clubber.Modules
             }
         }
 
-        [Command("changebotavatar")]
+        [Command("ChangeBotAvatar")]
         [Summary("Changes the bot's avatar.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ChangeBotAvatar(string avatarURL = null, string image = null)
@@ -134,6 +141,27 @@ namespace Clubber.Modules
             }
             await ReplyAsync("Bot avatar should change in a moment.");
             await Context.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(stream));
+        }
+
+        [Command("UpdateRoles")]
+        [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
+        public async Task UpdateRoles()
+        { 
+            await RUpdater.UpdateUserRoles(RUpdater.DdPlayerDatabase[Context.User.Id]);
+        }
+
+        [Command("UpdateRoles"), Remarks("├ ")]
+        [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
+        public async Task UpdateRoles(IUser userMention)
+        {
+            await ReplyAsync("Successfully executed UpdateRoles(IUser user)");
+        }
+
+        [Command("UpdateRoles"), Remarks("└ ")]
+        [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
+        public async Task UpdateRoles(string userNameOrNickname)
+        {
+            await ReplyAsync("Successfully executed UpdateRoles(string userNameOrNickname)");
         }
     }
 }
