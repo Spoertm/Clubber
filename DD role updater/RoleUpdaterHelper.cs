@@ -6,7 +6,7 @@ namespace Clubber.DdRoleUpdater
 {
     public static class RoleUpdaterHelper
     {
-        public static bool UserExists(ulong discordId)
+        public static bool UserExistsInDb(ulong discordId)
         {
             return RoleUpdater.DdPlayerDatabase.ContainsKey(discordId);
         }
@@ -36,7 +36,22 @@ namespace Clubber.DdRoleUpdater
             return removedRoles;
         }
 
-        public static EmbedFieldBuilder BuildEmbed(string name, string value, bool inline)
+        public static List<SocketRole> RemoveScoreRolesExcept(SocketGuildUser member, SocketRole excludedRole)
+        {
+            List<SocketRole> removedRoles = new List<SocketRole>();
+
+            foreach (var role in member.Roles)
+            {
+                if (RoleUpdater.ScoreRoleDict.ContainsValue(role.Id) && role.Id != excludedRole.Id)
+                {
+                    member.RemoveRoleAsync(role);
+                    removedRoles.Add(role);
+                }
+            }
+            return removedRoles;
+        }
+
+        public static EmbedFieldBuilder BuildField(string name, string value, bool inline)
         {
             return new EmbedFieldBuilder
             {

@@ -40,79 +40,56 @@ namespace Clubber.DdRoleUpdater
         public async Task UpdateRoles()
         {
             bool updatedRoles = false;
-            int numberOfRoleUpdates = 0;
-            foreach (var user in DdPlayerDatabase)
+            foreach (var user in DdPlayerDatabase.Values)
             {
-                var member = GetGuildUser(user.Value.DiscordId);
-                foreach (var item in ScoreRoleDict)
+                var guildUser = GetGuildUser(user.DiscordId);
+                var scoreRole = ScoreRoleDict.Where(sr => sr.Key <= user.Score).OrderByDescending(sr => sr.Key).FirstOrDefault();
+                var roleToAdd = Context.Guild.GetRole(scoreRole.Value);
+                var removedRoles = RoleUpdaterHelper.RemoveScoreRolesExcept(guildUser, roleToAdd);
+                StringBuilder description = new StringBuilder($"{guildUser.Mention}");
+
+                if (RoleUpdaterHelper.MemberHasRole(guildUser, roleToAdd.Id) && removedRoles.Count == 0)
+                    continue;
+
+                updatedRoles = true;
+                if (removedRoles.Count != 0) description.Append($"\n\nRemoved:\n- {string.Join("\n- ", removedRoles.Select(sr => sr.Mention))}");
+                if (!RoleUpdaterHelper.MemberHasRole(guildUser, scoreRole.Value))
                 {
-                    var memberHasRole = RoleUpdaterHelper.MemberHasRole(member, item.Value);
-                    if (user.Value.Score >= item.Key && memberHasRole)
-                        break;
-
-                    if (user.Value.Score >= item.Key && !memberHasRole)
-                    {
-                        updatedRoles = true;
-                        numberOfRoleUpdates++;
-
-                        List<SocketRole> removedRolesList = RoleUpdaterHelper.RemoveScoreRoles(member);
-                        SocketRole roleToAdd = Context.Guild.GetRole(item.Value);
-                        if (roleToAdd != null) await member.AddRoleAsync(roleToAdd);
-
-
-                        EmbedBuilder embed = new EmbedBuilder
-                        {
-                            Title = $"Updated roles for {member.Username}",
-                            Description = $"{member.Mention}\n"
-                        };
-
-                        if (removedRolesList.Count > 0)
-                            embed.Description += $"Removed:\n- {string.Join("\n- ", removedRolesList.Select(role => role.Mention))}";
-
-                        embed.Description += roleToAdd switch
-                        {
-                            null => $"\nAdded:\nNone. Failed to find role from role ID, but it should have been the one for {item.Key}s+.",
-                            _ => $"\nAdded:\n- {roleToAdd.Mention}"
-                        };
-
-                        await ReplyAsync(null, false, embed.Build());
-                        break;
-                    }
+                    if (roleToAdd != null)
+                        await guildUser.AddRoleAsync(roleToAdd);
+                    description.AppendLine(roleToAdd == null ? $"Failed to find role from role ID, but it should have been the one for {scoreRole.Key}s+." : $"\n\nAdded:\n- {roleToAdd.Mention}");
                 }
-            }
 
-            if (!updatedRoles) await ReplyAsync($"No user roles updates required.");
-            else await ReplyAsync($"Updated {numberOfRoleUpdates} user(s)' roles.");
+                EmbedBuilder embed = new EmbedBuilder
+                {
+                    Title = $"Updated roles for {guildUser.Username}",
+                    Description = description.ToString()
+                };
+                await ReplyAsync(null, false, embed.Build());
+            }
+            if (!updatedRoles) await ReplyAsync("No role updates were needed.");
         }
 
         [Command("adduserbyrank"), Alias("addr")]
         [Summary("Obtains user from their rank and adds them to the database.")]
         public async Task AddUserByRank(uint rank, ulong discordId)
         {
-            if (RoleUpdaterHelper.UserExists(discordId))
-            {
-                await ReplyAsync($"User {discordId} already exists in the DB.");
-                return;
-            }
-
-            IUserMessage msg = await ReplyAsync("Processing...");
+            if (RoleUpdaterHelper.UserExistsInDb(discordId))
+            { await ReplyAsync($"User {discordId} already exists in the DB."); return; }
 
             try
             {
                 string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-rank?rank={rank}");
                 DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
-                DdUser databaseUser = new DdUser(discordId, lbPlayer.Id)
-                {
-                    Score = lbPlayer.Time / 10000
-                };
-                DdPlayerDatabase.Add(discordId, databaseUser);
+                DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-                await msg.ModifyAsync(mssg => mssg.Content = "✅ User successfully added to database.");
+                DdPlayerDatabase.Add(discordId, databaseUser);
+                var msg = await ReplyAsync("✅ User successfully added to database.");
                 await SerializeDbMessage(msg);
             }
             catch
             {
-                await msg.ModifyAsync(mssg => mssg.Content = "❌ Something went wrong. Couldn't execute command.");
+                await ReplyAsync("❌ Something went wrong. Couldn't execute command.");
             }
         }
 
@@ -120,30 +97,22 @@ namespace Clubber.DdRoleUpdater
         [Summary("Obtains user from their leaderboard ID and adds them to the database.")]
         public async Task AddUserByID(uint lbID, ulong discordId)
         {
-            if (RoleUpdaterHelper.UserExists(discordId))
-            {
-                await ReplyAsync($"User {discordId} already exists in the DB.");
-                return;
-            }
-
-            IUserMessage msg = await ReplyAsync("Processing...");
+            if (RoleUpdaterHelper.UserExistsInDb(discordId))
+            { await ReplyAsync($"User {discordId} already exists in the DB."); return; }
 
             try
             {
                 string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbID}");
                 DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
-                DdUser databaseUser = new DdUser(discordId, lbPlayer.Id)
-                {
-                    Score = lbPlayer.Time / 10000
-                };
-                DdPlayerDatabase.Add(discordId, databaseUser);
+                DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-                await msg.ModifyAsync(mssg => mssg.Content = "✅ User successfully added to database.");
+                DdPlayerDatabase.Add(discordId, databaseUser);
+                var msg = await ReplyAsync("✅ User successfully added to database.");
                 await SerializeDbMessage(msg);
             }
             catch
             {
-                await msg.ModifyAsync(mssg => mssg.Content = "❌ Something went wrong. Couldn't execute command.");
+                await ReplyAsync("❌ Something went wrong. Couldn't execute command.");
             }
         }
 
@@ -151,18 +120,16 @@ namespace Clubber.DdRoleUpdater
         [Summary("Remove user from database based on their leaderboard ID.")]
         public async Task RemoveUserByID(uint lbID)
         {
-            IUserMessage msg = await ReplyAsync("Processing...");
             foreach (KeyValuePair<ulong, DdUser> user in DdPlayerDatabase)
             {
                 if (lbID == user.Value.LeaderboardId)
                 {
                     DdPlayerDatabase.Remove(user.Key);
-                    await msg.ModifyAsync(mssg => mssg.Content = $"✅ User {lbID} successfully removed from database.");
+                    var msg = await ReplyAsync($"✅ User {lbID} successfully removed from database.");
                     await SerializeDbMessage(msg);
                     return;
                 }
             }
-
             await ReplyAsync($"User {lbID} doesn't exist in the database.");
         }
 
@@ -170,19 +137,15 @@ namespace Clubber.DdRoleUpdater
         [Summary("Remove user from database based on their Discord ID.")]
         public async Task RemoveUserByDiscordId(ulong discordId)
         {
-            if (!RoleUpdaterHelper.UserExists(discordId))
-            {
-                await ReplyAsync($"User {discordId} doesn't exist in the database.");
-                return;
-            }
+            if (!RoleUpdaterHelper.UserExistsInDb(discordId))
+            { await ReplyAsync($"User {discordId} doesn't exist in the database."); return; }
 
-            IUserMessage msg = await ReplyAsync("Processing...");
             foreach (KeyValuePair<ulong, DdUser> user in DdPlayerDatabase)
             {
                 if (discordId == user.Value.DiscordId)
                 {
                     DdPlayerDatabase.Remove(user.Key);
-                    await msg.ModifyAsync(mssg => mssg.Content = $"✅ User {discordId} successfully removed from database.");
+                    var msg = await ReplyAsync($"✅ User {discordId} successfully removed from database.");
                     await SerializeDbMessage(msg);
                     return;
                 }
@@ -194,20 +157,16 @@ namespace Clubber.DdRoleUpdater
         public async Task ClearDatabase()
         {
             if (DdPlayerDatabase.Count == 0)
-            {
-                await ReplyAsync("The database is already empty.");
-                return;
-            }
+            { await ReplyAsync("The database is already empty."); return; }
 
             EmbedBuilder embed = new EmbedBuilder
             {
                 Title = "⚠️ Are you sure you want to clear the database?",
                 Description = "Think twice about this."
             };
-            Emoji checkmarkEmote = new Emoji("✅");
-            Emoji xEmote = new Emoji("❌");
+            Emoji checkmarkEmote = new Emoji("✅"), xEmote = new Emoji("❌");
 
-            IUserMessage msg = await ReplyAsync(null, false, embed.Build());
+            var msg = await ReplyAsync(null, false, embed.Build());
             await msg.AddReactionsAsync(new[] { checkmarkEmote, xEmote });
             Context.Client.ReactionAdded += OnMessageReactedAsync;
         }
@@ -219,10 +178,9 @@ namespace Clubber.DdRoleUpdater
             {
                 try
                 {
-                    IUserMessage reply = await ReplyAsync("Processing...");
                     DdPlayerDatabase.Clear();
-                    await reply.ModifyAsync(mssg => mssg.Content = "✅ Database successfully cleared.");
-                    await SerializeDbMessage(reply);
+                    var dbClearMsg = await ReplyAsync("✅ Database successfully cleared.");
+                    await SerializeDbMessage(dbClearMsg);
                     Context.Client.ReactionAdded -= OnMessageReactedAsync;
                 }
                 catch
@@ -231,7 +189,7 @@ namespace Clubber.DdRoleUpdater
                     Context.Client.ReactionAdded -= OnMessageReactedAsync;
                 }
             }
-            else if (msg != null && reaction.UserId == Context.User.Id && reaction.Emote.Name == "❌")
+            else if ((msg != null && reaction.UserId == Context.User.Id && reaction.Emote.Name == "❌") || msg == null)
             {
                 await ReplyAsync("Cancelled database clearing.");
                 Context.Client.ReactionAdded -= OnMessageReactedAsync;
@@ -252,9 +210,9 @@ namespace Clubber.DdRoleUpdater
 
             EmbedBuilder embed = new EmbedBuilder { Title = "DD player database" };
 
-            embed.AddField(RoleUpdaterHelper.BuildEmbed("`User`", $"{string.Join('\n', GetDbNameMentionList())}", true))
-                 .AddField(RoleUpdaterHelper.BuildEmbed($"`{"DiscordId",-18}\t{"LB-ID",-7}\t{"Score",-5}`", builder.Append("").ToString(), true))
-                 .AddField(RoleUpdaterHelper.BuildEmbed("`Role`", $"{string.Join('\n', GetDbRoleMentionList())}", true));
+            embed.AddField(RoleUpdaterHelper.BuildField("`User`", $"{string.Join('\n', GetDbNameMentionList())}", true))
+                 .AddField(RoleUpdaterHelper.BuildField($"`{"DiscordId",-18}\t{"LB-ID",-7}\t{"Score",-5}`", builder.Append("").ToString(), true))
+                 .AddField(RoleUpdaterHelper.BuildField("`Role`", $"{string.Join('\n', GetDbRoleMentionList())}", true));
 
             await ReplyAsync(null, false, embed.Build());
         }
