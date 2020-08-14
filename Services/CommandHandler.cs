@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using Discord;
 
 namespace Clubber
 {
@@ -31,6 +32,9 @@ namespace Clubber
                 return;
 
             var context = new SocketCommandContext(discord, msg);     // Create the command context
+
+            if (msg.Content == context.Client.GetUser(743431502842298368).Mention)
+            { await msg.AddReactionAsync(new Emoji("🗡")); return; }
 
             int argPos = 0;     // Check if the message has a valid command prefix
             if (msg.HasStringPrefix(config["prefix"], ref argPos) || msg.HasMentionPrefix(discord.CurrentUser, ref argPos))

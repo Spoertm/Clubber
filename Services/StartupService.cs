@@ -34,7 +34,7 @@ namespace Clubber
 			if (string.IsNullOrWhiteSpace(discordToken))
 				throw new Exception("Please enter your bot's token into the `_config.yml` file found in the applications root directory.");
 
-			await discord.SetGameAsync("for +", null, ActivityType.Watching);
+			await discord.SetGameAsync("your roles", null, ActivityType.Watching);
 
 			await discord.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
 			await discord.StartAsync();                                // Connect to the websocket
