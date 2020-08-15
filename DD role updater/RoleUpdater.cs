@@ -16,35 +16,32 @@ namespace Clubber.DdRoleUpdater
     [RequireUserPermission(GuildPermission.ManageRoles)]
     public class RoleUpdater : ModuleBase<SocketCommandContext>
     {
-        public Dictionary<ulong, DdUser> DdPlayerDatabase = new Dictionary<ulong, DdUser>();
-        public Dictionary<int, ulong> ScoreRoleDict = new Dictionary<int, ulong>();
+        public static Dictionary<int, ulong> ScoreRoleDict = new Dictionary<int, ulong>();
         private static readonly HttpClient Client = new HttpClient();
         private readonly UTF8Encoding UTF8 = new UTF8Encoding(true, true);
-        private readonly string DBJsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/DdPlayerDataBase.json");
+        private readonly string DbJsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/DdPlayerDataBase.json");
         private readonly string ScoreRoleJsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/ScoreRoles.json");
 
         public RoleUpdater()
         {
             ScoreRoleDict = JsonConvert.DeserializeObject<Dictionary<int, ulong>>(File.ReadAllText(ScoreRoleJsonPath));
 
-            if (File.Exists(DBJsonPath))
-            {
-                if (new FileInfo(DBJsonPath).Length > 0)
-                    DdPlayerDatabase = JsonConvert.DeserializeObject<Dictionary<ulong, DdUser>>(File.ReadAllText(DBJsonPath));
-            }
-            else File.Create(DBJsonPath);
+            if (!File.Exists(DbJsonPath))
+                File.Create(DbJsonPath);
         }
 
-        [Command("UpdateRolesAndDatabase"), Alias("updatedb")]
+        [Command("updaterolesanddatabase"), Alias("updatedb")]
         [Summary("Updates users' score/club roles that are in the database.")]
         public async Task UpdateRolesAndDataBase()
         {
-            List<bool> listOfRoleUpdateChecks = DdPlayerDatabase.Values.Select(async user => await UpdateUserRoles(user)).Select(t => t.Result).ToList();
+            var Db = RoleUpdaterHelper.DeserializeDb();
+            List<bool> listOfRoleUpdateChecks = Db.Values.Select(async user => await UpdateUserRoles(user)).Select(t => t.Result).ToList();
+            if (!listOfRoleUpdateChecks.Contains(true)) { await ReplyAsync("No role updates were needed."); return; }
 
-            if (!listOfRoleUpdateChecks.Contains(true)) await ReplyAsync("No role updates were needed.");
+            await SerializeDbAndReply(Db, await ReplyAsync("Processing..."));
         }
-        
-        [Command("AddUserByRank"), Alias("addr")]
+
+        [Command("adduserbyrank"), Alias("addr")]
         [Summary("Obtains user from their rank and adds them to the database.")]
         public async Task AddUserByRank(uint rank, ulong discordId)
         {
@@ -57,9 +54,10 @@ namespace Clubber.DdRoleUpdater
                 DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
                 DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-                DdPlayerDatabase.Add(discordId, databaseUser);
+                var Db = RoleUpdaterHelper.DeserializeDb();
+                Db.Add(discordId, databaseUser);
                 var msg = await ReplyAsync("✅ User successfully added to database.");
-                await SerializeDbMessage(msg);
+                await SerializeDbAndReply(Db, msg);
             }
             catch
             {
@@ -67,7 +65,7 @@ namespace Clubber.DdRoleUpdater
             }
         }
 
-        [Command("AddUserById"), Alias("addid")]
+        [Command("adduserbyid"), Alias("addid")]
         [Summary("Obtains user from their leaderboard ID and adds them to the database.")]
         public async Task AddUserByID(uint lbId, ulong discordId)
         {
@@ -80,9 +78,10 @@ namespace Clubber.DdRoleUpdater
                 DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
                 DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-                DdPlayerDatabase.Add(discordId, databaseUser);
+                var Db = RoleUpdaterHelper.DeserializeDb();
+                Db.Add(discordId, databaseUser);
                 var msg = await ReplyAsync("✅ User successfully added to database.");
-                await SerializeDbMessage(msg);
+                await SerializeDbAndReply(Db, msg);
             }
             catch
             {
@@ -94,43 +93,45 @@ namespace Clubber.DdRoleUpdater
         [Summary("Remove user from database based on their leaderboard ID.")]
         public async Task RemoveUserByLeaderboardID(uint lbId)
         {
-            foreach (KeyValuePair<ulong, DdUser> user in DdPlayerDatabase)
+            var Db = RoleUpdaterHelper.DeserializeDb();
+            foreach (KeyValuePair<ulong, DdUser> user in Db)
             {
                 if (lbId == user.Value.LeaderboardId)
                 {
-                    DdPlayerDatabase.Remove(user.Key);
+                    Db.Remove(user.Key);
                     var msg = await ReplyAsync($"✅ User {lbId} successfully removed from database.");
-                    await SerializeDbMessage(msg);
+                    await SerializeDbAndReply(Db, msg);
                     return;
                 }
             }
             await ReplyAsync($"User {lbId} doesn't exist in the database.");
         }
 
-        [Command("RemId")]
+        [Command("remid")]
         [Summary("Remove user from database based on their Discord ID.")]
         public async Task RemoveUserByDiscordId(ulong discordId)
         {
             if (!RoleUpdaterHelper.UserExistsInDb(discordId))
             { await ReplyAsync($"User {discordId} doesn't exist in the database."); return; }
 
-            foreach (KeyValuePair<ulong, DdUser> user in DdPlayerDatabase)
+            var Db = RoleUpdaterHelper.DeserializeDb();
+            foreach (KeyValuePair<ulong, DdUser> user in Db)
             {
                 if (discordId == user.Value.DiscordId)
                 {
-                    DdPlayerDatabase.Remove(user.Key);
+                    Db.Remove(user.Key);
                     var msg = await ReplyAsync($"✅ User {discordId} successfully removed from database.");
-                    await SerializeDbMessage(msg);
+                    await SerializeDbAndReply(Db, msg);
                     return;
                 }
             }
         }
 
-        [Command("ClearDb")]
+        [Command("cleardb")]
         [Summary("Clear the entire database.")]
         public async Task ClearDatabase()
         {
-            if (DdPlayerDatabase.Count == 0)
+            if (RoleUpdaterHelper.DeserializeDb().Count == 0)
             { await ReplyAsync("The database is already empty."); return; }
 
             EmbedBuilder embed = new EmbedBuilder
@@ -152,9 +153,10 @@ namespace Clubber.DdRoleUpdater
             {
                 try
                 {
-                    DdPlayerDatabase.Clear();
+                    var Db = RoleUpdaterHelper.DeserializeDb();
+                    Db.Clear();
                     var dbClearMsg = await ReplyAsync("✅ Database successfully cleared.");
-                    await SerializeDbMessage(dbClearMsg);
+                    await SerializeDbAndReply(Db, dbClearMsg);
                     Context.Client.ReactionAdded -= OnMessageReactedAsync;
                 }
                 catch
@@ -170,23 +172,22 @@ namespace Clubber.DdRoleUpdater
             }
         }
 
-        [Command("PrintDb")]
+        [Command("printdb")]
         [Summary("Print the list of users in the database.")]
         public async Task PrintDatabase()
         {
-            if (DdPlayerDatabase.Count == 0)
-            { await ReplyAsync("The database is empty."); return; }
+            var Db = RoleUpdaterHelper.DeserializeDb();
+            if (Db.Count == 0) { await ReplyAsync("The database is empty."); return; }
 
-            StringBuilder builder = new StringBuilder();
-
-            foreach (DdUser user in DdPlayerDatabase.Values)
-                builder.AppendLine($"`{user.DiscordId,-18}\t{user.LeaderboardId,-7}\t{user.Score + "s",-5}`");
-
-            EmbedBuilder embed = new EmbedBuilder { Title = "DD player database" };
-
-            embed.AddField(RoleUpdaterHelper.BuildField("`User`", $"{string.Join('\n', GetDbNameMentionList())}", true))
-                 .AddField(RoleUpdaterHelper.BuildField($"`{"DiscordId",-18}\t{"LB-ID",-7}\t{"Score",-5}`", builder.Append("").ToString(), true))
-                 .AddField(RoleUpdaterHelper.BuildField("`Role`", $"{string.Join('\n', GetDbRoleMentionList())}", true));
+            char[] blacklistedCharacters = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/CharacterBlacklist.txt")).ToCharArray();
+            StringBuilder desc = new StringBuilder().AppendLine($"`{"User",-16} {"Discord ID",-18-3}{"LB ID",-7-3}{"Score",-5-3}{"Role",-10}`");
+            foreach (DdUser user in Db.Values)
+            {
+                string userName = GetGuildUser(user.DiscordId).Username;
+                var userNameChecked = blacklistedCharacters.Intersect(userName.ToCharArray()).Any() ? "[Too long]" : userName.Length > 14 ? $"{userName.Substring(0, 14)}.." : userName;
+                desc.AppendLine($"`{userNameChecked,-16} {user.DiscordId,-18-3}{user.LeaderboardId,-7-3}{user.Score + "s",-5-3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
+            }
+            EmbedBuilder embed = new EmbedBuilder().WithTitle("DD player database").WithDescription(desc.ToString());
 
             await ReplyAsync(null, false, embed.Build());
         }
@@ -196,11 +197,12 @@ namespace Clubber.DdRoleUpdater
             var guildUser = GetGuildUser(user.DiscordId);
             var scoreRole = ScoreRoleDict.Where(sr => sr.Key <= user.Score).OrderByDescending(sr => sr.Key).FirstOrDefault();
             var roleToAdd = Context.Guild.GetRole(scoreRole.Value);
-            var removedRoles = RoleUpdaterHelper.RemoveScoreRolesExcept(guildUser, roleToAdd);
-            StringBuilder description = new StringBuilder($"{guildUser.Mention}");
+            var removedRoles = RemoveScoreRolesExcept(guildUser, roleToAdd);
 
             if (RoleUpdaterHelper.MemberHasRole(guildUser, roleToAdd.Id) && removedRoles.Count == 0)
                 return false;
+
+            StringBuilder description = new StringBuilder($"{guildUser.Mention}");
 
             if (removedRoles.Count != 0) description.Append($"\n\nRemoved:\n- {string.Join("\n- ", removedRoles.Select(sr => sr.Mention))}");
             if (!RoleUpdaterHelper.MemberHasRole(guildUser, scoreRole.Value))
@@ -219,12 +221,12 @@ namespace Clubber.DdRoleUpdater
             return true;
         }
 
-        public bool SerializeDB()
+        public bool SerializeDb(Dictionary<ulong, DdUser> Db)
         {
             try
             {
-                string json = JsonConvert.SerializeObject(DdPlayerDatabase, Formatting.Indented);
-                File.WriteAllText(DBJsonPath, json);
+                string json = JsonConvert.SerializeObject(Db, Formatting.Indented);
+                File.WriteAllText(DbJsonPath, json);
                 return true;
             }
             catch
@@ -233,57 +235,44 @@ namespace Clubber.DdRoleUpdater
             }
         }
 
-        public async Task SerializeDbMessage(IUserMessage msg)
+        public async Task SerializeDbAndReply(Dictionary<ulong, DdUser> Db, IUserMessage msg)
         {
             await msg.ModifyAsync(mssg => mssg.Content = $"{msg.Content}\nAttempting database serialization...");
 
-            if (SerializeDB()) await msg.ModifyAsync(mssg => mssg.Content = $"{msg.Content[0..^36]}✅ Database successfully serialized.");
+            if (SerializeDb(Db)) await msg.ModifyAsync(mssg => mssg.Content = $"{msg.Content[0..^36]}✅ Database successfully serialized.");
             else await msg.ModifyAsync(mssg => mssg.Content = $"{msg.Content[0..^36]}❌ Failed to serialize database.");
         }
 
-        public List<string> GetDbNameMentionList()
-        {
-            List<string> dbNameMentionList = new List<string>();
-
-            foreach (DdUser user in DdPlayerDatabase.Values)
-            {
-                dbNameMentionList.Add(GetGuildUser(user.DiscordId).Mention);
-            }
-
-            return dbNameMentionList;
-        }
-
-        public string GetMemberScoreRoleMention(ulong memberId)
+        public string GetMemberScoreRoleName(ulong memberId)
         {
             foreach (SocketRole userRole in GetGuildUser(memberId).Roles)
             {
                 foreach (ulong roleId in ScoreRoleDict.Values)
                 {
-                    if (userRole.Id == roleId) return userRole.Mention;
+                    if (userRole.Id == roleId) return userRole.Name;
                 }
             }
             return "No role";
-        }
-
-        public List<string> GetDbRoleMentionList()
-        {
-            List<string> dbMemberRoleMentionList = new List<string>();
-
-            foreach (DdUser user in DdPlayerDatabase.Values)
-            {
-                dbMemberRoleMentionList.Add(GetMemberScoreRoleMention(user.DiscordId));
-            }
-
-            return dbMemberRoleMentionList;
         }
 
         public SocketGuildUser GetGuildUser(ulong Id)
         {
             return Context.Guild.GetUser(Id);
         }
-        public static bool UserExistsInDb(ulong discordId)
+
+        public static List<SocketRole> RemoveScoreRolesExcept(SocketGuildUser member, SocketRole excludedRole)
         {
-            return DdPlayerDatabase.ContainsKey(discordId);
+            List<SocketRole> removedRoles = new List<SocketRole>();
+
+            foreach (var role in member.Roles)
+            {
+                if (ScoreRoleDict.ContainsValue(role.Id) && role.Id != excludedRole.Id)
+                {
+                    member.RemoveRoleAsync(role);
+                    removedRoles.Add(role);
+                }
+            }
+            return removedRoles;
         }
     }
 }

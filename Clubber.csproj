@@ -12,6 +12,9 @@
     <PackageReference Include="Utf8Json" Version="1.3.7" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="DD role updater\CharacterBlacklist.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="_config.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

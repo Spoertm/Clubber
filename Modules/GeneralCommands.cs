@@ -25,7 +25,7 @@ namespace Clubber.Modules
             RUpdater = roleUpdater;
         }
 
-        [Command("Help")]
+        [Command("help")]
         [Summary("Shows info about command, otherwise command list.")]
         public async Task HelpAsync([Remainder] string command = null)
         {
@@ -95,12 +95,12 @@ namespace Clubber.Modules
             }
         }
 
-        [Command("WhyAreYou")]
+        [Command("whyareyou")]
         [Summary("Describes what the bot does.")]
         public async Task WhyAreYou()
             => await ReplyAsync("I periodically update people's score/club roles. Most of my commands are admin-only, which means you can't see/use them if you're not an admin.");
 
-        [Command("ChangebotName")]
+        [Command("changebotname")]
         [Summary("Changes the bot's username.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ChangeBotName(string username)
@@ -112,7 +112,7 @@ namespace Clubber.Modules
             }
         }
 
-        [Command("ChangeBotAvatar")]
+        [Command("changebotavatar")]
         [Summary("Changes the bot's avatar.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ChangeBotAvatar(string avatarURL = null, string image = null)
@@ -143,21 +143,22 @@ namespace Clubber.Modules
             await Context.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(stream));
         }
 
-        [Command("UpdateRoles")]
+        [Command("updateroles")]
         [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
         public async Task UpdateRoles()
-        { 
-            await RUpdater.UpdateUserRoles(RUpdater.DdPlayerDatabase[Context.User.Id]);
+        {
+            await ReplyAsync("Successfully executed UpdateRoles()");
+            //await RUpdater.UpdateUserRoles(RUpdater.DdPlayerDatabase[Context.User.Id]);
         }
 
-        [Command("UpdateRoles"), Remarks("├ ")]
+        [Command("updateroles"), Remarks("├ ")]
         [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
         public async Task UpdateRoles(IUser userMention)
         {
             await ReplyAsync("Successfully executed UpdateRoles(IUser user)");
         }
 
-        [Command("UpdateRoles"), Remarks("└ ")]
+        [Command("updateroles"), Remarks("└ ")]
         [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
         public async Task UpdateRoles(string userNameOrNickname)
         {
