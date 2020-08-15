@@ -15,14 +15,12 @@ namespace Clubber.Modules
     {
         public readonly CommandService Service;
         public readonly IConfigurationRoot Config;
-        public readonly RoleUpdater RUpdater;
         private static readonly HttpClient Client = new HttpClient();
 
         public GeneralCommands(CommandService service, IConfigurationRoot config, RoleUpdater roleUpdater)
         {
             Service = service;
             Config = config;
-            RUpdater = roleUpdater;
         }
 
         [Command("help")]
@@ -141,27 +139,6 @@ namespace Clubber.Modules
             }
             await ReplyAsync("Bot avatar should change in a moment.");
             await Context.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(stream));
-        }
-
-        [Command("updateroles")]
-        [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
-        public async Task UpdateRoles()
-        {
-            //await RUpdater.UpdateUserRoles(RUpdater.GetDdUserFromId(Context.User.Id));
-        }
-
-        [Command("updateroles"), Remarks("├ ")]
-        [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
-        public async Task UpdateRoles(IUser userMention)
-        {
-            await ReplyAsync("Successfully executed UpdateRoles(IUser user)");
-        }
-
-        [Command("updateroles"), Remarks("└ ")]
-        [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
-        public async Task UpdateRoles(string userNameOrNickname)
-        {
-            await ReplyAsync("Successfully executed UpdateRoles(string userNameOrNickname)");
         }
     }
 }

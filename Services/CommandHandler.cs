@@ -43,7 +43,7 @@ namespace Clubber
                 if (commandSearch.IsSuccess)
                 {
                     var command = commandSearch.Commands[0].Command;
-                    if (command.Name != "help" &&
+                    if (command.Name != "help" && command.Name != "updateroles" && 
                         command.Parameters.Count > 0 &&
                         command.Aliases.Any(msg.Content.Substring(argPos).Equals) &&
                         msg.Attachments.Count == 0)
