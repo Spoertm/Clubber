@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Clubber.DdRoleUpdater
 {
@@ -180,12 +181,12 @@ namespace Clubber.DdRoleUpdater
             if (Db.Count == 0) { await ReplyAsync("The database is empty."); return; }
 
             char[] blacklistedCharacters = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/CharacterBlacklist.txt")).ToCharArray();
-            StringBuilder desc = new StringBuilder().AppendLine($"`{"User",-16} {"Discord ID",-18-3}{"LB ID",-7-3}{"Score",-5-3}{"Role",-10}`");
+            StringBuilder desc = new StringBuilder().AppendLine($"`{"User",-16-2}{"Discord ID",-18-3}{"LB ID",-7-3}{"Score",-5-3}{"Role",-10}`");
             foreach (DdUser user in Db.Values)
             {
                 string userName = GetGuildUser(user.DiscordId).Username;
                 var userNameChecked = blacklistedCharacters.Intersect(userName.ToCharArray()).Any() ? "[Too long]" : userName.Length > 14 ? $"{userName.Substring(0, 14)}.." : userName;
-                desc.AppendLine($"`{userNameChecked,-16} {user.DiscordId,-18-3}{user.LeaderboardId,-7-3}{user.Score + "s",-5-3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
+                desc.AppendLine($"`{userNameChecked,-16-2}{user.DiscordId,-18-3}{user.LeaderboardId,-7-3}{user.Score + "s",-5-3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
             }
             EmbedBuilder embed = new EmbedBuilder().WithTitle("DD player database").WithDescription(desc.ToString());
 
@@ -225,7 +226,8 @@ namespace Clubber.DdRoleUpdater
         {
             try
             {
-                string json = JsonConvert.SerializeObject(Db, Formatting.Indented);
+                var sortedDb = Db.OrderByDescending(db => db.Value.Score).ToDictionary(x => x.Key, x => x.Value);
+                string json = JsonConvert.SerializeObject(sortedDb, Formatting.Indented);
                 File.WriteAllText(DbJsonPath, json);
                 return true;
             }
@@ -260,7 +262,7 @@ namespace Clubber.DdRoleUpdater
             return Context.Guild.GetUser(Id);
         }
 
-        public static List<SocketRole> RemoveScoreRolesExcept(SocketGuildUser member, SocketRole excludedRole)
+        public List<SocketRole> RemoveScoreRolesExcept(SocketGuildUser member, SocketRole excludedRole)
         {
             List<SocketRole> removedRoles = new List<SocketRole>();
 
@@ -273,6 +275,11 @@ namespace Clubber.DdRoleUpdater
                 }
             }
             return removedRoles;
+        }
+
+        public DdUser GetDdUserFromId(ulong discordId)
+        {
+            return RoleUpdaterHelper.DeserializeDb()[discordId];
         }
     }
 }

@@ -28,16 +28,6 @@ namespace Clubber.DdRoleUpdater
             return member.Roles.Any(role => role.Id == roleId);
         }
 
-        public static EmbedFieldBuilder BuildField(string name, string value, bool inline)
-        {
-            return new EmbedFieldBuilder
-            {
-                Name = name,
-                Value = value,
-                IsInline = inline
-            };
-        }
-
         public static string GetCommandAndParameterString(CommandInfo cmd) // Returns the command and its params in the format: commandName <requiredParam> [optionalParam]
         {
             return $"{cmd.Name} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**[{p.Name}]**" : $"**[{p.Name} = {p.DefaultValue}]**" : $"**<{p.Name}>**"))}";

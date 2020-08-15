@@ -147,8 +147,7 @@ namespace Clubber.Modules
         [Summary("Updates your own roles if nothing is specified. Otherwise a user's roles based on the input type.")]
         public async Task UpdateRoles()
         {
-            await ReplyAsync("Successfully executed UpdateRoles()");
-            //await RUpdater.UpdateUserRoles(RUpdater.DdPlayerDatabase[Context.User.Id]);
+            //await RUpdater.UpdateUserRoles(RUpdater.GetDdUserFromId(Context.User.Id));
         }
 
         [Command("updateroles"), Remarks("├ ")]
