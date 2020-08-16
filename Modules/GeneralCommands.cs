@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -64,20 +65,24 @@ namespace Clubber.Modules
                     }
                 };
 
+                StringBuilder description = new StringBuilder();
                 foreach (ModuleInfo module in Service.Modules)
                 {
-                    string description = null;
+                    description.Clear();
                     foreach (var cmd in module.Commands)
                     {
                         PreconditionResult result = await cmd.CheckPreconditionsAsync(Context);
-                        if (result.IsSuccess)
+                        if (result.IsSuccess && cmd.Remarks == null)
                         {
-                            description += $"{cmd.Remarks}{(cmd.Remarks == null ? prefix : "")}{string.Join("/", cmd.Aliases)} ";
-                            description += $"{string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"[{p.Name}]" : $"[{p.Name} = {p.DefaultValue}]" : $"<{p.Name}>"))}\n";
+                            int numberOfSimilarCommands = module.Commands.Where(c => c.Name == cmd.Name).Count();
+                            description.Append($"{cmd.Remarks}{(cmd.Remarks == null ? prefix : "")}{string.Join("/", cmd.Aliases)} ");
+                            description.Append($"{string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"[{p.Name}]" : $"[{p.Name} = {p.DefaultValue}]" : $"<{p.Name}>"))}");
+                            if (numberOfSimilarCommands > 1) description.AppendLine($" `(+{numberOfSimilarCommands - 1})`");
+                            else description.AppendLine();
                         }
                     }
 
-                    if (!string.IsNullOrWhiteSpace(description))
+                    if (description.Length != 0)
                     {
                         builder.AddField(x =>
                         {
@@ -111,21 +116,21 @@ namespace Clubber.Modules
         }
 
         [Command("changebotavatar")]
-        [Summary("Changes the bot's avatar.")]
+        [Summary("Changes the bot's avatar. Specify either the URL of the image or attach it.")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task ChangeBotAvatar(string avatarURL = null, string image = null)
+        public async Task ChangeBotAvatar(string imgUrl = null, string image = null)
         {
             Stream stream = new MemoryStream();
-            if (string.IsNullOrWhiteSpace(avatarURL) && Context.Message.Attachments.Count == 0)
+            if (string.IsNullOrWhiteSpace(imgUrl) && Context.Message.Attachments.Count == 0)
             { await ReplyAsync("Invalid arguments."); return; }
 
             else if (Context.Message.Attachments.Count == 0)
             {
-                if (!(Uri.TryCreate(avatarURL, UriKind.Absolute, out Uri uriResult) &&
+                if (!(Uri.TryCreate(imgUrl, UriKind.Absolute, out Uri uriResult) &&
                      (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)))
                 { await ReplyAsync("Invalid URL."); return; }
 
-                stream = await Client.GetStreamAsync(avatarURL);
+                stream = await Client.GetStreamAsync(imgUrl);
             }
             else if (Context.Message.Attachments.Count > 0)
             {
