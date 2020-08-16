@@ -9,7 +9,6 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Clubber.DdRoleUpdater
 {
@@ -47,24 +46,27 @@ namespace Clubber.DdRoleUpdater
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task AddUserByRank(uint rank, ulong discordId)
         {
-            if (RoleUpdaterHelper.UserExistsInDb(discordId))
-            { await ReplyAsync($"User {discordId} already exists in the DB."); return; }
-
             try
             {
+                if (!RoleUpdaterHelper.IsValidDiscordId(discordId, Context.Guild.Users))
+                { await ReplyAsync("Invalid ID."); return; }
+                if (RoleUpdaterHelper.DiscordIdExistsInDb(discordId))
+                { await ReplyAsync($"There already exists a user in the database with the Discord ID `{discordId}`."); return; }
+
                 string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-rank?rank={rank}");
                 DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
                 DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
+                if (RoleUpdaterHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId))
+                { await ReplyAsync($"There already exists a user in the database with rank `{rank}` and leaderboard ID `{databaseUser.LeaderboardId}`."); return; }
+
                 var Db = RoleUpdaterHelper.DeserializeDb();
                 Db.Add(discordId, databaseUser);
-                var msg = await ReplyAsync("✅ User successfully added to database.");
+                var msg = await ReplyAsync($"✅ User `{GetGuildUser(discordId).Username}` successfully added to database.");
                 await SerializeDbAndReply(Db, msg);
             }
             catch
-            {
-                await ReplyAsync("❌ Something went wrong. Couldn't execute command.");
-            }
+            { await ReplyAsync("❌ Something went wrong. Couldn't execute command."); }
         }
 
         [Command("adduserbyid"), Alias("addid")]
@@ -72,43 +74,48 @@ namespace Clubber.DdRoleUpdater
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task AddUserByID(uint lbId, ulong discordId)
         {
-            if (RoleUpdaterHelper.UserExistsInDb(discordId))
-            { await ReplyAsync($"User {discordId} already exists in the DB."); return; }
-
             try
             {
+                if (!RoleUpdaterHelper.IsValidDiscordId(discordId, Context.Guild.Users))
+                { await ReplyAsync("Invalid ID."); return; }
+                if (RoleUpdaterHelper.DiscordIdExistsInDb(discordId))
+                { await ReplyAsync($"There already exists a user in the database with the Discord ID `{discordId}`."); return; }
+
                 string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
                 DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
                 DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
+                if (RoleUpdaterHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId))
+                { await ReplyAsync($"There already exists a user in the database with the leaderboard ID `{databaseUser.LeaderboardId}`."); return; }
+
                 var Db = RoleUpdaterHelper.DeserializeDb();
                 Db.Add(discordId, databaseUser);
-                var msg = await ReplyAsync("✅ User successfully added to database.");
+                var msg = await ReplyAsync($"✅ User `{GetGuildUser(discordId).Username}` successfully added to database.");
                 await SerializeDbAndReply(Db, msg);
             }
             catch
-            {
-                await ReplyAsync("❌ Something went wrong. Couldn't execute command.");
-            }
+            { await ReplyAsync("❌ Something went wrong. Couldn't execute command."); }
         }
 
         [Command("remlbid")]
         [Summary("Remove user from database based on their leaderboard ID.")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
-        public async Task RemoveUserByLeaderboardID(uint lbId)
+        public async Task RemoveUserByLeaderboardID(int lbId)
         {
+            if (!RoleUpdaterHelper.LeaderboardIdExistsInDb(lbId))
+            { await ReplyAsync($"User {lbId} doesn't exist in the database."); return; }
+
             var Db = RoleUpdaterHelper.DeserializeDb();
             foreach (KeyValuePair<ulong, DdUser> user in Db)
             {
                 if (lbId == user.Value.LeaderboardId)
                 {
+                    var msg = await ReplyAsync($"✅ User `{GetGuildUser(user.Value.DiscordId).Username}` (LB-ID: {lbId}) successfully removed from database.");
                     Db.Remove(user.Key);
-                    var msg = await ReplyAsync($"✅ User {lbId} successfully removed from database.");
                     await SerializeDbAndReply(Db, msg);
                     return;
                 }
             }
-            await ReplyAsync($"User {lbId} doesn't exist in the database.");
         }
 
         [Command("remid")]
@@ -116,7 +123,7 @@ namespace Clubber.DdRoleUpdater
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task RemoveUserByDiscordId(ulong discordId)
         {
-            if (!RoleUpdaterHelper.UserExistsInDb(discordId))
+            if (!RoleUpdaterHelper.DiscordIdExistsInDb(discordId))
             { await ReplyAsync($"User {discordId} doesn't exist in the database."); return; }
 
             var Db = RoleUpdaterHelper.DeserializeDb();
@@ -124,8 +131,8 @@ namespace Clubber.DdRoleUpdater
             {
                 if (discordId == user.Value.DiscordId)
                 {
+                    var msg = await ReplyAsync($"✅ User `{GetGuildUser(discordId).Username}` (LB-ID: {user.Value.LeaderboardId}) successfully removed from database.");
                     Db.Remove(user.Key);
-                    var msg = await ReplyAsync($"✅ User {discordId} successfully removed from database.");
                     await SerializeDbAndReply(Db, msg);
                     return;
                 }
@@ -197,6 +204,21 @@ namespace Clubber.DdRoleUpdater
             EmbedBuilder embed = new EmbedBuilder().WithTitle("DD player database").WithDescription(desc.ToString());
 
             await ReplyAsync(null, false, embed.Build());
+        }
+
+        [Command("showunregisteredusers"), Alias("showunreg")]
+        [Summary("Prints a list of guild members that aren't registered in the database.")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        public async Task ShowUnregisteredUsers()
+        {
+            try
+            {
+                EmbedBuilder embed = new EmbedBuilder { Title = "Unregistered guild members (limited < 2048 char)" };
+                var unregisteredMembers = Context.Guild.Users.Where(user => !RoleUpdaterHelper.DiscordIdExistsInDb(user.Id)).Select(u => u.Mention);
+                embed.Description = string.Join(' ', unregisteredMembers).Substring(0, 1950); // Good enough number below 2048
+                await ReplyAsync(null, false, embed.Build());
+            }
+            catch { await ReplyAsync("❌ Something went wrong. Couldn't execute command."); return; }
         }
 
         [Priority(1)]

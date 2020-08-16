@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
@@ -18,9 +17,19 @@ namespace Clubber.DdRoleUpdater
             return JsonConvert.DeserializeObject<Dictionary<ulong, DdUser>>(File.ReadAllText(DbJsonPath));
         }
 
-        public static bool UserExistsInDb(ulong discordId)
+        public static bool IsValidDiscordId(ulong discordId, IReadOnlyCollection<SocketGuildUser> guildUsers)
+        {
+            return guildUsers.Any(u => u.Id == discordId);
+        }
+
+        public static bool DiscordIdExistsInDb(ulong discordId)
         {
             return DeserializeDb().ContainsKey(discordId);
+        }
+
+        public static bool LeaderboardIdExistsInDb(int lbId)
+        {
+            return DeserializeDb().Values.Any(v => v.LeaderboardId == lbId);
         }
 
         public static bool MemberHasRole(SocketGuildUser member, ulong roleId)
