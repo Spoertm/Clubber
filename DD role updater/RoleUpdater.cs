@@ -226,7 +226,7 @@ namespace Clubber.DdRoleUpdater
         [Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
         public async Task UpdateRoles()
         {
-            if (!await UpdateUserRoles(GetDdUserFromId(Context.User.Id)))
+            if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(Context.User.Id)))
                 await ReplyAsync($"No updates were needed for you, {Context.User.Username}.");
         }
 
@@ -237,7 +237,7 @@ namespace Clubber.DdRoleUpdater
         {
             if (RoleUpdaterHelper.DeserializeDb().ContainsKey(userMention.Id))
             {
-                if (!await UpdateUserRoles(GetDdUserFromId(userMention.Id)))
+                if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(userMention.Id)))
                     await ReplyAsync($"No updates were needed for {Context.User.Username}.");
             }
             else await ReplyAsync($"User `{userMention.Username}` is not in my database. I can therefore not update their roles.");
@@ -256,7 +256,7 @@ namespace Clubber.DdRoleUpdater
                 case 1:
                     if (RoleUpdaterHelper.DeserializeDb().ContainsKey(userMatches.First().Id))
                     {
-                        if (!await UpdateUserRoles(GetDdUserFromId(userMatches.First().Id)))
+                        if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(userMatches.First().Id)))
                             await ReplyAsync($"No updates were needed for {Context.User.Username}.");
                     }
                     else await ReplyAsync($"User `{userMatches.First().Username}` is not in my database. I can therefore not update their roles.");
@@ -348,11 +348,6 @@ namespace Clubber.DdRoleUpdater
                 }
             }
             return removedRoles;
-        }
-
-        public DdUser GetDdUserFromId(ulong discordId)
-        {
-            return RoleUpdaterHelper.DeserializeDb()[discordId];
         }
     }
 }

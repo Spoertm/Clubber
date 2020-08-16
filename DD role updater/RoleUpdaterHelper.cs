@@ -17,6 +17,11 @@ namespace Clubber.DdRoleUpdater
             return JsonConvert.DeserializeObject<Dictionary<ulong, DdUser>>(File.ReadAllText(DbJsonPath));
         }
 
+        public static DdUser GetDdUserFromId(ulong discordId)
+        {
+            return DeserializeDb()[discordId];
+        }
+        
         public static bool IsValidDiscordId(ulong discordId, IReadOnlyCollection<SocketGuildUser> guildUsers)
         {
             return guildUsers.Any(u => u.Id == discordId);
