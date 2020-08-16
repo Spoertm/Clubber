@@ -25,8 +25,13 @@ namespace Clubber.DdRoleUpdater
         {
             ScoreRoleDict = JsonConvert.DeserializeObject<Dictionary<int, ulong>>(File.ReadAllText(ScoreRoleJsonPath));
 
-            if (!File.Exists(DbJsonPath))
-                File.Create(DbJsonPath);
+            if (!File.Exists(DbJsonPath) || new FileInfo(DbJsonPath).Length == 0)
+            {
+                Dictionary<ulong, DdUser> emptyDb = new Dictionary<ulong, DdUser>();
+                string emptyDbJson = JsonConvert.SerializeObject(emptyDb, Formatting.Indented);
+                File.Create(DbJsonPath).Close();
+                File.WriteAllText(DbJsonPath, emptyDbJson);
+            }
         }
 
         [Command("updaterolesanddatabase"), Alias("updatedb")]
@@ -226,8 +231,12 @@ namespace Clubber.DdRoleUpdater
         [Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
         public async Task UpdateRoles()
         {
-            if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(Context.User.Id)))
-                await ReplyAsync($"No updates were needed for you, {Context.User.Username}.");
+            if (RoleUpdaterHelper.DeserializeDb().ContainsKey(Context.User.Id))
+            {
+                if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(Context.User.Id)))
+                    await ReplyAsync($"No updates were needed for you, {Context.User.Username}.");
+            }
+            else await ReplyAsync($"You're not in my database, {Context.User.Username}. I can therefore not update your roles, so please ask an admin/moderator/role assigner to register you.");
         }
 
         [Priority(3)]
@@ -240,7 +249,7 @@ namespace Clubber.DdRoleUpdater
                 if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(userMention.Id)))
                     await ReplyAsync($"No updates were needed for {Context.User.Username}.");
             }
-            else await ReplyAsync($"User `{userMention.Username}` is not in my database. I can therefore not update their roles.");
+            else await ReplyAsync($"User `{userMention.Username}` is not in my database. I can therefore not update their roles, so please ask an admin/moderator/role assigner to register them.");
         }
 
         [Priority(2)]
@@ -259,7 +268,7 @@ namespace Clubber.DdRoleUpdater
                         if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(userMatches.First().Id)))
                             await ReplyAsync($"No updates were needed for {Context.User.Username}.");
                     }
-                    else await ReplyAsync($"User `{userMatches.First().Username}` is not in my database. I can therefore not update their roles.");
+                    else await ReplyAsync($"User `{userMatches.First().Username}` is not in my database. I can therefore not update their roles, so please ask an admin/moderator/role assigner to register them.");
                     break;
 
                 default: await ReplyAsync($"Multiple people have the name {userNameOrNickname}. Please specify a username or mention the user instead."); break;
