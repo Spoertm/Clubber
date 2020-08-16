@@ -101,7 +101,7 @@ namespace Clubber.Modules
         [Command("whyareyou")]
         [Summary("Describes what the bot does.")]
         public async Task WhyAreYou()
-            => await ReplyAsync("I periodically update people's score/club roles. Most of my commands are admin-only, which means you can't see/use them if you're not an admin.");
+            => await ReplyAsync("Every day or so, I automatically update people's DD roles.\nFor example, if someone beats their score of 300s and gets 400s, I update their role from `300+ club` to `400+ club`.\nYou can manually update your own or someone else's roles by using the `+updateroles` command.");
 
         [Command("changebotname")]
         [Summary("Changes the bot's username.")]

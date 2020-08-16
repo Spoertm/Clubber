@@ -75,6 +75,8 @@ namespace Clubber.DdRoleUpdater
             {
                 if (!RoleUpdaterHelper.IsValidDiscordId(discordId, Context.Guild.Users))
                 { await ReplyAsync("Invalid ID."); return; }
+                ulong cheaterRoleId = 693432614727581727;
+                if (GetGuildUser(GetGuildUser(discordId).Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{GetGuildUser(discordId).Username} can't be registered because they've cheated."); return; }
                 if (GetGuildUser(discordId).IsBot) { await ReplyAsync($"{GetGuildUser(discordId).Mention} is a bot. It can't be registered as a DD player."); return; }
                 if (RoleUpdaterHelper.DiscordIdExistsInDb(discordId))
                 { await ReplyAsync($"There already exists a user in the database with the Discord ID `{discordId}`."); return; }
