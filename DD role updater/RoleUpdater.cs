@@ -52,7 +52,7 @@ namespace Clubber.DdRoleUpdater
         public async Task AddUserByRank(uint rank, [Remainder] string name)
         {
             string usernameornickname = name.ToLower();
-            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower() == usernameornickname || (u.Nickname != null && u.Nickname.ToLower() == usernameornickname));
+            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
             switch (userMatches.Count())
             {
                 case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{name}`."); break;
@@ -103,7 +103,7 @@ namespace Clubber.DdRoleUpdater
         public async Task AddUserByID(uint lbId, [Remainder] string name)
         {
             string usernameornickname = name.ToLower();
-            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower() == usernameornickname || (u.Nickname != null && u.Nickname.ToLower() == usernameornickname));
+            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
             switch (userMatches.Count())
             {
                 case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{name}`."); break;
@@ -292,6 +292,7 @@ namespace Clubber.DdRoleUpdater
             catch { await ReplyAsync("❌ Something went wrong. Couldn't execute command."); return; }
         }
 
+        [Priority(1)]
         [Command("stats")]
         [Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
         public async Task Stats()
@@ -303,12 +304,13 @@ namespace Clubber.DdRoleUpdater
             await Stats(Context.User);
         }
 
+        [Priority(3)]
         [Command("stats"), Remarks("├ ")]
         [Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
         public async Task Stats(string name)
         {
             string usernameornickname = name.ToLower();
-            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower() == usernameornickname || (u.Nickname != null && u.Nickname.ToLower() == usernameornickname));
+            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
             switch (userMatches.Count())
             {
                 case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{name}`."); break;
@@ -317,6 +319,7 @@ namespace Clubber.DdRoleUpdater
             }
         }
 
+        [Priority(2)]
         [Command("stats"), Remarks("└ ")]
         [Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
         public async Task Stats(IUser userMention)
@@ -377,13 +380,13 @@ namespace Clubber.DdRoleUpdater
         [Priority(2)]
         [Command("updateroles"), Remarks("└ ")]
         [Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
-        public async Task UpdateRoles([Remainder] string userNameOrNickname)
+        public async Task UpdateRoles([Remainder] string name)
         {
-            string usernameornickname = userNameOrNickname.ToLower();
-            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower() == usernameornickname || (u.Nickname != null && u.Nickname.ToLower() == usernameornickname));
+            string usernameornickname = name.ToLower();
+            IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
             switch (userMatches.Count())
             {
-                case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{userNameOrNickname}`."); break;
+                case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{name}`."); break;
                 case 1:
                     if (RoleUpdaterHelper.DeserializeDb().ContainsKey(userMatches.First().Id))
                     {
@@ -396,7 +399,7 @@ namespace Clubber.DdRoleUpdater
                     else await ReplyAsync($"User `{userMatches.First().Username}` is not in my database. I can therefore not update their roles, so please ask an admin/moderator/role assigner to register them.");
                     break;
 
-                default: await ReplyAsync($"Multiple people have the name {userNameOrNickname}. Please specify a username or mention the user instead."); break;
+                default: await ReplyAsync($"Multiple people have the name {name.ToLower()}. Please specify a username or mention the user instead."); break;
             }
         }
 
