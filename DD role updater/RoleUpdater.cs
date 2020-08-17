@@ -43,7 +43,8 @@ namespace Clubber.DdRoleUpdater
             List<bool> listOfRoleUpdateChecks = Db.Values.Select(async user => await UpdateUserRoles(user)).Select(t => t.Result).ToList();
             if (!listOfRoleUpdateChecks.Contains(true)) { await ReplyAsync("No role updates were needed."); return; }
 
-            await SerializeDbAndReply(Db, await ReplyAsync("Processing..."));
+            var msg = await ReplyAsync("Processing...");
+            await SerializeDbAndReply(Db, msg);
         }
 
         [Command("addfromrank"), Alias("addr")]
@@ -314,7 +315,7 @@ namespace Clubber.DdRoleUpdater
             switch (userMatches.Count())
             {
                 case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{name}`."); break;
-                case 1: await Stats(userMatches.First()); break;
+                case 1: await Stats(userMatches.First().Mention); break;
                 default: await ReplyAsync($"Multiple people have the name {name.ToLower()}. Please specify a username or mention the user instead."); break;
             }
         }
@@ -351,13 +352,13 @@ namespace Clubber.DdRoleUpdater
         [Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
         public async Task UpdateRoles()
         {
-            if (RoleUpdaterHelper.DeserializeDb().ContainsKey(Context.User.Id))
+            ulong cheaterRoleId = 693432614727581727;
+            if (GetGuildUser(Context.User.Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{Context.User.Username}, you can't register because you've cheated."); return; }
+            else if (RoleUpdaterHelper.DeserializeDb().ContainsKey(Context.User.Id))
             {
                 if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(Context.User.Id)))
                     await ReplyAsync($"No updates were needed for you, {Context.User.Username}.");
             }
-            ulong cheaterRoleId = 693432614727581727;
-            if (GetGuildUser(Context.User.Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{Context.User.Username}, you can't register because you've cheated."); return; }
             else await ReplyAsync($"You're not in my database, {Context.User.Username}. I can therefore not update your roles, so please ask an admin/moderator/role assigner to register you.");
         }
 
@@ -366,14 +367,14 @@ namespace Clubber.DdRoleUpdater
         [Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
         public async Task UpdateRoles(IUser userMention)
         {
-            if (RoleUpdaterHelper.DeserializeDb().ContainsKey(userMention.Id))
+            if (userMention.IsBot) { await ReplyAsync($"{userMention} is a bot. It can't be registered as a DD player."); return; }
+            ulong cheaterRoleId = 693432614727581727;
+            else if (GetGuildUser(userMention.Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{userMention.Username} can't be registered because they've cheated."); return; }
+            else if (RoleUpdaterHelper.DeserializeDb().ContainsKey(userMention.Id))
             {
                 if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(userMention.Id)))
                     await ReplyAsync($"No updates were needed for {Context.User.Username}.");
             }
-            if (userMention.IsBot) { await ReplyAsync($"{userMention} is a bot. It can't be registered as a DD player."); return; }
-            ulong cheaterRoleId = 693432614727581727;
-            if (GetGuildUser(userMention.Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{userMention.Username} can't be registered because they've cheated."); return; }
             else await ReplyAsync($"User `{userMention.Username}` is not in my database. I can therefore not update their roles, so please ask an admin/moderator/role assigner to register them.");
         }
 
@@ -387,18 +388,7 @@ namespace Clubber.DdRoleUpdater
             switch (userMatches.Count())
             {
                 case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{name}`."); break;
-                case 1:
-                    if (RoleUpdaterHelper.DeserializeDb().ContainsKey(userMatches.First().Id))
-                    {
-                        if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(userMatches.First().Id)))
-                            await ReplyAsync($"No updates were needed for {Context.User.Username}.");
-                    }
-                    if (userMatches.First().IsBot) { await ReplyAsync($"{userMatches.First().Username} is a bot. It can't be registered as a DD player."); return; }
-                    ulong cheaterRoleId = 693432614727581727;
-                    if (GetGuildUser(userMatches.First().Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{userMatches.First().Username} can't be registered because they've cheated."); return; }
-                    else await ReplyAsync($"User `{userMatches.First().Username}` is not in my database. I can therefore not update their roles, so please ask an admin/moderator/role assigner to register them.");
-                    break;
-
+                case 1: await UpdateRoles(userMatches.First().Mention);
                 default: await ReplyAsync($"Multiple people have the name {name.ToLower()}. Please specify a username or mention the user instead."); break;
             }
         }
