@@ -25,7 +25,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DD role updater\" />
-  </ItemGroup>
 </Project>

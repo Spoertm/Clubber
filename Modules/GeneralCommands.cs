@@ -44,7 +44,7 @@ namespace Clubber.Modules
                 var cmd = result.Commands.First().Command;
                 if (cmd.Aliases.Count > 1) aliases = $"\nAliases: {string.Join(", ", cmd.Aliases)}";
 
-                builder.Title = $"{string.Join("\n", result.Commands.Select(c => RoleUpdaterHelper.GetCommandAndParameterString(c.Command)))}{(result.Commands.Count == 1 ? aliases : null)}";
+                builder.Title = $"{string.Join("\n", result.Commands.Select(c => Helper.GetCommandAndParameterString(c.Command)))}{(result.Commands.Count == 1 ? aliases : null)}";
                 builder.Description = cmd.Summary;
 
                 //if (cmd.Parameters.Count > 0)

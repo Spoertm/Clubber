@@ -19,14 +19,14 @@ namespace Clubber
 		public LoggingService(DiscordSocketClient _discord, CommandService _commands)
 		{
 			LogDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
-			
+
 			discord = _discord;
 			commands = _commands;
-			
+
 			discord.Log += OnLogAsync;
 			commands.Log += OnLogAsync;
 		}
-		
+
 		private Task OnLogAsync(LogMessage msg)
 		{
 			if (!Directory.Exists(LogDirectory))     // Create the log directory if it doesn't exist
