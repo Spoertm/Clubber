@@ -369,7 +369,7 @@ namespace Clubber.DdRoleUpdater
         {
             if (userMention.IsBot) { await ReplyAsync($"{userMention} is a bot. It can't be registered as a DD player."); return; }
             ulong cheaterRoleId = 693432614727581727;
-            else if (GetGuildUser(userMention.Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{userMention.Username} can't be registered because they've cheated."); return; }
+            if (GetGuildUser(userMention.Id).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{userMention.Username} can't be registered because they've cheated."); return; }
             else if (RoleUpdaterHelper.DeserializeDb().ContainsKey(userMention.Id))
             {
                 if (!await UpdateUserRoles(RoleUpdaterHelper.GetDdUserFromId(userMention.Id)))
@@ -388,7 +388,7 @@ namespace Clubber.DdRoleUpdater
             switch (userMatches.Count())
             {
                 case 0: await ReplyAsync($"Found no user(s) with the username/nickname `{name}`."); break;
-                case 1: await UpdateRoles(userMatches.First().Mention);
+                case 1: await UpdateRoles(userMatches.First().Mention); break;
                 default: await ReplyAsync($"Multiple people have the name {name.ToLower()}. Please specify a username or mention the user instead."); break;
             }
         }
