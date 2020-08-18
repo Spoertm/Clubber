@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
@@ -18,7 +19,7 @@ namespace Clubber.DdRoleUpdater
 
 		public static DdUser GetDdUserFromId(ulong discordId) => DeserializeDb()[discordId];
 
-		public static bool IsValidDiscordId(ulong discordId, IReadOnlyCollection<SocketGuildUser> guildUsers) => guildUsers.Any(u => u.Id == discordId);
+		public static bool IsValidDiscordId(ulong discordId, DiscordSocketClient client) => client.GetUser(discordId) != null;
 
 		public static bool DiscordIdExistsInDb(ulong discordId) => DeserializeDb().ContainsKey(discordId);
 
@@ -34,15 +35,15 @@ namespace Clubber.DdRoleUpdater
 			int numberOfMatches = userMatches.Count();
 			if (numberOfMatches == 0) await channel.SendMessageAsync($"Found no user(s) with the username/nickname `{name}`.");
 			else if (numberOfMatches == 1) await asyncCommand(num, userMatches.First().Id);
-			else await channel.SendMessageAsync($"Multiple people have the name {name.ToLower()}. Please specify a username or mention the user instead.");
+			else await channel.SendMessageAsync($"Multiple people have the name `{name.ToLower()}`. Please mention the user or use their Discord ID.");
 		}
 
-		public static async Task ExecuteFromName(IEnumerable<SocketGuildUser> userMatches, string name, Func<string, Task> asyncCommand, ISocketMessageChannel channel)
+		public static async Task ExecuteFromName(IEnumerable<IUser> userMatches, string name, Func<ulong, Task> asyncCommand, ISocketMessageChannel channel)
 		{
 			int numberOfMatches = userMatches.Count();
 			if (numberOfMatches == 0) await channel.SendMessageAsync($"Found no user(s) with the username/nickname `{name.ToLower()}`.");
-			else if (numberOfMatches == 1) await asyncCommand(userMatches.First().Mention);
-			else await channel.SendMessageAsync($"Multiple people have the name {name.ToLower()}. Please specify a username or mention the user instead.");
+			else if (numberOfMatches == 1) await asyncCommand(userMatches.First().Id);
+			else await channel.SendMessageAsync($"Multiple people have the name `{name.ToLower()}`. Please mention the user or use their Discord ID.");
 		}
 	}
 }
