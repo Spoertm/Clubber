@@ -250,9 +250,7 @@ namespace Clubber.DdRoleUpdater
 			StringBuilder desc = new StringBuilder().AppendLine($"`{"#",-4}{"User",-16 - 2}{"Discord ID",-18 - 3}{"LB ID",-7 - 3}{"Score",-5 - 3}{"Role",-10}`");
 
 			int i = start;
-			var debug = Db.Values.Skip(start).Take(20);
-			var debugSkip = Db.Values.Skip(start);
-			foreach (DdUser user in debug)
+			foreach (DdUser user in Db.Values.Skip(start).Take(20))
 			{
 				var dscUser = GetDiscordUser(user.DiscordId);
 				string userName = dscUser == null ? "[Deleted acc]" : dscUser.Username; ;
