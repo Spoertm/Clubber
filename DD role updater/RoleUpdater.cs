@@ -38,11 +38,11 @@ namespace Clubber.DdRoleUpdater
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task UpdateRolesAndDataBase()
 		{
+			var msg = await ReplyAsync("Processing...");
 			var Db = Helper.DeserializeDb();
 			bool updatedDbRolesBool = Db.Values.Select(async user => await UpdateUserRoles(user)).Select(t => t.Result).ToList().Contains(true);
-			if (!updatedDbRolesBool) { await ReplyAsync("No role updates were needed."); return; }
+			if (!updatedDbRolesBool) { await msg.ModifyAsync(m => m.Content = "No role updates were needed."); return; }
 
-			var msg = await ReplyAsync("Processing...");
 			await SerializeDbAndReply(Db, "✅ Successfully updated database and member roles.");
 			await msg.DeleteAsync();
 		}
@@ -392,7 +392,7 @@ namespace Clubber.DdRoleUpdater
 			var guildUser = GetGuildUser(user.DiscordId);
 			var scoreRole = ScoreRoleDict.Where(sr => sr.Key <= user.Score).OrderByDescending(sr => sr.Key).FirstOrDefault();
 			var roleToAdd = Context.Guild.GetRole(scoreRole.Value);
-			var removedRoles = RemoveScoreRolesExcept(guildUser, roleToAdd);
+			var removedRoles = await RemoveScoreRolesExcept(guildUser, roleToAdd);
 
 			if (Helper.MemberHasRole(guildUser, roleToAdd.Id) && removedRoles.Count == 0)
 				return false;
@@ -448,7 +448,7 @@ namespace Clubber.DdRoleUpdater
 			return Context.Guild.GetUser(Id);
 		}
 
-		public List<SocketRole> RemoveScoreRolesExcept(SocketGuildUser member, SocketRole excludedRole)
+		public async Task<List<SocketRole>> RemoveScoreRolesExcept(SocketGuildUser member, SocketRole excludedRole)
 		{
 			List<SocketRole> removedRoles = new List<SocketRole>();
 
@@ -456,7 +456,7 @@ namespace Clubber.DdRoleUpdater
 			{
 				if (ScoreRoleDict.ContainsValue(role.Id) && role.Id != excludedRole.Id)
 				{
-					member.RemoveRoleAsync(role);
+					await member.RemoveRoleAsync(role);
 					removedRoles.Add(role);
 				}
 			}

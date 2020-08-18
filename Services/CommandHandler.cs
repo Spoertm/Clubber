@@ -33,7 +33,7 @@ namespace Clubber
 
 			var context = new SocketCommandContext(discord, msg);     // Create the command context
 
-			if (msg.Content == context.Client.GetUser(743431502842298368).Mention)
+			if (msg.Content == context.Client.CurrentUser.Mention)
 			{ await msg.AddReactionAsync(new Emoji("🗡")); return; }
 
 			int argPos = 0;     // Check if the message has a valid command prefix
