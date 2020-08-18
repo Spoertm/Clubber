@@ -242,18 +242,20 @@ namespace Clubber.DdRoleUpdater
 			if (page < 1) { await ReplyAsync("Invalid page number."); return; }
 			var Db = Helper.DeserializeDb();
 			if (Db.Count == 0) { await ReplyAsync("The database is empty."); return; }
-			int maxpage = (int)Math.Ceiling(Db.Count() / 15d);
+			int maxpage = (int)Math.Ceiling(Db.Count() / 20d);
 			if (page > maxpage) { await ReplyAsync($"Page number exceeds the maximum of `{maxpage}`."); return; }
 
 			char[] blacklistedCharacters = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/CharacterBlacklist.txt")).ToCharArray();
-			int start = 0 + 15 * ((int)page - 1);
-			int end = start + 15 > Db.Count() ? Db.Count() : start + 15;
+			int start = 0 + 20 * ((int)page - 1);
 			StringBuilder desc = new StringBuilder().AppendLine($"`{"#",-4}{"User",-16 - 2}{"Discord ID",-18 - 3}{"LB ID",-7 - 3}{"Score",-5 - 3}{"Role",-10}`");
 
 			int i = start;
-			foreach (DdUser user in Db.Values.Skip(start).Take(end))
+			var debug = Db.Values.Skip(start).Take(20);
+			var debugSkip = Db.Values.Skip(start);
+			foreach (DdUser user in debug)
 			{
-				string userName = GetDiscordUser(user.DiscordId) == null ? "[Left server]" : GetDiscordUser(user.DiscordId).Username;
+				var dscUser = GetDiscordUser(user.DiscordId);
+				string userName = dscUser == null ? "[Deleted acc]" : dscUser.Username; ;
 				var userNameChecked = blacklistedCharacters.Intersect(userName.ToCharArray()).Any() ? "[Too long]" : userName.Length > 14 ? $"{userName.Substring(0, 14)}.." : userName;
 				desc.AppendLine($"`{++i,-4}{userNameChecked,-16 - 2}{user.DiscordId,-18 - 3}{user.LeaderboardId,-7 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
 			}
