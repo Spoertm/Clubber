@@ -14,10 +14,6 @@ namespace Clubber
 		private readonly DiscordSocketClient discord;
 		private readonly CommandService commands;
 		private readonly IConfigurationRoot config;
-		private ISocketMessageChannel Channel;
-		private SocketUserMessage msg;
-		private System.Threading.Timer Timer;
-		EmbedBuilder embed = new EmbedBuilder { Title = "Periodic database update" };
 
 		// DiscordSocketClient, CommandService, and IConfigurationRoot are injected automatically from the IServiceProvider
 		public StartupService(

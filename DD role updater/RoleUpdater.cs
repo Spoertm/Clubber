@@ -279,12 +279,12 @@ namespace Clubber.DdRoleUpdater
 				if (page < 1) { await ReplyAsync("Invalid page number."); return; }
 				var Db = Helper.DeserializeDb();
 				if (Db.Count == 0) { await ReplyAsync("The database is empty."); return; }
-				int maxpage = (int)Math.Ceiling(Context.Guild.Users.Count() / 50d);
+				int maxpage = (int)Math.Ceiling(Context.Guild.Users.Count() / 25d);
 				if (page > maxpage) { await ReplyAsync($"Page number exceeds the maximum of `{maxpage}`."); return; }
 
 				ulong cheaterRoleId = 693432614727581727;
-				uint start = 0 + 50 * (page - 1);
-				uint end = start + 50;
+				uint start = 0 + 25 * (page - 1);
+				uint end = start + 25;
 				var unregisteredMembersNoCheaters = Context.Guild.Users.Where(user => !user.IsBot && !Helper.DiscordIdExistsInDb(user.Id) && !user.Roles.Any(r => r.Id == cheaterRoleId)).Select(u => u.Mention);
 				EmbedBuilder embed = new EmbedBuilder { Title = $"Unregistered guild members ({page}/{maxpage})\nTotal: {unregisteredMembersNoCheaters.Count()}" };
 				embed.Description = string.Join(' ', unregisteredMembersNoCheaters.Skip((int)start).Take((int)end));
@@ -368,7 +368,7 @@ namespace Clubber.DdRoleUpdater
 			else if (Helper.DeserializeDb().ContainsKey(userMention.Id))
 			{
 				if (!await UpdateUserRoles(Helper.GetDdUserFromId(userMention.Id)))
-					await ReplyAsync($"No updates were needed for {Context.User.Username}.");
+					await ReplyAsync($"No updates were needed for {userMention.Username}.");
 			}
 			else await ReplyAsync($"User `{userMention.Username}` is not in my database. I can therefore not update their roles, so please ask an admin/moderator/role assigner to register them.");
 		}

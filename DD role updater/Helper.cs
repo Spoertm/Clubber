@@ -39,7 +39,6 @@ namespace Clubber.DdRoleUpdater
 
 		public static async Task ExecuteFromName(IEnumerable<SocketGuildUser> userMatches, string name, Func<string, Task> asyncCommand, ISocketMessageChannel channel)
 		{
-
 			int numberOfMatches = userMatches.Count();
 			if (numberOfMatches == 0) await channel.SendMessageAsync($"Found no user(s) with the username/nickname `{name.ToLower()}`.");
 			else if (numberOfMatches == 1) await asyncCommand(userMatches.First().Mention);
