@@ -40,49 +40,46 @@ namespace Clubber.DdRoleUpdater
 		{
 			var msg = await ReplyAsync("Processing...");
 			var Db = Helper.DeserializeDb();
-			var usersLeftServer = Db.Keys.Where(id => GetDiscordUser(id) == null).Select(id => $"<@{id}>");
+			var notGuildMembers = Db.Keys.Where(id => GetGuildMember(id) == null).Select(id => $"<@{id}>");
 			bool updatedDbRolesBool = Db.Values.Select(async user => await UpdateUserRoles(user)).Select(t => t.Result).ToList().Contains(true);
-			if (usersLeftServer.Count() != 0) await ReplyAsync(null, false, new EmbedBuilder { Title = "Unable to update these users. They're most likely not in the server.", Description = string.Join(' ', usersLeftServer) }.Build());
+			if (notGuildMembers.Count() != 0) await ReplyAsync(null, false, new EmbedBuilder { Title = "Unable to update these users. They're most likely not in the server.", Description = string.Join(' ', notGuildMembers) }.Build());
 			if (!updatedDbRolesBool) { await msg.ModifyAsync(m => m.Content = "No role updates were needed."); return; }
 
 			await SerializeDbAndReply(Db, "✅ Successfully updated database and member roles.");
 			await msg.DeleteAsync();
 		}
 
+		[Priority(3)]
 		[Command("addfromrank"), Alias("addr")]
 		[Summary("Obtains user from their rank and adds them to the database.")]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task AddUserByRank(uint rank, [Remainder] string name)
+		public async Task AddUserByRankAndName(uint rank, [Remainder] string name)
 		{
 			string lowerCaseName = name.ToLower();
 			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(lowerCaseName) || (u.Nickname != null && u.Nickname.ToLower().Contains(lowerCaseName)));
-			await Helper.AddToDbFromName(userMatches, name, rank, async (rank, discordId) => await AddUserByRank(rank, discordId), Context.Channel);
+			await Helper.AddToDbFromName(userMatches, name, rank, async (rank, discordId) => await AddUserByRankAndId(rank, discordId), Context.Channel);
 		}
 
+		[Priority(2)]
 		[Command("addfromrank"), Alias("addr"), Remarks("├ ")]
 		[Summary("Obtains user from their rank and adds them to the database.")]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task AddUserByRank(uint rank, IUser userMention) => await AddUserByRank(rank, userMention.Id);
+		public async Task AddUserByRankAndMention(uint rank, IUser userMention) => await AddUserByRankAndId(rank, userMention.Id);
 
-		[Command("addfromrank"), Alias("addr"), Remarks("└ ")]
+		[Priority(1)]
+		[Command("addfromrankandid"), Alias("addrid")]
 		[Summary("Obtains user from their rank and adds them to the database.")]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task AddUserByRank(uint rank, ulong discordId)
+		public async Task AddUserByRankAndId(uint rank, ulong discordId)
 		{
 			try
 			{
-				if (!Helper.IsValidDiscordId(discordId, Context.Client)) { await ReplyAsync("Invalid Discord ID."); return; }
-				var user = GetDiscordUser(discordId);
+				var user = GetGuildMember(discordId);
+				if (Helper.DiscordIdExistsInDb(discordId)) { await ReplyAsync($"User `{(user == null ? "" : user.Username)}({discordId})` is already registered."); return; }
+				if (user == null) { await ReplyAsync($"❗ Could not find a user with the name or ID `{discordId}`."); return; }
 				ulong cheaterRoleId = 693432614727581727;
-				bool userIsInGuild = UserIsInGuild(user.Id);
-				if (userIsInGuild)
-				{
-					var guildUser = user as SocketGuildUser;
-					if (guildUser.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }
-					if (guildUser.IsBot) { await ReplyAsync($"{guildUser.Mention} is a bot. It can't be registered as a DD player."); return; }
-					if (Helper.DiscordIdExistsInDb(discordId))
-					{ await ReplyAsync($"{guildUser.Username} ({guildUser.Id}) is already registered."); return; }
-				}
+				if (user.IsBot) { await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player."); return; }
+				if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username} can't be registered because they've cheated."); return; }
 
 				string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-rank?rank={rank}");
 				DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
@@ -92,47 +89,40 @@ namespace Clubber.DdRoleUpdater
 
 				var Db = Helper.DeserializeDb();
 				Db.Add(discordId, databaseUser);
-				if (!userIsInGuild) await ReplyAsync($"❗ <@{user.Id}> is not a member in this server.");
 				await SerializeDbAndReply(Db, $"✅ Added `{user.Username}` to the database.");
 			}
 			catch
-			{ await ReplyAsync("❌ Something went wrong. Couldn't execute command."); }
+			{ await ReplyAsync("❌ Couldn't execute command."); }
 		}
 
-		[Command("addfromlbid"), Alias("addid")]
+		[Command("addfromlbid"), Alias("addlbid")]
 		[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task AddUserByID(uint lbId, [Remainder] string name)
 		{
 			string usernameornickname = name.ToLower();
 			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
-			await Helper.AddToDbFromName(userMatches, name, lbId, async (lbId, discordId) => await AddUserByID(lbId, discordId), Context.Channel);
+			await Helper.AddToDbFromName(userMatches, name, lbId, async (lbId, discordId) => await AddUserByLbIdAndDscId(lbId, discordId), Context.Channel);
 		}
 
-		[Command("addfromlbid"), Alias("addid"), Remarks("├ ")]
+		[Command("addfromlbid"), Alias("addlbid"), Remarks("├ ")]
 		[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task AddUserByID(uint lbId, IUser userMention) => await AddUserByID(lbId, userMention.Id);
+		public async Task AddUserByID(uint lbId, IUser userMention) => await AddUserByLbIdAndDscId(lbId, userMention.Id);
 
-		[Command("addfromlbid"), Alias("addid"), Remarks("└ ")]
+		[Command("addfromlbidandid"), Alias("addlbandid")]
 		[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task AddUserByID(uint lbId, ulong discordId)
+		public async Task AddUserByLbIdAndDscId(uint lbId, ulong discordId)
 		{
 			try
 			{
-				if (!Helper.IsValidDiscordId(discordId, Context.Client)) { await ReplyAsync("Invalid Discord ID."); return; }
-				var user = GetDiscordUser(discordId);
+				var user = GetGuildMember(discordId);
+				if (Helper.DiscordIdExistsInDb(discordId)) { await ReplyAsync($"User `{(user == null ? "" : user.Username)}({discordId})` is already registered."); return; }
+				if (user == null) { await ReplyAsync($"❗ Could not find a user with the name or ID `{discordId}`."); return; }
 				ulong cheaterRoleId = 693432614727581727;
-				bool userIsInGuild = UserIsInGuild(user.Id);
-				if (userIsInGuild)
-				{
-					var guildUser = user as SocketGuildUser;
-					if (guildUser.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }
-					if (guildUser.IsBot) { await ReplyAsync($"{guildUser.Mention} is a bot. It can't be registered as a DD player."); return; }
-					if (Helper.DiscordIdExistsInDb(discordId))
-					{ await ReplyAsync($"{guildUser.Username} ({guildUser.Id}) is already registered."); return; }
-				}
+				if (user.IsBot) { await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player."); return; }
+				if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username} can't be registered because they've cheated."); return; }
 
 				string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
 				DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
@@ -142,11 +132,10 @@ namespace Clubber.DdRoleUpdater
 
 				var Db = Helper.DeserializeDb();
 				Db.Add(discordId, databaseUser);
-				if (!userIsInGuild) await ReplyAsync($"❗ <@{user.Id}> is not a member in this server.");
 				await SerializeDbAndReply(Db, $"✅ Added `{user.Username}` to the database.");
 			}
 			catch
-			{ await ReplyAsync("❌ Something went wrong. Couldn't execute command."); }
+			{ await ReplyAsync("❌ Couldn't execute command."); }
 		}
 
 		[Command("remove")]
@@ -156,9 +145,12 @@ namespace Clubber.DdRoleUpdater
 		{
 			var db = Helper.DeserializeDb();
 			string usernameornickname = name.ToLower();
-			var dbMatches = db.Keys.Where(id => Helper.IsValidDiscordId(id, Context.Client) && GetDiscordUser(id).Username.ToLower().Contains(usernameornickname)).Select(dId => GetDiscordUser(dId));
+			var dbMatches = db.Keys.Where(id => GetGuildMember(id) != null && GetGuildMember(id).Username.ToLower().Contains(usernameornickname)).Select(dId => GetGuildMember(dId));
+			int dbMatchesCount = dbMatches.Count();
 
-			await Helper.ExecuteFromName(dbMatches, usernameornickname, async (id) => await RemoveUser(dbMatches.First().Id), Context.Channel);
+			if (dbMatchesCount == 0) await ReplyAsync($"Found no users with the name `{usernameornickname}` in the database.");
+			else if (dbMatchesCount == 1) await RemoveUser(dbMatches.First().Id);
+			else await ReplyAsync($"Multiple people in the database have `{name.ToLower()}` in their name. Mention the user or specify their ID.");
 		}
 
 		[Command("remove"), Remarks("└ ")]
@@ -166,8 +158,7 @@ namespace Clubber.DdRoleUpdater
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task RemoveUser(ulong discordId)
 		{
-			if (!Helper.DiscordIdExistsInDb(discordId))
-			{ await ReplyAsync($"User {discordId} doesn't exist in the database."); return; }
+			if (!Helper.DiscordIdExistsInDb(discordId)) { await ReplyAsync($"Coudn't find a user with the username or ID `{discordId}` in the database."); return; }
 
 			var Db = Helper.DeserializeDb();
 			foreach (KeyValuePair<ulong, DdUser> user in Db)
@@ -175,7 +166,8 @@ namespace Clubber.DdRoleUpdater
 				if (discordId == user.Value.DiscordId)
 				{
 					Db.Remove(user.Key);
-					await SerializeDbAndReply(Db, $"✅ Removed `{GetDiscordUser(discordId).Username}, ID: {discordId}`.");
+					var discordUser = GetGuildMember(discordId);
+					await SerializeDbAndReply(Db, $"✅ Removed {(discordUser == null ? "User" : $"`{discordUser.Username}`")} `ID: {discordId}`.");
 					return;
 				}
 			}
@@ -246,15 +238,15 @@ namespace Clubber.DdRoleUpdater
 			if (page > maxpage) { await ReplyAsync($"Page number exceeds the maximum of `{maxpage}`."); return; }
 
 			char[] blacklistedCharacters = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/CharacterBlacklist.txt")).ToCharArray();
-			int start = 0 + 20 * ((int)page - 1);
 			StringBuilder desc = new StringBuilder().AppendLine($"`{"#",-4}{"User",-16 - 2}{"Discord ID",-18 - 3}{"LB ID",-7 - 3}{"Score",-5 - 3}{"Role",-10}`");
 
+			int start = 0 + 20 * ((int)page - 1);
 			int i = start;
 			foreach (DdUser user in Db.Values.Skip(start).Take(20))
 			{
-				var dscUser = GetDiscordUser(user.DiscordId);
-				string userName = dscUser == null ? "[Deleted acc]" : dscUser.Username; ;
-				var userNameChecked = blacklistedCharacters.Intersect(userName.ToCharArray()).Any() ? "[Too long]" : userName.Length > 14 ? $"{userName.Substring(0, 14)}.." : userName;
+				var dscUser = GetGuildMember(user.DiscordId);
+				string userName = dscUser == null ? "Not in server" : dscUser.Username;
+				var userNameChecked = blacklistedCharacters.Intersect(userName.ToCharArray()).Any() ? $"{userName[0]}.." : userName.Length > 14 ? $"{userName.Substring(0, 14)}.." : userName;
 				desc.AppendLine($"`{++i,-4}{userNameChecked,-16 - 2}{user.DiscordId,-18 - 3}{user.LeaderboardId,-7 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
 			}
 			EmbedBuilder embed = new EmbedBuilder().WithTitle($"DD player database ({page}/{maxpage})\nTotal: {Db.Count()}").WithDescription(desc.ToString());
@@ -271,15 +263,15 @@ namespace Clubber.DdRoleUpdater
 			{
 				if (page < 1) { await ReplyAsync("Invalid page number."); return; }
 				var Db = Helper.DeserializeDb();
-				int maxpage = (int)Math.Ceiling(Context.Guild.Users.Count() / 25d);
+				ulong cheaterRoleId = 693432614727581727;
+				var unregisteredMembersNoCheaters = Context.Guild.Users.Where(user => !user.IsBot && !Helper.DiscordIdExistsInDb(user.Id) && !user.Roles.Any(r => r.Id == cheaterRoleId)).Select(u => $"<@{u.Id}>");
+				int unregisteredCount = unregisteredMembersNoCheaters.Count();
+				int maxpage = (int)Math.Ceiling(unregisteredCount / 30d);
 				if (page > maxpage) { await ReplyAsync($"Page number exceeds the maximum of `{maxpage}`."); return; }
 
-				ulong cheaterRoleId = 693432614727581727;
-				uint start = 0 + 25 * (page - 1);
-				uint end = start + 25;
-				var unregisteredMembersNoCheaters = Context.Guild.Users.Where(user => !user.IsBot && !Helper.DiscordIdExistsInDb(user.Id) && !user.Roles.Any(r => r.Id == cheaterRoleId)).Select(u => $"<@{u.Id}>");
-				EmbedBuilder embed = new EmbedBuilder { Title = $"Unregistered guild members ({page}/{maxpage})\nTotal: {unregisteredMembersNoCheaters.Count()}" };
-				embed.Description = string.Join(' ', unregisteredMembersNoCheaters.Skip((int)start).Take((int)end));
+				int start = 0 + 30 * ((int)page - 1);
+				EmbedBuilder embed = new EmbedBuilder { Title = $"Unregistered guild members ({page}/{maxpage})\nTotal: {unregisteredCount}" };
+				embed.Description = string.Join(' ', unregisteredMembersNoCheaters.Skip(start).Take(30));
 				await ReplyAsync(null, false, embed.Build());
 			}
 			catch { await ReplyAsync("❌ Something went wrong. Couldn't execute command."); return; }
@@ -295,7 +287,7 @@ namespace Clubber.DdRoleUpdater
 			if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username}, you can't register because you've cheated."); return; }
 			if (!Helper.DiscordIdExistsInDb(Context.User.Id)) { await ReplyAsync($"You're not registered in the database, {user.Username}. Please ask an admin/moderator/role assigner to register you. "); return; }
 
-			await Stats(user.Id);
+			await StatsFromId(user.Id);
 		}
 
 		[Priority(2)]
@@ -305,43 +297,53 @@ namespace Clubber.DdRoleUpdater
 		{
 			var db = Helper.DeserializeDb();
 			string usernameornickname = name.ToLower();
-			var dbMatches = db.Keys.Where(id => Helper.IsValidDiscordId(id, Context.Client) && GetDiscordUser(id).Username.ToLower().Contains(usernameornickname)).Select(dId => GetDiscordUser(dId));
-			if (dbMatches.Count() != 0) { await Helper.ExecuteFromName(dbMatches, usernameornickname, async (id) => await Stats(dbMatches.First().Id), Context.Channel); return; }
 
+			var dbMatches = db.Keys.Where(id => UserIsInGuild(id) && GetGuildMember(id).Username.ToLower().Contains(usernameornickname)).Select(dId => GetGuildMember(dId));
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
-			await Helper.ExecuteFromName(guildMatches, name, async (id) => await Stats(guildMatches.First().Id), Context.Channel);
+			int dbMatchesCount = dbMatches.Count();
+			int guildMatchesCount = guildMatches.Count();
+
+			if (dbMatchesCount == 0 && guildMatchesCount == 0) { await ReplyAsync($"Found no users with the name `{usernameornickname}`."); return; }
+
+			if (dbMatchesCount == 1) { await StatsFromId(dbMatches.First().Id); return; }
+			if (dbMatchesCount > 1) { await ReplyAsync($"Multiple people in the database have `{name.ToLower()}` in their name. Mention the user or specify their ID."); return; }
+
+			if (guildMatchesCount == 1) { await StatsFromId(guildMatches.First().Id); return; }
+			if (guildMatchesCount > 1) { await ReplyAsync($"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or specify their ID."); return; }
 		}
 
 		[Priority(3)]
 		[Command("stats"), Remarks("└ ")]
 		[Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
-		public async Task Stats(IUser userMention) => await Stats(userMention.Id);
+		public async Task Stats(IUser userMention) => await StatsFromId(userMention.Id);
 
 		[Priority(4)]
-		[Command("stats"), Remarks("└ ")]
-		[Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
-		public async Task Stats(ulong discordId)
+		[Command("statsid")]
+		[Summary("Provides stats on a user from their Discord ID.")]
+		public async Task StatsFromId(ulong discordId)
 		{
 			try
 			{
-				if (!Helper.IsValidDiscordId(discordId, Context.Client)) { await ReplyAsync("Invalid Discord ID."); return; }
 				bool userIsInGuild = UserIsInGuild(discordId);
+				bool userInDb = Helper.DiscordIdExistsInDb(discordId);
 				if (userIsInGuild)
 				{
+					ulong cheaterRoleId = 693432614727581727;
 					var guildUser = Context.Guild.GetUser(discordId);
 					if (guildUser.IsBot) { await ReplyAsync($"{guildUser.Mention} is a bot. It can't be registered as a DD player."); return; }
-					ulong cheaterRoleId = 693432614727581727;
 					if (Context.Guild.GetUser(discordId).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }
+					if (!userInDb) { await ReplyAsync($"`{GetGuildMember(discordId).Username}` is not registered in the database. Please ask an admin/moderator/role assigner to register them."); return; }
 				}
-				if (!Helper.DiscordIdExistsInDb(discordId)) { await ReplyAsync($"`{GetDiscordUser(discordId).Username}` is not registered in the database. Please ask an admin/moderator/role assigner to register them."); return; }
+				if (!userIsInGuild && !userInDb) { await ReplyAsync($"Failed to find user with the name or ID `{discordId}`."); return; }
 
 				DdUser ddUser = Helper.GetDdUserFromId(discordId);
 				string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={ddUser.LeaderboardId}");
 				DdPlayer ddPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 
+				var guildMember = GetGuildMember(discordId);
 				EmbedBuilder embed = new EmbedBuilder
 				{
-					Title = $"{GetDiscordUser(discordId).Username} is registered",
+					Title = $"{(guildMember == null ? "User" : guildMember.Username)} is registered",
 					Description = $"Leaderboard name: {ddPlayer.Username}\nScore: {ddPlayer.Time / 10000f}s"
 				};
 				embed.Description += userIsInGuild ? null : $"\n\n<@{discordId}> is not a member in {Context.Guild.Name}.";
@@ -367,48 +369,55 @@ namespace Clubber.DdRoleUpdater
 			else await ReplyAsync($"You're not in my database, {user.Username}. I can therefore not update your roles, so please ask an admin/moderator/role assigner to register you.");
 		}
 
-		[Priority(2)]
+		[Priority(3)]
 		[Command("updateroles"), Remarks("└ ")]
 		[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
 		public async Task UpdateRoles([Remainder] string name)
 		{
 			var db = Helper.DeserializeDb();
 			string usernameornickname = name.ToLower();
-			var dbMatches = db.Keys.Where(id => Helper.IsValidDiscordId(id, Context.Client) && GetDiscordUser(id).Username.ToLower().Contains(usernameornickname)).Select(dId => GetDiscordUser(dId));
-			if (dbMatches.Count() != 0) { await Helper.ExecuteFromName(dbMatches, usernameornickname, async (id) => await UpdateRoles(dbMatches.First().Id), Context.Channel); return; }
 
-			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
-			await Helper.ExecuteFromName(userMatches, name, async (id) => await UpdateRoles(userMatches.First().Id), Context.Channel);
+			var dbMatches = db.Keys.Where(id => UserIsInGuild(id) && GetGuildMember(id).Username.ToLower().Contains(usernameornickname)).Select(dId => GetGuildMember(dId));
+			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
+			int dbMatchesCount = dbMatches.Count();
+			int guildMatchesCount = guildMatches.Count();
+
+			if (dbMatchesCount == 0 && guildMatchesCount == 0) { await ReplyAsync($"Found no users with the name `{usernameornickname}`."); return; }
+
+			if (dbMatchesCount == 1) { await UpdateRolesFromId(dbMatches.First().Id); return; }
+			if (dbMatchesCount > 1) { await ReplyAsync($"Multiple people in the database have `{name.ToLower()}` in their name. Mention the user or specify their ID."); return; }
+
+			if (guildMatchesCount == 1) { await UpdateRolesFromId(guildMatches.First().Id); return; }
+			if (guildMatchesCount > 1) { await ReplyAsync($"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or specify their ID."); return; }
 		}
 
-		[Priority(3)]
+		[Priority(2)]
 		[Command("updateroles"), Remarks("├ ")]
 		[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
-		public async Task UpdateRoles(IUser userMention) => await UpdateRoles(userMention.Id);
+		public async Task UpdateRoles(IUser userMention) => await UpdateRolesFromId(userMention.Id);
 
-		[Priority(4)]
-		[Command("updateroles"), Remarks("└ ")]
+		[Command("updaterolesID")]
 		[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
-		public async Task UpdateRoles(ulong discordId)
+		public async Task UpdateRolesFromId(ulong discordId)
 		{
-			if (!Helper.IsValidDiscordId(discordId, Context.Client)) { await ReplyAsync("Invalid Discord ID."); return; }
 			bool userIsInGuild = UserIsInGuild(discordId);
+			bool userInDb = Helper.DiscordIdExistsInDb(discordId);
+			if (!userIsInGuild && !userInDb) { await ReplyAsync($"Failed to find user with the name or ID `{discordId}`."); return; }
 			if (userIsInGuild)
 			{
+				ulong cheaterRoleId = 693432614727581727;
 				var guildUser = Context.Guild.GetUser(discordId);
 				if (guildUser.IsBot) { await ReplyAsync($"{guildUser.Mention} is a bot. It can't be registered as a DD player."); return; }
-				ulong cheaterRoleId = 693432614727581727;
 				if (Context.Guild.GetUser(discordId).Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }
-
-				if (Helper.DeserializeDb().ContainsKey(discordId))
+				if (!userInDb) { await ReplyAsync($"`{GetGuildMember(discordId).Username}` is not registered in the database. Please ask an admin/moderator/role assigner to register them."); return; }
+				if (userInDb)
 				{
 					if (!await UpdateUserRoles(Helper.GetDdUserFromId(discordId)))
 						await ReplyAsync($"No updates were needed for {guildUser.Username}.");
 				}
 				else await ReplyAsync($"{guildUser.Username} is not in my database. I can therefore not update their roles, so please ask an admin/moderator/role assigner to register them.");
 			}
-			else if (!Helper.DiscordIdExistsInDb(discordId)) await ReplyAsync($"`{GetDiscordUser(discordId).Username}` is not registered in the database. Please ask an admin/moderator/role assigner to register them.");
-			else await ReplyAsync($"<@{GetDiscordUser(discordId).Id}> is not in this server.");
+			else await ReplyAsync("That user is in the database but not in the server.");
 		}
 
 		public async Task<bool> UpdateUserRoles(DdUser user)
@@ -474,9 +483,9 @@ namespace Clubber.DdRoleUpdater
 			return "No role";
 		}
 
-		public SocketUser GetDiscordUser(ulong Id)
+		public SocketGuildUser GetGuildMember(ulong Id)
 		{
-			return Context.Client.GetUser(Id);
+			return Context.Guild.GetUser(Id);
 		}
 
 		public bool UserIsInGuild(ulong id)

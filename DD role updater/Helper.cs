@@ -19,8 +19,6 @@ namespace Clubber.DdRoleUpdater
 
 		public static DdUser GetDdUserFromId(ulong discordId) => DeserializeDb()[discordId];
 
-		public static bool IsValidDiscordId(ulong discordId, DiscordSocketClient client) => client.GetUser(discordId) != null;
-
 		public static bool DiscordIdExistsInDb(ulong discordId) => DeserializeDb().ContainsKey(discordId);
 
 		public static bool LeaderboardIdExistsInDb(int lbId) => DeserializeDb().Values.Any(v => v.LeaderboardId == lbId);
@@ -30,20 +28,17 @@ namespace Clubber.DdRoleUpdater
 		public static string GetCommandAndParameterString(CommandInfo cmd) // Returns the command and its params in the format: commandName <requiredParam> [optionalParam]
 => $"{cmd.Name} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**[{p.Name}]**" : $"**[{p.Name} = {p.DefaultValue}]**" : $"**<{p.Name}>**"))}";
 
-		public static async Task AddToDbFromName(IEnumerable<SocketGuildUser> userMatches, string name, uint num, Func<uint, ulong, Task> asyncCommand, ISocketMessageChannel channel)
+		public static async Task AddToDbFromName(IEnumerable<SocketGuildUser> userMatches, string name, uint rankOrLbId, Func<uint, ulong, Task> asyncCommand, ISocketMessageChannel channel)
 		{
 			int numberOfMatches = userMatches.Count();
-			if (numberOfMatches == 0) await channel.SendMessageAsync($"Found no user(s) with the username/nickname `{name}`.");
-			else if (numberOfMatches == 1) await asyncCommand(num, userMatches.First().Id);
-			else await channel.SendMessageAsync($"Multiple people have the name `{name.ToLower()}`. Please mention the user or use their Discord ID.");
-		}
-
-		public static async Task ExecuteFromName(IEnumerable<IUser> userMatches, string name, Func<ulong, Task> asyncCommand, ISocketMessageChannel channel)
-		{
-			int numberOfMatches = userMatches.Count();
-			if (numberOfMatches == 0) await channel.SendMessageAsync($"Found no user(s) with the username/nickname `{name.ToLower()}`.");
-			else if (numberOfMatches == 1) await asyncCommand(userMatches.First().Id);
-			else await channel.SendMessageAsync($"Multiple people have the name `{name.ToLower()}`. Please mention the user or use their Discord ID.");
+			var converted = ulong.TryParse(name, out ulong discordId);
+			if (numberOfMatches == 0)
+			{
+				if (!converted) { await channel.SendMessageAsync($"Failed to find user with the name `{name}`."); return; }
+				await asyncCommand(rankOrLbId, discordId);
+			}
+			else if (numberOfMatches == 1) await asyncCommand(rankOrLbId, userMatches.First().Id);
+			else await channel.SendMessageAsync($"Multiple people have the name `{name.ToLower()}`. Try mentioning the user.");
 		}
 	}
 }
