@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -38,15 +39,30 @@ namespace Clubber.DdRoleUpdater
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task UpdateRolesAndDataBase()
 		{
-			var msg = await ReplyAsync("Processing...");
-			var Db = Helper.DeserializeDb();
-			var notGuildMembers = Db.Keys.Where(id => GetGuildMember(id) == null).Select(id => $"<@{id}>");
-			bool updatedDbRolesBool = Db.Values.Select(async user => await UpdateUserRoles(user)).Select(t => t.Result).ToList().Contains(true);
-			if (notGuildMembers.Count() != 0) await ReplyAsync(null, false, new EmbedBuilder { Title = "Unable to update these users. They're most likely not in the server.", Description = string.Join(' ', notGuildMembers) }.Build());
-			if (!updatedDbRolesBool) { await msg.ModifyAsync(m => m.Content = "No role updates were needed."); return; }
+			Stopwatch stopwatch = new Stopwatch();
+			stopwatch.Start();
 
-			await SerializeDbAndReply(Db, "✅ Successfully updated database and member roles.");
-			await msg.DeleteAsync();
+			IUserMessage msg = await ReplyAsync("Processing...");
+			Dictionary<ulong, DdUser> db = Helper.DeserializeDb();
+			IEnumerable<string> notGuildMembers = db.Keys.Where(id => GetGuildMember(id) == null).Select(id => $"<@{id}>");
+
+			if (notGuildMembers.Any())
+				await ReplyAsync(null, false, new EmbedBuilder { Title = "Unable to update these users. They're most likely not in the server.", Description = string.Join(' ', notGuildMembers) }.Build());
+
+			List<Task<bool>> tasks = new List<Task<bool>>();
+			foreach (DdUser user in db.Values)
+				tasks.Add(UpdateUserRoles(user));
+
+			int usersUpdated = (await Task.WhenAll(tasks)).Count();
+			if (usersUpdated > 0)
+			{
+				await SerializeDbAndReply(db, $"✅ Successfully updated database and member roles for {usersUpdated} users.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+				await msg.DeleteAsync();
+			}
+			else
+			{
+				await msg.ModifyAsync(m => m.Content = $"No role updates were needed.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+			}
 		}
 
 		[Priority(3)]
@@ -422,22 +438,23 @@ namespace Clubber.DdRoleUpdater
 
 		public async Task<bool> UpdateUserRoles(DdUser user)
 		{
-			string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={user.LeaderboardId}");
-			DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
-			if (lbPlayer.Time / 10000 > user.Score) user.Score = lbPlayer.Time / 10000;
+			SocketGuildUser guildUser = Context.Guild.GetUser(user.DiscordId);
+			if (guildUser == null || !UserIsInGuild(guildUser.Id))
+				return false; // User not in server
 
-			var guildUser = Context.Guild.GetUser(user.DiscordId);
-			if (guildUser == null || !UserIsInGuild(guildUser.Id)) return false; // User not in server
-			var scoreRole = ScoreRoleDict.Where(sr => sr.Key <= user.Score).OrderByDescending(sr => sr.Key).FirstOrDefault();
-			var roleToAdd = Context.Guild.GetRole(scoreRole.Value);
-			var removedRoles = await RemoveScoreRolesExcept(guildUser, roleToAdd);
+			user.Score = await GetUserTimeFromHasmodai(user.LeaderboardId) / 10000;
 
-			if (Helper.MemberHasRole(guildUser, roleToAdd.Id) && removedRoles.Count == 0)
+			KeyValuePair<int, ulong> scoreRole = ScoreRoleDict.Where(sr => sr.Key <= user.Score).OrderByDescending(sr => sr.Key).FirstOrDefault();
+			SocketRole roleToAdd = Context.Guild.GetRole(scoreRole.Value);
+			List<SocketRole> removedRoles = await RemoveScoreRolesExcept(guildUser, roleToAdd);
+
+			if (removedRoles.Count == 0 && Helper.MemberHasRole(guildUser, roleToAdd.Id))
 				return false;
 
 			StringBuilder description = new StringBuilder($"{guildUser.Mention}");
 
-			if (removedRoles.Count != 0) description.Append($"\n\nRemoved:\n- {string.Join("\n- ", removedRoles.Select(sr => sr.Mention))}");
+			if (removedRoles.Count != 0)
+				description.Append($"\n\nRemoved:\n- {string.Join("\n- ", removedRoles.Select(sr => sr.Mention))}");
 			if (!Helper.MemberHasRole(guildUser, scoreRole.Value))
 			{
 				if (roleToAdd != null)
@@ -452,6 +469,21 @@ namespace Clubber.DdRoleUpdater
 			};
 			await ReplyAsync(null, false, embed.Build());
 			return true;
+		}
+
+		private async Task<int> GetUserTimeFromHasmodai(int userId)
+		{
+			Dictionary<string, string> postValues = new Dictionary<string, string> { { "uid", userId.ToString() } };
+
+			using FormUrlEncodedContent content = new FormUrlEncodedContent(postValues);
+			using HttpClient client = new HttpClient();
+			HttpResponseMessage resp = await client.PostAsync("http://dd.hasmodai.com/backend16/get_user_by_id_public.php", content);
+			byte[] data = await resp.Content.ReadAsByteArrayAsync();
+
+			int bytePos = 19;
+			short usernameLength = BitConverter.ToInt16(data, bytePos);
+			bytePos += usernameLength + sizeof(short);
+			return BitConverter.ToInt32(data, bytePos + 12);
 		}
 
 		public async Task SerializeDbAndReply(Dictionary<ulong, DdUser> db, string msg)
@@ -483,9 +515,9 @@ namespace Clubber.DdRoleUpdater
 			return "No role";
 		}
 
-		public SocketGuildUser GetGuildMember(ulong Id)
+		public SocketGuildUser GetGuildMember(ulong id)
 		{
-			return Context.Guild.GetUser(Id);
+			return Context.Guild.GetUser(id);
 		}
 
 		public bool UserIsInGuild(ulong id)
