@@ -53,7 +53,7 @@ namespace Clubber.DdRoleUpdater
 			foreach (DdUser user in db.Values)
 				tasks.Add(UpdateUserRoles(user));
 
-			int usersUpdated = (await Task.WhenAll(tasks)).Count();
+			int usersUpdated = (await Task.WhenAll(tasks)).Count(b => b);
 			if (usersUpdated > 0)
 			{
 				await SerializeDbAndReply(db, $"✅ Successfully updated database and member roles for {usersUpdated} users.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
@@ -458,8 +458,11 @@ namespace Clubber.DdRoleUpdater
 			if (!Helper.MemberHasRole(guildUser, scoreRole.Value))
 			{
 				if (roleToAdd != null)
+				{
 					await guildUser.AddRoleAsync(roleToAdd);
-				description.AppendLine(roleToAdd == null ? $"Failed to find role from role ID, but it should have been the one for {scoreRole.Key}s+." : $"\n\nAdded:\n- {roleToAdd.Mention}");
+					description.AppendLine($"\n\nAdded:\n- {roleToAdd.Mention}");
+				}
+				else description.AppendLine($"Failed to find role from role ID, but it should have been the one for {scoreRole.Key}s+.");
 			}
 
 			EmbedBuilder embed = new EmbedBuilder
