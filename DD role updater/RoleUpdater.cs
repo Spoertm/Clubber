@@ -53,15 +53,15 @@ namespace Clubber.DdRoleUpdater
 			foreach (DdUser user in db.Values)
 				tasks.Add(UpdateUserRoles(user));
 
-			bool updatedAnyUsers = (await Task.WhenAll(tasks)).Any();
-			if (updatedAnyUsers)
+			int usersUpdated = (await Task.WhenAll(tasks)).Count();
+			if (usersUpdated > 0)
 			{
-				await SerializeDbAndReply(db, $"✅ Successfully updated database and member roles.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+				await SerializeDbAndReply(db, $"✅ Successfully updated database and member roles for {usersUpdated} users.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
 				await msg.DeleteAsync();
 			}
 			else
 			{
-				await msg.ModifyAsync(m => m.Content = "No role updates were needed.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+				await msg.ModifyAsync(m => m.Content = $"No role updates were needed.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
 			}
 		}
 
