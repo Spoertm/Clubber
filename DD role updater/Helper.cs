@@ -1,27 +1,20 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.WebSocket;
-using Newtonsoft.Json;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Clubber.DdRoleUpdater
 {
 	public static class Helper
 	{
-		private static readonly string DbJsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/DdPlayerDataBase.json");
+		public static DdUser GetDdUserFromId(ulong discordId, IMongoCollection<DdUser> collection) => collection.Find(x => x.DiscordId == discordId).SingleOrDefault();
 
-		public static Dictionary<ulong, DdUser> DeserializeDb() => JsonConvert.DeserializeObject<Dictionary<ulong, DdUser>>(File.ReadAllText(DbJsonPath));
+		public static bool DiscordIdExistsInDb(ulong discordId, IMongoCollection<DdUser> collection) => collection.Find(x => x.DiscordId == discordId).SingleOrDefault() == null ? false : true;
 
-		public static DdUser GetDdUserFromId(ulong discordId) => DeserializeDb()[discordId];
-
-		public static bool DiscordIdExistsInDb(ulong discordId) => DeserializeDb().ContainsKey(discordId);
-
-		public static bool LeaderboardIdExistsInDb(int lbId) => DeserializeDb().Values.Any(v => v.LeaderboardId == lbId);
+		public static bool LeaderboardIdExistsInDb(int lbId, IMongoCollection<DdUser> collection) => collection.Find(x => x.LeaderboardId == lbId).SingleOrDefault() == null ? false : true;
 
 		public static bool MemberHasRole(SocketGuildUser member, ulong roleId) => member.Roles.Any(role => role.Id == roleId);
 
