@@ -340,11 +340,14 @@ namespace Clubber.DdRoleUpdater
 				string jsonUser = await Client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={ddUser.LeaderboardId}");
 				DdPlayer ddPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 
+
+				var test = typeof(DdUser).GetFields();
 				var guildMember = GetGuildMember(discordId);
 				EmbedBuilder embed = new EmbedBuilder
 				{
 					Title = $"{(guildMember == null ? "User" : guildMember.Username)} is registered",
-					Description = $"Leaderboard name: {ddPlayer.Username}\nScore: {ddPlayer.Time / 10000f}s"
+					Description = $"Leaderboard name: {ddPlayer.Username}\nLeaderboard ID: {ddPlayer.Id}\nScore: {ddPlayer.Time / 10000f}s",
+					ThumbnailUrl = guildMember.GetAvatarUrl() ?? guildMember.GetDefaultAvatarUrl()
 				};
 				embed.Description += userInGuild ? null : $"\n\n<@{discordId}> is not a member in {Context.Guild.Name}.";
 
@@ -435,25 +438,36 @@ namespace Clubber.DdRoleUpdater
 			if (removedRoles.Count == 0 && Helper.MemberHasRole(guildMember, roleToAdd.Id))
 				return false;
 
-			StringBuilder description = new StringBuilder($"{guildMember.Mention}");
+			EmbedBuilder embed = new EmbedBuilder
+			{
+				Title = $"Updated roles for {guildMember.Username}",
+				Description = $"User: {guildMember.Mention}",
+				ThumbnailUrl = guildMember.GetAvatarUrl() ?? guildMember.GetDefaultAvatarUrl()
+			};
 
 			if (removedRoles.Count != 0)
-				description.Append($"\n\nRemoved:\n- {string.Join("\n- ", removedRoles.Select(sr => sr.Mention))}");
+				embed.AddField(new EmbedFieldBuilder()
+				{
+					Name = "Removed:",
+					Value = string.Join('\n', removedRoles.Select(sr => sr.Mention)),
+					IsInline = true
+				});
+
 			if (!Helper.MemberHasRole(guildMember, scoreRole.Value))
 			{
 				if (roleToAdd != null)
 				{
 					await guildMember.AddRoleAsync(roleToAdd);
-					description.AppendLine($"\n\nAdded:\n- {roleToAdd.Mention}");
+					embed.AddField(new EmbedFieldBuilder()
+					{
+						Name = "Added:",
+						Value = roleToAdd.Mention,
+						IsInline = true
+					});
 				}
-				else description.AppendLine($"Failed to find role from role ID, but it should have been the one for {scoreRole.Key}s+.");
+				else embed.Description += $"\nFailed to find role from role ID, but it should have been the one for {scoreRole.Key}s+.";
 			}
 
-			EmbedBuilder embed = new EmbedBuilder
-			{
-				Title = $"Updated roles for {guildMember.Username}",
-				Description = description.ToString()
-			};
 			await ReplyAsync(null, false, embed.Build());
 			return true;
 		}
@@ -501,7 +515,7 @@ namespace Clubber.DdRoleUpdater
 		{
 			var user = GetGuildMember(discordId);
 			if (user == null) return "Not in server";
-			
+
 			string username = user.Username;
 			if (blacklistedCharacters.Intersect(username.ToCharArray()).Any()) return $"{username[0]}..";
 			else if (username.Length > 14) return $"{username.Substring(0, 14)}..";
