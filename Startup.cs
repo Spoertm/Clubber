@@ -1,5 +1,6 @@
 ﻿using Clubber.DdRoleUpdater;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
@@ -54,10 +55,10 @@ namespace Clubber
 				CaseSensitiveCommands = false,
 				IgnoreExtraArgs = true,
 			}))
+			.AddSingleton<InteractiveService>()
 			.AddSingleton<CommandHandler>()         // Add the command handler to the collection
 			.AddSingleton<StartupService>()         // Add startupservice to the collection
 			.AddSingleton<LoggingService>()         // Add loggingservice to the collection
-			.AddSingleton<RoleUpdater>()
 			.AddSingleton<Random>()                 // Add random to the collection
 			.AddSingleton(Configuration);           // Add the configuration to the collection
 		}

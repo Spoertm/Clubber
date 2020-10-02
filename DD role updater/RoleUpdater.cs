@@ -176,108 +176,6 @@ namespace Clubber.DdRoleUpdater
 			await ReplyAsync($"✅ Removed {(GetGuildMember(discordId) == null ? "User" : $"`{GetGuildMember(discordId).Username}`")} `ID: {discordId}`.");
 		}
 
-		[Command("cleardb")]
-		[Summary("Clear the entire database.")]
-		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task ClearDatabase()
-		{
-			if (Database.CountDocuments(new BsonDocument()) == 0)
-			{ await ReplyAsync("The database is already empty."); return; }
-
-			Emoji confirm = new Emoji("✅"), deny = new Emoji("");
-			EmbedBuilder embed = new EmbedBuilder
-			{
-				Title = "⚠️ Are you sure you want to clear the database?",
-				Description = "Think twice about this."
-			};
-
-			var msg = await ReplyAsync(null, false, embed.Build());
-			await msg.AddReactionsAsync(new[] { confirm, deny });
-			Context.Client.ReactionAdded += ClearDbReacted;
-		}
-
-		public async Task ClearDbReacted(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel originChannel, SocketReaction reaction)
-		{
-			var msg = await cachedMessage.GetOrDownloadAsync();
-			if (msg != null && reaction.UserId == Context.User.Id)
-			{
-				try
-				{
-					if (reaction.Emote.Name == "✅")
-					{
-						Context.Client.ReactionAdded -= ClearDbReacted;
-						var filter = Builders<DdUser>.Filter.Empty;
-						Database.DeleteMany(filter);
-						await ReplyAsync("✅ Cleared database.");
-					}
-					else if (reaction.Emote.Name == "❌")
-					{
-						Context.Client.ReactionAdded -= ClearDbReacted;
-						await ReplyAsync("Cancelled database clearing.");
-					}
-				}
-				catch
-				{
-					Context.Client.ReactionAdded -= ClearDbReacted;
-					await ReplyAsync("❌ Failed to execute command. Cancelled database clearing.");
-				}
-			}
-			else if (msg == null)
-			{
-				Context.Client.ReactionAdded -= ClearDbReacted;
-				await ReplyAsync("Cancelled database clearing.");
-			}
-		}
-
-		[Command("printdb")]
-		[Summary("Print the list of users in the database.")]
-		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task PrintDatabase(uint page = 1)
-		{
-			int databaseCount = (int)Database.CountDocuments(new BsonDocument());
-			if (page < 1) { await ReplyAsync("Invalid page number."); return; }
-			if (databaseCount == 0) { await ReplyAsync("The database is empty."); return; }
-			int maxpage = (int)Math.Ceiling(databaseCount / 20d);
-			if (page > maxpage) { await ReplyAsync($"Page number exceeds the maximum of `{maxpage}`."); return; }
-
-			char[] blacklistedCharacters = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DD role updater/CharacterBlacklist.txt")).ToCharArray();
-			StringBuilder desc = new StringBuilder().AppendLine($"`{"#",-4}{"User",-16 - 2}{"Discord ID",-18 - 3}{"LB ID",-7 - 3}{"Score",-5 - 3}{"Role",-10}`");
-
-			int start = 0 + 20 * ((int)page - 1);
-			int i = start;
-			IEnumerable<DdUser> sortedDb = Database.AsQueryable().OrderByDescending(x => x.Score).Skip(start).Take(20);
-			foreach (DdUser user in sortedDb)
-			{
-				string username = GetCheckedMemberName(user.DiscordId, blacklistedCharacters);
-				desc.AppendLine($"`{++i,-4}{username,-16 - 2}{user.DiscordId,-18 - 3}{user.LeaderboardId,-7 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
-			}
-			EmbedBuilder embed = new EmbedBuilder().WithTitle($"DD player database ({page}/{maxpage})\nTotal: {databaseCount}").WithDescription(desc.ToString());
-
-			await ReplyAsync(null, false, embed.Build());
-		}
-
-		[Command("showunregisteredusers"), Alias("showunreg")]
-		[Summary("Prints a list of guild members that aren't registered in the database.")]
-		[RequireUserPermission(GuildPermission.ManageRoles)]
-		public async Task ShowUnregisteredUsers(uint page = 1)
-		{
-			try
-			{
-				if (page < 1) { await ReplyAsync("Invalid page number."); return; }
-				ulong cheaterRoleId = 693432614727581727;
-				var unregisteredMembersNoCheaters = Context.Guild.Users.Where(user => !user.IsBot && !Helper.DiscordIdExistsInDb(user.Id, Database) && !user.Roles.Any(r => r.Id == cheaterRoleId)).Select(u => $"<@{u.Id}>");
-				int unregisteredCount = unregisteredMembersNoCheaters.Count();
-				int maxpage = (int)Math.Ceiling(unregisteredCount / 30d);
-				if (page > maxpage) { await ReplyAsync($"Page number exceeds the maximum of `{maxpage}`."); return; }
-
-				int start = 0 + 30 * ((int)page - 1);
-				EmbedBuilder embed = new EmbedBuilder { Title = $"Unregistered guild members ({page}/{maxpage})\nTotal: {unregisteredCount}" };
-				embed.Description = string.Join(' ', unregisteredMembersNoCheaters.Skip(start).Take(30));
-				await ReplyAsync(null, false, embed.Build());
-			}
-			catch { await ReplyAsync("❌ Something went wrong. Couldn't execute command."); return; }
-		}
-
 		[Priority(1)]
 		[Command("stats")]
 		[Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
@@ -314,7 +212,7 @@ namespace Clubber.DdRoleUpdater
 
 		[Priority(3)]
 		[Command("stats"), Remarks("└ ")]
-		[Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
+		[Summary("Provides stats on you if you're registered, otherwise says you're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
 		public async Task Stats(IUser userMention) => await StatsFromId(userMention.Id);
 
 		[Priority(4)]

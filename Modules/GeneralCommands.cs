@@ -18,7 +18,7 @@ namespace Clubber.Modules
         public readonly IConfigurationRoot Config;
         private static readonly HttpClient Client = new HttpClient();
 
-        public GeneralCommands(CommandService service, IConfigurationRoot config, RoleUpdater roleUpdater)
+        public GeneralCommands(CommandService service, IConfigurationRoot config)
         {
             Service = service;
             Config = config;
