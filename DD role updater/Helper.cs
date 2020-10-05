@@ -12,9 +12,9 @@ namespace Clubber.DdRoleUpdater
 	{
 		public static DdUser GetDdUserFromId(ulong discordId, IMongoCollection<DdUser> collection) => collection.Find(x => x.DiscordId == discordId).SingleOrDefault();
 
-		public static bool DiscordIdExistsInDb(ulong discordId, IMongoCollection<DdUser> collection) => collection.Find(x => x.DiscordId == discordId).SingleOrDefault() == null ? false : true;
+		public static bool DiscordIdExistsInDb(ulong discordId, IMongoCollection<DdUser> collection) => collection.Find(x => x.DiscordId == discordId).Any();
 
-		public static bool LeaderboardIdExistsInDb(int lbId, IMongoCollection<DdUser> collection) => collection.Find(x => x.LeaderboardId == lbId).SingleOrDefault() == null ? false : true;
+		public static bool LeaderboardIdExistsInDb(int lbId, IMongoCollection<DdUser> collection) => collection.Find(x => x.LeaderboardId == lbId).Any();
 
 		public static bool MemberHasRole(SocketGuildUser member, ulong roleId) => member.Roles.Any(role => role.Id == roleId);
 

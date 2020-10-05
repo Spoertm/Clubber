@@ -5,14 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using System.Diagnostics;
 using Discord.WebSocket;
 using Newtonsoft.Json;
-using MongoDB.Bson;
 
 namespace Clubber.DdRoleUpdater
 {
@@ -48,13 +46,13 @@ namespace Clubber.DdRoleUpdater
 			stopwatch.Start();
 
 			IUserMessage msg = await ReplyAsync("Processing...");
-			IEnumerable<string> nonMemberMentions = Database.AsQueryable().ToList().Where(x => GetGuildMember(x.DiscordId) == null).Select(ddUser => $"<@{ddUser.DiscordId}>");
+			IEnumerable<string> nonMemberMentions = Database.AsQueryable().Where(x => GetGuildMember(x.DiscordId) == null).Select(ddUser => $"<@{ddUser.DiscordId}>");
 
 			if (nonMemberMentions.Any())
 				await ReplyAsync(null, false, new EmbedBuilder { Title = "Unable to update these users. They're most likely not in the server.", Description = string.Join(' ', nonMemberMentions) }.Build());
 
 			List<Task<bool>> tasks = new List<Task<bool>>();
-			foreach (DdUser user in Database.AsQueryable().ToList())
+			foreach (DdUser user in Database.AsQueryable())
 				tasks.Add(UpdateUserRoles(user));
 
 			int usersUpdated = (await Task.WhenAll(tasks)).Count(b => b);
@@ -157,7 +155,7 @@ namespace Clubber.DdRoleUpdater
 		public async Task RemoveUser(string name)
 		{
 			string usernameornickname = name.ToLower();
-			var dbMatches = Database.AsQueryable().ToList().Where(doc => GetGuildMember(doc.DiscordId) != null && GetGuildMember(doc.DiscordId).Username.ToLower().Contains(usernameornickname)).Select(ddUser => GetGuildMember(ddUser.DiscordId));
+			var dbMatches = Database.AsQueryable().Where(doc => GetGuildMember(doc.DiscordId) != null && GetGuildMember(doc.DiscordId).Username.ToLower().Contains(usernameornickname)).Select(ddUser => GetGuildMember(ddUser.DiscordId));
 			int dbMatchesCount = dbMatches.Count();
 
 			if (dbMatchesCount == 0) await ReplyAsync($"Found no users with the name `{usernameornickname}` in the database.");
@@ -196,7 +194,7 @@ namespace Clubber.DdRoleUpdater
 		{
 			string usernameornickname = name.ToLower();
 
-			var dbMatches = Database.AsQueryable().ToList().Where(ddUser => UserIsInGuild(ddUser.DiscordId) && GetGuildMember(ddUser.DiscordId).Username.ToLower().Contains(usernameornickname)).Select(ddUser => GetGuildMember(ddUser.DiscordId));
+			var dbMatches = Database.AsQueryable().Where(ddUser => UserIsInGuild(ddUser.DiscordId) && GetGuildMember(ddUser.DiscordId).Username.ToLower().Contains(usernameornickname)).Select(ddUser => GetGuildMember(ddUser.DiscordId));
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
 			int dbMatchesCount = dbMatches.Count();
 			int guildMatchesCount = guildMatches.Count();
@@ -277,7 +275,7 @@ namespace Clubber.DdRoleUpdater
 		{
 			string usernameornickname = name.ToLower();
 
-			var dbMatches = Database.AsQueryable().ToList().Where(ddUser => UserIsInGuild(ddUser.DiscordId) && GetGuildMember(ddUser.DiscordId).Username.ToLower().Contains(usernameornickname)).Select(ddUser => GetGuildMember(ddUser.DiscordId));
+			var dbMatches = Database.AsQueryable().Where(ddUser => UserIsInGuild(ddUser.DiscordId) && GetGuildMember(ddUser.DiscordId).Username.ToLower().Contains(usernameornickname)).Select(ddUser => GetGuildMember(ddUser.DiscordId));
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
 			int dbMatchesCount = dbMatches.Count();
 			int guildMatchesCount = guildMatches.Count();
@@ -343,7 +341,7 @@ namespace Clubber.DdRoleUpdater
 				ThumbnailUrl = guildMember.GetAvatarUrl() ?? guildMember.GetDefaultAvatarUrl()
 			};
 
-			if (removedRoles.Count != 0)
+			if (removedRoles.Count > 0)
 				embed.AddField(new EmbedFieldBuilder()
 				{
 					Name = "Removed:",
