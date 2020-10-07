@@ -275,14 +275,14 @@ namespace Clubber.DdRoleUpdater
 		{
 			string usernameornickname = name.ToLower();
 
-			var dbMatches = Database.AsQueryable().Where(ddUser => UserIsInGuild(ddUser.DiscordId) && GetGuildMember(ddUser.DiscordId).Username.ToLower().Contains(usernameornickname)).Select(ddUser => GetGuildMember(ddUser.DiscordId));
+			var dbMatches = Database.AsQueryable().ToList().Where(ddUser => UserIsInGuild(ddUser.DiscordId) && GetGuildMember(ddUser.DiscordId).Username.ToLower().Contains(usernameornickname));
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(u => u.Username.ToLower().Contains(usernameornickname) || (u.Nickname != null && u.Nickname.ToLower().Contains(usernameornickname)));
 			int dbMatchesCount = dbMatches.Count();
 			int guildMatchesCount = guildMatches.Count();
 
 			if (dbMatchesCount == 0 && guildMatchesCount == 0) { await ReplyAsync($"Found no users with the name `{usernameornickname}`."); return; }
 
-			if (dbMatchesCount == 1) { await UpdateRolesFromId(dbMatches.First().Id); return; }
+			if (dbMatchesCount == 1) { await UpdateRolesFromId(dbMatches.First().DiscordId); return; }
 			if (dbMatchesCount > 1) { await ReplyAsync($"Multiple people in the database have `{name.ToLower()}` in their name. Mention the user or specify their ID."); return; }
 
 			if (guildMatchesCount == 1) { await UpdateRolesFromId(guildMatches.First().Id); return; }
