@@ -1,4 +1,4 @@
-﻿namespace Clubber.DdRoleUpdater
+﻿namespace Clubber.Files
 {
 	public class DdPlayer
 	{

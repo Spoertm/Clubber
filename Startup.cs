@@ -1,4 +1,4 @@
-﻿using Clubber.DdRoleUpdater;
+﻿using Clubber.Databases;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -56,11 +56,13 @@ namespace Clubber
 				IgnoreExtraArgs = true,
 			}))
 			.AddSingleton<InteractiveService>()
-			.AddSingleton<CommandHandler>()         // Add the command handler to the collection
-			.AddSingleton<StartupService>()         // Add startupservice to the collection
-			.AddSingleton<LoggingService>()         // Add loggingservice to the collection
-			.AddSingleton<Random>()                 // Add random to the collection
-			.AddSingleton(Configuration);           // Add the configuration to the collection
+			.AddSingleton<CommandHandler>()
+			.AddSingleton<StartupService>()
+			.AddSingleton<LoggingService>()
+			.AddSingleton<Random>()
+			.AddSingleton<MongoDatabase>()
+			.AddSingleton<ScoreRoles>()
+			.AddSingleton(Configuration);
 		}
 	}
 }

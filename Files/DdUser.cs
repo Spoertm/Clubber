@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Clubber.DdRoleUpdater
+namespace Clubber.Files
 {
 	public class DdUser
 	{

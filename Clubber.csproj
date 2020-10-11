@@ -15,14 +15,19 @@
     <PackageReference Include="Discord.Addons.Interactive" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="DD role updater\CharacterBlacklist.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="_config.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="DD role updater\ScoreRoles.json">
+    <None Update="Files\ScoreRoles.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Files\CharacterBlacklist.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Databases\" />
+    <Folder Include="Files\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
 </Project>

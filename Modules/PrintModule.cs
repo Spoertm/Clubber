@@ -1,0 +1,93 @@
+﻿using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
+using Clubber.Databases;
+using MongoDB.Bson;
+using System.Text;
+using Discord.Addons.Interactive;
+using Clubber.Files;
+
+namespace Clubber.Modules
+{
+	public class PrintModule : InteractiveBase
+	{
+		private readonly char[] blacklistedCharacters = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Files/CharacterBlacklist.txt")).ToCharArray();
+		private readonly IMongoCollection<DdUser> Database;
+		private readonly Dictionary<int, ulong> ScoreRoleDictionary;
+
+		public PrintModule(MongoDatabase mongoDatabase, ScoreRoles scoreRoles)
+		{
+			Database = mongoDatabase.DdUserCollection;
+			ScoreRoleDictionary = scoreRoles.ScoreRoleDictionary;
+		}
+
+		[Command("printdb")]
+		[Summary("Shows a paginated list of users in the database.")]
+		[RequireUserPermission(GuildPermission.ManageRoles)]
+		public async Task PrintDatabase()
+		{
+			int databaseCount = (int)Database.CountDocuments(new BsonDocument());
+			int maxpage = (int)Math.Ceiling(databaseCount / 20d);
+			StringBuilder embedText = new StringBuilder();
+			string[] descriptionArray = new string[maxpage];
+			PaginatedMessage paginate = new PaginatedMessage() { Title = $"DD player database\nTotal: {databaseCount}" };
+			paginate.Options = new PaginatedAppearanceOptions()
+			{
+				Stop = Emote.Parse("<:trashcanUI:762399152385556510>"),
+				InformationText = ">>> ◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n<:trashcanUI:762399152385556510> - Stops the pagination session and deletes the pagination message.",
+				Timeout = TimeSpan.FromMinutes(20),
+				FooterFormat = "Page {0}/{1} - " + $"{Context.User.Username}'s session",
+			};
+
+			for (int pageNum = 1; pageNum <= maxpage; pageNum++)
+			{
+				int start = 20 * (pageNum - 1);
+				int i = start;
+
+				embedText.Clear().AppendLine($"`{"#",-4}{"User",-16 - 2}{"Discord ID",-18 - 3}{"LB ID",-7 - 3}{"Score",-5 - 3}{"Role",-10}`");
+
+				IEnumerable<DdUser> sortedDb = Database.AsQueryable().OrderByDescending(x => x.Score).Skip(start).Take(20);
+				foreach (DdUser user in sortedDb)
+				{
+					string username = GetCheckedMemberName(user.DiscordId, blacklistedCharacters);
+					embedText.AppendLine($"`{++i,-4}{username,-16 - 2}{user.DiscordId,-18 - 3}{user.LeaderboardId,-7 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
+				}
+				descriptionArray[pageNum - 1] = embedText.ToString();
+			}
+			paginate.Pages = descriptionArray;
+
+			await PagedReplyAsync(paginate);
+		}
+
+		public string GetCheckedMemberName(ulong discordId, char[] blacklistedCharacters)
+		{
+			var user = Context.Guild.GetUser(discordId);
+			if (user == null) return "Not in server";
+
+			string username = user.Username;
+			if (blacklistedCharacters.Intersect(username.ToCharArray()).Any()) return $"{username[0]}..";
+			else if (username.Length > 14) return $"{username.Substring(0, 14)}..";
+			else return username;
+		}
+
+		public string GetMemberScoreRoleName(ulong memberId)
+		{
+			if (!Context.Guild.Users.Any(x => x.Id == memberId)) return "N.I.S";
+			var guildUser = Context.Guild.GetUser(memberId);
+			foreach (var userRole in guildUser.Roles)
+			{
+				foreach (ulong roleId in ScoreRoleDictionary.Values)
+				{
+					if (userRole.Id == roleId) return userRole.Name;
+				}
+			}
+			return "No role";
+		}
+	}
+}
