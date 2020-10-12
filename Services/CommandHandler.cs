@@ -3,7 +3,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber
@@ -15,7 +14,6 @@ namespace Clubber
 		private readonly IConfigurationRoot config;
 		private readonly IServiceProvider provider;
 
-		// DiscordSocketClient, CommandService, IConfigurationRoot, and IServiceProvider are injected automatically from the IServiceProvider
 		public CommandHandler(DiscordSocketClient _discord, CommandService _commands, IConfigurationRoot _config, IServiceProvider _provider)
 		{
 			discord = _discord;
@@ -26,33 +24,27 @@ namespace Clubber
 			discord.MessageReceived += OnMessageReceivedAsync;
 		}
 
-		private async Task OnMessageReceivedAsync(SocketMessage s)
+		private async Task OnMessageReceivedAsync(SocketMessage message)
 		{
-			if (!(s is SocketUserMessage msg) || msg.Author.Id == discord.CurrentUser.Id) // Ensure the message is from a user/bot and ignore self when checking commands
-				return;
+			if (!(message is SocketUserMessage msg) || msg.Source != MessageSource.User) return;
 
-			var context = new SocketCommandContext(discord, msg);     // Create the command context
-
-			if (msg.Content == context.Client.CurrentUser.Mention)
-			{ await msg.AddReactionAsync(new Emoji("🗡")); return; }
-
-			int argPos = 0;     // Check if the message has a valid command prefix
-			if (msg.HasStringPrefix(config["prefix"], ref argPos) || msg.HasMentionPrefix(discord.CurrentUser, ref argPos))
+			if (msg.Content == discord.CurrentUser.Mention)
 			{
-				var commandSearch = commands.Search(context, argPos);
-				if (commandSearch.IsSuccess)
-				{
-					var command = commandSearch.Commands[0].Command;
+				await msg.AddReactionAsync(new Emoji("🗡"));
+				return;
+			}
 
-					if (!new string[] { "help", "updateroles", "printdb", "showunregisteredusers", "stats" }.Contains(command.Name) &&
-						command.Parameters.Count > 0 &&
-						command.Aliases.Any(msg.Content.Substring(argPos).Equals) &&
-						msg.Attachments.Count == 0)
-					{ await commands.ExecuteAsync(context, $"help {msg.Content.Substring(argPos)}", provider); return; }
+			int argPos = 0;
+			if (!(msg.HasStringPrefix(config["prefix"], ref argPos) || msg.HasMentionPrefix(discord.CurrentUser, ref argPos))) return;
 
-					var result = await commands.ExecuteAsync(context, msg.Content.Substring(argPos), provider);
-					if (!result.IsSuccess) await context.Channel.SendMessageAsync(result.ErrorReason);
-				}
+			SocketCommandContext context = new SocketCommandContext(discord, msg);
+
+			var result = await commands.ExecuteAsync(context, msg.Content.Substring(argPos), provider);
+
+			if (!result.IsSuccess && result.Error.HasValue)
+			{
+				if (result.Error.Value == CommandError.UnknownCommand) await msg.AddReactionAsync(new Emoji("❔"));
+				else await context.Channel.SendMessageAsync(result.ErrorReason);
 			}
 		}
 	}
