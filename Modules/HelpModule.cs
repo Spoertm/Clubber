@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Clubber.Modules
 {
-	[Name("Info"), Group("Help")]
+	[Name("Info"), Group("help")]
 	public class HelpModule : ModuleBase<SocketCommandContext>
 	{
 		private readonly CommandService service;
@@ -19,7 +20,7 @@ namespace Clubber.Modules
 			config = _config;
 		}
 
-		[Priority(1)]
+		[Priority(0)]
 		[Command]
 		public async Task Help(string command)
 		{
@@ -47,50 +48,33 @@ namespace Clubber.Modules
 			await ReplyAsync("", false, embedBuilder.Build());
 		}
 
-		[Priority(0)]
+		[Priority(1)]
 		[Command]
 		public async Task Help()
 		{
 			string prefix = config["prefix"];
-			EmbedBuilder builder = new EmbedBuilder
-			{
-				Author = new EmbedAuthorBuilder
-				{
-					Name = "List of available commands",
-					IconUrl = Context.Client.CurrentUser.GetAvatarUrl()
-				}
-			};
+			EmbedBuilder embed = new EmbedBuilder()
+				.WithTitle("List of commands")
+				.WithDescription($"Prefix: {Format.Code(prefix)}\n\n")
+				.WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
+				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help [command] to get more info.");
 
 			StringBuilder description = new StringBuilder();
-			foreach (ModuleInfo module in service.Modules)
-			{
-				description.Clear();
-				foreach (var cmd in module.Commands)
-				{
-					PreconditionResult result = await cmd.CheckPreconditionsAsync(Context);
-					if (result.IsSuccess && cmd.Remarks == null)
-					{
-						int numberOfSimilarCommands = module.Commands.Where(c => c.Name == cmd.Name).Count();
-						description.Append($"{cmd.Remarks}{(cmd.Remarks == null ? prefix : "")}{string.Join("/", cmd.Aliases)} ");
-						description.Append($"{string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"[{p.Name}]" : $"[{p.Name} = {p.DefaultValue}]" : $"<{p.Name}>"))}");
-						if (numberOfSimilarCommands > 1) description.AppendLine($" `(+{numberOfSimilarCommands - 1})`");
-						else description.AppendLine();
-					}
-				}
+			var commandGroups = service.Commands.GroupBy(x => x.Module.Name);
 
-				if (description.Length != 0)
-				{
-					builder.AddField(x =>
-					{
-						x.Name = $"{module.Name}";
-						x.Value = description;
-						x.IsInline = true;
-					});
-				}
+			foreach (var group in commandGroups)
+			{
+				string groupCommands = string.Join(", ", group
+						.Select(x => x)
+						.Where(cmd => cmd.CheckPreconditionsAsync(Context).Result.IsSuccess)
+						.Select(x => Format.Code(x.Aliases[0]))
+						.Distinct());
+
+				if (!string.IsNullOrEmpty(groupCommands))
+					embed.AddField(group.Key, groupCommands);
 			}
 
-			builder.AddField("\u200B", $"<>: Required⠀⠀[]: Optional\nText within \" \" will be counted as one argument.\n\nMentioning the bot works as well as using the prefix.\nUse `{prefix}help [command]` or call a command to get more info.");
-			await ReplyAsync("", false, builder.Build());
+			await ReplyAsync("", false, embed.Build());
 		}
 
 		// Returns the command and its params in the format: commandName <requiredParam> [optionalParam]

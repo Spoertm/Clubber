@@ -25,6 +25,7 @@ namespace Clubber.Modules
 		}
 
 		[Priority(1)]
+		[Command]
 		public async Task Stats()
 		{
 			ulong cheaterRoleId = 693432614727581727;
@@ -36,6 +37,7 @@ namespace Clubber.Modules
 		}
 
 		[Priority(2)]
+		[Command]
 		public async Task Stats(string name)
 		{
 			string usernameornickname = name.ToLower();
@@ -61,6 +63,7 @@ namespace Clubber.Modules
 		}
 
 		[Priority(3)]
+		[Command]
 		public async Task Stats(IUser userMention) => await StatsFromId(userMention.Id);
 
 		[Priority(4)]

@@ -25,8 +25,7 @@ namespace Clubber.Modules
 			Database = mongoDatabase.DdUserCollection;
 		}
 
-		[Command("addfromlbid"), Alias("addlbid")]
-		[RequireUserPermission(GuildPermission.ManageRoles)]
+		[Command]
 		public async Task AddUserByID(uint lbId, [Remainder] string name)
 		{
 			string usernameornickname = name.ToLower();
@@ -34,14 +33,10 @@ namespace Clubber.Modules
 			await Helper.AddToDbFromName(userMatches, name, lbId, async (lbId, discordId) => await AddUserByLbIdAndDscId(lbId, discordId), Context.Channel);
 		}
 
-		[Command("addfromlbid"), Alias("addlbid"), Remarks("├ ")]
-		[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
-		[RequireUserPermission(GuildPermission.ManageRoles)]
+		[Command]
 		public async Task AddUserByID(uint lbId, IUser userMention) => await AddUserByLbIdAndDscId(lbId, userMention.Id);
 
-		[Command("addfromlbidandid"), Alias("addlbandid")]
-		[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
-		[RequireUserPermission(GuildPermission.ManageRoles)]
+		[Command("id")]
 		public async Task AddUserByLbIdAndDscId(uint lbId, ulong discordId)
 		{
 			try

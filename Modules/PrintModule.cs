@@ -15,6 +15,7 @@ using Clubber.Files;
 
 namespace Clubber.Modules
 {
+	[Name("Database")]
 	public class PrintModule : InteractiveBase
 	{
 		private readonly char[] blacklistedCharacters = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Files/CharacterBlacklist.txt")).ToCharArray();

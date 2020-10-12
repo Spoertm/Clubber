@@ -13,6 +13,7 @@ using Clubber.Databases;
 
 namespace Clubber.Modules
 {
+	[Name("Database")]
 	public class ShowUnregistered : InteractiveBase
 	{
 		private readonly IMongoCollection<DdUser> Database;
