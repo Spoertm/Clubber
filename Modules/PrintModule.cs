@@ -40,12 +40,13 @@ namespace Clubber.Modules
 			PaginatedMessage paginate = new PaginatedMessage() { Title = $"DD player database\nTotal: {databaseCount}" };
 			paginate.Options = new PaginatedAppearanceOptions()
 			{
-				Stop = Emote.Parse("<:trashcanUI:762399152385556510>"),
+				Stop = Emote.Parse("<:trashcan:765705377857667107>"),
 				InformationText = ">>> ◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n<:trashcanUI:762399152385556510> - Stops the pagination session and deletes the pagination message.",
 				Timeout = TimeSpan.FromMinutes(20),
 				FooterFormat = "Page {0}/{1} - " + $"{Context.User.Username}'s session",
 			};
 
+			IEnumerable<DdUser> sortedDb = Database.AsQueryable().OrderByDescending(x => x.Score);
 			for (int pageNum = 1; pageNum <= maxpage; pageNum++)
 			{
 				int start = 20 * (pageNum - 1);
@@ -53,8 +54,8 @@ namespace Clubber.Modules
 
 				embedText.Clear().AppendLine($"`{"#",-4}{"User",-16 - 2}{"Discord ID",-18 - 3}{"LB ID",-7 - 3}{"Score",-5 - 3}{"Role",-10}`");
 
-				IEnumerable<DdUser> sortedDb = Database.AsQueryable().OrderByDescending(x => x.Score).Skip(start).Take(20);
-				foreach (DdUser user in sortedDb)
+				IEnumerable<DdUser> table = sortedDb.Skip(start).Take(20);
+				foreach (DdUser user in table)
 				{
 					string username = GetCheckedMemberName(user.DiscordId, blacklistedCharacters);
 					embedText.AppendLine($"`{++i,-4}{username,-16 - 2}{user.DiscordId,-18 - 3}{user.LeaderboardId,-7 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
