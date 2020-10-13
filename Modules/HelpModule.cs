@@ -20,7 +20,6 @@ namespace Clubber.Modules
 			config = _config;
 		}
 
-		[Priority(0)]
 		[Command]
 		public async Task Help(string command)
 		{
@@ -48,7 +47,6 @@ namespace Clubber.Modules
 			await ReplyAsync("", false, embedBuilder.Build());
 		}
 
-		[Priority(1)]
 		[Command]
 		public async Task Help()
 		{
@@ -57,7 +55,7 @@ namespace Clubber.Modules
 				.WithTitle("List of commands")
 				.WithDescription($"Prefix: {Format.Code(prefix)}\n\n")
 				.WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
-				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help [command] to get more info.");
+				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
 
 			StringBuilder description = new StringBuilder();
 			var commandGroups = service.Commands.GroupBy(x => x.Module.Name);
