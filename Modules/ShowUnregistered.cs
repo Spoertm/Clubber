@@ -30,24 +30,24 @@ namespace Clubber.Modules
 		{
 			try
 			{
-				List<string> unregMentions = new List<string>();
+				List<string> unregUsernames = new List<string>();
 				ulong cheaterRoleId = 693432614727581727;
 				foreach (SocketGuildUser user in Context.Guild.Users)
 				{
 					if (!user.IsBot && !user.Roles.Any(r => r.Id == cheaterRoleId) && !Helper.DiscordIdExistsInDb(user.Id, Database))
 					{
-						unregMentions.Add(user.Mention);
+						unregUsernames.Add(user.Username);
 					}
 				}
 
-				int unregisteredCount = unregMentions.Count;
+				int unregisteredCount = unregUsernames.Count;
 				if (unregisteredCount == 0) { await ReplyAsync("No results to show."); return; }
 				int maxFields = (int)Math.Ceiling(unregisteredCount / 15d); // 15 names per field
 
 				PaginatedMessage paginate = new PaginatedMessage() { Title = $"Unregistered guild members\nTotal: {unregisteredCount}" };
 				paginate.Options = new PaginatedAppearanceOptions()
 				{
-					Stop = Emote.Parse("<:trashcanUI:762399152385556510>"),
+					Stop = Emote.Parse("<:trashcan:765705377857667107>"),
 					InformationText = ">>> ◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n<:trashcanUI:762399152385556510> - Stops the pagination session and deletes the pagination message.",
 					Timeout = TimeSpan.FromMinutes(20),
 					FooterFormat = "Page {0}/{1} - " + $"{Context.User.Username}'s session",
@@ -60,7 +60,7 @@ namespace Clubber.Modules
 				for (int i = 1; i <= maxFields; i++)
 				{
 					int start = 15 * (i - 1);
-					sb.Clear().Append("・" + string.Join("\n・", unregMentions.Skip(start).Take(15)));
+					sb.Clear().Append("・" + string.Join("\n・", unregUsernames.Skip(start).Take(15)));
 					string test = sb.ToString();
 					fields[i - 1] = new EmbedFieldBuilder()
 					{
