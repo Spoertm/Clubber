@@ -39,7 +39,7 @@ namespace Clubber
 
 			SocketCommandContext context = new SocketCommandContext(discord, msg);
 
-			var result = await commands.ExecuteAsync(context, msg.Content.Substring(argPos), provider);
+			IResult result = await commands.ExecuteAsync(context, msg.Content.Substring(argPos), provider);
 
 			if (!result.IsSuccess && result.Error.HasValue)
 			{
