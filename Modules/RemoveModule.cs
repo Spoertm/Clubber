@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Clubber.Databases;
 using Clubber.Files;
 using Discord;
@@ -23,7 +24,7 @@ namespace Clubber.Modules
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task RemoveUser(string memberName)
 		{
-			IQueryable<DdUser> dbMatches = Database.AsQueryable().Where(
+			IEnumerable<DdUser> dbMatches = Database.AsQueryable().ToList().Where(
 				user => Context.Guild.GetUser(user.DiscordId) != null &&
 				Context.Guild.GetUser(user.DiscordId).Username.Contains(memberName, System.StringComparison.InvariantCultureIgnoreCase));
 			int dbMatchesCount = dbMatches.Count();
