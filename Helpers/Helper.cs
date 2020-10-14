@@ -20,12 +20,7 @@ namespace Clubber.Files
 		public static async Task AddToDbFromName(IEnumerable<SocketGuildUser> userMatches, string name, uint rankOrLbId, Func<uint, ulong, Task> asyncCommand, ISocketMessageChannel channel)
 		{
 			int numberOfMatches = userMatches.Count();
-			bool converted = ulong.TryParse(name, out ulong discordId);
-			if (numberOfMatches == 0)
-			{
-				if (!converted) { await channel.SendMessageAsync($"Failed to find user with the name `{name}`."); return; }
-				await asyncCommand(rankOrLbId, discordId);
-			}
+			if (numberOfMatches == 0) await channel.SendMessageAsync($"No user found.");
 			else if (numberOfMatches == 1) await asyncCommand(rankOrLbId, userMatches.First().Id);
 			else await channel.SendMessageAsync($"Multiple people have the name `{name.ToLower()}`. Try mentioning the user.");
 		}
