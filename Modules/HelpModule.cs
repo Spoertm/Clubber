@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -9,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 namespace Clubber.Modules
 {
 	[Name("Info"), Group("help")]
+	[Summary("Get a list of commands, or info regarding a specific command.")]
 	public class HelpModule : ModuleBase<SocketCommandContext>
 	{
 		private readonly CommandService service;
@@ -21,7 +21,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
-		public async Task Help(string command)
+		public async Task Help([Remainder] string command)
 		{
 			var result = service.Search(Context, command);
 			var preCondCheck = result.IsSuccess ? await result.Commands[0].Command.CheckPreconditionsAsync(Context) : null;
@@ -35,10 +35,17 @@ namespace Clubber.Modules
 			var embedBuilder = new EmbedBuilder();
 
 			var cmd = result.Commands.First().Command;
-			if (cmd.Aliases.Count > 1) aliases = $"\nAliases: {string.Join(", ", cmd.Aliases)}";
+			if (cmd.Module.Group == null)
+			{
+				if (cmd.Aliases.Count > 1) aliases = $"\nAliases: {string.Join(", ", cmd.Aliases)}";
+			}
+			else aliases = $"\nAliases: {string.Join(", ", cmd.Module.Aliases)}";			
 
-			embedBuilder.Title = $"{string.Join("\n", result.Commands.Select(c => GetCommandAndParameterString(c.Command)))}{(result.Commands.Count == 1 ? aliases : null)}";
-			embedBuilder.Description = cmd.Summary;
+			if (result.Commands.First().Command.Module.Group == null)
+				embedBuilder.Title = $"{string.Join("\n", result.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => GetCommandAndParameterString(c.Command)))}\n{aliases}";
+			else
+				embedBuilder.Title = $"{string.Join("\n", result.Commands.First().Command.Module.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => GetCommandAndParameterString(c)))}\n{aliases}";
+			embedBuilder.Description = cmd.Summary ?? cmd.Module.Summary;
 
 			//if (cmd.Parameters.Count > 0)
 			if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
@@ -77,6 +84,6 @@ namespace Clubber.Modules
 
 		// Returns the command and its params in the format: commandName <requiredParam> [optionalParam]
 		public string GetCommandAndParameterString(CommandInfo cmd)
-			=> $"{cmd.Name} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**[{p.Name}]**" : $"**[{p.Name} = {p.DefaultValue}]**" : $"**<{p.Name}>**"))}";
+			=> $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**[{p.Name}]**" : $"**[{p.Name} = {p.DefaultValue}]**" : $"**<{p.Name}>**"))}";
 	}
 }
