@@ -23,20 +23,19 @@ namespace Clubber.Modules
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task RemoveUser(string memberName)
 		{
-			string name = memberName.ToLower();
 			IQueryable<DdUser> dbMatches = Database.AsQueryable().Where(
 				user => Context.Guild.GetUser(user.DiscordId) != null &&
-				Context.Guild.GetUser(user.DiscordId).Username.ToLower().Contains(name));
+				Context.Guild.GetUser(user.DiscordId).Username.Contains(memberName, System.StringComparison.InvariantCultureIgnoreCase));
 			int dbMatchesCount = dbMatches.Count();
 
-			if (dbMatchesCount == 0) await ReplyAsync($"Found no users with the name `{name}` in the database.");
+			if (dbMatchesCount == 0) await ReplyAsync($"Found no users with the name `{memberName.ToLower()}` in the database.");
 			else if (dbMatchesCount == 1)
 			{
 				ulong idToRemove = dbMatches.First().DiscordId;
 				Database.DeleteOne(x => x.DiscordId == idToRemove);
 				await ReplyAsync($"✅ Removed {(Context.Guild.GetUser(idToRemove) == null ? "User" : $"`{Context.Guild.GetUser(idToRemove).Username}`")} `ID: {idToRemove}`.");
 			}
-			else await ReplyAsync($"Multiple people in the database have `{name.ToLower()}` in their name. Mention the user or specify their ID.");
+			else await ReplyAsync($"Multiple people in the database have `{memberName.ToLower()}` in their name. Mention the user or specify their ID.");
 		}
 	}
 }
