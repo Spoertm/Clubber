@@ -44,7 +44,7 @@ namespace Clubber.Modules
 				await ReplyAsync(null, false, new EmbedBuilder { Title = "Unable to update these users. They're most likely not in the server.", Description = string.Join(' ', nonMemberMentions) }.Build());
 
 			List<Task<bool>> tasks = new List<Task<bool>>();
-			foreach (DdUser user in Database.AsQueryable())
+			foreach (DdUser user in Database.AsQueryable().ToList())
 				tasks.Add(UpdateUserRoles(user));
 
 			int usersUpdated = (await Task.WhenAll(tasks)).Count(b => b);
