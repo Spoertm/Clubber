@@ -45,10 +45,11 @@ namespace Clubber.Modules
 				int maxFields = (int)Math.Ceiling(unregisteredCount / 15d); // 15 names per field
 
 				PaginatedMessage paginate = new PaginatedMessage() { Title = $"Unregistered guild members\nTotal: {unregisteredCount}" };
+				Emote trashcan = Emote.Parse("<:trashcan:765705377857667107>");
 				paginate.Options = new PaginatedAppearanceOptions()
 				{
-					Stop = Emote.Parse("<:trashcan:765705377857667107>"),
-					InformationText = ">>> ◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n<:trashcanUI:762399152385556510> - Stops the pagination session and deletes the pagination message.",
+					Stop = trashcan,
+					InformationText = $">>> ◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.",
 					Timeout = TimeSpan.FromMinutes(20),
 					FooterFormat = "Page {0}/{1} - " + $"{Context.User.Username}'s session",
 					FieldsPerPage = 2

@@ -38,7 +38,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
-		[Priority(3)]
+		[Priority(2)]
 		public async Task StatsFromName([Remainder] string name)
 		{
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(
@@ -47,20 +47,20 @@ namespace Clubber.Modules
 
 			int guildMatchesCount = guildMatches.Count();
 
-			if (guildMatchesCount == 0) await ReplyAsync($"Found no user with the name `{name.ToLower()}`.");
+			if (guildMatchesCount == 0) await ReplyAsync($"User not found.");
 			else if (guildMatchesCount == 1) await StatsFromId(guildMatches.First().Id);
 			else await ReplyAsync($"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or specify their ID.");
 		}
 
 		[Command]
-		[Priority(2)]
+		[Priority(3)]
 		public async Task StatsFromMention(IUser userMention) => await StatsFromId(userMention.Id);
 
 		[Command("id")]
 		[Priority(4)]
 		public async Task StatsFromId(ulong discordId)
 		{
-			bool userInGuild = UserIsInGuild(discordId);
+			bool userInGuild = Context.Guild.GetUser(discordId) != null;
 			bool userInDb = Helper.DiscordIdExistsInDb(discordId, Database);
 
 			if (!userInGuild && !userInDb) { await ReplyAsync("User not found."); return; }
@@ -93,11 +93,6 @@ namespace Clubber.Modules
 			{
 				await ReplyAsync("❌ Something went wrong. Couldn't execute command.");
 			}
-		}
-
-		public bool UserIsInGuild(ulong id)
-		{
-			return Context.Guild.Users.Any(user => user.Id == id);
 		}
 	}
 }

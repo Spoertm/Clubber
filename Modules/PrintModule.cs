@@ -81,7 +81,7 @@ namespace Clubber.Modules
 
 		public string GetMemberScoreRoleName(ulong memberId)
 		{
-			if (!Context.Guild.Users.Any(x => x.Id == memberId)) return "N.I.S";
+			if (Context.Guild.GetUser(memberId) == null) return "N.I.S";
 			var guildUser = Context.Guild.GetUser(memberId);
 			foreach (var userRole in guildUser.Roles)
 			{

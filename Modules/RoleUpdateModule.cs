@@ -28,7 +28,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("database")]
-		[Summary("Updates users' score/club roles that are in the database.")]
+		[Priority(5)]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task UpdateRolesAndDataBase()
 		{
@@ -68,7 +68,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
-		[Priority(3)]
+		[Priority(2)]
 		public async Task UpdateRoles([Remainder] string name)
 		{
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(
@@ -83,14 +83,14 @@ namespace Clubber.Modules
 		}
 
 		[Command]
-		[Priority(2)]
+		[Priority(3)]
 		public async Task UpdateRoles(IUser userMention) => await UpdateRolesFromId(userMention.Id);
 
 		[Command("id")]
 		[Priority(4)]
 		public async Task UpdateRolesFromId(ulong discordId)
 		{
-			bool userIsInGuild = Context.Guild.Users.Any(x => x.Id == discordId);
+			bool userIsInGuild = Context.Guild.GetUser(discordId) != null;
 			bool userInDb = Helper.DiscordIdExistsInDb(discordId, Database);
 			if (!userIsInGuild && !userInDb) { await ReplyAsync("User not found."); return; }
 			if (!userIsInGuild && userInDb) { await ReplyAsync("User is registered but isn't in the server."); return; }
