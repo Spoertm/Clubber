@@ -19,6 +19,7 @@ namespace Clubber.Modules
 	public class StatsModule : ModuleBase<SocketCommandContext>
 	{
 		private readonly IMongoCollection<DdUser> Database;
+		private const ulong cheaterRoleId = 693432614727581727;
 
 		public StatsModule(MongoDatabase mongoDatabase)
 		{
@@ -29,7 +30,6 @@ namespace Clubber.Modules
 		[Priority(1)]
 		public async Task Stats()
 		{
-			ulong cheaterRoleId = 693432614727581727;
 			var user = Context.User as SocketGuildUser;
 			if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username}, you can't register because you've cheated."); return; }
 			if (!Helper.DiscordIdExistsInDb(Context.User.Id, Database)) { await ReplyAsync($"You're not registered in the database, {user.Username}. Please ask an admin/moderator/role assigner to register you."); return; }
@@ -66,7 +66,6 @@ namespace Clubber.Modules
 			if (!userInGuild && !userInDb) { await ReplyAsync("User not found."); return; }
 			if (!userInGuild && userInDb) { await ReplyAsync("User is registered but isn't in the server."); return; }
 
-			ulong cheaterRoleId = 693432614727581727;
 			var guildUser = Context.Guild.GetUser(discordId);
 			if (guildUser.IsBot) { await ReplyAsync($"{guildUser.Mention} is a bot. It can't be registered as a DD player."); return; }
 			if (guildUser.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }

@@ -48,7 +48,7 @@ namespace Clubber.Modules
 			if (Helper.DiscordIdExistsInDb(discordId, Database)) { await ReplyAsync($"User `{(user == null ? "" : user.Username)}({discordId})` is already registered."); return; }
 			if (user == null) { await ReplyAsync($"User not found."); return; }
 
-			ulong cheaterRoleId = 693432614727581727;
+			const ulong cheaterRoleId = 693432614727581727;
 			if (user.IsBot) { await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player."); return; }
 			if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username} can't be registered because they've cheated."); return; }
 

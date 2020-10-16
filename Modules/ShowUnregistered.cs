@@ -31,7 +31,7 @@ namespace Clubber.Modules
 			try
 			{
 				List<string> unregUsernames = new List<string>();
-				ulong cheaterRoleId = 693432614727581727;
+				const ulong cheaterRoleId = 693432614727581727;
 				foreach (SocketGuildUser user in Context.Guild.Users)
 				{
 					if (!user.IsBot && !user.Roles.Any(r => r.Id == cheaterRoleId) && !Helper.DiscordIdExistsInDb(user.Id, Database))
@@ -49,7 +49,7 @@ namespace Clubber.Modules
 				paginate.Options = new PaginatedAppearanceOptions()
 				{
 					Stop = trashcan,
-					InformationText = $">>> ◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.",
+					InformationText = $">>> \n◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.\n\u2800",
 					Timeout = TimeSpan.FromMinutes(20),
 					FooterFormat = "Page {0}/{1} - " + $"{Context.User.Username}'s session",
 					FieldsPerPage = 2
@@ -64,11 +64,9 @@ namespace Clubber.Modules
 					sb.Clear().Append("・" + string.Join("\n・", unregUsernames.Skip(start).Take(15)));
 					string test = sb.ToString();
 					fields[i - 1] = new EmbedFieldBuilder()
-					{
-						Name = i.ToString(),
-						Value = sb.ToString(),
-						IsInline = true
-					};
+						.WithName(i.ToString())
+						.WithValue(sb.ToString())
+						.WithIsInline(true);
 				}
 				paginate.Pages = fields;
 

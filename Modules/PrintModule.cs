@@ -42,7 +42,7 @@ namespace Clubber.Modules
 			paginate.Options = new PaginatedAppearanceOptions()
 			{
 				Stop = trashcan,
-				InformationText = $">>> ◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.",
+				InformationText = $">>> \n◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.\n\u2800",
 				Timeout = TimeSpan.FromMinutes(20),
 				FooterFormat = "Page {0}/{1} - " + $"{Context.User.Username}'s session",
 			};
@@ -53,13 +53,13 @@ namespace Clubber.Modules
 				int start = 20 * (pageNum - 1);
 				int i = start;
 
-				embedText.Clear().AppendLine($"`{"#",-4}{"User",-16 - 2}{"Discord ID",-18 - 3}{"LB ID",-7 - 3}{"Score",-5 - 3}{"Role",-10}`");
+				embedText.Clear().AppendLine($"`{"#",-4}{"User",-17 - 3}{"Discord ID",-18 - 3}{"LB ID",-6 - 3}{"Score",-5 - 3}{"Role",-10}`");
 
 				IEnumerable<DdUser> table = sortedDb.Skip(start).Take(20);
 				foreach (DdUser user in table)
 				{
 					string username = GetCheckedMemberName(user.DiscordId, blacklistedCharacters);
-					embedText.AppendLine($"`{++i,-4}{username,-16 - 2}{user.DiscordId,-18 - 3}{user.LeaderboardId,-7 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
+					embedText.AppendLine($"`{++i,-4}{username,-17 - 3}{user.DiscordId,-18 - 3}{user.LeaderboardId,-6 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
 				}
 				descriptionArray[pageNum - 1] = embedText.ToString();
 			}
@@ -75,14 +75,15 @@ namespace Clubber.Modules
 
 			string username = user.Username;
 			if (blacklistedCharacters.Intersect(username.ToCharArray()).Any()) return $"{username[0]}..";
-			else if (username.Length > 14) return $"{username.Substring(0, 14)}..";
+			else if (username.Length > 15) return $"{username.Substring(0, 15)}..";
 			else return username;
 		}
 
 		public string GetMemberScoreRoleName(ulong memberId)
 		{
-			if (Context.Guild.GetUser(memberId) == null) return "N.I.S";
 			var guildUser = Context.Guild.GetUser(memberId);
+			if (guildUser == null) return "N.I.S";
+
 			foreach (var userRole in guildUser.Roles)
 			{
 				foreach (ulong roleId in ScoreRoleDictionary.Values)
