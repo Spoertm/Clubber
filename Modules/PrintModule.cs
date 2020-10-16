@@ -12,6 +12,8 @@ using MongoDB.Bson;
 using System.Text;
 using Discord.Addons.Interactive;
 using Clubber.Files;
+using System.Globalization;
+using System.Dynamic;
 
 namespace Clubber.Modules
 {
@@ -59,7 +61,7 @@ namespace Clubber.Modules
 				foreach (DdUser user in table)
 				{
 					string username = GetCheckedMemberName(user.DiscordId);
-					embedText.AppendLine($"`{++i,-4}{username,-17 - 3}{user.DiscordId,-18 - 3}{user.LeaderboardId,-6 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
+					embedText.AppendLine($"`{++i,-4}{username}{user.DiscordId,-18 - 3}{user.LeaderboardId,-6 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
 				}
 				descriptionArray[pageNum - 1] = embedText.ToString();
 			}
@@ -70,13 +72,31 @@ namespace Clubber.Modules
 
 		public string GetCheckedMemberName(ulong discordId)
 		{
+			StringBuilder nameBuilder = new StringBuilder();
 			var user = Context.Guild.GetUser(discordId);
-			if (user == null) return "Not in server";
+			if (user == null) return nameBuilder.Append("Not in server").Append(' ', 7).ToString();
 
 			string username = user.Username;
-			if (blacklistedCharacters.Intersect(username.ToCharArray()).Any()) return $"{username[0]}..";
-			else if (username.Length > 15) return $"{username.Substring(0, 15)}..";
-			else return username;
+			if (blacklistedCharacters.Intersect(username.ToCharArray()).Any()) return nameBuilder.Append($"{username[0]}..").Append(' ', 17).ToString();
+
+			int nameCount = new StringInfo(username).LengthInTextElements;
+			if (nameCount > 15) return nameBuilder.Append($"{GraphemeSubstring(username, 15)}..   ").ToString();
+			else if (nameCount < username.Length) return nameBuilder.Append(username).Append(' ', 19 - nameCount).ToString();
+			else return nameBuilder.Append(username).Append(' ', 20 - nameCount).ToString();
+		}
+
+		public string GraphemeSubstring(string str, int length)
+		{
+			string substr = "";
+			TextElementEnumerator charEnum = StringInfo.GetTextElementEnumerator(str);
+
+			for (int i = 0; i < length; i++)
+			{
+				charEnum.MoveNext();
+				substr += charEnum.GetTextElement();
+			}
+
+			return substr;
 		}
 
 		public string GetMemberScoreRoleName(ulong memberId)
