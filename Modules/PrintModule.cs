@@ -58,7 +58,7 @@ namespace Clubber.Modules
 				IEnumerable<DdUser> table = sortedDb.Skip(start).Take(20);
 				foreach (DdUser user in table)
 				{
-					string username = GetCheckedMemberName(user.DiscordId, blacklistedCharacters);
+					string username = GetCheckedMemberName(user.DiscordId);
 					embedText.AppendLine($"`{++i,-4}{username,-17 - 3}{user.DiscordId,-18 - 3}{user.LeaderboardId,-6 - 3}{user.Score + "s",-5 - 3}{GetMemberScoreRoleName(user.DiscordId),-10}`");
 				}
 				descriptionArray[pageNum - 1] = embedText.ToString();
@@ -68,7 +68,7 @@ namespace Clubber.Modules
 			await PagedReplyAsync(paginate);
 		}
 
-		public string GetCheckedMemberName(ulong discordId, char[] blacklistedCharacters)
+		public string GetCheckedMemberName(ulong discordId)
 		{
 			var user = Context.Guild.GetUser(discordId);
 			if (user == null) return "Not in server";
