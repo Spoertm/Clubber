@@ -37,15 +37,15 @@ namespace Clubber.Modules
 			stopwatch.Start();
 
 			IUserMessage msg = await ReplyAsync("Processing...");
-			IEnumerable<string> nonMemberMentions = Database.AsQueryable()
-				.Where(x => Context.Guild.GetUser(x.DiscordId) == null)
-				.Select(ddUser => $"<@{ddUser.DiscordId}>");
+			List<DdUser> dbUsersList = Database.AsQueryable().ToList();
 
-			if (nonMemberMentions.Any())
-				await ReplyAsync(null, false, new EmbedBuilder { Title = "Unable to update these users. They're most likely not in the server.", Description = string.Join(' ', nonMemberMentions) }.Build());
+			int nonMemberCount = dbUsersList.Where(dbUser => Context.Guild.GetUser(dbUser.DiscordId) == null).Count();
+
+			if (nonMemberCount > 0)
+				await ReplyAsync($"ℹ️ Unable to update {nonMemberCount} user(s). They're most likely not in the server.");
 
 			List<Task<bool>> tasks = new List<Task<bool>>();
-			foreach (DdUser user in Database.AsQueryable().ToList())
+			foreach (DdUser user in dbUsersList)
 				tasks.Add(UpdateUserRoles(user));
 
 			int usersUpdated = (await Task.WhenAll(tasks)).Count(b => b);
