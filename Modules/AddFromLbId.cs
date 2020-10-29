@@ -30,9 +30,9 @@ namespace Clubber.Modules
 		[Priority(1)]
 		public async Task AddUserByID(uint lbId, [Remainder] string name)
 		{
-			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(
-				u => u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-				(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
+			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => 
+			u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
+			(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
 			await Helper.AddToDbFromName(userMatches, name, lbId, async (lbId, discordId) => await AddUserByLbIdAndDscId(lbId, discordId), Context.Channel);
 		}
 

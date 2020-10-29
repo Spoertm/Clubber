@@ -46,7 +46,8 @@ namespace Clubber
 			services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
 			{                                       // Add discord to the collection
 				LogLevel = LogSeverity.Error,       // Tell the logger to give Verbose amount of info
-				MessageCacheSize = 1000             // Cache 1,000 messages per channel
+				MessageCacheSize = 1000,            // Cache 1,000 messages per channel
+				AlwaysDownloadUsers = true
 			}))
 			.AddSingleton(new CommandService(new CommandServiceConfig
 			{                                       // Add the command service to the collection
