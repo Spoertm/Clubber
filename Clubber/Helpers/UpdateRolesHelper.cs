@@ -41,7 +41,7 @@ namespace Clubber.Helpers
 
 			var responses = await Task.WhenAll(tasks);
 			int usersUpdated = responses.Count(b => b.Success);
-			return new(nonMemberCount, usersUpdated, responses);
+			return new(usersUpdated, nonMemberCount, responses);
 		}
 
 		public record UpdateRoleResponse(bool Success, bool MemberHasRole, SocketRole RoleToAdd, List<SocketRole> RemovedRoles);
