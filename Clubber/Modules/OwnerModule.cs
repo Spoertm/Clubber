@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Discord;
+using Discord.Commands;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
 
 namespace Clubber.Modules
 {
 	[Name("Owner")]
 	[RequireOwner]
-	public class OwnerModule : ModuleBase<SocketCommandContext>
+	public class OwnerModule : AbstractModule<SocketCommandContext>
 	{
 		[Command("changebotname")]
 		[Summary("Changes the bot's username.")]

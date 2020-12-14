@@ -1,16 +1,16 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Clubber.Databases;
+﻿using Clubber.Databases;
 using Clubber.Files;
 using Discord;
 using Discord.Commands;
 using MongoDB.Driver;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
 	[Name("Database")]
-	public class RemoveModule : ModuleBase<SocketCommandContext>
+	public class RemoveModule : AbstractModule<SocketCommandContext>
 	{
 		private readonly IMongoCollection<DdUser> Database;
 

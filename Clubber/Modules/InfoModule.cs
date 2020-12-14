@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using Discord.Commands;
+﻿using Discord.Commands;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
 	[Name("Info")]
-	public class InfoModule : ModuleBase<SocketCommandContext>
+	public class InfoModule : AbstractModule<SocketCommandContext>
 	{
 		[Command("whyareyou")]
 		[Summary("Describes what the bot does.")]

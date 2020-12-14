@@ -26,7 +26,7 @@ namespace Clubber
 
 		private async Task OnMessageReceivedAsync(SocketMessage message)
 		{
-			if (!(message is SocketUserMessage msg) || msg.Source != MessageSource.User) return;
+			if (message is not SocketUserMessage msg || msg.Source != MessageSource.User) return;
 
 			if (msg.Content == discord.CurrentUser.Mention)
 			{

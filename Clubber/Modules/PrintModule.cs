@@ -1,19 +1,18 @@
-﻿using MongoDB.Driver;
+﻿using Clubber.Databases;
+using Clubber.Files;
+using Discord;
+using Discord.Addons.Interactive;
+using Discord.Commands;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Clubber.Databases;
-using MongoDB.Bson;
 using System.Text;
-using Discord.Addons.Interactive;
-using Clubber.Files;
-using System.Globalization;
-using System.Dynamic;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {

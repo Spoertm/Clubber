@@ -1,29 +1,28 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Clubber.Databases;
-using Clubber.Files;
+﻿using Clubber.Files;
+using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
 	[Name("Info")]
 	[Group("stats")]
 	[Summary("Provides stats on you if you're registered, otherwise says they're unregistered.\nIf a user is specified, then it'll provide their stats instead.")]
-	public class StatsModule : ModuleBase<SocketCommandContext>
+	public class StatsModule : AbstractModule<SocketCommandContext>
 	{
-		private readonly IMongoCollection<DdUser> Database;
-		private const ulong cheaterRoleId = 693432614727581727;
+		private readonly DatabaseHelper _databaseHelper;
 
-		public StatsModule(MongoDatabase mongoDatabase)
+		public StatsModule(DatabaseHelper databaseHelper)
 		{
-			Database = mongoDatabase.DdUserCollection;
+			_databaseHelper = databaseHelper;
 		}
 
 		[Command]
@@ -31,8 +30,8 @@ namespace Clubber.Modules
 		public async Task Stats()
 		{
 			var user = Context.User as SocketGuildUser;
-			if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username}, you can't register because you've cheated."); return; }
-			if (!Helper.DiscordIdExistsInDb(Context.User.Id, Database)) { await ReplyAsync($"You're not registered in the database, {user.Username}. Please ask an admin/moderator/role assigner to register you."); return; }
+			if (user.Roles.Any(r => r.Id == Constants.CheaterRoleId)) { await ReplyAsync($"{user.Username}, you can't register because you've cheated."); return; }
+			if (!_databaseHelper.DiscordIdExistsInDb(Context.User.Id)) { await ReplyAsync($"You're not registered in the database, {user.Username}. Please ask an admin/moderator/role assigner to register you."); return; }
 
 			await StatsFromId(user.Id);
 		}
@@ -61,21 +60,21 @@ namespace Clubber.Modules
 		public async Task StatsFromId(ulong discordId)
 		{
 			bool userInGuild = Context.Guild.GetUser(discordId) != null;
-			bool userInDb = Helper.DiscordIdExistsInDb(discordId, Database);
+			bool userInDb = _databaseHelper.DiscordIdExistsInDb(discordId);
 
 			if (!userInGuild && !userInDb) { await ReplyAsync("User not found."); return; }
 			if (!userInGuild && userInDb) { await ReplyAsync("User is registered but isn't in the server."); return; }
 
 			var guildUser = Context.Guild.GetUser(discordId);
 			if (guildUser.IsBot) { await ReplyAsync($"{guildUser.Mention} is a bot. It can't be registered as a DD player."); return; }
-			if (guildUser.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }
+			if (guildUser.Roles.Any(r => r.Id == Constants.CheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }
 			if (!userInDb) { await ReplyAsync($"`{guildUser.Username}` is not registered. Please ask an admin/moderator/role-assigner to register them."); return; }
 
 			try
 			{
 				HttpClient httpClient = new HttpClient();
 
-				int userLbId = Helper.GetDdUserFromId(discordId, Database).LeaderboardId;
+				int userLbId = _databaseHelper.GetDdUserFromId(discordId).LeaderboardId;
 				string jsonUser = await httpClient.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={userLbId}");
 				DdPlayer ddPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 

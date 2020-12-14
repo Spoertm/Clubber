@@ -1,15 +1,15 @@
-﻿using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Configuration;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
 	[Name("Info"), Group("help")]
 	[Summary("Get a list of commands, or info regarding a specific command.")]
-	public class HelpModule : ModuleBase<SocketCommandContext>
+	public class HelpModule : AbstractModule<SocketCommandContext>
 	{
 		private readonly CommandService service;
 		private readonly IConfigurationRoot config;
@@ -39,7 +39,7 @@ namespace Clubber.Modules
 			{
 				if (cmd.Aliases.Count > 1) aliases = $"\nAliases: {string.Join(", ", cmd.Aliases)}";
 			}
-			else aliases = $"\nAliases: {string.Join(", ", cmd.Module.Aliases)}";			
+			else aliases = $"\nAliases: {string.Join(", ", cmd.Module.Aliases)}";
 
 			if (result.Commands.First().Command.Module.Group == null)
 				embedBuilder.Title = $"{string.Join("\n", result.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => GetCommandAndParameterString(c.Command)))}\n{aliases}";
