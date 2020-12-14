@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace ClubberDatabaseUpdateCron
@@ -55,7 +56,7 @@ namespace ClubberDatabaseUpdateCron
 			SocketTextChannel testAndConfigChannel = ddPals.GetTextChannel(447487662891466752);
 
 			int tries = 1, maxTries = 5;
-			await testAndConfigChannel.SendMessageAsync(":dagger: Attempting database update...");
+			IUserMessage msg = await testAndConfigChannel.SendMessageAsync(":dagger: Attempting database update...");
 
 			var updateRoleHelper = Provider.GetRequiredService<UpdateRolesHelper>();
 
@@ -64,8 +65,19 @@ namespace ClubberDatabaseUpdateCron
 			{
 				try
 				{
-					await updateRoleHelper.UpdateRolesAndDb();
+					Stopwatch stopwatch = new Stopwatch();
+					stopwatch.Start();
+
+					var response = await updateRoleHelper.UpdateRolesAndDb();
 					success = true;
+
+					if (response.NonMemberCount > 0)
+						await testAndConfigChannel.SendMessageAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s). They're most likely not in the server.");
+
+					if (response.UpdatedUsers > 0)
+						await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and member roles for {response.UpdatedUsers} users.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+					else
+						await msg.ModifyAsync(m => m.Content = $"No role updates were needed.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
 				}
 				catch
 				{
