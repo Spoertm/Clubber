@@ -1,6 +1,6 @@
 ﻿using Clubber;
 using Clubber.Databases;
-using Clubber.Modules;
+using Clubber.Helpers;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -34,10 +34,10 @@ namespace ClubberDatabaseUpdateCron
 
 		public async Task RunAsync()
 		{
-			var services = new ServiceCollection();             // Create a new instance of a service collection
+			var services = new ServiceCollection(); // Create a new instance of a service collection
 			ConfigureServices(services);
 
-			Provider = services.BuildServiceProvider();     // Build the service provider
+			Provider = services.BuildServiceProvider(); // Build the service provider
 			Client = Provider.GetRequiredService<DiscordSocketClient>();
 
 			string discordToken = "NzQzNDMxNTAyODQyMjk4MzY4.XzUkig.UQrKlF7axeeFqewonpkTTAwaIIo";
@@ -51,23 +51,20 @@ namespace ClubberDatabaseUpdateCron
 
 		public async Task OnReady()
 		{
-			SocketGuild DdPals = Client.GetGuild(399568958669455364);
-			SocketTextChannel TestAndConfigChannel = DdPals.GetTextChannel(447487662891466752);
+			SocketGuild ddPals = Client.GetGuild(399568958669455364);
+			SocketTextChannel testAndConfigChannel = ddPals.GetTextChannel(447487662891466752);
 
 			int tries = 1, maxTries = 5;
-			await TestAndConfigChannel.SendMessageAsync(":dagger: Attempting database update...");
+			await testAndConfigChannel.SendMessageAsync(":dagger: Attempting database update...");
 
-			var mongoDB = Provider.GetRequiredService<MongoDatabase>();
-			var scoreRoles = Provider.GetRequiredService<ScoreRoles>();
+			var updateRoleHelper = Provider.GetRequiredService<UpdateRolesHelper>();
 
-			var roleUpdateModule = new RoleUpdateModule(mongoDB, scoreRoles);
-			
 			bool success = false;
 			do
 			{
 				try
 				{
-					await roleUpdateModule.UpdateRolesAndDataBase();
+					await updateRoleHelper.UpdateRolesAndDb();
 					success = true;
 				}
 				catch
@@ -75,16 +72,16 @@ namespace ClubberDatabaseUpdateCron
 					tries++;
 					if (tries > maxTries)
 					{
-						await TestAndConfigChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
+						await testAndConfigChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 						break;
 					}
 					else
 					{
-						await TestAndConfigChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed, possible lock on file. Trying again in 10s...");
+						await testAndConfigChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed, possible lock on file. Trying again in 10s...");
 						System.Threading.Thread.Sleep(10000); // Sleep 10s
 					}
 				}
-				
+
 			} while (!success);
 
 			Environment.Exit(0);
@@ -112,6 +109,8 @@ namespace ClubberDatabaseUpdateCron
 			.AddSingleton<Random>()
 			.AddSingleton<MongoDatabase>()
 			.AddSingleton<ScoreRoles>()
+			.AddSingleton<UpdateRolesHelper>()
+			.AddSingleton<DatabaseHelper>()
 			.AddSingleton(Configuration);
 		}
 	}
