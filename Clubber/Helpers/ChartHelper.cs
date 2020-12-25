@@ -116,7 +116,6 @@ namespace Clubber.Helpers
                     }}],
                     yAxes: [{{
 						ticks: {{
-							stepSize: 1,
 							beginAtZero: true
 						}},
 						scaleLabel: {{
