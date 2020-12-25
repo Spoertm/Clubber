@@ -1,4 +1,5 @@
 ﻿using Clubber.Databases;
+using Clubber.Helpers;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -63,6 +64,7 @@ namespace Clubber
 			.AddSingleton<Random>()
 			.AddSingleton<MongoDatabase>()
 			.AddSingleton<ScoreRoles>()
+			.AddSingleton<ChartHelper>()
 			.AddSingleton(Configuration);
 		}
 	}
