@@ -2,7 +2,6 @@
 using Discord.Commands;
 using Clubber.Helpers;
 using Clubber.Databases;
-using Clubber.Files;
 using System.Collections.Generic;
 using Discord;
 using System.Linq;

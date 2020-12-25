@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.808.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber", "Clubber.csproj", "{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber", "Clubber\Clubber.csproj", "{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClubberDatabaseUpdateCron", "ClubberDatabaseUpdateCron\ClubberDatabaseUpdateCron.csproj", "{C4926C1E-EBD0-4779-ABD0-C06D884309F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4926C1E-EBD0-4779-ABD0-C06D884309F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4926C1E-EBD0-4779-ABD0-C06D884309F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4926C1E-EBD0-4779-ABD0-C06D884309F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4926C1E-EBD0-4779-ABD0-C06D884309F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
