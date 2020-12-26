@@ -117,7 +117,7 @@ namespace Clubber.Modules
 
 		[Command("bydeath")]
 		[Summary("Shows death type frequency within the given top range.")]
-		public async Task ByDeath(uint bottomLimit = 229900, uint topLimit = 1)
+		public async Task ByDeath(uint topLimit, uint bottomLimit)
 		{
 			if (bottomLimit < topLimit)
 			{
@@ -143,5 +143,13 @@ namespace Clubber.Modules
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 			await processingMessage.DeleteAsync();
 		}
+
+		[Command("bydeath")]
+		public async Task ByDeath(uint bottomLimit)
+			=> await ByDeath(1, bottomLimit);
+
+		[Command("bydeath")]
+		public async Task ByDeath()
+			=> await ByDeath(1, MAX_LIMIT);
 	}
 }
