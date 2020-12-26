@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Clubber.Files;
 using System.Linq;
-using Clubber.Databases;
 using QuickChart;
 using MongoDB.Driver;
 
@@ -12,27 +11,41 @@ namespace Clubber.Helpers
 {
 	public class ChartHelper
 	{
-		private readonly IMongoCollection<DdUser> Collection;
-
-		public ChartHelper(MongoDatabase _database)
+		public async Task<Stream> GetEveryXBracketChartStream(int bracketSize, int bottomLimit, int toplimit)
 		{
-			Collection = _database.DdUserCollection;
-		}
+			LeaderboardData LB = new LeaderboardData();
 
-		public async Task<Stream> GetEvery100ChartStream()
-		{
+			if (LB.Times.Count == 0)
+				return null;
+
+			List<int> times = LB.Times.Select(t => t / 10000).ToList();
+
+			int roundedDown = RoundDown(times[bottomLimit - 1], bracketSize);
+
+			times = times.Skip(toplimit - 1).TakeWhile(t => t >= roundedDown).ToList();
+
+			int maxtime = times[0];
+
 			List<int> yValues = new List<int>();
-			for (int i = 0; i < 1200; i += 100)
+			for (int i = roundedDown; i < maxtime; i += bracketSize)
 			{
-				yValues.Add(Collection.AsQueryable().ToList().FindAll(du => du.Score >= i && du.Score < i + 100).Count);
+				yValues.Add(times.FindAll(t => t >= i && t < i + bracketSize).Count);
 			}
 
-			string labels = GetEvery100LabelFormatted(0, 1199);
+			string labels = GetEveryXLabelFormatted(roundedDown, maxtime, bracketSize);
 			string data = GetStringFromList(yValues);
-			Chart qc = GetChart(labels, data, "PB bracket", "Number of users", "Number of users in DD Pals based on PB within range");
+			Chart qc = GetChart(labels, data, "PB bracket", "Number of players", $"Number of players within a PB bracket - rank {toplimit}-{bottomLimit}");
 
 			return await GetStreamFromLink(qc.GetUrl());
 		}
+
+		private static int RoundUp(int toRound, int nearest)
+		{
+			if (toRound % nearest == 0) return toRound;
+			return (nearest - toRound % nearest) + toRound;
+		}
+
+		private static int RoundDown(int toRound, int nearest) => toRound - toRound % nearest;
 
 		public static async Task<Stream> GetRoleChartStream(List<string> roleNames, List<int> roleMemberCounts)
 		{
@@ -44,16 +57,23 @@ namespace Clubber.Helpers
 			return await GetStreamFromLink(qc.GetUrl());
 		}
 
-		public static async Task<Stream> GetByDeathChartStream(uint top)
+		public static async Task<Stream> GetByDeathChartStream(int bottomLimit, int toplimit)
 		{
-			LeaderboardData LB = new LeaderboardData(top);
+			LeaderboardData LB = new LeaderboardData();
 
-			var result = LB.Deaths.GroupBy(d => d).OrderBy(t => t.Count());
+			if (LB.Times.Count == 0)
+				return null;
+
+			var result = LB.Deaths
+				.Skip(toplimit - 1)
+				.Take(bottomLimit - (toplimit - 1))
+				.GroupBy(d => d)
+				.OrderBy(t => t.Count());
 
 			string deathLabels = "'" + string.Join("','", result.Select(x => x.Key)) + "'";
 			string countLabels = "'" + string.Join("','", result.Select(x => x.Count())) + "'";
 
-			Chart qc = GetChart(deathLabels, countLabels, "Death type", "Number of victims", $"Death type frequency - {(top == 229900 ? "entire LB" : $"top {top}")}");
+			Chart qc = GetChart(deathLabels, countLabels, "Death type", "Number of victims", $"Death type frequency - rank {toplimit}-{bottomLimit}");
 
 			return await GetStreamFromLink(qc.GetUrl());
 		}
@@ -68,16 +88,16 @@ namespace Clubber.Helpers
 			return await new HttpClient().GetStreamAsync(link);
 		}
 
-		private static string GetEvery100LabelFormatted(int start, int limit)
+		private static string GetEveryXLabelFormatted(int minScore, int maxScore, int bracketSize)
 		{
 			List<string> labels = new List<string>
 			{
-				$"{start}-{start + 99}"
+				$"{minScore}-{minScore + (bracketSize - 1)}"
 			};
 
-			for (int i = start + 99; i < limit; i += 100)
+			for (int i = minScore + (bracketSize - 1); i < maxScore; i += bracketSize)
 			{
-				labels.Add($"{i + 1}-{i + 100}");
+				labels.Add($"{i + 1}-{i + bracketSize}");
 			}
 
 			return "'" + string.Join("','", labels) + "'";
@@ -85,7 +105,7 @@ namespace Clubber.Helpers
 
 		private static Chart GetChart(string xData, string yData, string xLabel, string yLabel, string title = null)
 		{
-			return new Chart
+			Chart qc = new Chart
 			{
 				DevicePixelRatio = 2.0,
 				BackgroundColor = "white",
@@ -114,8 +134,10 @@ namespace Clubber.Helpers
 							labelString: '{xLabel}'
 						}}
                     }}],
-                    yAxes: [{{
+      				yAxes: [
+						{{
 						ticks: {{
+							precision: 0,
 							beginAtZero: true
 						}},
 						scaleLabel: {{
@@ -132,6 +154,8 @@ namespace Clubber.Helpers
                 }}
             }}"
 			};
+
+			return qc;
 		}
 	}
 }

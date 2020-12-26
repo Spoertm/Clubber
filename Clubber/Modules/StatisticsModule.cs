@@ -22,13 +22,40 @@ namespace Clubber.Modules
 			ScoreRolesDict = _scroreRoles.ScoreRoleDictionary;
 		}
 
-		//[Command("every100")]
-		//[Summary("Shows number of users per PB bracket that are registered in this bot. For more accurate data run the `byrole` command instead.")]
-		public async Task Every100()
+		[Command("every10")]
+		[Summary("Shows number of users per 10s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
+		public async Task Every10(uint bottomLimit = 229900, uint topLimit = 1) => await EveryX(10, (int)bottomLimit, (int)topLimit);
+
+		[Command("every50")]
+		[Summary("Shows number of users per 50s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
+		public async Task Every50(uint bottomLimit = 229900, uint topLimit = 1) => await EveryX(50, (int)bottomLimit, (int)topLimit);
+
+		[Command("every100")]
+		[Summary("Shows number of users per 100s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
+		public async Task Every100(uint bottomLimit = 229900, uint topLimit = 1) => await EveryX(100, (int)bottomLimit, (int)topLimit);
+
+		public async Task EveryX(int bracketSize, int bottomLimit, int topLimit)
 		{
+			if (bottomLimit < topLimit)
+			{
+				await ReplyAsync("The bottom limit cant be smaller than the upper limit.");
+				return;
+			}
+			if (bottomLimit > 229900 || topLimit < 1)
+			{
+				await ReplyAsync("Bottom limit can't be larger than 229900 and top limit can't be smaller than 1.");
+				return;
+			}
+
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await ChartHelper.GetEvery100ChartStream();
+			Stream chartStream = await ChartHelper.GetEveryXBracketChartStream(bracketSize, bottomLimit, topLimit);
+
+			if (chartStream == null)
+			{
+				await ReplyAsync("Another operation is in process, try again shortly.\n(Or you've input identical limits!)");
+				return;
+			}
 
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 			await processingMessage.DeleteAsync();
@@ -60,22 +87,28 @@ namespace Clubber.Modules
 
 		[Command("bydeath")]
 		[Summary("Shows death type frequency within the given top range.")]
-		public async Task ByDeath(uint top = 229900)
+		public async Task ByDeath(uint bottomLimit = 229900, uint topLimit = 1)
 		{
-			if (top < 1)
+			if (bottomLimit < topLimit)
 			{
-				await ReplyAsync("What does \"top 0\" mean?");
+				await ReplyAsync("The bottom limit cant be smaller than the upper limit.");
 				return;
 			}
-			if (top > 229900)
+			if (bottomLimit > 229900 || topLimit < 1)
 			{
-				await ReplyAsync("Can't input a number bigger than 229900.");
+				await ReplyAsync("Bottom limit can't be larger than 229900 and top limit can't be smaller than 1.");
 				return;
 			}
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await ChartHelper.GetByDeathChartStream(top);
+			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)bottomLimit, (int)topLimit);
+
+			if (chartStream == null)
+			{
+				await ReplyAsync("Another operation is in process, try again shortly.\n(Or you've input identical limits!)");
+				return;
+			}
 
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 
