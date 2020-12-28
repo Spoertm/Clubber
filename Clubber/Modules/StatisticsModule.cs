@@ -60,14 +60,14 @@ namespace Clubber.Modules
 
 		[Command("every100")]
 		public async Task Every100()
-			=> await EveryX(100, 229900, 1);
+			=> await EveryX(100, _maxLimit, 1);
 
 		private async Task EveryX(uint bracketSize, uint bottomLimit, uint topLimit)
 		{
 			if (await IsError(bottomLimit < topLimit, "The bottom limit cant be smaller than the upper limit."))
 				return;
 
-			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, "Bottom limit can't be larger than 229900 and top limit can't be smaller than 1."))
+			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, $"Bottom limit can't be larger than {_maxLimit} and top limit can't be smaller than 1."))
 				return;
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
@@ -91,7 +91,7 @@ namespace Clubber.Modules
 			List<int> roleMemberCounts = new();
 			SocketRole role;
 
-			foreach (var id in _scoreRolesDict.Values.Reverse())
+			foreach (ulong id in _scoreRolesDict.Values.Reverse())
 			{
 				role = Context.Guild.GetRole(id);
 				roleNames.Add(role.Name);
@@ -112,7 +112,7 @@ namespace Clubber.Modules
 			if (await IsError(bottomLimit < topLimit, "The bottom limit cant be smaller than the upper limit."))
 				return;
 
-			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, "Bottom limit can't be larger than 229900 and top limit can't be smaller than 1."))
+			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, $"Bottom limit can't be larger than {_maxLimit} and top limit can't be smaller than 1."))
 				return;
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
