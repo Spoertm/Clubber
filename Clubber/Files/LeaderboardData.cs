@@ -6,12 +6,7 @@ namespace Clubber.Files
 {
 	public class LeaderboardData
 	{
-		public readonly List<int> Times = new List<int>();
-		public readonly List<short> Kills = new List<short>();
-		public readonly List<short> Gems = new List<short>();
-		public readonly List<short> DaggersHit = new List<short>();
-		public readonly List<int> DaggersFired = new List<int>();
-		public readonly List<string> Deaths = new List<string>();
+		public List<LbDataPlayer> PlayerList = new List<LbDataPlayer>();
 
 		public LeaderboardData()
 		{
@@ -43,12 +38,13 @@ namespace Clubber.Files
 
 				while (br.BaseStream.Position != br.BaseStream.Length)
 				{
-					Times.Add((int)br.ReadUInt32());
-					Kills.Add((short)br.ReadUInt16());
-					Gems.Add((short)br.ReadUInt16());
-					DaggersHit.Add((short)br.ReadUInt16());
-					DaggersFired.Add((int)br.ReadUInt32());
-					Deaths.Add(deathtypeDict[br.ReadByte()]);
+					PlayerList.Add(new LbDataPlayer(
+						(float)br.ReadUInt32() / 10000,
+						br.ReadUInt16(),
+						br.ReadUInt16(),
+						br.ReadUInt16(),
+						(int)br.ReadUInt32(),
+						deathtypeDict[br.ReadByte()]));
 				}
 
 				br.Close();
