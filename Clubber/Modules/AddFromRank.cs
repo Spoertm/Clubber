@@ -34,7 +34,7 @@ namespace Clubber.Modules
 				u => u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
 
-			var response = await _databaseHelper.AddToDbFromName(userMatches, rank, async (lbId, discordId) => await AddUserByRankAndId(lbId, discordId));
+			var response = await DatabaseHelper.AddToDbFromName(userMatches, rank, async (lbId, discordId) => await AddUserByRankAndId(lbId, discordId));
 
 			if (response.NumberOfMatches == 0)
 				await Context.Channel.SendMessageAsync($"No user found.");
@@ -52,21 +52,24 @@ namespace Clubber.Modules
 		public async Task AddUserByRankAndId(uint rank, ulong discordId)
 		{
 			SocketGuildUser user = Context.Guild.GetUser(discordId);
-			if (await Validate(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user == null ? "" : user.Username)}({discordId})` is already registered.") ||
-				await Validate(user == null, "User not found."))
+			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user == null ? "" : user.Username)}({discordId})` is already registered.") ||
+				await IsError(user == null, "User not found."))
 				return;
 
-			if (user.IsBot) { await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player."); return; }
-			if (user.Roles.Any(r => r.Id == Constants.CheaterRoleId)) { await ReplyAsync($"{user.Username} can't be registered because they've cheated."); return; }
+			if (await IsError(user.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player."))
+				return;
+
+			if (await IsError(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username} can't be registered because they've cheated."))
+				return;
 
 			try
 			{
-				HttpClient client = new HttpClient();
+				using HttpClient client = new HttpClient();
 				string jsonUser = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-rank?rank={rank}");
 				DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 				DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-				if (await Validate(_databaseHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId), $"There already exists a registered user with rank `{rank}` and leaderboard ID `{databaseUser.LeaderboardId}`."))
+				if (await IsError(_databaseHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId), $"There already exists a registered user with rank `{rank}` and leaderboard ID `{databaseUser.LeaderboardId}`."))
 					return;
 
 				_databaseHelper.AddUser(databaseUser);

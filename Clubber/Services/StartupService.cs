@@ -10,36 +10,36 @@ namespace Clubber
 {
 	public class StartupService
 	{
-		private readonly IServiceProvider provider;
-		private readonly DiscordSocketClient discord;
-		private readonly CommandService commands;
-		private readonly IConfigurationRoot config;
+		private readonly IServiceProvider _provider;
+		private readonly DiscordSocketClient _discord;
+		private readonly CommandService _commands;
+		private readonly IConfigurationRoot _config;
 
 		// DiscordSocketClient, CommandService, and IConfigurationRoot are injected automatically from the IServiceProvider
 		public StartupService(
-			IServiceProvider _provider,
-			DiscordSocketClient _discord,
-			CommandService _commands,
-			IConfigurationRoot _config)
+			IServiceProvider provider,
+			DiscordSocketClient discord,
+			CommandService commands,
+			IConfigurationRoot config)
 		{
-			provider = _provider;
-			config = _config;
-			discord = _discord;
-			commands = _commands;
+			_provider = provider;
+			_config = config;
+			_discord = discord;
+			_commands = commands;
 		}
 
 		public async Task StartAsync()
 		{
-			string discordToken = config["tokens:discord"];     // Get the discord token from the config file
+			string discordToken = _config["tokens:discord"];     // Get the discord token from the config file
 			if (string.IsNullOrWhiteSpace(discordToken))
 				throw new Exception("Please enter your bot's token into the `_config.yml` file found in the applications root directory.");
 
-			await discord.SetGameAsync("your roles", null, ActivityType.Watching);
+			await _discord.SetGameAsync("your roles", null, ActivityType.Watching);
 
-			await discord.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
-			await discord.StartAsync();                                // Connect to the websocket
+			await _discord.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
+			await _discord.StartAsync();                                // Connect to the websocket
 
-			await commands.AddModulesAsync(Assembly.GetExecutingAssembly(), provider);     // Load commands and modules into the command service
+			await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _provider);     // Load commands and modules into the command service
 		}
 	}
 }

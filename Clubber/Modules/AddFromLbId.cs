@@ -31,9 +31,9 @@ namespace Clubber.Modules
 		public async Task AddUserById(uint lbId, [Remainder] string name)
 		{
 			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u =>
-			u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-			(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
-			var response = await _databaseHelper.AddToDbFromName(userMatches, lbId, async (lbId, discordId) => await AddUserByLbIdAndDscId(lbId, discordId));
+				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
+				(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
+			var response = await DatabaseHelper.AddToDbFromName(userMatches, lbId, async (lbId, discordId) => await AddUserByLbIdAndDscId(lbId, discordId));
 
 			if (response.NumberOfMatches == 0)
 				await Context.Channel.SendMessageAsync($"No user found.");
@@ -51,10 +51,10 @@ namespace Clubber.Modules
 		public async Task AddUserByLbIdAndDscId(uint lbId, ulong discordId)
 		{
 			SocketGuildUser user = Context.Guild.GetUser(discordId);
-			if (await Validate(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user == null ? "" : user.Username)}({discordId})` is already registered.") ||
-				await Validate(user == null, "User not found.") ||
-				await Validate(user.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player.") ||
-				await Validate(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username} can't be registered because they've cheated."))
+			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user == null ? "" : user.Username)}({discordId})` is already registered.") ||
+				await IsError(user == null, "User not found.") ||
+				await IsError(user.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player.") ||
+				await IsError(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username} can't be registered because they've cheated."))
 				return;
 
 			try
@@ -64,7 +64,7 @@ namespace Clubber.Modules
 				DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 				DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-				if (await Validate(_databaseHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId), $"There already exists a registered user with the leaderboard ID `{databaseUser.LeaderboardId}`."))
+				if (await IsError(_databaseHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId), $"There already exists a registered user with the leaderboard ID `{databaseUser.LeaderboardId}`."))
 					return;
 
 				_databaseHelper.AddUser(databaseUser);

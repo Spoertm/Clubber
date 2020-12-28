@@ -33,18 +33,16 @@ namespace Clubber.Modules
 				foreach (SocketGuildUser user in Context.Guild.Users)
 				{
 					if (!user.IsBot && !user.Roles.Any(r => r.Id == Constants.CheaterRoleId) && !_databaseHelper.DiscordIdExistsInDb(user.Id))
-					{
 						unregUsernames.Add(user.Username);
-					}
 				}
 
 				int unregisteredCount = unregUsernames.Count;
 				if (unregisteredCount == 0) { await ReplyAsync("No results to show."); return; }
 				int maxFields = (int)Math.Ceiling(unregisteredCount / 15d); // 15 names per field
 
-				PaginatedMessage paginate = new PaginatedMessage { Title = $"Unregistered guild members\nTotal: {unregisteredCount}" };
+				PaginatedMessage paginate = new() { Title = $"Unregistered guild members\nTotal: {unregisteredCount}" };
 				Emote trashcan = Emote.Parse("<:trashcan:765705377857667107>");
-				paginate.Options = new PaginatedAppearanceOptions
+				paginate.Options = new()
 				{
 					Stop = trashcan,
 					InformationText = $">>> \n◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.\n\u2800",
@@ -53,7 +51,7 @@ namespace Clubber.Modules
 					FieldsPerPage = 2
 				};
 
-				StringBuilder sb = new StringBuilder();
+				StringBuilder sb = new();
 				EmbedFieldBuilder[] fields = new EmbedFieldBuilder[maxFields];
 
 				for (int i = 1; i <= maxFields; i++)

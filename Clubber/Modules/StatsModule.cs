@@ -30,8 +30,11 @@ namespace Clubber.Modules
 		public async Task Stats()
 		{
 			var user = Context.User as SocketGuildUser;
-			if (user.Roles.Any(r => r.Id == Constants.CheaterRoleId)) { await ReplyAsync($"{user.Username}, you can't register because you've cheated."); return; }
-			if (!_databaseHelper.DiscordIdExistsInDb(Context.User.Id)) { await ReplyAsync($"You're not registered in the database, {user.Username}. Please ask an admin/moderator/role assigner to register you."); return; }
+			if (await IsError(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username}, you can't register because you've cheated."))
+				return;
+
+			if (await IsError(!_databaseHelper.DiscordIdExistsInDb(Context.User.Id), $"You're not registered in the database, {user.Username}. Please ask an admin/moderator/role assigner to register you."))
+				return;
 
 			await StatsFromId(user.Id);
 		}
@@ -46,9 +49,12 @@ namespace Clubber.Modules
 
 			int guildMatchesCount = guildMatches.Count();
 
-			if (guildMatchesCount == 0) await ReplyAsync($"User not found.");
-			else if (guildMatchesCount == 1) await StatsFromId(guildMatches.First().Id);
-			else await ReplyAsync($"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or specify their ID.");
+			if (guildMatchesCount == 0)
+				await ReplyAsync($"User not found.");
+			else if (guildMatchesCount == 1)
+				await StatsFromId(guildMatches.First().Id);
+			else
+				await ReplyAsync($"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or specify their ID.");
 		}
 
 		[Command]
@@ -62,23 +68,31 @@ namespace Clubber.Modules
 			bool userInGuild = Context.Guild.GetUser(discordId) != null;
 			bool userInDb = _databaseHelper.DiscordIdExistsInDb(discordId);
 
-			if (!userInGuild && !userInDb) { await ReplyAsync("User not found."); return; }
-			if (!userInGuild && userInDb) { await ReplyAsync("User is registered but isn't in the server."); return; }
+			if (await IsError(!userInGuild && !userInDb, "User not found."))
+				return;
 
-			var guildUser = Context.Guild.GetUser(discordId);
-			if (guildUser.IsBot) { await ReplyAsync($"{guildUser.Mention} is a bot. It can't be registered as a DD player."); return; }
-			if (guildUser.Roles.Any(r => r.Id == Constants.CheaterRoleId)) { await ReplyAsync($"{guildUser.Username} can't be registered because they've cheated."); return; }
-			if (!userInDb) { await ReplyAsync($"`{guildUser.Username}` is not registered. Please ask an admin/moderator/role-assigner to register them."); return; }
+			if (await IsError(!userInGuild && userInDb, "User is registered but isn't in the server."))
+				return;
+
+			SocketGuildUser guildUser = Context.Guild.GetUser(discordId);
+			if (await IsError(guildUser.IsBot, $"{guildUser.Mention} is a bot. It can't be registered as a DD player."))
+				return;
+
+			if (await IsError(guildUser.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{guildUser.Username} can't be registered because they've cheated."))
+				return;
+
+			if (await IsError(!userInDb, $"`{guildUser.Username}` is not registered. Please ask an admin/moderator/role-assigner to register them."))
+				return;
 
 			try
 			{
-				HttpClient httpClient = new HttpClient();
+				using HttpClient httpClient = new();
 
 				int userLbId = _databaseHelper.GetDdUserFromId(discordId).LeaderboardId;
 				string jsonUser = await httpClient.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={userLbId}");
 				DdPlayer ddPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 
-				EmbedBuilder embed = new EmbedBuilder
+				EmbedBuilder embed = new()
 				{
 					Title = $"{guildUser.Username} is registered",
 					Description = $"Leaderboard name: {ddPlayer.Username}\nLeaderboard ID: {ddPlayer.Id}\nScore: {ddPlayer.Time / 10000f}s",

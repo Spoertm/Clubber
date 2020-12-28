@@ -124,13 +124,13 @@ namespace Clubber.Modules
 		{
 			bool userIsInGuild = Context.Guild.GetUser(discordId) != null;
 			bool userInDb = _databaseHelper.DiscordIdExistsInDb(discordId);
-			if (await Validate(!userIsInGuild && !userInDb, "User not found.") || await Validate(!userIsInGuild && userInDb, "User is registered but isn't in the server."))
+			if (await IsError(!userIsInGuild && !userInDb, "User not found.") || await IsError(!userIsInGuild && userInDb, "User is registered but isn't in the server."))
 				return;
 
 			var guildUser = Context.Guild.GetUser(discordId);
-			if (await Validate(guildUser.IsBot, $"{guildUser.Mention} is a bot. It can't be registered as a DD player.") ||
-				await Validate(guildUser.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{guildUser.Username} can't be registered because they've cheated.") ||
-				await Validate(!userInDb, $"`{guildUser.Username}` is not registered. Please ask an admin/moderator/role assigner to register them."))
+			if (await IsError(guildUser.IsBot, $"{guildUser.Mention} is a bot. It can't be registered as a DD player.") ||
+				await IsError(guildUser.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{guildUser.Username} can't be registered because they've cheated.") ||
+				await IsError(!userInDb, $"`{guildUser.Username}` is not registered. Please ask an admin/moderator/role assigner to register them."))
 				return;
 
 			var response = await _updateRolesHelper.UpdateUserRoles(_databaseHelper.GetDdUserFromId(discordId));

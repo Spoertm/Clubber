@@ -36,11 +36,11 @@ namespace Clubber.Modules
 		{
 			int databaseCount = (int)Database.CountDocuments(new BsonDocument());
 			int maxpage = (int)Math.Ceiling(databaseCount / 20d);
-			StringBuilder embedText = new StringBuilder();
+			StringBuilder embedText = new();
 			string[] descriptionArray = new string[maxpage];
 			Emote trashcan = Emote.Parse("<:trashcan:765705377857667107>");
-			PaginatedMessage paginate = new PaginatedMessage() { Title = $"DD player database\nTotal: {databaseCount}" };
-			paginate.Options = new PaginatedAppearanceOptions()
+			PaginatedMessage paginate = new() { Title = $"DD player database\nTotal: {databaseCount}" };
+			paginate.Options = new()
 			{
 				Stop = trashcan,
 				InformationText = $">>> \n◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.\n\u2800",
@@ -71,22 +71,27 @@ namespace Clubber.Modules
 
 		public string GetCheckedMemberName(ulong discordId)
 		{
-			StringBuilder nameBuilder = new StringBuilder();
+			StringBuilder nameBuilder = new();
 			var user = Context.Guild.GetUser(discordId);
-			if (user == null) return nameBuilder.Append("Not in server").Append(' ', 7).ToString();
+			if (user == null)
+				return nameBuilder.Append("Not in server").Append(' ', 7).ToString();
 
 			string username = user.Username;
-			if (blacklistedCharacters.Intersect(username.ToCharArray()).Any()) return nameBuilder.Append($"{username[0]}..").Append(' ', 17).ToString();
+			if (blacklistedCharacters.Intersect(username.ToCharArray()).Any())
+				return nameBuilder.Append($"{username[0]}..").Append(' ', 17).ToString();
 
 			int nameCount = new StringInfo(username).LengthInTextElements;
-			if (nameCount > 15) return nameBuilder.Append($"{GraphemeSubstring(username, 15)}..   ").ToString();
-			else if (nameCount < username.Length) return nameBuilder.Append(username).Append(' ', 19 - nameCount).ToString();
-			else return nameBuilder.Append(username).Append(' ', 20 - nameCount).ToString();
+			if (nameCount > 15)
+				return nameBuilder.Append($"{GraphemeSubstring(username, 15)}..   ").ToString();
+			if (nameCount < username.Length)
+				return nameBuilder.Append(username).Append(' ', 19 - nameCount).ToString();
+
+			return nameBuilder.Append(username).Append(' ', 20 - nameCount).ToString();
 		}
 
-		public string GraphemeSubstring(string str, int length)
+		public static string GraphemeSubstring(string str, int length)
 		{
-			string substr = "";
+			string substr = string.Empty;
 			TextElementEnumerator charEnum = StringInfo.GetTextElementEnumerator(str);
 
 			for (int i = 0; i < length; i++)
@@ -101,15 +106,18 @@ namespace Clubber.Modules
 		public string GetMemberScoreRoleName(ulong memberId)
 		{
 			var guildUser = Context.Guild.GetUser(memberId);
-			if (guildUser == null) return "N.I.S";
+			if (guildUser == null)
+				return "N.I.S";
 
 			foreach (var userRole in guildUser.Roles)
 			{
 				foreach (ulong roleId in ScoreRoleDictionary.Values)
 				{
-					if (userRole.Id == roleId) return userRole.Name;
+					if (userRole.Id == roleId)
+						return userRole.Name;
 				}
 			}
+
 			return "No role";
 		}
 	}

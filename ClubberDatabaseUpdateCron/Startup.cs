@@ -15,9 +15,8 @@ namespace ClubberDatabaseUpdateCron
 {
 	public class Startup
 	{
-		DiscordSocketClient Client;
-		ServiceProvider Provider;
-		public IConfigurationRoot Configuration { get; }
+		private DiscordSocketClient _client;
+		private ServiceProvider _provider;
 
 		public Startup(string[] args)
 		{
@@ -26,6 +25,8 @@ namespace ClubberDatabaseUpdateCron
 				.AddYamlFile("_config.yml");                // Add this (yaml encoded) file to the configuration
 			Configuration = builder.Build();                // Build the configuration
 		}
+
+		public IConfigurationRoot Configuration { get; }
 
 		public static async Task RunAsync(string[] args)
 		{
@@ -38,27 +39,27 @@ namespace ClubberDatabaseUpdateCron
 			var services = new ServiceCollection(); // Create a new instance of a service collection
 			ConfigureServices(services);
 
-			Provider = services.BuildServiceProvider(); // Build the service provider
-			Client = Provider.GetRequiredService<DiscordSocketClient>();
+			_provider = services.BuildServiceProvider(); // Build the service provider
+			_client = _provider.GetRequiredService<DiscordSocketClient>();
 
 			string discordToken = "NzQzNDMxNTAyODQyMjk4MzY4.XzUkig.UQrKlF7axeeFqewonpkTTAwaIIo";
-			await Client.LoginAsync(TokenType.Bot, discordToken);
-			await Client.StartAsync();
+			await _client.LoginAsync(TokenType.Bot, discordToken);
+			await _client.StartAsync();
 
-			Client.Ready += OnReady;
+			_client.Ready += OnReady;
 
 			await Task.Delay(-1);
 		}
 
 		public async Task OnReady()
 		{
-			SocketGuild ddPals = Client.GetGuild(399568958669455364);
+			SocketGuild ddPals = _client.GetGuild(399568958669455364);
 			SocketTextChannel testAndConfigChannel = ddPals.GetTextChannel(447487662891466752);
 
 			int tries = 1, maxTries = 5;
 			IUserMessage msg = await testAndConfigChannel.SendMessageAsync(":dagger: Attempting database update...");
 
-			var updateRoleHelper = Provider.GetRequiredService<UpdateRolesHelper>();
+			var updateRoleHelper = _provider.GetRequiredService<UpdateRolesHelper>();
 
 			bool success = false;
 			do
@@ -93,7 +94,6 @@ namespace ClubberDatabaseUpdateCron
 						System.Threading.Thread.Sleep(10000); // Sleep 10s
 					}
 				}
-
 			} while (!success);
 
 			Environment.Exit(0);

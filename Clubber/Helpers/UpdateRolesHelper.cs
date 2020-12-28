@@ -33,9 +33,9 @@ namespace Clubber.Helpers
 		{
 			List<DdUser> dbUsersList = _databaseHelper.GetUsers();
 
-			int nonMemberCount = dbUsersList.Where(dbUser => _guild.GetUser(dbUser.DiscordId) == null).Count();
+			int nonMemberCount = dbUsersList.Count(dbUser => _guild.GetUser(dbUser.DiscordId) == null);
 
-			List<Task<UpdateRoleResponse>> tasks = new List<Task<UpdateRoleResponse>>();
+			List<Task<UpdateRoleResponse>> tasks = new();
 			foreach (DdUser user in dbUsersList)
 				tasks.Add(UpdateUserRoles(user));
 
@@ -59,7 +59,7 @@ namespace Clubber.Helpers
 			SocketRole roleToAdd = _guild.GetRole(scoreRole.Value);
 			List<SocketRole> removedRoles = await RemoveScoreRolesExcept(guildMember, roleToAdd);
 
-			bool memberHasRole = _databaseHelper.MemberHasRole(guildMember, roleToAdd.Id);
+			bool memberHasRole = MemberHasRole(guildMember, roleToAdd.Id);
 			if (removedRoles.Count == 0 && memberHasRole)
 				return new(false, memberHasRole, roleToAdd, removedRoles);
 
@@ -95,5 +95,8 @@ namespace Clubber.Helpers
 			}
 			return removedRoles;
 		}
+
+		private static bool MemberHasRole(SocketGuildUser member, ulong roleId)
+			=> member.Roles.Any(role => role.Id == roleId);
 	}
 }

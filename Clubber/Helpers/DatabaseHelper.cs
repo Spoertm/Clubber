@@ -33,15 +33,12 @@ namespace Clubber.Helpers
 		public bool LeaderboardIdExistsInDb(int lbId)
 			=> _database.DdUserCollection.Find(du => du.LeaderboardId == lbId).Any();
 
-		public bool MemberHasRole(SocketGuildUser member, ulong roleId)
-			=> member.Roles.Any(role => role.Id == roleId);
-
 		public void AddUser(DdUser ddUser)
 			=> _database.DdUserCollection.InsertOne(ddUser);
 
 		public record AddToDbFromNameResponse(int NumberOfMatches);
 
-		public async Task<AddToDbFromNameResponse> AddToDbFromName(IEnumerable<SocketGuildUser> userMatches, uint rankOrLbId, Func<uint, ulong, Task> asyncCommand)
+		public static async Task<AddToDbFromNameResponse> AddToDbFromName(IEnumerable<SocketGuildUser> userMatches, uint rankOrLbId, Func<uint, ulong, Task> asyncCommand)
 		{
 			int numberOfMatches = userMatches.Count();
 			if (numberOfMatches == 1)
