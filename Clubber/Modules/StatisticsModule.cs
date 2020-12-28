@@ -3,6 +3,7 @@ using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -64,11 +65,8 @@ namespace Clubber.Modules
 
 		private async Task EveryX(uint bracketSize, uint bottomLimit, uint topLimit)
 		{
-			if (await IsError(bottomLimit < topLimit, "The bottom limit cant be smaller than the upper limit."))
-				return;
-
-			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, $"Bottom limit can't be larger than {_maxLimit} and top limit can't be smaller than 1."))
-				return;
+			topLimit = Math.Max(topLimit, 1);
+			bottomLimit = Math.Min(bottomLimit, topLimit - 1);
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
@@ -109,11 +107,8 @@ namespace Clubber.Modules
 		[Summary("Shows death type frequency within the given top range.")]
 		public async Task ByDeath(uint topLimit, uint bottomLimit)
 		{
-			if (await IsError(bottomLimit < topLimit, "The bottom limit cant be smaller than the upper limit."))
-				return;
-
-			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, $"Bottom limit can't be larger than {_maxLimit} and top limit can't be smaller than 1."))
-				return;
+			topLimit = Math.Max(topLimit, 1);
+			bottomLimit = Math.Min(bottomLimit, topLimit - 1);
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
