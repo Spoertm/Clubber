@@ -6,16 +6,16 @@ namespace Clubber.Files
 {
 	public class LeaderboardData
 	{
-		public readonly List<int> Times = new List<int>();
-		public readonly List<short> Kills = new List<short>();
-		public readonly List<short> Gems = new List<short>();
-		public readonly List<short> DaggersHit = new List<short>();
-		public readonly List<int> DaggersFired = new List<int>();
-		public readonly List<string> Deaths = new List<string>();
+		public readonly List<uint> Times = new();
+		public readonly List<ushort> Kills = new();
+		public readonly List<ushort> Gems = new();
+		public readonly List<ushort> DaggersHit = new();
+		public readonly List<uint> DaggersFired = new();
+		public readonly List<string> Deaths = new();
 
 		public LeaderboardData()
 		{
-			Dictionary<byte, string> deathtypeDict = new Dictionary<byte, string>()
+			Dictionary<byte, string> deathtypeDict = new()
 			{
 				{ 0, "FALLEN" },
 				{ 1, "SWARMED" },
@@ -35,19 +35,19 @@ namespace Clubber.Files
 				{ 15, "BARBED" }
 			};
 
-			string binaryLbPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Files/LB.bin");
+			string binaryLbPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.Combine("Files", "LB.bin"));
 
 			try
 			{
-				BinaryReader br = new BinaryReader(File.Open(binaryLbPath, FileMode.Open));
+				using BinaryReader br = new(File.Open(binaryLbPath, FileMode.Open));
 
 				while (br.BaseStream.Position != br.BaseStream.Length)
 				{
-					Times.Add((int)br.ReadUInt32());
-					Kills.Add((short)br.ReadUInt16());
-					Gems.Add((short)br.ReadUInt16());
-					DaggersHit.Add((short)br.ReadUInt16());
-					DaggersFired.Add((int)br.ReadUInt32());
+					Times.Add(br.ReadUInt32());
+					Kills.Add(br.ReadUInt16());
+					Gems.Add(br.ReadUInt16());
+					DaggersHit.Add(br.ReadUInt16());
+					DaggersFired.Add(br.ReadUInt32());
 					Deaths.Add(deathtypeDict[br.ReadByte()]);
 				}
 

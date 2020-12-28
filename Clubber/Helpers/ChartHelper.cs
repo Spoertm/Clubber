@@ -1,36 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using Clubber.Files;
+using MongoDB.Driver;
+using QuickChart;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Clubber.Files;
-using System.Linq;
-using QuickChart;
-using MongoDB.Driver;
 
 namespace Clubber.Helpers
 {
 	public class ChartHelper
 	{
-		public async Task<Stream> GetEveryXBracketChartStream(int bracketSize, int bottomLimit, int toplimit)
+		public async Task<Stream> GetEveryXBracketChartStream(uint bracketSize, uint bottomLimit, uint toplimit)
 		{
-			LeaderboardData LB = new LeaderboardData();
+			LeaderboardData lb = new();
 
-			if (LB.Times.Count == 0)
+			if (lb.Times.Count == 0)
 				return null;
 
-			List<int> times = LB.Times.Select(t => t / 10000).ToList();
+			List<uint> times = lb.Times.Select(t => t / 10000).ToList();
 
-			int roundedDown = RoundDown(times[bottomLimit - 1], bracketSize);
+			uint roundedDown = RoundDown(times[(int)(bottomLimit - 1)], bracketSize);
 
-			times = times.Skip(toplimit - 1).TakeWhile(t => t >= roundedDown).ToList();
+			times = times.Skip((int)(toplimit - 1)).TakeWhile(t => t >= roundedDown).ToList();
 
-			int maxtime = times[0];
+			uint maxtime = times[0];
 
-			List<int> yValues = new List<int>();
-			for (int i = roundedDown; i < maxtime; i += bracketSize)
-			{
+			List<int> yValues = new();
+			for (uint i = roundedDown; i < maxtime; i += bracketSize)
 				yValues.Add(times.FindAll(t => t >= i && t < i + bracketSize).Count);
-			}
 
 			string labels = GetEveryXLabelFormatted(roundedDown, maxtime, bracketSize);
 			string data = GetStringFromList(yValues);
@@ -39,13 +37,8 @@ namespace Clubber.Helpers
 			return await GetStreamFromLink(qc.GetUrl());
 		}
 
-		private static int RoundUp(int toRound, int nearest)
-		{
-			if (toRound % nearest == 0) return toRound;
-			return (nearest - toRound % nearest) + toRound;
-		}
-
-		private static int RoundDown(int toRound, int nearest) => toRound - toRound % nearest;
+		private static uint RoundDown(uint toRound, uint nearest)
+			=> toRound - toRound % nearest;
 
 		public static async Task<Stream> GetRoleChartStream(List<string> roleNames, List<int> roleMemberCounts)
 		{
@@ -59,12 +52,12 @@ namespace Clubber.Helpers
 
 		public static async Task<Stream> GetByDeathChartStream(int bottomLimit, int toplimit)
 		{
-			LeaderboardData LB = new LeaderboardData();
+			LeaderboardData lb = new();
 
-			if (LB.Times.Count == 0)
+			if (lb.Times.Count == 0)
 				return null;
 
-			var result = LB.Deaths
+			var result = lb.Deaths
 				.Skip(toplimit - 1)
 				.Take(bottomLimit - (toplimit - 1))
 				.GroupBy(d => d)
@@ -88,19 +81,17 @@ namespace Clubber.Helpers
 			return await new HttpClient().GetStreamAsync(link);
 		}
 
-		private static string GetEveryXLabelFormatted(int minScore, int maxScore, int bracketSize)
+		private static string GetEveryXLabelFormatted(uint minScore, uint maxScore, uint bracketSize)
 		{
-			List<string> labels = new List<string>
+			List<string> labels = new()
 			{
 				$"{minScore}-{minScore + (bracketSize - 1)}"
 			};
 
-			for (int i = minScore + (bracketSize - 1); i < maxScore; i += bracketSize)
-			{
+			for (uint i = minScore + (bracketSize - 1); i < maxScore; i += bracketSize)
 				labels.Add($"{i + 1}-{i + bracketSize}");
-			}
 
-			return "'" + string.Join("','", labels) + "'";
+			return GetStringFromList(labels);
 		}
 
 		private static Chart GetChart(string xData, string yData, string xLabel, string yLabel, string title = null)

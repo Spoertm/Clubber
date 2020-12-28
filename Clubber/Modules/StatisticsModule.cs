@@ -1,91 +1,81 @@
-﻿using System.Threading.Tasks;
-using Discord.Commands;
+﻿using Clubber.Databases;
 using Clubber.Helpers;
-using Clubber.Databases;
-using System.Collections.Generic;
 using Discord;
-using System.Linq;
-using System.IO;
+using Discord.Commands;
 using Discord.WebSocket;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
 	[Name("Statistics")]
-	public class StatisticsModule : ModuleBase<SocketCommandContext>
+	public class StatisticsModule : AbstractModule<SocketCommandContext>
 	{
-		private readonly ChartHelper ChartHelper;
-		private readonly Dictionary<int, ulong> ScoreRolesDict;
-		private const int MAX_LIMIT = 229900;
+		private const int _maxLimit = 229900;
+		private readonly ChartHelper _chartHelper;
+		private readonly Dictionary<int, ulong> _scoreRolesDict;
 
-		public StatisticsModule(ChartHelper _chartHelper, ScoreRoles _scroreRoles)
+		public StatisticsModule(ChartHelper chartHelper, ScoreRoles scoreRoles)
 		{
-			ChartHelper = _chartHelper;
-			ScoreRolesDict = _scroreRoles.ScoreRoleDictionary;
+			_chartHelper = chartHelper;
+			_scoreRolesDict = scoreRoles.ScoreRoleDictionary;
 		}
 
 		[Command("every10")]
 		[Summary("Shows number of users per 10s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
 		public async Task Every10(uint topLimit, uint bottomLimit)
-			=> await EveryX(10, (int)bottomLimit, (int)topLimit);
+			=> await EveryX(10, bottomLimit, topLimit);
 
 		[Command("every10")]
 		public async Task Every10(uint bottomLimit)
-			=> await EveryX(10, (int)bottomLimit, 1);
+			=> await EveryX(10, bottomLimit, 1);
 
 		[Command("every10")]
 		public async Task Every10()
-			=> await EveryX(10, MAX_LIMIT, 1);
-
+			=> await EveryX(10, _maxLimit, 1);
 
 		[Command("every50")]
 		[Summary("Shows number of users per 50s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
 		public async Task Every50(uint topLimit, uint bottomLimit)
-			=> await EveryX(50, (int)bottomLimit, (int)topLimit);
+			=> await EveryX(50, bottomLimit, topLimit);
 
 		[Command("every50")]
 		public async Task Every50(uint bottomLimit)
-			=> await EveryX(50, (int)bottomLimit, 1);
+			=> await EveryX(50, bottomLimit, 1);
 
 		[Command("every50")]
 		public async Task Every50()
-			=> await EveryX(50, MAX_LIMIT, 1);
-
+			=> await EveryX(50, _maxLimit, 1);
 
 		[Command("every100")]
 		[Summary("Shows number of users per 100s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
 		public async Task Every100(uint topLimit, uint bottomLimit)
-			=> await EveryX(100, (int)bottomLimit, (int)topLimit);
+			=> await EveryX(100, bottomLimit, topLimit);
 
 		[Command("every100")]
 		public async Task Every100(uint bottomLimit)
-			=> await EveryX(100, (int)bottomLimit, 1);
+			=> await EveryX(100, bottomLimit, 1);
 
 		[Command("every100")]
 		public async Task Every100()
 			=> await EveryX(100, 229900, 1);
 
-		private async Task EveryX(int bracketSize, int bottomLimit, int topLimit)
+		private async Task EveryX(uint bracketSize, uint bottomLimit, uint topLimit)
 		{
-			if (bottomLimit < topLimit)
-			{
-				await ReplyAsync("The bottom limit cant be smaller than the upper limit.");
+			if (await IsError(bottomLimit < topLimit, "The bottom limit cant be smaller than the upper limit."))
 				return;
-			}
-			if (bottomLimit > MAX_LIMIT || topLimit < 1)
-			{
-				await ReplyAsync("Bottom limit can't be larger than 229900 and top limit can't be smaller than 1.");
+
+			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, "Bottom limit can't be larger than 229900 and top limit can't be smaller than 1."))
 				return;
-			}
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await ChartHelper.GetEveryXBracketChartStream(bracketSize, bottomLimit, topLimit);
+			Stream chartStream = await _chartHelper.GetEveryXBracketChartStream(bracketSize, bottomLimit, topLimit);
 
-			if (chartStream == null)
-			{
-				await ReplyAsync("Another operation is in process, try again shortly.\n(Or you've input identical limits!)");
+			if (await IsError(chartStream == null, "Another operation is in process, try again shortly.\n(Or you've input identical limits!)"))
 				return;
-			}
 
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 			await processingMessage.DeleteAsync();
@@ -97,11 +87,11 @@ namespace Clubber.Modules
 		{
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			List<string> roleNames = new List<string>();
-			List<int> roleMemberCounts = new List<int>();
+			List<string> roleNames = new();
+			List<int> roleMemberCounts = new();
 			SocketRole role;
 
-			foreach (var id in ScoreRolesDict.Values.Reverse())
+			foreach (var id in _scoreRolesDict.Values.Reverse())
 			{
 				role = Context.Guild.GetRole(id);
 				roleNames.Add(role.Name);
@@ -119,26 +109,18 @@ namespace Clubber.Modules
 		[Summary("Shows death type frequency within the given top range.")]
 		public async Task ByDeath(uint topLimit, uint bottomLimit)
 		{
-			if (bottomLimit < topLimit)
-			{
-				await ReplyAsync("The bottom limit cant be smaller than the upper limit.");
+			if (await IsError(bottomLimit < topLimit, "The bottom limit cant be smaller than the upper limit."))
 				return;
-			}
-			if (bottomLimit > 229900 || topLimit < 1)
-			{
-				await ReplyAsync("Bottom limit can't be larger than 229900 and top limit can't be smaller than 1.");
+
+			if (await IsError(bottomLimit > _maxLimit || topLimit < 1, "Bottom limit can't be larger than 229900 and top limit can't be smaller than 1."))
 				return;
-			}
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
 			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)bottomLimit, (int)topLimit);
 
-			if (chartStream == null)
-			{
-				await ReplyAsync("Another operation is in process, try again shortly.\n(Or you've input identical limits!)");
+			if (await IsError(chartStream == null, "Another operation is in process, try again shortly.\n(Or you've input identical limits!)"))
 				return;
-			}
 
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 			await processingMessage.DeleteAsync();
@@ -150,6 +132,6 @@ namespace Clubber.Modules
 
 		[Command("bydeath")]
 		public async Task ByDeath()
-			=> await ByDeath(1, MAX_LIMIT);
+			=> await ByDeath(1, _maxLimit);
 	}
 }
