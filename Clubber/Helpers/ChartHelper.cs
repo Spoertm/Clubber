@@ -1,51 +1,264 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Clubber.Files;
-using System.Linq;
-using QuickChart;
 using MongoDB.Driver;
+using QuickChart;
 
 namespace Clubber.Helpers
 {
 	public class ChartHelper
 	{
-		public async Task<Stream> GetEveryXBracketChartStream(int bracketSize, int bottomLimit, int toplimit)
+		public async Task<Stream> GetEveryXBracketChartStream(int bracketSize, int bottomLimit, int topLimit, string property)
 		{
 			LeaderboardData LB = new LeaderboardData();
 
-			if (LB.Times.Count == 0)
+			if (LB.PlayerList.Count == 0)
 				return null;
 
-			List<int> times = LB.Times.Select(t => t / 10000).ToList();
+			if (property.Equals(PropertyType.Seconds, System.StringComparison.InvariantCultureIgnoreCase))
+			{
+				return await GetSecondsChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
+			}
+			else if (property.Equals(PropertyType.Kills, System.StringComparison.InvariantCultureIgnoreCase))
+			{
+				return await GetKillsChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
+			}
+			else if (property.Equals(PropertyType.Gems, System.StringComparison.InvariantCultureIgnoreCase))
+			{
+				return await GetGemsChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
+			}
+			else if (property.Equals(PropertyType.DaggersHit, System.StringComparison.InvariantCultureIgnoreCase))
+			{
+				return await GetDaggersHitChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
+			}
+			else if (property.Equals(PropertyType.DaggersFired, System.StringComparison.InvariantCultureIgnoreCase))
+			{
+				return await GetDaggersFiredChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
+			}
+			else
+				return await GetHitAccuracyChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
+		}
 
-			int roundedDown = RoundDown(times[bottomLimit - 1], bracketSize);
+		private static Task<Stream> GetSecondsChartStream(List<LbDataPlayer> playerList, int bracketSize, int bottomLimit, int topLimit)
+		{
+			List<LbDataPlayer> times = playerList.GetRange(topLimit - 1, bottomLimit - topLimit + 1);
 
-			times = times.Skip(toplimit - 1).TakeWhile(t => t >= roundedDown).ToList();
-
-			int maxtime = times[0];
+			float maxScore = times[0].Time;
+			float minScore = times.Last().Time;
+			times.Reverse();
 
 			List<int> yValues = new List<int>();
-			for (int i = roundedDown; i < maxtime; i += bracketSize)
+			int upper;
+
+			if (minScore == maxScore)
 			{
-				yValues.Add(times.FindAll(t => t >= i && t < i + bracketSize).Count);
+				yValues.Add(times.Count);
+			}
+			else
+			{
+				for (float i = minScore; i <= maxScore; i = upper)
+				{
+					upper = MoveUp((int)i, bracketSize);
+					yValues.Add(times.Count(p => p.Time >= i && p.Time < upper));
+				}
 			}
 
-			string labels = GetEveryXLabelFormatted(roundedDown, maxtime, bracketSize);
+			string labels = GetEveryXLabelFormatted((int)minScore, (int)maxScore, bracketSize);
 			string data = GetStringFromList(yValues);
-			Chart qc = GetChart(labels, data, "PB bracket", "Number of players", $"Number of players within a PB bracket - rank {toplimit}-{bottomLimit}");
+			Chart qc = GetChart(labels, data, "PB bracket", "Number of players", $"Score frequency - rank {topLimit}-{bottomLimit}");
 
-			return await GetStreamFromLink(qc.GetUrl());
+			return GetStreamFromLink(qc.GetShortUrl());
 		}
 
-		private static int RoundUp(int toRound, int nearest)
+		private static Task<Stream> GetKillsChartStream(List<LbDataPlayer> playerList, int bracketSize, int bottomLimit, int topLimit)
 		{
-			if (toRound % nearest == 0) return toRound;
-			return (nearest - toRound % nearest) + toRound;
+			playerList = playerList.GetRange(topLimit - 1, bottomLimit - topLimit + 1);
+
+			float maxScore = playerList[0].Time;
+			float minScore = playerList.Last().Time;
+			playerList.Reverse();
+
+			List<double> yValues = new List<double>();
+			int upperScore;
+
+			if (minScore == maxScore)
+			{
+				yValues.Add(playerList.Average(p => p.Kills));
+			}
+			else
+			{
+				for (float i = minScore; i <= maxScore; i = upperScore)
+				{
+					upperScore = MoveUp((int)i, bracketSize);
+					IEnumerable<LbDataPlayer> toBeAveraged = playerList.Where(p => p.Time >= i && p.Time < upperScore);
+					if (!toBeAveraged.Any())
+						yValues.Add(0);
+					else
+						yValues.Add(toBeAveraged.Average(p => p.Kills));
+				}
+			}
+
+			string labels = GetEveryXLabelFormatted((int)minScore, (int)maxScore, bracketSize);
+			string data = GetStringFromList(yValues);
+			Chart qc = GetChart(labels, data, "PB bracket", "Avg. number of kills", $"Average kills per PB bracket - rank {topLimit}-{bottomLimit}", true);
+
+			return GetStreamFromLink(qc.GetShortUrl());
 		}
 
-		private static int RoundDown(int toRound, int nearest) => toRound - toRound % nearest;
+		private static Task<Stream> GetGemsChartStream(List<LbDataPlayer> playerList, int bracketSize, int bottomLimit, int topLimit)
+		{
+			playerList = playerList.GetRange(topLimit - 1, bottomLimit - topLimit + 1);
+
+			float maxScore = playerList[0].Time;
+			float minScore = playerList.Last().Time;
+			playerList.Reverse();
+
+			List<double> yValues = new List<double>();
+			int upperScore;
+
+			if (minScore == maxScore)
+			{
+				yValues.Add(playerList.Average(p => p.Gems));
+			}
+			else
+			{
+				for (float i = minScore; i <= maxScore; i = upperScore)
+				{
+					upperScore = MoveUp((int)i, bracketSize);
+					var toBeAveraged = playerList.Where(p => p.Time >= i && p.Time < upperScore);
+					if (!toBeAveraged.Any())
+						yValues.Add(0);
+					else
+						yValues.Add(toBeAveraged.Average(p => p.Gems));
+				}
+			}
+
+			string labels = GetEveryXLabelFormatted((int)minScore, (int)maxScore, bracketSize);
+			string data = GetStringFromList(yValues);
+			Chart qc = GetChart(labels, data, "PB bracket", "Avg. number of gems", $"Average gems per PB bracket - rank {topLimit}-{bottomLimit}", true);
+
+			return GetStreamFromLink(qc.GetShortUrl());
+		}
+
+		private static Task<Stream> GetDaggersHitChartStream(List<LbDataPlayer> playerList, int bracketSize, int bottomLimit, int topLimit)
+		{
+			playerList = playerList.GetRange(topLimit - 1, bottomLimit - topLimit + 1);
+
+			float maxScore = playerList[0].Time;
+			float minScore = playerList.Last().Time;
+			playerList.Reverse();
+
+			List<double> yValues = new List<double>();
+			int upperScore, startIndex = 0;
+
+			if (minScore == maxScore)
+			{
+				yValues.Add(playerList.Average(p => p.DaggersHit));
+			}
+			else
+			{
+				for (float i = minScore; i <= maxScore; i = upperScore)
+				{
+					upperScore = MoveUp((int)i, bracketSize);
+					var toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
+					if (!toBeAveraged.Any())
+						yValues.Add(0);
+					else
+						yValues.Add(toBeAveraged.Average(p => p.DaggersHit));
+				}
+			}
+
+			string labels = GetEveryXLabelFormatted((int)minScore, (int)maxScore, bracketSize);
+			string data = GetStringFromList(yValues);
+			Chart qc = GetChart(labels, data, "PB bracket", "Avg. number of daggers hit", $"Average daggers hit per PB bracket - rank {topLimit}-{bottomLimit}", true);
+
+			return GetStreamFromLink(qc.GetShortUrl());
+		}
+
+		private static Task<Stream> GetDaggersFiredChartStream(List<LbDataPlayer> playerList, int bracketSize, int bottomLimit, int topLimit)
+		{
+			playerList = playerList.GetRange(topLimit - 1, bottomLimit - topLimit + 1);
+
+			float maxScore = playerList[0].Time;
+			float minScore = playerList.Last().Time;
+			playerList.Reverse();
+
+			List<double> yValues = new List<double>();
+			int upperScore, startIndex = 0;
+
+			if (minScore == maxScore)
+			{
+				yValues.Add(playerList.Average(p => p.DaggersFired));
+			}
+			else
+			{
+				for (float i = minScore; i <= maxScore; i = upperScore)
+				{
+					upperScore = MoveUp((int)i, bracketSize);
+					var toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
+					if (!toBeAveraged.Any())
+						yValues.Add(0);
+					else
+						yValues.Add(toBeAveraged.Average(p => p.DaggersFired));
+				}
+			}
+
+			string labels = GetEveryXLabelFormatted((int)minScore, (int)maxScore, bracketSize);
+			string data = GetStringFromList(yValues);
+			Chart qc = GetChart(labels, data, "PB bracket", "Avg. number of daggers fired", $"Average daggers fired per PB bracket - rank {topLimit}-{bottomLimit}", true);
+
+			return GetStreamFromLink(qc.GetShortUrl());
+		}
+
+		private static Task<Stream> GetHitAccuracyChartStream(List<LbDataPlayer> playerList, int bracketSize, int bottomLimit, int topLimit)
+		{
+			playerList = playerList.GetRange(topLimit - 1, bottomLimit - topLimit + 1).ToList();
+
+			float maxScore = playerList[0].Time;
+			float minScore = playerList.Last().Time;
+			playerList.Reverse();
+
+			List<double> yValues = new List<double>();
+			int upperScore, startIndex = 0;
+
+			if (minScore == maxScore)
+			{
+				yValues.Add(playerList.Average(p => p.DaggersHit / p.DaggersFired * 100));
+			}
+			else
+			{
+				for (float i = minScore; i <= maxScore; i = upperScore)
+				{
+					upperScore = MoveUp((int)i, bracketSize);
+					var toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
+					if (!toBeAveraged.Any())
+						yValues.Add(0);
+					else
+						yValues.Add(toBeAveraged.Average(p => (double)p.DaggersHit / p.DaggersFired * 100));
+				}
+			}
+
+			string labels = GetEveryXLabelFormatted((int)minScore, (int)maxScore, bracketSize);
+			string data = GetStringFromList(yValues);
+			Chart qc = GetChart(labels, data, "PB bracket", "Avg. accuracy", $"Average accuracy per PB bracket - rank {topLimit}-{bottomLimit}", true);
+
+			return GetStreamFromLink(qc.GetShortUrl());
+		}
+
+		private static int MoveUp(int toMove, int nearest) // Always rounds up, even if the number is round
+		{
+			if (toMove % nearest == 0)
+				return toMove + nearest;
+			return nearest - toMove % nearest + toMove;
+		}
+
+		private static int RoundDown(int toRound, int nearest)
+		{
+			return toRound - toRound % nearest;
+		}
 
 		public static async Task<Stream> GetRoleChartStream(List<string> roleNames, List<int> roleMemberCounts)
 		{
@@ -54,17 +267,17 @@ namespace Clubber.Helpers
 
 			Chart qc = GetChart(xData, yData, "Club role", "Number of members", "Number of members per club role");
 
-			return await GetStreamFromLink(qc.GetUrl());
+			return await GetStreamFromLink(qc.GetShortUrl());
 		}
 
 		public static async Task<Stream> GetByDeathChartStream(int bottomLimit, int toplimit)
 		{
 			LeaderboardData LB = new LeaderboardData();
 
-			if (LB.Times.Count == 0)
+			if (LB.PlayerList.Count == 0)
 				return null;
 
-			var result = LB.Deaths
+			var result = LB.PlayerList.Select(p => p.Death)
 				.Skip(toplimit - 1)
 				.Take(bottomLimit - (toplimit - 1))
 				.GroupBy(d => d)
@@ -75,7 +288,7 @@ namespace Clubber.Helpers
 
 			Chart qc = GetChart(deathLabels, countLabels, "Death type", "Number of victims", $"Death type frequency - rank {toplimit}-{bottomLimit}");
 
-			return await GetStreamFromLink(qc.GetUrl());
+			return await GetStreamFromLink(qc.GetShortUrl());
 		}
 
 		private static string GetStringFromList<T>(IEnumerable<T> list)
@@ -90,23 +303,30 @@ namespace Clubber.Helpers
 
 		private static string GetEveryXLabelFormatted(int minScore, int maxScore, int bracketSize)
 		{
-			List<string> labels = new List<string>
-			{
-				$"{minScore}-{minScore + (bracketSize - 1)}"
-			};
+			if (minScore == maxScore)
+				return $"'{RoundDown(minScore, bracketSize)}-{MoveUp(minScore, bracketSize)}'";
 
-			for (int i = minScore + (bracketSize - 1); i < maxScore; i += bracketSize)
+			List<string> labels = new List<string>();
+
+			int cntr = RoundDown(minScore, bracketSize), upper;
+			while (cntr <= maxScore)
 			{
-				labels.Add($"{i + 1}-{i + bracketSize}");
+				upper = MoveUp(cntr, bracketSize);
+				if (bracketSize == 1)
+					labels.Add($"{cntr}");
+				else
+					labels.Add($"{cntr}-{upper}");
+				cntr = upper;
 			}
 
 			return "'" + string.Join("','", labels) + "'";
 		}
 
-		private static Chart GetChart(string xData, string yData, string xLabel, string yLabel, string title = null)
+		private static Chart GetChart(string xData, string yData, string xLabel, string yLabel, string title = null, bool precise = false)
 		{
-			Chart qc = new Chart
+			return new Chart
 			{
+				Width = 600,
 				DevicePixelRatio = 2.0,
 				BackgroundColor = "white",
 				Config = $@"
@@ -118,6 +338,7 @@ namespace Clubber.Helpers
                 datasets: 
                 [
                     {{
+					maxBarThickness: 90,
                     backgroundColor: 'darkblue',
                     borderColor: 'darkblue',
                     borderWidth: 1,
@@ -137,7 +358,7 @@ namespace Clubber.Helpers
       				yAxes: [
 						{{
 						ticks: {{
-							precision: 0,
+							{(precise ? "" : "precision: 0,")}
 							beginAtZero: true
 						}},
 						scaleLabel: {{
@@ -154,8 +375,6 @@ namespace Clubber.Helpers
                 }}
             }}"
 			};
-
-			return qc;
 		}
 	}
 }
