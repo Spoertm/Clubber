@@ -6,11 +6,9 @@ namespace Clubber.Files
 {
 	public class LeaderboardData
 	{
-		public List<LbDataPlayer> PlayerList = new List<LbDataPlayer>();
-
 		public LeaderboardData()
 		{
-			Dictionary<byte, string> deathtypeDict = new Dictionary<byte, string>()
+			Dictionary<byte, string> deathtypeDict = new()
 			{
 				{ 0, "FALLEN" },
 				{ 1, "SWARMED" },
@@ -27,7 +25,7 @@ namespace Clubber.Files
 				{ 12, "ENVENOMATED" },
 				{ 13, "INCARNATED" },
 				{ 14, "DISCARNATED" },
-				{ 15, "BARBED" }
+				{ 15, "BARBED" },
 			};
 
 			string binaryLbPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Files/LB.bin");
@@ -51,8 +49,10 @@ namespace Clubber.Files
 			}
 			catch (IOException)
 			{
-				return;
+				// Ignore IO exceptions.
 			}
 		}
+
+		public List<LbDataPlayer> PlayerList { get; } = new();
 	}
 }

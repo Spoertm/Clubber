@@ -1,31 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Clubber.Databases;
+﻿using Clubber.Databases;
 using Clubber.Files;
 using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
 	[Name("Statistics")]
-	public class StatisticsModule : ModuleBase<SocketCommandContext>
+	public class StatisticsModule : AbstractModule<SocketCommandContext>
 	{
-		private readonly ChartHelper ChartHelper;
-		private readonly Dictionary<int, ulong> ScoreRolesDict;
-		private const int MAX_LIMIT = 229900;
-		private const int DEFAULT_UPPER_LIMIT = 1;
-		private const int DEFAULT_GRANULARITY = 10;
-		private const string DEFAULT_PROPERTYTYPE = PropertyType.Seconds;
+		private const int _maxLimit = 229900;
+		private const int _defaultUpperLimit = 1;
+		private const int _defaultGranularity = 10;
+		private const string _defaultPropertyType = PropertyType.Seconds;
 
-		public StatisticsModule(ChartHelper _chartHelper, ScoreRoles _scroreRoles)
+		private readonly ChartHelper _chartHelper;
+		private readonly Dictionary<int, ulong> _scoreRolesDict;
+
+		public StatisticsModule(ChartHelper chartHelper, ScoreRoles scoreRoles)
 		{
-			ChartHelper = _chartHelper;
-			ScoreRolesDict = _scroreRoles.ScoreRoleDictionary;
+			_chartHelper = chartHelper;
+			_scoreRolesDict = scoreRoles.ScoreRoleDictionary;
 		}
 
 		[Command("graph")]
@@ -41,43 +42,35 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 
 		[Command("graph")]
 		public async Task Graph(string property, uint granularity, uint lowerLimit)
-			=> await GraphX(property, (int)granularity, DEFAULT_UPPER_LIMIT, (int)lowerLimit);
+			=> await GraphX(property, (int)granularity, _defaultUpperLimit, (int)lowerLimit);
 
 		[Command("graph")]
 		public async Task Graph(string property, uint granularity)
-			=> await GraphX(property, (int)granularity, DEFAULT_UPPER_LIMIT, MAX_LIMIT);
+			=> await GraphX(property, (int)granularity, _defaultUpperLimit, _maxLimit);
 
 		[Command("graph")]
 		public async Task Graph(string property)
-			=> await GraphX(property, DEFAULT_GRANULARITY, DEFAULT_UPPER_LIMIT, MAX_LIMIT);
+			=> await GraphX(property, _defaultGranularity, _defaultUpperLimit, _maxLimit);
 
 		[Command("graph")]
 		public async Task Graph()
-			=> await GraphX(DEFAULT_PROPERTYTYPE, DEFAULT_GRANULARITY, DEFAULT_UPPER_LIMIT, MAX_LIMIT);
+			=> await GraphX(_defaultPropertyType, _defaultGranularity, _defaultUpperLimit, _maxLimit);
 
 		private async Task GraphX(string property, int granularity, int upperLimit, int lowerLimit)
 		{
-			if (!PropertyCheck(property))
-			{
-				await ReplyAsync($"Property can only be `{string.Join("`/`", GetPropertyStrings())}`.");
+			if (await IsError(!PropertyCheck(property), $"Property can only be `{string.Join("`/`", GetPropertyStrings())}`."))
 				return;
-			}
-			if (upperLimit > lowerLimit)
-			{
-				await ReplyAsync("The upper limit can't be bigger than the lower limit.");
+
+			if (await IsError(upperLimit > lowerLimit, "The upper limit can't be bigger than the lower limit."))
 				return;
-			}
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
 			granularity = granularity < 1 ? 1 : granularity > 1000 ? 1000 : granularity;
-			Stream chartStream = await ChartHelper.GetEveryXBracketChartStream(granularity, Math.Min(MAX_LIMIT, lowerLimit), Math.Max(1, upperLimit), property);
+			Stream chartStream = await _chartHelper.GetEveryXBracketChartStream(granularity, Math.Min(_maxLimit, lowerLimit), Math.Max(1, upperLimit), property);
 
-			if (chartStream == null)
-			{
-				await ReplyAsync("Another operation is in process, try again shortly.");
+			if (await IsError(chartStream == null, "Another operation is in process, try again shortly."))
 				return;
-			}
 
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 			await processingMessage.DeleteAsync();
@@ -85,14 +78,10 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 
 		private static bool PropertyCheck(string property)
 		{
-			IEnumerable<string> fieldList = GetPropertyStrings();
-
-			foreach (string field in fieldList)
+			foreach (string field in GetPropertyStrings())
 			{
 				if (property.Equals(field, StringComparison.InvariantCultureIgnoreCase))
-				{
 					return true;
-				}
 			}
 
 			return false;
@@ -116,7 +105,7 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 			List<int> roleMemberCounts = new List<int>();
 			SocketRole role;
 
-			foreach (var id in ScoreRolesDict.Values.Reverse())
+			foreach (ulong id in _scoreRolesDict.Values.Reverse())
 			{
 				role = Context.Guild.GetRole(id);
 				roleNames.Add(role.Name);
@@ -142,7 +131,7 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)Math.Max(1, upperLimit), (int)Math.Min(MAX_LIMIT, lowerLimit));
+			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)Math.Max(1, upperLimit), (int)Math.Min(_maxLimit, lowerLimit));
 
 			if (chartStream == null)
 			{
@@ -160,6 +149,6 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 
 		[Command("deathgraph")]
 		public async Task ByDeath()
-			=> await DeathGraph(1, MAX_LIMIT);
+			=> await DeathGraph(1, _maxLimit);
 	}
 }

@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Clubber.Files;
+using MongoDB.Driver;
+using QuickChart;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Clubber.Files;
-using MongoDB.Driver;
-using QuickChart;
 
 namespace Clubber.Helpers
 {
@@ -13,33 +13,27 @@ namespace Clubber.Helpers
 	{
 		public async Task<Stream> GetEveryXBracketChartStream(int bracketSize, int bottomLimit, int topLimit, string property)
 		{
-			LeaderboardData LB = new LeaderboardData();
+			LeaderboardData lb = new();
 
-			if (LB.PlayerList.Count == 0)
+			if (lb.PlayerList.Count == 0)
 				return null;
 
 			if (property.Equals(PropertyType.Seconds, System.StringComparison.InvariantCultureIgnoreCase))
-			{
-				return await GetSecondsChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
-			}
-			else if (property.Equals(PropertyType.Kills, System.StringComparison.InvariantCultureIgnoreCase))
-			{
-				return await GetKillsChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
-			}
-			else if (property.Equals(PropertyType.Gems, System.StringComparison.InvariantCultureIgnoreCase))
-			{
-				return await GetGemsChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
-			}
-			else if (property.Equals(PropertyType.DaggersHit, System.StringComparison.InvariantCultureIgnoreCase))
-			{
-				return await GetDaggersHitChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
-			}
-			else if (property.Equals(PropertyType.DaggersFired, System.StringComparison.InvariantCultureIgnoreCase))
-			{
-				return await GetDaggersFiredChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
-			}
-			else
-				return await GetHitAccuracyChartStream(LB.PlayerList, bracketSize, bottomLimit, topLimit);
+				return await GetSecondsChartStream(lb.PlayerList, bracketSize, bottomLimit, topLimit);
+
+			if (property.Equals(PropertyType.Kills, System.StringComparison.InvariantCultureIgnoreCase))
+				return await GetKillsChartStream(lb.PlayerList, bracketSize, bottomLimit, topLimit);
+
+			if (property.Equals(PropertyType.Gems, System.StringComparison.InvariantCultureIgnoreCase))
+				return await GetGemsChartStream(lb.PlayerList, bracketSize, bottomLimit, topLimit);
+
+			if (property.Equals(PropertyType.DaggersHit, System.StringComparison.InvariantCultureIgnoreCase))
+				return await GetDaggersHitChartStream(lb.PlayerList, bracketSize, bottomLimit, topLimit);
+
+			if (property.Equals(PropertyType.DaggersFired, System.StringComparison.InvariantCultureIgnoreCase))
+				return await GetDaggersFiredChartStream(lb.PlayerList, bracketSize, bottomLimit, topLimit);
+
+			return await GetHitAccuracyChartStream(lb.PlayerList, bracketSize, bottomLimit, topLimit);
 		}
 
 		private static Task<Stream> GetSecondsChartStream(List<LbDataPlayer> playerList, int bracketSize, int bottomLimit, int topLimit)
@@ -128,7 +122,7 @@ namespace Clubber.Helpers
 				for (float i = minScore; i <= maxScore; i = upperScore)
 				{
 					upperScore = MoveUp((int)i, bracketSize);
-					var toBeAveraged = playerList.Where(p => p.Time >= i && p.Time < upperScore);
+					IEnumerable<LbDataPlayer> toBeAveraged = playerList.Where(p => p.Time >= i && p.Time < upperScore);
 					if (!toBeAveraged.Any())
 						yValues.Add(0);
 					else
@@ -163,7 +157,7 @@ namespace Clubber.Helpers
 				for (float i = minScore; i <= maxScore; i = upperScore)
 				{
 					upperScore = MoveUp((int)i, bracketSize);
-					var toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
+					IEnumerable<LbDataPlayer> toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
 					if (!toBeAveraged.Any())
 						yValues.Add(0);
 					else
@@ -198,7 +192,7 @@ namespace Clubber.Helpers
 				for (float i = minScore; i <= maxScore; i = upperScore)
 				{
 					upperScore = MoveUp((int)i, bracketSize);
-					var toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
+					IEnumerable<LbDataPlayer> toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
 					if (!toBeAveraged.Any())
 						yValues.Add(0);
 					else
@@ -233,7 +227,7 @@ namespace Clubber.Helpers
 				for (float i = minScore; i <= maxScore; i = upperScore)
 				{
 					upperScore = MoveUp((int)i, bracketSize);
-					var toBeAveraged = playerList.Where(p => p.Time >= i && p.Time < upperScore && p.DaggersFired != 0);
+					IEnumerable<LbDataPlayer> toBeAveraged = playerList.Where(p => p.Time >= i && p.Time < upperScore && p.DaggersFired != 0);
 					if (!toBeAveraged.Any())
 						yValues.Add(0);
 					else
@@ -272,12 +266,12 @@ namespace Clubber.Helpers
 
 		public static async Task<Stream> GetByDeathChartStream(int bottomLimit, int toplimit)
 		{
-			LeaderboardData LB = new LeaderboardData();
+			LeaderboardData lb = new();
 
-			if (LB.PlayerList.Count == 0)
+			if (lb.PlayerList.Count == 0)
 				return null;
 
-			var result = LB.PlayerList.Select(p => p.Death)
+			IOrderedEnumerable<IGrouping<string, string>> result = lb.PlayerList.Select(p => p.Death)
 				.Skip(toplimit - 1)
 				.Take(bottomLimit - (toplimit - 1))
 				.GroupBy(d => d)
@@ -358,7 +352,7 @@ namespace Clubber.Helpers
       				yAxes: [
 						{{
 						ticks: {{
-							{(precise ? "" : "precision: 0,")}
+							{(precise ? string.Empty : "precision: 0,")}
 							beginAtZero: true
 						}},
 						scaleLabel: {{
@@ -373,7 +367,7 @@ namespace Clubber.Helpers
                     text: '{title}'
                 }}
                 }}
-            }}"
+            }}",
 			};
 		}
 	}
