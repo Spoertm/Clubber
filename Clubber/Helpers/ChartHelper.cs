@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Clubber.Files;
+using MongoDB.Driver;
+using QuickChart;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Clubber.Files;
-using MongoDB.Driver;
-using QuickChart;
 
 namespace Clubber.Helpers
 {
