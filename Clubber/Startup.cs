@@ -17,7 +17,7 @@ namespace Clubber
 
 		public Startup(string[] args)
 		{
-			var builder = new ConfigurationBuilder()        // Create a new instance of the config builder
+			IConfigurationBuilder builder = new ConfigurationBuilder()        // Create a new instance of the config builder
 				.SetBasePath(AppContext.BaseDirectory)      // Specify the default location for the config file
 				.AddYamlFile("_config.yml");                // Add this (yaml encoded) file to the configuration
 			Configuration = builder.Build();                // Build the configuration
@@ -25,16 +25,16 @@ namespace Clubber
 
 		public static async Task RunAsync(string[] args)
 		{
-			var startup = new Startup(args);
+			Startup startup = new(args);
 			await startup.RunAsync();
 		}
 
 		public async Task RunAsync()
 		{
-			var services = new ServiceCollection();             // Create a new instance of a service collection
+			ServiceCollection services = new();             // Create a new instance of a service collection
 			ConfigureServices(services);
 
-			var provider = services.BuildServiceProvider();     // Build the service provider
+			ServiceProvider provider = services.BuildServiceProvider();     // Build the service provider
 			provider.GetRequiredService<LoggingService>();      // Start the logging service
 			provider.GetRequiredService<CommandHandler>();      // Start the command handler service
 
@@ -48,7 +48,7 @@ namespace Clubber
 			{                                       // Add discord to the collection
 				LogLevel = LogSeverity.Error,       // Tell the logger to give Verbose amount of info
 				MessageCacheSize = 1000,            // Cache 1,000 messages per channel
-				AlwaysDownloadUsers = true
+				AlwaysDownloadUsers = true,
 			}))
 			.AddSingleton(new CommandService(new CommandServiceConfig
 			{                                       // Add the command service to the collection

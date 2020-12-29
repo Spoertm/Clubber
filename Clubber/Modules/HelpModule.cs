@@ -2,7 +2,6 @@
 using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -11,20 +10,20 @@ namespace Clubber.Modules
 	[Summary("Get a list of commands, or info regarding a specific command.")]
 	public class HelpModule : AbstractModule<SocketCommandContext>
 	{
-		private readonly CommandService service;
-		private readonly IConfigurationRoot config;
+		private readonly CommandService _service;
+		private readonly IConfigurationRoot _config;
 
-		public HelpModule(CommandService _service, IConfigurationRoot _config)
+		public HelpModule(CommandService service, IConfigurationRoot config)
 		{
-			service = _service;
-			config = _config;
+			_service = service;
+			_config = config;
 		}
 
 		[Command]
 		public async Task Help([Remainder] string command)
 		{
-			var result = service.Search(Context, command);
-			var preCondCheck = result.IsSuccess ? await result.Commands[0].Command.CheckPreconditionsAsync(Context) : null;
+			SearchResult result = _service.Search(Context, command);
+			PreconditionResult preCondCheck = result.IsSuccess ? await result.Commands[0].Command.CheckPreconditionsAsync(Context) : null;
 
 			if (await IsError(!result.IsSuccess, $"The command `{command}` doesn't exist."))
 				return;
@@ -32,10 +31,10 @@ namespace Clubber.Modules
 			if (await IsError(!preCondCheck.IsSuccess, $"The command `{command}` couldn't be executed.\nReason: " + preCondCheck.ErrorReason))
 				return;
 
-			string prefix = config["prefix"], aliases = "";
+			string aliases = string.Empty;
 			EmbedBuilder embedBuilder = new();
 
-			var cmd = result.Commands[0].Command;
+			CommandInfo cmd = result.Commands[0].Command;
 			if (cmd.Module.Group == null)
 			{
 				if (cmd.Aliases.Count > 1)
@@ -55,23 +54,20 @@ namespace Clubber.Modules
 			if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
 				embedBuilder.Footer = new EmbedFooterBuilder { Text = "<>: Required⠀⠀[]: Optional\nText within \" \" will be counted as one argument." };
 
-			await ReplyAsync("", false, embedBuilder.Build());
+			await ReplyAsync(string.Empty, false, embedBuilder.Build());
 		}
 
 		[Command]
 		public async Task Help()
 		{
-			string prefix = config["prefix"];
+			string prefix = _config["prefix"];
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle("List of commands")
 				.WithDescription($"Prefix: {Format.Code(prefix)}\n\n")
 				.WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
 				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
 
-			StringBuilder description = new();
-			var commandGroups = service.Commands.GroupBy(x => x.Module.Name);
-
-			foreach (var group in commandGroups)
+			foreach (IGrouping<string, CommandInfo> group in _service.Commands.GroupBy(x => x.Module.Name))
 			{
 				string groupCommands = string.Join(", ", group
 					.Select(x => x)
@@ -83,7 +79,7 @@ namespace Clubber.Modules
 					embed.AddField(group.Key, groupCommands);
 			}
 
-			await ReplyAsync("", false, embed.Build());
+			await ReplyAsync(string.Empty, false, embed.Build());
 		}
 
 		/// <summary>

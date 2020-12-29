@@ -51,7 +51,7 @@ namespace Clubber.Modules
 		[Priority(1)]
 		public async Task UpdateRoles()
 		{
-			var user = Context.User as SocketGuildUser;
+			SocketGuildUser user = Context.User as SocketGuildUser;
 			if (user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
 			{
 				await ReplyAsync($"{user.Username}, you can't register because you've cheated.");
@@ -63,7 +63,7 @@ namespace Clubber.Modules
 				return;
 			}
 
-			var response = await _updateRolesHelper.UpdateUserRoles(_databaseHelper.GetDdUserFromId(user.Id));
+			UpdateRoleResponse response = await _updateRolesHelper.UpdateUserRoles(_databaseHelper.GetDdUserFromId(user.Id));
 
 			await WriteRoleUpdateEmbed(user, response);
 
@@ -78,10 +78,13 @@ namespace Clubber.Modules
 				.WithDescription($"User: {guildMember.Mention}")
 				.WithThumbnailUrl(guildMember.GetAvatarUrl() ?? guildMember.GetDefaultAvatarUrl());
 
-			if (response.RemovedRoles.Count > 0) embed.AddField(new EmbedFieldBuilder()
-				.WithName("Removed:")
-				.WithValue(string.Join('\n', response.RemovedRoles.Select(sr => sr.Mention)))
-				.WithIsInline(true));
+			if (response.RemovedRoles.Count > 0)
+			{
+				embed.AddField(new EmbedFieldBuilder()
+					.WithName("Removed:")
+					.WithValue(string.Join('\n', response.RemovedRoles.Select(sr => sr.Mention)))
+					.WithIsInline(true));
+			}
 
 			if (!response.MemberHasRole)
 			{
@@ -101,12 +104,12 @@ namespace Clubber.Modules
 		{
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(
 				u => u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-				(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
+				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
 
 			int guildMatchesCount = guildMatches.Count();
 
 			if (guildMatchesCount == 0)
-				await ReplyAsync($"User not found.");
+				await ReplyAsync("User not found.");
 			else if (guildMatchesCount == 1)
 				await UpdateRolesFromId(guildMatches.First().Id);
 			else
@@ -127,13 +130,15 @@ namespace Clubber.Modules
 			if (await IsError(!userIsInGuild && !userInDb, "User not found.") || await IsError(!userIsInGuild && userInDb, "User is registered but isn't in the server."))
 				return;
 
-			var guildUser = Context.Guild.GetUser(discordId);
+			SocketGuildUser guildUser = Context.Guild.GetUser(discordId);
 			if (await IsError(guildUser.IsBot, $"{guildUser.Mention} is a bot. It can't be registered as a DD player.") ||
 				await IsError(guildUser.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{guildUser.Username} can't be registered because they've cheated.") ||
 				await IsError(!userInDb, $"`{guildUser.Username}` is not registered. Please ask an admin/moderator/role assigner to register them."))
+			{
 				return;
+			}
 
-			var response = await _updateRolesHelper.UpdateUserRoles(_databaseHelper.GetDdUserFromId(discordId));
+			UpdateRoleResponse response = await _updateRolesHelper.UpdateUserRoles(_databaseHelper.GetDdUserFromId(discordId));
 			if (!response.Success)
 				await ReplyAsync($"No updates were needed for {guildUser.Username}.");
 		}

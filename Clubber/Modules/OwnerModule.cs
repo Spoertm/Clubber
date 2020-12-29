@@ -25,9 +25,9 @@ namespace Clubber.Modules
 
 		[Command("changebotavatar")]
 		[Summary("Changes the bot's avatar. Specify either the URL of the image or attach it.")]
-		public async Task ChangeBotAvatar(string imgUrl = null, string image = null)
+		public async Task ChangeBotAvatar(string imgUrl = null)
 		{
-			using HttpClient Client = new();
+			using HttpClient client = new();
 			Stream stream = new MemoryStream();
 
 			if (await IsError(string.IsNullOrWhiteSpace(imgUrl) && Context.Message.Attachments.Count == 0, "Invalid arguments."))
@@ -38,18 +38,19 @@ namespace Clubber.Modules
 				if (await IsError(!(Uri.TryCreate(imgUrl, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)), "Invalid URL."))
 					return;
 
-				stream = await Client.GetStreamAsync(imgUrl);
+				stream = await client.GetStreamAsync(imgUrl);
 			}
 			else if (Context.Message.Attachments.Count > 0)
 			{
 				string[] imageFormats = new string[] { "jpg", "jpeg", "png", "gif" };
-				var atchm = Context.Message.Attachments.First();
+				Attachment atchm = Context.Message.Attachments.First();
 
 				if (await IsError(!imageFormats.Contains(atchm.Filename[^3..]), "Image file format has to be of type: " + string.Join('/', imageFormats)))
 					return;
 
-				stream = await Client.GetStreamAsync(Context.Message.Attachments.First().Url);
+				stream = await client.GetStreamAsync(Context.Message.Attachments.First().Url);
 			}
+
 			await ReplyAsync("Bot avatar should change in a moment.");
 			await Context.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(stream));
 		}

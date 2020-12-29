@@ -39,7 +39,7 @@ namespace Clubber.Helpers
 			foreach (DdUser user in dbUsersList)
 				tasks.Add(UpdateUserRoles(user));
 
-			var responses = await Task.WhenAll(tasks);
+			UpdateRoleResponse[] responses = await Task.WhenAll(tasks);
 			int usersUpdated = responses.Count(b => b.Success);
 			return new(usersUpdated, nonMemberCount, responses);
 		}
@@ -85,7 +85,7 @@ namespace Clubber.Helpers
 		{
 			List<SocketRole> removedRoles = new List<SocketRole>();
 
-			foreach (var role in member.Roles)
+			foreach (SocketRole role in member.Roles)
 			{
 				if (_scoreRoles.ScoreRoleDictionary.ContainsValue(role.Id) && role.Id != excludedRole.Id || role.Id == 728663492424499200)
 				{
@@ -93,6 +93,7 @@ namespace Clubber.Helpers
 					removedRoles.Add(role);
 				}
 			}
+
 			return removedRoles;
 		}
 

@@ -7,12 +7,12 @@ namespace Clubber.Databases
 {
 	public class ScoreRoles
 	{
-		public Dictionary<int, ulong> ScoreRoleDictionary { get; }
-
 		public ScoreRoles()
 		{
-			string ScoreRoleJsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Files/ScoreRoles.json");
-			ScoreRoleDictionary = JsonConvert.DeserializeObject<Dictionary<int, ulong>>(File.ReadAllText(ScoreRoleJsonPath));
+			string scoreRoleJsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Files/ScoreRoles.json");
+			ScoreRoleDictionary = JsonConvert.DeserializeObject<Dictionary<int, ulong>>(File.ReadAllText(scoreRoleJsonPath));
 		}
+
+		public Dictionary<int, ulong> ScoreRoleDictionary { get; }
 	}
 }
