@@ -45,16 +45,16 @@ namespace Clubber.Modules
 		public async Task AddUserByLbIdAndDscId(uint lbId, ulong discordId)
 		{
 			SocketGuildUser user = Context.Guild.GetUser(discordId);
-			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user == null ? string.Empty : user.Username)}({discordId})` is already registered."))
+			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user?.Username ?? string.Empty)}({discordId})` is already registered."))
 				return;
 
 			if (await IsError(user == null, "User not found."))
 				return;
 
-			const ulong cheaterRoleId = 693432614727581727;
 			if (await IsError(user.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player."))
 				return;
 
+			const ulong cheaterRoleId = 693432614727581727;
 			if (await IsError(user.Roles.Any(r => r.Id == cheaterRoleId), $"{user.Username} can't be registered because they've cheated."))
 				return;
 
@@ -69,7 +69,7 @@ namespace Clubber.Modules
 					return;
 
 				_databaseHelper.AddUser(databaseUser);
-				await ReplyAsync($"✅ `{user.Username} is now registered.");
+				await ReplyAsync($"✅ `{user.Username}` is now registered.");
 			}
 			catch
 			{
