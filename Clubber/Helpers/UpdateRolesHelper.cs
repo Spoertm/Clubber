@@ -85,9 +85,10 @@ namespace Clubber.Helpers
 		{
 			List<SocketRole> removedRoles = new List<SocketRole>();
 
+			const ulong newMemberRoleId = 728663492424499200;
 			foreach (SocketRole role in member.Roles)
 			{
-				if (_scoreRoles.ScoreRoleDictionary.ContainsValue(role.Id) && role.Id != excludedRole.Id || role.Id == 728663492424499200)
+				if (_scoreRoles.ScoreRoleDictionary.ContainsValue(role.Id) && role.Id != excludedRole.Id || role.Id == newMemberRoleId)
 				{
 					await member.RemoveRoleAsync(role);
 					removedRoles.Add(role);
