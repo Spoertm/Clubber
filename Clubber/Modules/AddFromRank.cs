@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Clubber.Databases;
+﻿using Clubber.Databases;
 using Clubber.Files;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
