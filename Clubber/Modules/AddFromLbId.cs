@@ -1,15 +1,15 @@
-﻿using Clubber.Files;
-using Clubber.Helpers;
+﻿using System.Collections.Generic;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Clubber.Databases;
+using Clubber.Files;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
@@ -17,45 +17,40 @@ namespace Clubber.Modules
 	[Group("addfromlbid"), Alias("addlbid")]
 	[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
 	[RequireUserPermission(GuildPermission.ManageRoles)]
-	public class AddFromLbId : AbstractModule<SocketCommandContext>
+	public class AddFromLbId : ModuleBase<SocketCommandContext>
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IMongoCollection<DdUser> Database;
 
-		public AddFromLbId(DatabaseHelper databaseHelper)
+		public AddFromLbId(MongoDatabase mongoDatabase)
 		{
-			_databaseHelper = databaseHelper;
+			Database = mongoDatabase.DdUserCollection;
 		}
 
 		[Command]
 		[Priority(1)]
-		public async Task AddUserById(uint lbId, [Remainder] string name)
+		public async Task AddUserByID(uint lbId, [Remainder] string name)
 		{
-			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u =>
-				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-				(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
-			var response = await DatabaseHelper.AddToDbFromName(userMatches, lbId, async (lbId, discordId) => await AddUserByLbIdAndDscId(lbId, discordId));
-
-			if (response.NumberOfMatches == 0)
-				await Context.Channel.SendMessageAsync($"No user found.");
-			else if (response.NumberOfMatches > 1)
-				await Context.Channel.SendMessageAsync($"Multiple people have the name `{name.ToLower()}`. Try mentioning the user.");
+			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u => 
+			u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
+			(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
+			await Helper.AddToDbFromName(userMatches, name, lbId, async (lbId, discordId) => await AddUserByLbIdAndDscId(lbId, discordId), Context.Channel);
 		}
 
 		[Command]
 		[Priority(2)]
-		public async Task AddUserById(uint lbId, IUser userMention)
-			=> await AddUserByLbIdAndDscId(lbId, userMention.Id);
+		public async Task AddUserByID(uint lbId, IUser userMention) => await AddUserByLbIdAndDscId(lbId, userMention.Id);
 
 		[Command("id")]
 		[Priority(3)]
 		public async Task AddUserByLbIdAndDscId(uint lbId, ulong discordId)
 		{
 			SocketGuildUser user = Context.Guild.GetUser(discordId);
-			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user == null ? "" : user.Username)}({discordId})` is already registered.") ||
-				await IsError(user == null, "User not found.") ||
-				await IsError(user.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player.") ||
-				await IsError(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username} can't be registered because they've cheated."))
-				return;
+			if (Helper.DiscordIdExistsInDb(discordId, Database)) { await ReplyAsync($"User `{(user == null ? "" : user.Username)}({discordId})` is already registered."); return; }
+			if (user == null) { await ReplyAsync($"User not found."); return; }
+
+			const ulong cheaterRoleId = 693432614727581727;
+			if (user.IsBot) { await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player."); return; }
+			if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username} can't be registered because they've cheated."); return; }
 
 			try
 			{
@@ -64,11 +59,10 @@ namespace Clubber.Modules
 				DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 				DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-				if (await IsError(_databaseHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId), $"There already exists a registered user with the leaderboard ID `{databaseUser.LeaderboardId}`."))
-					return;
+				if (Helper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId, Database)) { await ReplyAsync($"There already exists a registered user with the leaderboard ID `{databaseUser.LeaderboardId}`."); return; }
 
-				_databaseHelper.AddUser(databaseUser);
-				await ReplyAsync($"✅ Added `{user.Username}` to the database.");
+				Database.InsertOne(databaseUser);
+				await ReplyAsync($"✅ `{user.Username} is now registered.");
 			}
 			catch
 			{

@@ -1,95 +1,122 @@
-﻿using Clubber.Databases;
-using Clubber.Helpers;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Clubber.Databases;
+using Clubber.Files;
+using Clubber.Helpers;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 
 namespace Clubber.Modules
 {
 	[Name("Statistics")]
-	public class StatisticsModule : AbstractModule<SocketCommandContext>
+	public class StatisticsModule : ModuleBase<SocketCommandContext>
 	{
-		private const int _maxLimit = 229900;
-		private readonly ChartHelper _chartHelper;
-		private readonly Dictionary<int, ulong> _scoreRolesDict;
+		private readonly ChartHelper ChartHelper;
+		private readonly Dictionary<int, ulong> ScoreRolesDict;
+		private const int MAX_LIMIT = 229900;
+		private const int DEFAULT_UPPER_LIMIT = 1;
+		private const int DEFAULT_GRANULARITY = 10;
+		private const string DEFAULT_PROPERTYTYPE = PropertyType.Seconds;
 
-		public StatisticsModule(ChartHelper chartHelper, ScoreRoles scoreRoles)
+		public StatisticsModule(ChartHelper _chartHelper, ScoreRoles _scroreRoles)
 		{
-			_chartHelper = chartHelper;
-			_scoreRolesDict = scoreRoles.ScoreRoleDictionary;
+			ChartHelper = _chartHelper;
+			ScoreRolesDict = _scroreRoles.ScoreRoleDictionary;
 		}
 
-		[Command("every10")]
-		[Summary("Shows number of users per 10s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
-		public async Task Every10(uint topLimit, uint bottomLimit)
-			=> await EveryX(10, bottomLimit, topLimit);
+		[Command("graph")]
+		[Summary(@"
+Shows a graph of how frequent a property occurs within the DD leaderboard.
 
-		[Command("every10")]
-		public async Task Every10(uint bottomLimit)
-			=> await EveryX(10, bottomLimit, 1);
+`property`: Could be seconds/kills/gems/daggershit/daggersfired/accuracy (default = seconds)
+`granularity`: How roughly detailed the graph should be, in seconds (default = 10)
+`upperLimit`: The rank where the range starts (default = 1)
+`lowerLimit`: The rank where the range ends (default = 229900, also the maximum)")]
+		public async Task Graph(string property, uint granularity, uint upperLimit, uint lowerLimit)
+			=> await GraphX(property, (int)granularity, (int)upperLimit, (int)lowerLimit);
 
-		[Command("every10")]
-		public async Task Every10()
-			=> await EveryX(10, _maxLimit, 1);
+		[Command("graph")]
+		public async Task Graph(string property, uint granularity, uint lowerLimit)
+			=> await GraphX(property, (int)granularity, DEFAULT_UPPER_LIMIT, (int)lowerLimit);
 
-		[Command("every50")]
-		[Summary("Shows number of users per 50s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
-		public async Task Every50(uint topLimit, uint bottomLimit)
-			=> await EveryX(50, bottomLimit, topLimit);
+		[Command("graph")]
+		public async Task Graph(string property, uint granularity)
+			=> await GraphX(property, (int)granularity, DEFAULT_UPPER_LIMIT, MAX_LIMIT);
 
-		[Command("every50")]
-		public async Task Every50(uint bottomLimit)
-			=> await EveryX(50, bottomLimit, 1);
+		[Command("graph")]
+		public async Task Graph(string property)
+			=> await GraphX(property, DEFAULT_GRANULARITY, DEFAULT_UPPER_LIMIT, MAX_LIMIT);
 
-		[Command("every50")]
-		public async Task Every50()
-			=> await EveryX(50, _maxLimit, 1);
+		[Command("graph")]
+		public async Task Graph()
+			=> await GraphX(DEFAULT_PROPERTYTYPE, DEFAULT_GRANULARITY, DEFAULT_UPPER_LIMIT, MAX_LIMIT);
 
-		[Command("every100")]
-		[Summary("Shows number of users per 100s PB bracket.\n\n`bottomLimit`: The larger number/further down the leaderboard (default = 229900)\n\n`topLimit`: The smaller number/further up the leaderboard (default = 1)")]
-		public async Task Every100(uint topLimit, uint bottomLimit)
-			=> await EveryX(100, bottomLimit, topLimit);
-
-		[Command("every100")]
-		public async Task Every100(uint bottomLimit)
-			=> await EveryX(100, bottomLimit, 1);
-
-		[Command("every100")]
-		public async Task Every100()
-			=> await EveryX(100, _maxLimit, 1);
-
-		private async Task EveryX(uint bracketSize, uint bottomLimit, uint topLimit)
+		private async Task GraphX(string property, int granularity, int upperLimit, int lowerLimit)
 		{
-			topLimit = Math.Max(topLimit, 1);
-			bottomLimit = Math.Min(bottomLimit, topLimit - 1);
+			if (!PropertyCheck(property))
+			{
+				await ReplyAsync($"Property can only be `{string.Join("`/`", GetPropertyStrings())}`.");
+				return;
+			}
+			if (upperLimit > lowerLimit)
+			{
+				await ReplyAsync("The upper limit can't be bigger than the lower limit.");
+				return;
+			}
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await _chartHelper.GetEveryXBracketChartStream(bracketSize, bottomLimit, topLimit);
+			granularity = granularity < 1 ? 1 : granularity > 1000 ? 1000 : granularity;
+			Stream chartStream = await ChartHelper.GetEveryXBracketChartStream(granularity, Math.Min(MAX_LIMIT, lowerLimit), Math.Max(1, upperLimit), property);
 
-			if (await IsError(chartStream == null, "Another operation is in process, try again shortly.\n(Or you've input identical limits!)"))
+			if (chartStream == null)
+			{
+				await ReplyAsync("Another operation is in process, try again shortly.");
 				return;
+			}
 
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 			await processingMessage.DeleteAsync();
 		}
 
-		[Command("byrole")]
+		private static bool PropertyCheck(string property)
+		{
+			IEnumerable<string> fieldList = GetPropertyStrings();
+
+			foreach (string field in fieldList)
+			{
+				if (property.Equals(field, StringComparison.InvariantCultureIgnoreCase))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private static IEnumerable<string> GetPropertyStrings()
+		{
+			return new PropertyType()
+				.GetType()
+				.GetFields()
+				.Select(f => f.GetRawConstantValue() as string);
+		}
+
+		[Command("rolegraph")]
 		[Summary("Shows the number of members per club role.")]
 		public async Task ByRole()
 		{
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			List<string> roleNames = new();
-			List<int> roleMemberCounts = new();
+			List<string> roleNames = new List<string>();
+			List<int> roleMemberCounts = new List<int>();
 			SocketRole role;
 
-			foreach (ulong id in _scoreRolesDict.Values.Reverse())
+			foreach (var id in ScoreRolesDict.Values.Reverse())
 			{
 				role = Context.Guild.GetRole(id);
 				roleNames.Add(role.Name);
@@ -103,30 +130,36 @@ namespace Clubber.Modules
 			await processingMessage.DeleteAsync();
 		}
 
-		[Command("bydeath")]
+		[Command("deathgraph")]
 		[Summary("Shows death type frequency within the given top range.")]
-		public async Task ByDeath(uint topLimit, uint bottomLimit)
+		public async Task DeathGraph(uint upperLimit, uint lowerLimit)
 		{
-			topLimit = Math.Max(topLimit, 1);
-			bottomLimit = Math.Min(bottomLimit, topLimit - 1);
+			if (upperLimit > lowerLimit)
+			{
+				await ReplyAsync("Upper limit can't be bigger than the lower limit.");
+				return;
+			}
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)bottomLimit, (int)topLimit);
+			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)Math.Max(1, upperLimit), (int)Math.Min(MAX_LIMIT, lowerLimit));
 
-			if (await IsError(chartStream == null, "Another operation is in process, try again shortly.\n(Or you've input identical limits!)"))
+			if (chartStream == null)
+			{
+				await ReplyAsync("Another operation is in process, try again shortly.");
 				return;
+			}
 
 			await Context.Channel.SendFileAsync(chartStream, "chart.png");
 			await processingMessage.DeleteAsync();
 		}
 
-		[Command("bydeath")]
-		public async Task ByDeath(uint bottomLimit)
-			=> await ByDeath(1, bottomLimit);
+		[Command("deathgraph")]
+		public async Task ByDeath(uint lowerLimit)
+			=> await DeathGraph(1, lowerLimit);
 
-		[Command("bydeath")]
+		[Command("deathgraph")]
 		public async Task ByDeath()
-			=> await ByDeath(1, _maxLimit);
+			=> await DeathGraph(1, MAX_LIMIT);
 	}
 }
