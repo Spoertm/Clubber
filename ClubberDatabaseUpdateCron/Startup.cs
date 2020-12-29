@@ -1,6 +1,6 @@
 ﻿using Clubber;
 using Clubber.Databases;
-using Clubber.Modules;
+using Clubber.Helpers;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -8,15 +8,15 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace ClubberDatabaseUpdateCron
 {
 	public class Startup
 	{
-		DiscordSocketClient Client;
-		ServiceProvider Provider;
-		public IConfigurationRoot Configuration { get; }
+		private DiscordSocketClient _client;
+		private ServiceProvider _provider;
 
 		public Startup(string[] args)
 		{
@@ -26,6 +26,8 @@ namespace ClubberDatabaseUpdateCron
 			Configuration = builder.Build();                // Build the configuration
 		}
 
+		public IConfigurationRoot Configuration { get; }
+
 		public static async Task RunAsync(string[] args)
 		{
 			var startup = new Startup(args);
@@ -34,57 +36,64 @@ namespace ClubberDatabaseUpdateCron
 
 		public async Task RunAsync()
 		{
-			var services = new ServiceCollection();             // Create a new instance of a service collection
+			var services = new ServiceCollection(); // Create a new instance of a service collection
 			ConfigureServices(services);
 
-			Provider = services.BuildServiceProvider();     // Build the service provider
-			Client = Provider.GetRequiredService<DiscordSocketClient>();
+			_provider = services.BuildServiceProvider(); // Build the service provider
+			_client = _provider.GetRequiredService<DiscordSocketClient>();
 
 			string discordToken = "NzQzNDMxNTAyODQyMjk4MzY4.XzUkig.UQrKlF7axeeFqewonpkTTAwaIIo";
-			await Client.LoginAsync(TokenType.Bot, discordToken);
-			await Client.StartAsync();
+			await _client.LoginAsync(TokenType.Bot, discordToken);
+			await _client.StartAsync();
 
-			Client.Ready += OnReady;
+			_client.Ready += OnReady;
 
 			await Task.Delay(-1);
 		}
 
 		public async Task OnReady()
 		{
-			SocketGuild DdPals = Client.GetGuild(399568958669455364);
-			SocketTextChannel TestAndConfigChannel = DdPals.GetTextChannel(447487662891466752);
+			SocketGuild ddPals = _client.GetGuild(399568958669455364);
+			SocketTextChannel testAndConfigChannel = ddPals.GetTextChannel(447487662891466752);
 
 			int tries = 1, maxTries = 5;
-			await TestAndConfigChannel.SendMessageAsync(":dagger: Attempting database update...");
+			IUserMessage msg = await testAndConfigChannel.SendMessageAsync(":dagger: Attempting database update...");
 
-			var mongoDB = Provider.GetRequiredService<MongoDatabase>();
-			var scoreRoles = Provider.GetRequiredService<ScoreRoles>();
+			var updateRoleHelper = _provider.GetRequiredService<UpdateRolesHelper>();
 
-			var roleUpdateModule = new RoleUpdateModule(mongoDB, scoreRoles);
-			
 			bool success = false;
 			do
 			{
 				try
 				{
-					await roleUpdateModule.UpdateRolesAndDataBase();
+					Stopwatch stopwatch = new Stopwatch();
+					stopwatch.Start();
+
+					var response = await updateRoleHelper.UpdateRolesAndDb();
 					success = true;
+
+					if (response.NonMemberCount > 0)
+						await testAndConfigChannel.SendMessageAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s). They're most likely not in the server.");
+
+					if (response.UpdatedUsers > 0)
+						await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and member roles for {response.UpdatedUsers} users.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+					else
+						await msg.ModifyAsync(m => m.Content = $"No role updates were needed.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
 				}
 				catch
 				{
 					tries++;
 					if (tries > maxTries)
 					{
-						await TestAndConfigChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
+						await testAndConfigChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 						break;
 					}
 					else
 					{
-						await TestAndConfigChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed, possible lock on file. Trying again in 10s...");
+						await testAndConfigChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed, possible lock on file. Trying again in 10s...");
 						System.Threading.Thread.Sleep(10000); // Sleep 10s
 					}
 				}
-				
 			} while (!success);
 
 			Environment.Exit(0);
@@ -112,6 +121,8 @@ namespace ClubberDatabaseUpdateCron
 			.AddSingleton<Random>()
 			.AddSingleton<MongoDatabase>()
 			.AddSingleton<ScoreRoles>()
+			.AddSingleton<UpdateRolesHelper>()
+			.AddSingleton<DatabaseHelper>()
 			.AddSingleton(Configuration);
 		}
 	}

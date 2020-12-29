@@ -9,42 +9,46 @@ namespace Clubber
 {
 	public class CommandHandler
 	{
-		private readonly DiscordSocketClient discord;
-		private readonly CommandService commands;
-		private readonly IConfigurationRoot config;
-		private readonly IServiceProvider provider;
+		private readonly DiscordSocketClient _discord;
+		private readonly CommandService _commands;
+		private readonly IConfigurationRoot _config;
+		private readonly IServiceProvider _provider;
 
-		public CommandHandler(DiscordSocketClient _discord, CommandService _commands, IConfigurationRoot _config, IServiceProvider _provider)
+		public CommandHandler(DiscordSocketClient discord, CommandService commands, IConfigurationRoot config, IServiceProvider provider)
 		{
-			discord = _discord;
-			commands = _commands;
-			config = _config;
-			provider = _provider;
+			_discord = discord;
+			_commands = commands;
+			_config = config;
+			_provider = provider;
 
-			discord.MessageReceived += OnMessageReceivedAsync;
+			_discord.MessageReceived += OnMessageReceivedAsync;
 		}
 
 		private async Task OnMessageReceivedAsync(SocketMessage message)
 		{
-			if (!(message is SocketUserMessage msg) || msg.Source != MessageSource.User) return;
+			if (message is not SocketUserMessage msg || msg.Source != MessageSource.User)
+				return;
 
-			if (msg.Content == discord.CurrentUser.Mention)
+			if (msg.Content == _discord.CurrentUser.Mention)
 			{
 				await msg.AddReactionAsync(new Emoji("🗡"));
 				return;
 			}
 
 			int argPos = 0;
-			if (!(msg.HasStringPrefix(config["prefix"], ref argPos) || msg.HasMentionPrefix(discord.CurrentUser, ref argPos))) return;
+			if (!(msg.HasStringPrefix(_config["prefix"], ref argPos) || msg.HasMentionPrefix(_discord.CurrentUser, ref argPos)))
+				return;
 
-			SocketCommandContext context = new SocketCommandContext(discord, msg);
+			SocketCommandContext context = new SocketCommandContext(_discord, msg);
 
-			IResult result = await commands.ExecuteAsync(context, msg.Content.Substring(argPos), provider);
+			IResult result = await _commands.ExecuteAsync(context, msg.Content[argPos..], _provider);
 
 			if (!result.IsSuccess && result.Error.HasValue)
 			{
-				if (result.Error.Value == CommandError.UnknownCommand) await msg.AddReactionAsync(new Emoji("❔"));
-				else await context.Channel.SendMessageAsync(result.ErrorReason);
+				if (result.Error.Value == CommandError.UnknownCommand)
+					await msg.AddReactionAsync(new Emoji("❔"));
+				else
+					await context.Channel.SendMessageAsync(result.ErrorReason);
 			}
 		}
 	}
