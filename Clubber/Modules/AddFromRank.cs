@@ -1,5 +1,5 @@
-﻿using Clubber.Databases;
-using Clubber.Files;
+﻿using Clubber.Files;
+using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -17,23 +17,23 @@ namespace Clubber.Modules
 	[Group("addfromrank"), Alias("addr")]
 	[Summary("Obtains user from their rank and adds them to the database.")]
 	[RequireUserPermission(GuildPermission.ManageRoles)]
-	public class AddFromRank : ModuleBase<SocketCommandContext>
+	public class AddFromRank : AbstractModule<SocketCommandContext>
 	{
-		private readonly IMongoCollection<DdUser> Database;
+		private readonly DatabaseHelper _databaseHelper;
 
-		public AddFromRank(MongoDatabase mongoDatabase)
+		public AddFromRank(DatabaseHelper databaseHelper)
 		{
-			Database = mongoDatabase.DdUserCollection;
+			_databaseHelper = databaseHelper;
 		}
 
 		[Command]
 		[Priority(1)]
 		public async Task AddUserByRankAndName(uint rank, [Remainder] string name)
 		{
-			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(
-				u => u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-				(u.Nickname != null && u.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
-			await Helper.AddToDbFromName(userMatches, name, rank, async (rank, discordId) => await AddUserByRankAndId(rank, discordId), Context.Channel);
+			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u =>
+				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
+				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
+			await DatabaseHelper.AddToDbFromName(userMatches, rank, async (rank, discordId) => await AddUserByRankAndId(rank, discordId));
 		}
 
 		[Command]
@@ -45,23 +45,30 @@ namespace Clubber.Modules
 		public async Task AddUserByRankAndId(uint rank, ulong discordId)
 		{
 			SocketGuildUser user = Context.Guild.GetUser(discordId);
-			if (Helper.DiscordIdExistsInDb(discordId, Database)) { await ReplyAsync($"User `{(user == null ? "" : user.Username)}({discordId})` is already registered."); return; }
-			if (user == null) { await ReplyAsync($"User not found."); return; }
+			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user?.Username ?? string.Empty)}({discordId})` is already registered."))
+				return;
+
+			if (await IsError(user == null, "User not found."))
+				return;
+
+			if (await IsError(user.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player."))
+				return;
 
 			const ulong cheaterRoleId = 693432614727581727;
-			if (user.IsBot) { await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player."); return; }
-			if (user.Roles.Any(r => r.Id == cheaterRoleId)) { await ReplyAsync($"{user.Username} can't be registered because they've cheated."); return; }
+			if (await IsError(user.Roles.Any(r => r.Id == cheaterRoleId), $"{user.Username} can't be registered because they've cheated."))
+				return;
 
 			try
 			{
-				HttpClient client = new HttpClient();
+				using HttpClient client = new();
 				string jsonUser = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-rank?rank={rank}");
 				DdPlayer lbPlayer = JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 				DdUser databaseUser = new DdUser(discordId, lbPlayer.Id) { Score = lbPlayer.Time / 10000 };
 
-				if (Helper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId, Database)) { await ReplyAsync($"There already exists a registered user with rank `{rank}` and leaderboard ID `{databaseUser.LeaderboardId}`."); return; }
+				if (await IsError(_databaseHelper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId), $"There already exists a registered user with rank `{rank}` and leaderboard ID `{databaseUser.LeaderboardId}`."))
+					return;
 
-				Database.InsertOne(databaseUser);
+				_databaseHelper.AddUser(databaseUser);
 				await ReplyAsync($"✅ `{user.Username}` is now registered.");
 			}
 			catch
