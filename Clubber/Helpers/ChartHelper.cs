@@ -222,7 +222,7 @@ namespace Clubber.Helpers
 			playerList.Reverse();
 
 			List<double> yValues = new List<double>();
-			int upperScore, startIndex = 0;
+			int upperScore;
 
 			if (minScore == maxScore)
 			{
@@ -233,7 +233,7 @@ namespace Clubber.Helpers
 				for (float i = minScore; i <= maxScore; i = upperScore)
 				{
 					upperScore = MoveUp((int)i, bracketSize);
-					var toBeAveraged = playerList.Skip(startIndex).Where(p => p.Time >= i && p.Time < upperScore);
+					var toBeAveraged = playerList.Where(p => p.Time >= i && p.Time < upperScore && p.DaggersFired != 0);
 					if (!toBeAveraged.Any())
 						yValues.Add(0);
 					else
