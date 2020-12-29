@@ -62,7 +62,7 @@ namespace Clubber.Modules
 				if (Helper.LeaderboardIdExistsInDb(databaseUser.LeaderboardId, Database)) { await ReplyAsync($"There already exists a registered user with rank `{rank}` and leaderboard ID `{databaseUser.LeaderboardId}`."); return; }
 
 				Database.InsertOne(databaseUser);
-				await ReplyAsync($"✅ Added `{user.Username}` to the database.");
+				await ReplyAsync($"✅ `{user.Username}` is now registered.");
 			}
 			catch
 			{
