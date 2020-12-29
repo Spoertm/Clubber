@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -58,17 +59,7 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 		{
 			if (!PropertyCheck(property))
 			{
-				await ReplyAsync("Property can only be `seconds`/`kills`/`gems`/`daggershit`/`daggersfired`/`daggersperc`");
-				return;
-			}
-			if (granularity < 1 || granularity > 1000)
-			{
-				await ReplyAsync("Granularity can't be smaller than 1 or greater than 1000.");
-				return;
-			}
-			if (upperLimit < 1 || lowerLimit > MAX_LIMIT)
-			{
-				await ReplyAsync("Upper limit can't be smaller than 1 and lower limit can't be greater than 229900.");
+				await ReplyAsync($"Property can only be `{string.Join("`/`", GetPropertyStrings())}`.");
 				return;
 			}
 			if (upperLimit > lowerLimit)
@@ -77,11 +68,10 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 				return;
 			}
 
-
-
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await ChartHelper.GetEveryXBracketChartStream(granularity, lowerLimit, upperLimit, property);
+			granularity = granularity < 1 ? 1 : granularity > 1000 ? 1000 : granularity;
+			Stream chartStream = await ChartHelper.GetEveryXBracketChartStream(granularity, Math.Min(MAX_LIMIT, lowerLimit), Math.Max(1, upperLimit), property);
 
 			if (chartStream == null)
 			{
@@ -93,22 +83,27 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 			await processingMessage.DeleteAsync();
 		}
 
-		private bool PropertyCheck(string property)
+		private static bool PropertyCheck(string property)
 		{
-			IEnumerable<string> fieldList = new PropertyType()
-				.GetType()
-				.GetFields()
-				.Select(f => f.GetRawConstantValue() as string);
+			IEnumerable<string> fieldList = GetPropertyStrings();
 
 			foreach (string field in fieldList)
 			{
-				if (property.Equals(field, System.StringComparison.InvariantCultureIgnoreCase))
+				if (property.Equals(field, StringComparison.InvariantCultureIgnoreCase))
 				{
 					return true;
 				}
 			}
 
 			return false;
+		}
+
+		private static IEnumerable<string> GetPropertyStrings()
+		{
+			return new PropertyType()
+				.GetType()
+				.GetFields()
+				.Select(f => f.GetRawConstantValue() as string);
 		}
 
 		[Command("rolegraph")]
@@ -139,11 +134,6 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 		[Summary("Shows death type frequency within the given top range.")]
 		public async Task DeathGraph(uint upperLimit, uint lowerLimit)
 		{
-			if (upperLimit < 1 || lowerLimit > 229900)
-			{
-				await ReplyAsync("Upper limit can't be smaller than 1 and the lower limit can't be bigger than 229900.");
-				return;
-			}
 			if (upperLimit > lowerLimit)
 			{
 				await ReplyAsync("Upper limit can't be bigger than the lower limit.");
@@ -152,7 +142,7 @@ Shows a graph of how frequent a property occurs within the DD leaderboard.
 
 			IUserMessage processingMessage = await ReplyAsync("Processing...");
 
-			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)lowerLimit, (int)upperLimit);
+			Stream chartStream = await ChartHelper.GetByDeathChartStream((int)Math.Max(1, upperLimit), (int)Math.Min(MAX_LIMIT, lowerLimit));
 
 			if (chartStream == null)
 			{
