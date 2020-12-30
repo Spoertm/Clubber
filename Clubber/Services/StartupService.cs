@@ -39,7 +39,12 @@ namespace Clubber
 			await _discord.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
 			await _discord.StartAsync();                                // Connect to the websocket
 
-			await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _provider);     // Load commands and modules into the command service
+			_discord.Ready += OnReady;
+		}
+
+		public async Task OnReady()
+		{
+			await _commands.AddModulesAsync(Assembly.GetExecutingAssembly(), _provider);
 		}
 	}
 }
