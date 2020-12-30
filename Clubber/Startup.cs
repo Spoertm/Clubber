@@ -64,6 +64,8 @@ namespace Clubber
 			.AddSingleton<Random>()
 			.AddSingleton<MongoDatabase>()
 			.AddSingleton<ScoreRoles>()
+			.AddSingleton<DatabaseHelper>()
+			.AddSingleton<UpdateRolesHelper>()
 			.AddSingleton<ChartHelper>()
 			.AddSingleton(Configuration);
 		}
