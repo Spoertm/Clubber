@@ -2,7 +2,7 @@
 using Clubber.Files;
 using Discord.WebSocket;
 using MongoDB.Driver;
-using System;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -12,19 +12,19 @@ namespace Clubber.Helpers
 {
 	public class UpdateRolesHelper
 	{
-		private readonly DiscordSocketClient _client;
+		private const ulong _wrRoleId = 446688666325090310;
+		private const ulong _top3RoleId = 472451008342261820;
+		private const ulong _top10RoleId = 556255819323277312;
+
 		private readonly ScoreRoles _scoreRoles;
 		private readonly DatabaseHelper _databaseHelper;
-
 		private readonly SocketGuild _guild;
 
 		public UpdateRolesHelper(DiscordSocketClient client, ScoreRoles scoreRoles, DatabaseHelper databaseHelper)
 		{
-			_client = client;
 			_scoreRoles = scoreRoles;
 			_databaseHelper = databaseHelper;
-
-			_guild = _client.GetGuild(399568958669455364);
+			_guild = client.GetGuild(399568958669455364);
 		}
 
 		public record UpdateRolesResponse(int UpdatedUsers, int NonMemberCount, UpdateRoleResponse[] UpdateResponses);
@@ -44,58 +44,110 @@ namespace Clubber.Helpers
 			return new(usersUpdated, nonMemberCount, responses);
 		}
 
-		public record UpdateRoleResponse(bool Success, bool MemberHasRole, SocketRole RoleToAdd, List<SocketRole> RemovedRoles);
+		public record UpdateRoleResponse(bool Success, List<SocketRole> AddedRoles, List<SocketRole> RemovedRoles);
 
 		public async Task<UpdateRoleResponse> UpdateUserRoles(DdUser user)
 		{
 			SocketGuildUser guildMember = _guild.GetUser(user.DiscordId);
-			if (guildMember == null)
-				return new(false, false, null, null);
 
-			int newScore = await GetUserTimeFromHasmodai(user.LeaderboardId) / 10000;
-			_databaseHelper.FindAndUpdateUser(guildMember.Id, newScore);
+			DdPlayer ddPlayer = await GetDdPlayer(user.LeaderboardId);
+			_databaseHelper.FindAndUpdateUser(guildMember.Id, ddPlayer.Time / 10000);
 
-			KeyValuePair<int, ulong> scoreRole = _scoreRoles.ScoreRoleDictionary.Where(sr => sr.Key <= newScore).OrderByDescending(sr => sr.Key).FirstOrDefault();
-			SocketRole roleToAdd = _guild.GetRole(scoreRole.Value);
-			List<SocketRole> removedRoles = await RemoveScoreRolesExcept(guildMember, roleToAdd);
+			KeyValuePair<int, ulong> scoreRole = _scoreRoles.ScoreRoleDictionary.Where(sr => sr.Key <= ddPlayer.Time / 10000).OrderByDescending(sr => sr.Key).FirstOrDefault();
+			SocketRole scoreRoleToAdd = _guild.GetRole(scoreRole.Value);
+			List<SocketRole> addedRoles = new(), removedRoles = new();
 
-			bool memberHasRole = MemberHasRole(guildMember, roleToAdd.Id);
-			if (removedRoles.Count == 0 && memberHasRole)
-				return new(false, memberHasRole, roleToAdd, removedRoles);
+			HandleTopRolesResponse response = HandleTopRoles(guildMember, ddPlayer.Rank);
 
-			return new(true, memberHasRole, roleToAdd, removedRoles);
+			if (!MemberHasRole(guildMember, scoreRoleToAdd.Id))
+				addedRoles.Add(scoreRoleToAdd);
+
+			addedRoles.AddRange(response.TopRolesToadd);
+			removedRoles.AddRange(response.TopRolesToRemove);
+			removedRoles.AddRange(GetScoreRolesToRemove(guildMember, scoreRoleToAdd));
+
+			await guildMember.AddRolesAsync(addedRoles);
+			await guildMember.RemoveRolesAsync(removedRoles);
+
+			if (removedRoles.Count == 0 && addedRoles.Count == 0)
+				return new(false, null, null);
+
+			return new(true, addedRoles, removedRoles);
 		}
 
-		private static async Task<int> GetUserTimeFromHasmodai(int userId)
+		private async Task<DdPlayer> GetDdPlayer(int lbId)
 		{
-			Dictionary<string, string> postValues = new Dictionary<string, string> { { "uid", userId.ToString() } };
+			using HttpClient client = new();
+			string jsonUser = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
 
-			using FormUrlEncodedContent content = new FormUrlEncodedContent(postValues);
-			using HttpClient client = new HttpClient();
-			HttpResponseMessage resp = await client.PostAsync("http://dd.hasmodai.com/backend16/get_user_by_id_public.php", content);
-			byte[] data = await resp.Content.ReadAsByteArrayAsync();
-
-			int bytePos = 19;
-			short usernameLength = BitConverter.ToInt16(data, bytePos);
-			bytePos += usernameLength + sizeof(short);
-			return BitConverter.ToInt32(data, bytePos + 12);
+			return JsonConvert.DeserializeObject<DdPlayer>(jsonUser);
 		}
 
-		public async Task<List<SocketRole>> RemoveScoreRolesExcept(SocketGuildUser member, SocketRole excludedRole)
+		private List<SocketRole> GetScoreRolesToRemove(SocketGuildUser member, SocketRole excludedRole)
 		{
 			List<SocketRole> removedRoles = new List<SocketRole>();
 
 			const ulong newMemberRoleId = 728663492424499200;
-			foreach (SocketRole role in member.Roles)
+			IEnumerable<SocketRole> rolesToRemove = member.Roles.Where(r =>
+				_scoreRoles.ScoreRoleDictionary.ContainsValue(r.Id) &&
+				r.Id != excludedRole.Id ||
+				r.Id == newMemberRoleId);
+
+			removedRoles.AddRange(rolesToRemove);
+
+			return removedRoles;
+		}
+
+		private List<SocketRole> GetTopRolesToRemove(SocketGuildUser member, SocketRole excludedRole)
+		{
+			List<ulong> rolesToRemove = new() { _wrRoleId, _top3RoleId, _top10RoleId };
+			rolesToRemove = rolesToRemove.Where(r => r != excludedRole.Id).ToList();
+			List<SocketRole> removedRoles = new();
+
+			removedRoles.AddRange(member.Roles.Where(r => rolesToRemove.Contains(r.Id)));
+
+			return removedRoles;
+		}
+
+		public record HandleTopRolesResponse(List<SocketRole> TopRolesToadd, List<SocketRole> TopRolesToRemove);
+
+		private HandleTopRolesResponse HandleTopRoles(SocketGuildUser member, int rank)
+		{
+			SocketRole wrRole = _guild.GetRole(_wrRoleId);
+			SocketRole top3Role = _guild.GetRole(_top3RoleId);
+			SocketRole top10Role = _guild.GetRole(_top10RoleId);
+
+			List<SocketRole> topRolesToAdd = new(), topRolesToRemove = new();
+			SocketRole roleToExclude = null;
+			if (rank < 11)
 			{
-				if (_scoreRoles.ScoreRoleDictionary.ContainsValue(role.Id) && role.Id != excludedRole.Id || role.Id == newMemberRoleId)
+				if (rank == 1)
 				{
-					await member.RemoveRoleAsync(role);
-					removedRoles.Add(role);
+					if (!member.Roles.Contains(wrRole))
+						topRolesToAdd.Add(wrRole);
+
+					roleToExclude = wrRole;
+				}
+				else if (rank < 4)
+				{
+					if (!member.Roles.Contains(top3Role))
+						topRolesToAdd.Add(top3Role);
+
+					roleToExclude = top3Role;
+				}
+				else
+				{
+					if (!member.Roles.Contains(top10Role))
+						topRolesToAdd.Add(top10Role);
+
+					roleToExclude = top10Role;
 				}
 			}
 
-			return removedRoles;
+			if (roleToExclude != null)
+				topRolesToRemove = GetTopRolesToRemove(member, roleToExclude);
+
+			return new(topRolesToAdd, topRolesToRemove);
 		}
 
 		private static bool MemberHasRole(SocketGuildUser member, ulong roleId)

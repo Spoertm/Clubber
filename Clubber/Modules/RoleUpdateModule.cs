@@ -52,23 +52,18 @@ namespace Clubber.Modules
 		public async Task UpdateRoles()
 		{
 			SocketGuildUser user = Context.User as SocketGuildUser;
-			if (user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
+			if (await IsError(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username}, you can't register because you've cheated.") ||
+				await IsError(!_databaseHelper.DiscordIdExistsInDb(user.Id), $"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you."))
 			{
-				await ReplyAsync($"{user.Username}, you can't register because you've cheated.");
-				return;
-			}
-			if (!_databaseHelper.DiscordIdExistsInDb(user.Id))
-			{
-				await ReplyAsync($"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you.");
 				return;
 			}
 
 			UpdateRoleResponse response = await _updateRolesHelper.UpdateUserRoles(_databaseHelper.GetDdUserFromId(user.Id));
 
-			await WriteRoleUpdateEmbed(user, response);
-
 			if (!response.Success)
 				await ReplyAsync($"No updates were needed for you, {user.Username}.");
+			else
+				await WriteRoleUpdateEmbed(user, response);
 		}
 
 		private async Task WriteRoleUpdateEmbed(SocketGuildUser guildMember, UpdateRoleResponse response)
@@ -82,16 +77,15 @@ namespace Clubber.Modules
 			{
 				embed.AddField(new EmbedFieldBuilder()
 					.WithName("Removed:")
-					.WithValue(string.Join('\n', response.RemovedRoles.Select(sr => sr.Mention)))
+					.WithValue(string.Join('\n', response.RemovedRoles.Select(rr => rr.Mention)))
 					.WithIsInline(true));
 			}
 
-			if (!response.MemberHasRole)
+			if (response.AddedRoles.Count > 0)
 			{
-				await guildMember.AddRoleAsync(response.RoleToAdd);
 				embed.AddField(new EmbedFieldBuilder()
 					.WithName("Added:")
-					.WithValue(response.RoleToAdd.Mention)
+					.WithValue(string.Join('\n', response.AddedRoles.Select(ar => ar.Mention)))
 					.WithIsInline(true));
 			}
 
@@ -102,8 +96,8 @@ namespace Clubber.Modules
 		[Priority(2)]
 		public async Task UpdateRoles([Remainder] string name)
 		{
-			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(
-				u => u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
+			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(u =>
+				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
 
 			int guildMatchesCount = guildMatches.Count();
@@ -141,6 +135,8 @@ namespace Clubber.Modules
 			UpdateRoleResponse response = await _updateRolesHelper.UpdateUserRoles(_databaseHelper.GetDdUserFromId(discordId));
 			if (!response.Success)
 				await ReplyAsync($"No updates were needed for {guildUser.Username}.");
+			else
+				await WriteRoleUpdateEmbed(guildUser, response);
 		}
 	}
 }
