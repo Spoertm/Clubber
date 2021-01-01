@@ -42,7 +42,7 @@ namespace ClubberDatabaseUpdateCron
 			_provider = services.BuildServiceProvider(); // Build the service provider
 			_client = _provider.GetRequiredService<DiscordSocketClient>();
 
-			string discordToken = "NzQzNDMxNTAyODQyMjk4MzY4.XzUkig.UQrKlF7axeeFqewonpkTTAwaIIo";
+			const string discordToken = "NzQzNDMxNTAyODQyMjk4MzY4.XzUkig.UQrKlF7axeeFqewonpkTTAwaIIo";
 			await _client.LoginAsync(TokenType.Bot, discordToken);
 			await _client.StartAsync();
 
