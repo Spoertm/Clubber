@@ -33,10 +33,12 @@ namespace Clubber.Helpers
 		{
 			List<DdUser> dbUsersList = _databaseHelper.GetUsers();
 
-			int nonMemberCount = dbUsersList.Count(dbUser => _guild.GetUser(dbUser.DiscordId) == null);
+			IEnumerable<DdUser> usersInGuild = dbUsersList.Where(dbUser => _guild.GetUser(dbUser.DiscordId) != null);
+
+			int nonMemberCount = dbUsersList.Count - usersInGuild.Count();
 
 			List<Task<UpdateRoleResponse>> tasks = new();
-			foreach (DdUser user in dbUsersList)
+			foreach (DdUser user in usersInGuild)
 				tasks.Add(UpdateUserRoles(user));
 
 			UpdateRoleResponse[] responses = await Task.WhenAll(tasks);
