@@ -77,7 +77,7 @@ namespace Clubber.Helpers
 			return new(true, addedRoles, removedRoles);
 		}
 
-		private async Task<DdPlayer> GetDdPlayer(int lbId)
+		private static async Task<DdPlayer> GetDdPlayer(int lbId)
 		{
 			using HttpClient client = new();
 			string jsonUser = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
@@ -100,7 +100,7 @@ namespace Clubber.Helpers
 			return removedRoles;
 		}
 
-		private List<SocketRole> GetTopRolesToRemove(SocketGuildUser member, SocketRole excludedRole)
+		private static List<SocketRole> GetTopRolesToRemove(SocketGuildUser member, SocketRole excludedRole)
 		{
 			List<ulong> rolesToRemove = new() { _wrRoleId, _top3RoleId, _top10RoleId };
 			rolesToRemove = rolesToRemove.Where(r => r != excludedRole.Id).ToList();
