@@ -63,15 +63,15 @@ namespace Clubber.Modules
 			if (!response.Success)
 				await ReplyAsync($"No updates were needed for you, {user.Username}.");
 			else
-				await WriteRoleUpdateEmbed(user, response);
+				await WriteRoleUpdateEmbed(response);
 		}
 
-		private async Task WriteRoleUpdateEmbed(SocketGuildUser guildMember, UpdateRoleResponse response)
+		public async Task WriteRoleUpdateEmbed(UpdateRoleResponse response)
 		{
 			EmbedBuilder embed = new EmbedBuilder()
-				.WithTitle($"Updated roles for {guildMember.Username}")
-				.WithDescription($"User: {guildMember.Mention}")
-				.WithThumbnailUrl(guildMember.GetAvatarUrl() ?? guildMember.GetDefaultAvatarUrl());
+				.WithTitle($"Updated roles for {response.GuildMember.Username}")
+				.WithDescription($"User: {response.GuildMember.Mention}")
+				.WithThumbnailUrl(response.GuildMember.GetAvatarUrl() ?? response.GuildMember.GetDefaultAvatarUrl());
 
 			if (response.RemovedRoles.Count > 0)
 			{
@@ -136,7 +136,7 @@ namespace Clubber.Modules
 			if (!response.Success)
 				await ReplyAsync($"No updates were needed for {guildUser.Username}.");
 			else
-				await WriteRoleUpdateEmbed(guildUser, response);
+				await WriteRoleUpdateEmbed(response);
 		}
 	}
 }
