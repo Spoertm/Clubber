@@ -46,7 +46,7 @@ namespace Clubber.Helpers
 			return new(usersUpdated, nonMemberCount, responses);
 		}
 
-		public record UpdateRoleResponse(bool Success, List<SocketRole> AddedRoles, List<SocketRole> RemovedRoles);
+		public record UpdateRoleResponse(bool Success, List<SocketRole> AddedRoles, List<SocketRole> RemovedRoles, SocketGuildUser GuildMember);
 
 		public async Task<UpdateRoleResponse> UpdateUserRoles(DdUser user)
 		{
@@ -72,9 +72,9 @@ namespace Clubber.Helpers
 			await guildMember.RemoveRolesAsync(removedRoles);
 
 			if (removedRoles.Count == 0 && addedRoles.Count == 0)
-				return new(false, null, null);
+				return new(false, null, null, null);
 
-			return new(true, addedRoles, removedRoles);
+			return new(true, addedRoles, removedRoles, guildMember);
 		}
 
 		private static async Task<DdPlayer> GetDdPlayer(int lbId)
