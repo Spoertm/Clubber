@@ -357,3 +357,5 @@ MigrationBackup/
 .ionide/
 .vscode/launch.json
 .vscode/tasks.json
+Clubber/.vscode/launch.json
+Clubber/.vscode/tasks.json
