@@ -25,7 +25,7 @@ namespace Clubber.Modules
 
 		[Command("changebotavatar")]
 		[Summary("Changes the bot's avatar. Specify either the URL of the image or attach it.")]
-		public async Task ChangeBotAvatar(string imgUrl = null)
+		public async Task ChangeBotAvatar(string? imgUrl = null)
 		{
 			using HttpClient client = new();
 			Stream stream = new MemoryStream();
@@ -35,7 +35,7 @@ namespace Clubber.Modules
 
 			if (Context.Message.Attachments.Count == 0)
 			{
-				if (await IsError(!(Uri.TryCreate(imgUrl, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)), "Invalid URL."))
+				if (await IsError(!(Uri.TryCreate(imgUrl, UriKind.Absolute, out Uri? uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)), "Invalid URL."))
 					return;
 
 				stream = await client.GetStreamAsync(imgUrl);

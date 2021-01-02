@@ -11,7 +11,7 @@ namespace Clubber.Helpers
 {
 	public class ChartHelper
 	{
-		public async Task<Stream> GetEveryXBracketChartStream(int bracketSize, int bottomLimit, int topLimit, string property)
+		public async Task<Stream?> GetEveryXBracketChartStream(int bracketSize, int bottomLimit, int topLimit, string property)
 		{
 			LeaderboardData lb = new();
 
@@ -264,7 +264,7 @@ namespace Clubber.Helpers
 			return await GetStreamFromLink(qc.GetShortUrl());
 		}
 
-		public static async Task<Stream> GetByDeathChartStream(int bottomLimit, int toplimit)
+		public static async Task<Stream?> GetByDeathChartStream(int bottomLimit, int toplimit)
 		{
 			LeaderboardData lb = new();
 
@@ -316,7 +316,7 @@ namespace Clubber.Helpers
 			return "'" + string.Join("','", labels) + "'";
 		}
 
-		private static Chart GetChart(string xData, string yData, string xLabel, string yLabel, string title = null, bool precise = false)
+		private static Chart GetChart(string xData, string yData, string xLabel, string yLabel, string? title = null, bool precise = false)
 		{
 			return new Chart
 			{

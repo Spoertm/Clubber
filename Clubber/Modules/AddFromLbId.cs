@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 namespace Clubber.Modules
 {
 	[Name("Database")]
-	[Group("addfromlbid"), Alias("addlbid")]
+	[Group("addfromlbid")]
+	[Alias("addlbid")]
 	[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
 	[RequireUserPermission(GuildPermission.ManageRoles)]
 	public class AddFromLbId : AbstractModule<SocketCommandContext>
@@ -45,13 +46,13 @@ namespace Clubber.Modules
 		public async Task AddUserByLbIdAndDscId(uint lbId, ulong discordId)
 		{
 			SocketGuildUser user = Context.Guild.GetUser(discordId);
-			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{(user?.Username ?? string.Empty)}({discordId})` is already registered."))
+			if (await IsError(_databaseHelper.DiscordIdExistsInDb(discordId), $"User `{user?.Username ?? string.Empty}({discordId})` is already registered."))
 				return;
 
 			if (await IsError(user == null, "User not found."))
 				return;
 
-			if (await IsError(user.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player."))
+			if (await IsError(user!.IsBot, $"{user.Mention} is a bot. It can't be registered as a DD player."))
 				return;
 
 			const ulong cheaterRoleId = 693432614727581727;

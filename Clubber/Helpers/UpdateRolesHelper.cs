@@ -46,7 +46,7 @@ namespace Clubber.Helpers
 			return new(usersUpdated, nonMemberCount, responses);
 		}
 
-		public record UpdateRoleResponse(bool Success, List<SocketRole> AddedRoles, List<SocketRole> RemovedRoles, SocketGuildUser GuildMember);
+		public record UpdateRoleResponse(bool Success, List<SocketRole>? AddedRoles, List<SocketRole>? RemovedRoles, SocketGuildUser? GuildMember);
 
 		public async Task<UpdateRoleResponse> UpdateUserRoles(DdUser user)
 		{
@@ -120,7 +120,7 @@ namespace Clubber.Helpers
 			SocketRole top10Role = _guild.GetRole(_top10RoleId);
 
 			List<SocketRole> topRolesToAdd = new(), topRolesToRemove = new();
-			SocketRole roleToExclude = null;
+			SocketRole? roleToExclude = null;
 			if (rank < 11)
 			{
 				if (rank == 1)

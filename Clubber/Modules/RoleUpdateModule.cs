@@ -51,8 +51,8 @@ namespace Clubber.Modules
 		[Priority(1)]
 		public async Task UpdateRoles()
 		{
-			SocketGuildUser user = Context.User as SocketGuildUser;
-			if (await IsError(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username}, you can't register because you've cheated.") ||
+			SocketGuildUser? user = Context.User as SocketGuildUser;
+			if (await IsError(user!.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username}, you can't register because you've cheated.") ||
 				await IsError(!_databaseHelper.DiscordIdExistsInDb(user.Id), $"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you."))
 			{
 				return;

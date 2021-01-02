@@ -22,7 +22,8 @@ namespace Clubber.Modules
 			_databaseHelper = databaseHelper;
 		}
 
-		[Command("showunregisteredusers"), Alias("showunreg")]
+		[Command("showunregisteredusers")]
+		[Alias("showunreg")]
 		[Summary("Shows a paginated list of guild members that aren't registered in the database.")]
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task ShowUnregisteredUsers()
@@ -37,7 +38,12 @@ namespace Clubber.Modules
 				}
 
 				int unregisteredCount = unregUsernames.Count;
-				if (unregisteredCount == 0) { await ReplyAsync("No results to show."); return; }
+				if (unregisteredCount == 0)
+				{
+					await ReplyAsync("No results to show.");
+					return;
+				}
+
 				int maxFields = (int)Math.Ceiling(unregisteredCount / 15d); // 15 names per field
 
 				PaginatedMessage paginate = new() { Title = $"Unregistered guild members\nTotal: {unregisteredCount}" };
@@ -48,7 +54,7 @@ namespace Clubber.Modules
 					InformationText = $">>> \n◀️ ▶️ - Cycle between pages.\n\n⏮ ⏭️ - Jump to the first or last page.\n\n🔢 - Once pressed it will listen to the user's next message which should be a page number.\n\n{trashcan} - Stops the pagination session and deletes the pagination message.\n\u2800",
 					Timeout = TimeSpan.FromMinutes(20),
 					FooterFormat = "Page {0}/{1} - " + $"{Context.User.Username}'s session",
-					FieldsPerPage = 2
+					FieldsPerPage = 2,
 				};
 
 				StringBuilder sb = new();
@@ -58,12 +64,12 @@ namespace Clubber.Modules
 				{
 					int start = 15 * (i - 1);
 					sb.Clear().Append("・" + string.Join("\n・", unregUsernames.Skip(start).Take(15)));
-					string test = sb.ToString();
 					fields[i - 1] = new EmbedFieldBuilder()
 						.WithName(i.ToString())
 						.WithValue(sb.ToString())
 						.WithIsInline(true);
 				}
+
 				paginate.Pages = fields;
 
 				await PagedReplyAsync(paginate);
