@@ -29,7 +29,7 @@ namespace Clubber.Modules
 		[Priority(1)]
 		public async Task Stats()
 		{
-			var user = Context.User as SocketGuildUser;
+			SocketGuildUser? user = Context.User as SocketGuildUser;
 			if (await IsError(user.Roles.Any(r => r.Id == Constants.CheaterRoleId), $"{user.Username}, you can't register because you've cheated."))
 				return;
 
@@ -45,12 +45,12 @@ namespace Clubber.Modules
 		{
 			IEnumerable<IUser> guildMatches = Context.Guild.Users.Where(
 				user => user.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-				(user.Nickname != null && user.Nickname.Contains(name, StringComparison.InvariantCultureIgnoreCase)));
+				user.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
 
 			int guildMatchesCount = guildMatches.Count();
 
 			if (guildMatchesCount == 0)
-				await ReplyAsync($"User not found.");
+				await ReplyAsync("User not found.");
 			else if (guildMatchesCount == 1)
 				await StatsFromId(guildMatches.First().Id);
 			else
@@ -96,7 +96,7 @@ namespace Clubber.Modules
 				{
 					Title = $"{guildUser.Username} is registered",
 					Description = $"Leaderboard name: {ddPlayer.Username}\nLeaderboard ID: {ddPlayer.Id}\nScore: {ddPlayer.Time / 10000f}s",
-					ThumbnailUrl = guildUser.GetAvatarUrl() ?? guildUser.GetDefaultAvatarUrl()
+					ThumbnailUrl = guildUser.GetAvatarUrl() ?? guildUser.GetDefaultAvatarUrl(),
 				};
 
 				await ReplyAsync(null, false, embed.Build());

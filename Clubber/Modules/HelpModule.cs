@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
-	[Name("Info"), Group("help")]
+	[Name("Info")]
+	[Group("help")]
 	[Summary("Get a list of commands, or info regarding a specific command.")]
 	public class HelpModule : AbstractModule<SocketCommandContext>
 	{
@@ -23,12 +24,12 @@ namespace Clubber.Modules
 		public async Task Help([Remainder] string command)
 		{
 			SearchResult result = _service.Search(Context, command);
-			PreconditionResult preCondCheck = result.IsSuccess ? await result.Commands[0].Command.CheckPreconditionsAsync(Context) : null;
+			PreconditionResult? preCondCheck = result.IsSuccess ? await result.Commands[0].Command.CheckPreconditionsAsync(Context) : null;
 
 			if (await IsError(!result.IsSuccess, $"The command `{command}` doesn't exist."))
 				return;
 
-			if (await IsError(!preCondCheck.IsSuccess, $"The command `{command}` couldn't be executed.\nReason: " + preCondCheck.ErrorReason))
+			if (await IsError(!preCondCheck!.IsSuccess, $"The command `{command}` couldn't be executed.\nReason: " + preCondCheck.ErrorReason))
 				return;
 
 			string aliases = string.Empty;

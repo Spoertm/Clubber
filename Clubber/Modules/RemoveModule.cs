@@ -12,11 +12,11 @@ namespace Clubber.Modules
 	[Name("Database")]
 	public class RemoveModule : AbstractModule<SocketCommandContext>
 	{
-		private readonly IMongoCollection<DdUser> Database;
+		private readonly IMongoCollection<DdUser> _database;
 
 		public RemoveModule(MongoDatabase mongoDatabase)
 		{
-			Database = mongoDatabase.DdUserCollection;
+			_database = mongoDatabase.DdUserCollection;
 		}
 
 		[Command("remove")]
@@ -24,7 +24,7 @@ namespace Clubber.Modules
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task RemoveUser(string memberName)
 		{
-			IEnumerable<DdUser> dbMatches = Database.AsQueryable().ToList().Where(
+			IEnumerable<DdUser> dbMatches = _database.AsQueryable().Where(
 				user => Context.Guild.GetUser(user.DiscordId) != null &&
 				Context.Guild.GetUser(user.DiscordId).Username.Contains(memberName, System.StringComparison.InvariantCultureIgnoreCase));
 			int dbMatchesCount = dbMatches.Count();
@@ -36,7 +36,7 @@ namespace Clubber.Modules
 			else if (dbMatchesCount == 1)
 			{
 				ulong idToRemove = dbMatches.First().DiscordId;
-				Database.DeleteOne(x => x.DiscordId == idToRemove);
+				_database.DeleteOne(x => x.DiscordId == idToRemove);
 				await ReplyAsync($"✅ Removed {(Context.Guild.GetUser(idToRemove) == null ? "User" : $"`{Context.Guild.GetUser(idToRemove).Username}`")} `ID: {idToRemove}`.");
 			}
 			else
