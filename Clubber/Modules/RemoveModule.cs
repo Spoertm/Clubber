@@ -24,7 +24,7 @@ namespace Clubber.Modules
 		[RequireUserPermission(GuildPermission.ManageRoles)]
 		public async Task RemoveUser(string memberName)
 		{
-			IEnumerable<DdUser> dbMatches = _database.AsQueryable().Where(
+			IEnumerable<DdUser> dbMatches = _database.AsQueryable().ToList().Where(
 				user => Context.Guild.GetUser(user.DiscordId) != null &&
 				Context.Guild.GetUser(user.DiscordId).Username.Contains(memberName, System.StringComparison.InvariantCultureIgnoreCase));
 			int dbMatchesCount = dbMatches.Count();
