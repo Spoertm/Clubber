@@ -30,10 +30,13 @@ namespace Clubber.Modules
 		{
 			try
 			{
-				List<string> unregUsernames = new List<string>();
+				List<string> unregUsernames = new();
 				foreach (SocketGuildUser user in Context.Guild.Users)
 				{
-					if (!user.IsBot && !user.Roles.Any(r => r.Id == Constants.CheaterRoleId) && !_databaseHelper.DiscordIdExistsInDb(user.Id))
+					if (!user.IsBot &&
+					!user.Roles.Any(r => r.Id == Constants.CheaterRoleId) &&
+					!_databaseHelper.DiscordIdExistsInDb(user.Id) &&
+					!user.Roles.Any(r => r.Id == Constants.NoScoreRoleId))
 						unregUsernames.Add(user.Username);
 				}
 
