@@ -89,11 +89,10 @@ namespace Clubber.Helpers
 		{
 			List<SocketRole> removedRoles = new List<SocketRole>();
 
-			const ulong newMemberRoleId = 728663492424499200;
 			IEnumerable<SocketRole> rolesToRemove = member.Roles.Where(r =>
 				_scoreRoles.ScoreRoleDictionary.ContainsValue(r.Id) &&
 				r.Id != excludedRole.Id ||
-				r.Id == newMemberRoleId);
+				r.Id == Constants.MembersRoleId);
 
 			removedRoles.AddRange(rolesToRemove);
 
