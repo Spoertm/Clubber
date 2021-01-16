@@ -11,12 +11,13 @@ namespace Clubber.Files
 		[BsonRepresentation(BsonType.Int32)]
 		public int LeaderboardId { get; set; }
 		[BsonRepresentation(BsonType.Int32)]
-		public int? Score { get; set; }
+		public int Score { get; set; }
 
-		public DdUser(ulong discordId, int leaderboardId)
+		public DdUser(ulong discordId, int leaderboardId, int score)
 		{
 			DiscordId = discordId;
 			LeaderboardId = leaderboardId;
+			Score = score;
 		}
 	}
 }

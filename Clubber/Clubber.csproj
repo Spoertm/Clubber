@@ -29,16 +29,7 @@
     <PackageReference Include="QuickChart" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="_config.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Files\ScoreRoles.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Files\CharacterBlacklist.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Files\LB.bin">
+    <None Update="Database\UsersJson.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

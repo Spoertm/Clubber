@@ -1,50 +1,53 @@
-﻿using Clubber.Databases;
-using Clubber.Files;
+﻿using Clubber.Files;
 using Discord.WebSocket;
-using MongoDB.Driver;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {
 	public class DatabaseHelper
 	{
-		private readonly MongoDatabase _database;
+		private static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(JsonDbFile));
 
-		public DatabaseHelper(MongoDatabase database)
+		private static string JsonDbFile => Path.Combine(AppContext.BaseDirectory, "UsersJson.json");
+
+		public static async Task<string> RegisterUser(uint lbId, SocketGuildUser user)
 		{
-			_database = database;
+			if (DdUsers.Any(du => du.LeaderboardId == lbId))
+				return $"User `{user.Username ?? string.Empty}({user.Id})` is already registered.";
+
+			if (user.IsBot)
+				return $"{user.Mention} is a bot. It can't be registered as a DD player.";
+
+			if (user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
+				return $"{user.Username} can't be registered because they've cheated.";
+
+			try
+			{
+				throw new HttpRequestException();
+				using HttpClient client = new();
+				string json = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
+				dynamic lbPlayer = JsonConvert.DeserializeObject(json);
+				AddUserToDatabase(new DdUser(user.Id, lbPlayer.Id, lbPlayer.Time / 10000));
+
+				return "✅ Successfully registered";
+			}
+			catch
+			{
+				return "devildaggers.info is experiencing issues ATM. Please try again later.";
+			}
 		}
 
-		public List<DdUser> GetUsers()
-			=> _database.DdUserCollection.AsQueryable().ToList();
-
-		public void FindAndUpdateUser(ulong discordId, int newScore)
-			=> _database.DdUserCollection.FindOneAndUpdate(du => du.DiscordId == discordId, Builders<DdUser>.Update.Set(du => du.Score, newScore));
-
-		public DdUser GetDdUserFromId(ulong discordId)
-			=> _database.DdUserCollection.Find(du => du.DiscordId == discordId).SingleOrDefault();
-
-		public bool DiscordIdExistsInDb(ulong discordId)
-			=> _database.DdUserCollection.Find(du => du.DiscordId == discordId).Any();
-
-		public bool LeaderboardIdExistsInDb(int lbId)
-			=> _database.DdUserCollection.Find(du => du.LeaderboardId == lbId).Any();
-
-		public void AddUser(DdUser ddUser)
-			=> _database.DdUserCollection.InsertOne(ddUser);
-
-		public record AddToDbFromNameResponse(int NumberOfMatches);
-
-		public static async Task<AddToDbFromNameResponse> AddToDbFromName(IEnumerable<SocketGuildUser> userMatches, uint rankOrLbId, Func<uint, ulong, Task> asyncCommand)
+		public static void AddUserToDatabase(params DdUser[] users)
 		{
-			int numberOfMatches = userMatches.Count();
-			if (numberOfMatches == 1)
-				await asyncCommand(rankOrLbId, userMatches.First().Id);
-
-			return new(numberOfMatches);
+			List<DdUser> list = DdUsers;
+			list.AddRange(users);
+			File.WriteAllText(JsonDbFile, JsonConvert.SerializeObject(list, Formatting.Indented));
 		}
 	}
 }
