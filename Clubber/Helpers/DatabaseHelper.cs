@@ -1,4 +1,5 @@
-﻿using Clubber.Files;
+﻿using Clubber.Database;
+using Clubber.Files;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
@@ -10,44 +11,57 @@ using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {
-	public class DatabaseHelper
+	public static class DatabaseHelper
 	{
-		private static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(JsonDbFile));
-
-		private static string JsonDbFile => Path.Combine(AppContext.BaseDirectory, "UsersJson.json");
+		private static readonly string _jsonDbFile = Path.Combine(AppContext.BaseDirectory, "Database", "UsersJson.json");
+		public static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(_jsonDbFile));
 
 		public static async Task<string> RegisterUser(uint lbId, SocketGuildUser user)
 		{
-			if (DdUsers.Any(du => du.LeaderboardId == lbId))
-				return $"User `{user.Username ?? string.Empty}({user.Id})` is already registered.";
+			dynamic lbPlayer = await GetLbPlayer(lbId);
 
-			if (user.IsBot)
-				return $"{user.Mention} is a bot. It can't be registered as a DD player.";
+			List<DdUser> list = DdUsers;
+			list.Add(new DdUser(user.Id, (int)lbPlayer!.id, (int)lbPlayer.time / 10000));
+			UpdateDbFile(list);
 
-			if (user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
-				return $"{user.Username} can't be registered because they've cheated.";
+			return "✅ Successfully registered";
+		}
 
+		public static async Task<dynamic> GetLbPlayer(uint lbId)
+		{
+			using HttpClient client = new();
 			try
 			{
-				throw new HttpRequestException();
-				using HttpClient client = new();
 				string json = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
-				dynamic lbPlayer = JsonConvert.DeserializeObject(json);
-				AddUserToDatabase(new DdUser(user.Id, lbPlayer.Id, lbPlayer.Time / 10000));
-
-				return "✅ Successfully registered";
+				return JsonConvert.DeserializeObject<dynamic>(json);
 			}
-			catch
+			catch (Exception e)
 			{
-				return "devildaggers.info is experiencing issues ATM. Please try again later.";
+				if (e is JsonException)
+					throw new CustomException("Something went wrong. Chupacabra will get on it soon:tm:.", e);
+				else
+					throw new CustomException("DdInfo API issue. Please try again later.", e);
 			}
 		}
 
-		public static void AddUserToDatabase(params DdUser[] users)
+		public static string RemoveUser(ulong discordId)
 		{
 			List<DdUser> list = DdUsers;
-			list.AddRange(users);
-			File.WriteAllText(JsonDbFile, JsonConvert.SerializeObject(list, Formatting.Indented));
+			DdUser? toRemove = list.Find(du => du.DiscordId == discordId);
+			if (toRemove != null)
+			{
+				list.Remove(toRemove);
+				UpdateDbFile(list);
+				return "✅ Successfully removed.";
+			}
+			else
+			{
+				return "User not registered.";
+			}
 		}
+
+		private static void UpdateDbFile(List<DdUser> list) => File.WriteAllText(_jsonDbFile, JsonConvert.SerializeObject(list, Formatting.Indented));
+
+		public static bool UserIsRegistered(ulong discordId) => DdUsers.Any(du => du.DiscordId == discordId);
 	}
 }
