@@ -29,6 +29,9 @@
     <PackageReference Include="QuickChart" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Database\ScoreRoles.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Database\UsersJson.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
