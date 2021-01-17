@@ -1,4 +1,4 @@
-﻿using Clubber.Helpers;
+﻿using Clubber.Database;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -10,46 +10,46 @@ using System.Threading.Tasks;
 
 namespace Clubber
 {
-	public class Program
+	public static class Program
 	{
-		private DiscordSocketClient _client = null!;
-		private CommandService _commands = null!;
-		private IServiceProvider _services = null!;
+		private static DiscordSocketClient _client = null!;
+		private static CommandService _commands = null!;
+		private static IServiceProvider _services = null!;
+		private static SocketCommandContext _context = null!;
+
 		private static string LogDirectory => Path.Combine(AppContext.BaseDirectory, "Logs");
 		private static string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.txt");
 
-		private static void Main() => new Program().RunBotAsync().GetAwaiter().GetResult();
+		private static void Main() => RunBotAsync().GetAwaiter().GetResult();
 
-		public async Task RunBotAsync()
+		public static async Task RunBotAsync()
 		{
-			_client = new DiscordSocketClient();
-			_commands = new CommandService();
+			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true });
+			_commands = new CommandService(new CommandServiceConfig() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 			_services = new ServiceCollection()
 				.AddSingleton(_client)
 				.AddSingleton(_commands)
-				.AddSingleton<DatabaseHelper>()
 				.BuildServiceProvider();
-
-			_client.Log += LogAsync;
-			_commands.Log += LogAsync;
 
 			await _client.LoginAsync(TokenType.Bot, Constants.Token);
 			await _client.StartAsync();
 			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
 
-			_client.Ready += RegisterCommandsAsync;
+			_client.Ready += RegisterCommandsAndLogAsync;
 
 			await Task.Delay(-1);
 		}
 
-		private async Task RegisterCommandsAsync()
+		private static async Task RegisterCommandsAndLogAsync()
 		{
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
 			_client.MessageReceived += MessageRecievedAsync;
+			_client.Log += LogAsync;
+			_commands.Log += LogAsync;
 		}
 
-		private Task LogAsync(LogMessage msg)
+		private static async Task LogAsync(LogMessage msg)
 		{
 			if (!Directory.Exists(LogDirectory))
 				Directory.CreateDirectory(LogDirectory);
@@ -57,13 +57,17 @@ namespace Clubber
 			if (!File.Exists(LogFile))
 				File.Create(LogFile).Dispose();
 
-			string logText = $"{DateTime.UtcNow:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}\n\n";
-			File.AppendAllText(LogFile, logText);
+			if (msg.Exception?.InnerException is CustomException customException)
+				await _context.Channel.SendMessageAsync(customException.Message);
 
-			return Task.CompletedTask;
+			string logText = $"{DateTime.Now:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
+			File.AppendAllText(LogFile, $"{logText}\n\n");
+
+			SocketTextChannel clubberExceptionsChannel = (SocketTextChannel)_client.GetChannel(Constants.ClubberExceptionsChannel);
+			_ = await clubberExceptionsChannel.SendMessageAsync(Format.Code(logText));
 		}
 
-		private async Task MessageRecievedAsync(SocketMessage msg)
+		private static async Task MessageRecievedAsync(SocketMessage msg)
 		{
 			if (msg is not SocketUserMessage message || message.Author.IsBot)
 				return;
@@ -71,14 +75,14 @@ namespace Clubber
 			int argumentPos = 0;
 			if (message.HasStringPrefix(Constants.Prefix, ref argumentPos) || message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
 			{
-				SocketCommandContext context = new SocketCommandContext(_client, message);
-				IResult result = await _commands.ExecuteAsync(context, argumentPos, _services);
+				_context = new SocketCommandContext(_client, message);
+				IResult result = await _commands.ExecuteAsync(_context, argumentPos, _services);
 				if (!result.IsSuccess && result.Error.HasValue)
 				{
 					if (result.Error.Value == CommandError.UnknownCommand)
 						await msg.AddReactionAsync(new Emoji("❔"));
 					else
-						await context.Channel.SendMessageAsync(result.ErrorReason);
+						await _context.Channel.SendMessageAsync(result.ErrorReason);
 				}
 			}
 		}
