@@ -8,11 +8,11 @@ namespace Clubber.Modules
 	[Name("Info")]
 	[Group("help")]
 	[Summary("Get a list of commands, or info regarding a specific command.")]
-	public class HelpModule : AbstractModule<SocketCommandContext>
+	public class HelpCommand : AbstractModule<SocketCommandContext>
 	{
 		private readonly CommandService _service;
 
-		public HelpModule(CommandService service)
+		public HelpCommand(CommandService service)
 		{
 			_service = service;
 		}
