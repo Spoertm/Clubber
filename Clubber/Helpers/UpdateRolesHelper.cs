@@ -16,7 +16,8 @@ namespace Clubber.Helpers
 		public static async Task<DatabaseUpdateResponse> UpdateRolesAndDb(SocketGuild guild)
 		{
 			List<DdUser> usersList = DatabaseHelper.DdUsers;
-			IEnumerable<SocketGuildUser> registeredUsersInGuild = usersList.Select(du => du.DiscordId).Intersect(guild.Users.Select(u => u.Id)).Select(id => guild.GetUser(id));
+			IEnumerable<SocketGuildUser> registeredUsersInGuild = guild.Users.Where(u => usersList.Any(du => du.DiscordId == u.Id)); // "guild users that are in the list"
+			// Alternatively: usersList.Where(du => guild.GetUser(du.DiscordId) != null); which would mean "dd users that are in the guild"
 
 			int nonMemberCount = usersList.Count - registeredUsersInGuild.Count();
 
