@@ -5,6 +5,13 @@ namespace Clubber.Files
 {
 	public class DdUser
 	{
+		public DdUser(ulong discordId, int leaderboardId, int score)
+		{
+			DiscordId = discordId;
+			LeaderboardId = leaderboardId;
+			Score = score;
+		}
+
 		[BsonId]
 		[BsonRepresentation(BsonType.Int64)]
 		public ulong DiscordId { get; set; }
@@ -12,12 +19,5 @@ namespace Clubber.Files
 		public int LeaderboardId { get; set; }
 		[BsonRepresentation(BsonType.Int32)]
 		public int Score { get; set; }
-
-		public DdUser(ulong discordId, int leaderboardId, int score)
-		{
-			DiscordId = discordId;
-			LeaderboardId = leaderboardId;
-			Score = score;
-		}
 	}
 }
