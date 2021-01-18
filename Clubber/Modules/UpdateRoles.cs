@@ -24,6 +24,7 @@ namespace Clubber.Modules
 			IUserMessage msg = await ReplyAsync("Processing...");
 
 			DatabaseUpdateResponse response = await UpdateRolesHelper.UpdateRolesAndDb(Context.Guild);
+			long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
 			if (response.NonMemberCount > 0)
 				await ReplyAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s) because they're not in the server.");
@@ -36,11 +37,11 @@ namespace Clubber.Modules
 						await WriteRoleUpdateEmbed(updateResponse);
 				}
 
-				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {stopwatch.ElapsedMilliseconds} ms");
+				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms");
 			}
 			else
 			{
-				await msg.ModifyAsync(m => m.Content = $"No role updates were needed.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+				await msg.ModifyAsync(m => m.Content = $"No updated needed today.\nExecution took {elapsedMilliseconds} ms");
 			}
 		}
 
