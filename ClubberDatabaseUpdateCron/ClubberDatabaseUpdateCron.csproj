@@ -23,9 +23,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Clubber\Clubber.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Update="ScoreRoles.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>
