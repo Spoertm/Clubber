@@ -4,7 +4,11 @@ namespace Clubber.Database
 {
 	public class CustomException : Exception
 	{
-		public CustomException(string? message)
+		public CustomException()
+		{
+		}
+
+		public CustomException(string message)
 			: base(message)
 		{
 		}
