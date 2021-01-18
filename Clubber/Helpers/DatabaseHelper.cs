@@ -35,12 +35,12 @@ namespace Clubber.Helpers
 				string json = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
 				return JsonConvert.DeserializeObject<dynamic>(json);
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
 				if (e is JsonException)
-					throw new CustomException("Something went wrong. Chupacabra will get on it soon:tm:.", e);
+					throw new CustomException("Something went wrong. Chupacabra will get on it soon:tm:.", ex);
 				else
-					throw new CustomException("DdInfo API issue. Please try again later.", e);
+					throw new CustomException("DdInfo API issue. Please try again later.");
 			}
 		}
 
