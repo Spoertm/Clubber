@@ -63,7 +63,7 @@ namespace Clubber.Helpers
 			if (!userRolesIds.Contains(scoreRole.Value))
 				scoreRoleToAdd.Add(scoreRole.Value);
 
-			IEnumerable<ulong> filteredScoreRoles = Constants.ScoreRoles.Values.Where(rid => rid != scoreRole.Value);
+			IEnumerable<ulong> filteredScoreRoles = Constants.ScoreRoles.Values.Where(rid => rid != scoreRole.Value).Concat(Constants.UselessRoles);
 			return (scoreRoleToAdd, userRolesIds.Intersect(filteredScoreRoles));
 		}
 
