@@ -1,9 +1,8 @@
-﻿using Clubber.Files;
+﻿using Clubber.Database;
+using Clubber.Files;
 using Discord.WebSocket;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,13 +10,10 @@ namespace Clubber.Helpers
 {
 	public static class UpdateRolesHelper
 	{
-		private static Dictionary<int, ulong> ScoreRoleDictionary => JsonConvert.DeserializeObject<Dictionary<int, ulong>>(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Database", "ScoreRoles.json")));
-
 		public static async Task<DatabaseUpdateResponse> UpdateRolesAndDb(SocketGuild guild)
 		{
 			List<DdUser> usersList = DatabaseHelper.DdUsers;
 			IEnumerable<SocketGuildUser> registeredUsersInGuild = guild.Users.Where(u => usersList.Any(du => du.DiscordId == u.Id)); // "guild users that are in the list"
-			// Alternatively: usersList.Where(du => guild.GetUser(du.DiscordId) != null); which would mean "dd users that are in the guild"
 
 			int nonMemberCount = usersList.Count - registeredUsersInGuild.Count();
 
@@ -32,83 +28,58 @@ namespace Clubber.Helpers
 
 		public static async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
 		{
-			List<DdUser> usersList = DatabaseHelper.DdUsers;
-			DdUser ddUser = usersList.Find(du => du.DiscordId == user.Id)!;
-			dynamic lbPlayer = await DatabaseHelper.GetLbPlayer((uint)ddUser.LeaderboardId);
+			try
+			{
+				List<DdUser> usersList = DatabaseHelper.DdUsers;
+				DdUser ddUser = usersList.Find(du => du.DiscordId == user.Id)!;
+				dynamic lbPlayer = await DatabaseHelper.GetLbPlayer((uint)ddUser.LeaderboardId);
 
-			List<ulong> rolesToAdd = new(), rolesToRemove = new();
-			ulong scoreRoleToAdd = ScoreRoleDictionary.FirstOrDefault(sr => sr.Key <= (int)lbPlayer!.time / 10000).Value;
-			IReadOnlyCollection<SocketRole> userRoles = user.Roles;
+				IEnumerable<ulong> userRolesIds = user.Roles.Select(r => r.Id);
+				(IEnumerable<ulong> scoreRoleToAdd, IEnumerable<ulong> scoreRolesToRemove) = HandleScoreRoles(userRolesIds, (int)lbPlayer.time);
+				(IEnumerable<ulong> topRoleToAdd, IEnumerable<ulong> topRolesToRemove) = HandleTopRoles(userRolesIds, (int)lbPlayer.rank);
 
-			(IEnumerable<ulong> topRolesToAdd, IEnumerable<ulong> topRolesToRemove) = HandleTopRoles(userRoles, (int)lbPlayer!.rank);
+				if (!scoreRoleToAdd.Any() && !scoreRolesToRemove.Any() && !topRoleToAdd.Any() && !topRolesToRemove.Any())
+					return new(false, null, null, null);
 
-			if (!userRoles.Any(r => r.Id == scoreRoleToAdd))
-				rolesToAdd.Add(scoreRoleToAdd);
+				IEnumerable<SocketRole> socketRolesToAdd = scoreRoleToAdd.Concat(topRoleToAdd).Select(r => user.Guild.GetRole(r));
+				IEnumerable<SocketRole> socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove).Select(r => user.Guild.GetRole(r));
 
-			rolesToAdd.AddRange(topRolesToAdd);
-			rolesToRemove.AddRange(topRolesToRemove);
-			rolesToRemove.AddRange(GetScoreRolesToRemove(userRoles, scoreRoleToAdd));
+				await user.AddRolesAsync(socketRolesToAdd);
+				await user.RemoveRolesAsync(socketRolesToRemove);
 
-			if (rolesToRemove.Count == 0 && rolesToAdd.Count == 0)
-				return new(false, null, null, null);
-
-			IEnumerable<SocketRole> socketRolesToAdd = rolesToAdd.Select(r => user.Guild.GetRole(r));
-			IEnumerable<SocketRole> socketRolesToRemove = rolesToRemove.Select(r => user.Guild.GetRole(r));
-
-			await user.AddRolesAsync(socketRolesToAdd);
-			await user.RemoveRolesAsync(socketRolesToRemove);
-
-			return new(true, user, socketRolesToAdd, socketRolesToRemove);
+				return new(true, user, socketRolesToAdd, socketRolesToRemove);
+			}
+			catch (Exception ex)
+			{
+				throw new CustomException("Something went wrong. Chupacabra will get on it soon:tm:.", ex);
+			}
 		}
 
-		private static IEnumerable<ulong> GetScoreRolesToRemove(IEnumerable<SocketRole> userRoles, ulong excludedRole)
+		private static (IEnumerable<ulong> ScoreRoleToAdd, IEnumerable<ulong> ScoreRolesToRemove) HandleScoreRoles(IEnumerable<ulong> userRolesIds, int playerTime)
 		{
-			return userRoles.Where(r =>
-				ScoreRoleDictionary.ContainsValue(r.Id) &&
-				r.Id != excludedRole ||
-				r.Id == Constants.MembersRoleId)
-				.Select(r => r.Id);
+			KeyValuePair<int, ulong> scoreRole = Constants.ScoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
+
+			List<ulong> scoreRoleToAdd = new();
+			if (!userRolesIds.Contains(scoreRole.Value))
+				scoreRoleToAdd.Add(scoreRole.Value);
+
+			IEnumerable<ulong> filteredScoreRoles = Constants.ScoreRoles.Values.Where(rid => rid != scoreRole.Value);
+			return (scoreRoleToAdd, userRolesIds.Intersect(filteredScoreRoles));
 		}
 
-		private static IEnumerable<ulong> GetTopRolesToRemove(IEnumerable<SocketRole> userRoles, ulong excludedRole)
+		private static (IEnumerable<ulong> TopRoleToAdd, IEnumerable<ulong> TopRolesToRemove) HandleTopRoles(IEnumerable<ulong> userRolesIds, int rank)
 		{
-			List<ulong> rolesToRemove = new() { Constants.WrRoleId, Constants.Top3RoleId, Constants.Top10RoleId };
-			rolesToRemove = rolesToRemove.Where(r => r != excludedRole).ToList();
+			KeyValuePair<int, ulong>? rankRole = Constants.RankRoles.FirstOrDefault(rr => rank <= rr.Key);
 
-			return userRoles.Where(r => rolesToRemove.Contains(r.Id)).Select(r => r.Id);
-		}
+			List<ulong> topRoleToAdd = new();
+			if (rankRole.Value.Value == 0)
+				return new(topRoleToAdd, userRolesIds.Intersect(Constants.RankRoles.Values));
 
-		private static (IEnumerable<ulong> TopRolesToAdd, IEnumerable<ulong> TopRolesToRemove) HandleTopRoles(IEnumerable<SocketRole> userRoles, int rank)
-		{
-			List<ulong> topRolesToAdd = new(), topRolesToRemove = new();
-			ulong roleToExclude = 0;
+			if (!userRolesIds.Contains(rankRole.Value.Value))
+				topRoleToAdd.Add(rankRole.Value.Value);
 
-			if (rank == 1)
-			{
-				if (!userRoles.Any(r => r.Id == Constants.WrRoleId))
-					topRolesToAdd.Add(Constants.WrRoleId);
-
-				roleToExclude = Constants.WrRoleId;
-			}
-			else if (rank < 4)
-			{
-				if (!userRoles.Any(r => r.Id == Constants.Top3RoleId))
-					topRolesToAdd.Add(Constants.Top3RoleId);
-
-				roleToExclude = Constants.Top3RoleId;
-			}
-			else
-			{
-				if (!userRoles.Any(r => r.Id == Constants.Top10RoleId))
-					topRolesToAdd.Add(Constants.Top10RoleId);
-
-				roleToExclude = Constants.Top10RoleId;
-			}
-
-			if (roleToExclude != 0)
-				topRolesToRemove = GetTopRolesToRemove(userRoles, roleToExclude).ToList();
-
-			return new(topRolesToAdd, topRolesToRemove);
+			IEnumerable<ulong> filteredTopRoles = Constants.RankRoles.Values.Where(rid => rid != rankRole.Value.Value);
+			return new(topRoleToAdd, userRolesIds.Intersect(filteredTopRoles));
 		}
 	}
 
