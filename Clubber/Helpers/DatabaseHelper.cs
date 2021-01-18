@@ -37,7 +37,7 @@ namespace Clubber.Helpers
 			}
 			catch (Exception ex)
 			{
-				if (e is JsonException)
+				if (ex is JsonException)
 					throw new CustomException("Something went wrong. Chupacabra will get on it soon:tm:.", ex);
 				else
 					throw new CustomException("DdInfo API issue. Please try again later.");
