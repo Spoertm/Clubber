@@ -30,8 +30,13 @@ namespace Clubber.Modules
 
 			if (response.UpdatedUsers > 0)
 			{
-				_ = response.UpdateResponses.Where(ur => ur.Success).Select(async ur => await WriteRoleUpdateEmbed(ur));
-				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} users.\nExecution took {stopwatch.ElapsedMilliseconds} ms");
+				foreach (UpdateRolesResponse updateResponse in response.UpdateResponses)
+				{
+					if (updateResponse.Success)
+						await WriteRoleUpdateEmbed(updateResponse);
+				}
+
+				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {stopwatch.ElapsedMilliseconds} ms");
 			}
 			else
 			{
