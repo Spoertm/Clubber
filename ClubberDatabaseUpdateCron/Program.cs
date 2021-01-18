@@ -61,7 +61,7 @@ namespace ClubberDatabaseUpdateCron
 					}
 					else
 					{
-						await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms");
+						await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms.");
 					}
 
 					success = true;
