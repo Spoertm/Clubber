@@ -18,7 +18,7 @@ namespace Clubber.Modules
 		[RequireOwner]
 		public async Task UpdateDatabase()
 		{
-			Stopwatch stopwatch = new Stopwatch();
+			Stopwatch stopwatch = new();
 			stopwatch.Start();
 
 			IUserMessage msg = await ReplyAsync("Processing...");
