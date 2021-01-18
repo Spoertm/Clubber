@@ -13,7 +13,7 @@ namespace Clubber.Helpers
 		public static async Task<DatabaseUpdateResponse> UpdateRolesAndDb(SocketGuild guild)
 		{
 			List<DdUser> usersList = DatabaseHelper.DdUsers;
-			IEnumerable<SocketGuildUser> registeredUsersInGuild = guild.Users.Where(u => usersList.Any(du => du.DiscordId == u.Id)); // "guild users that are in the list"
+			IEnumerable<SocketGuildUser> registeredUsersInGuild = guild.Users.Where(u => usersList.Any(du => du.DiscordId == u.Id));
 
 			int nonMemberCount = usersList.Count - registeredUsersInGuild.Count();
 
@@ -48,6 +48,10 @@ namespace Clubber.Helpers
 				await user.RemoveRolesAsync(socketRolesToRemove);
 
 				return new(true, user, socketRolesToAdd, socketRolesToRemove);
+			}
+			catch (CustomException)
+			{
+				throw;
 			}
 			catch (Exception ex)
 			{
