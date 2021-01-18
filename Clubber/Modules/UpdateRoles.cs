@@ -37,7 +37,7 @@ namespace Clubber.Modules
 						await WriteRoleUpdateEmbed(updateResponse);
 				}
 
-				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms");
+				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
 			}
 			else
 			{

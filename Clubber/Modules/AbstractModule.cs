@@ -28,7 +28,7 @@ namespace Clubber.Modules
 				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
 
-			if (!await IsError(!userMatches.Any(), "User not found.") && !await IsError(userMatches.Count() > 1, $"Multiple people in the server have {name.ToLower()} in their name. Mention the user or specify their ID."))
+			if (!await IsError(!userMatches.Any(), "User not found.") && !await IsError(userMatches.Count() > 1, $"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or specify their ID."))
 				return (true, userMatches.FirstOrDefault());
 			else
 				return (false, null);
@@ -38,10 +38,9 @@ namespace Clubber.Modules
 		{
 			if (checkIfCheater && user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
 			{
-				if (user.Id == Context.User.Id)
-					await ReplyAsync($"{user.Username}, you can't register because you've cheated.");
-				else
-					await ReplyAsync($"{user.Username} can't be registered because they've cheated.");
+				_ = user.Id == Context.User.Id
+					? await ReplyAsync($"{user.Username}, you can't register because you've cheated.")
+					: await ReplyAsync($"{user.Username} can't be registered because they've cheated.");
 
 				return false;
 			}
@@ -60,10 +59,9 @@ namespace Clubber.Modules
 
 			if (checkIfNotRegistered && !DatabaseHelper.UserIsRegistered(user.Id))
 			{
-				if (user.Id == Context.User.Id)
-					await ReplyAsync($"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you.");
-				else
-					await ReplyAsync($"`{user.Username}` is not registered. Please ask an admin/moderator/role assigner to register them.");
+				_ = user.Id == Context.User.Id
+					? await ReplyAsync($"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you.")
+					: await ReplyAsync($"`{user.Username}` is not registered. Please ask an admin/moderator/role assigner to register them.");
 
 				return false;
 			}
