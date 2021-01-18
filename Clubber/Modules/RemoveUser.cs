@@ -17,7 +17,12 @@ namespace Clubber.Modules
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(name);
 			if (success && user != null)
-				await ReplyAsync(DatabaseHelper.RemoveUser(user.Id));
+			{
+				if (DatabaseHelper.RemoveUser(user.Id))
+					await ReplyAsync("✅ Successfully removed.");
+				else
+					await ReplyAsync("User not registered.");
+			}
 		}
 	}
 }

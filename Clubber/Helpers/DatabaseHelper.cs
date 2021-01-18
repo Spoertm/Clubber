@@ -16,15 +16,13 @@ namespace Clubber.Helpers
 		private static readonly string _jsonDbFile = Path.Combine(AppContext.BaseDirectory, "Database", "UsersJson.json");
 		public static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(_jsonDbFile));
 
-		public static async Task<string> RegisterUser(uint lbId, SocketGuildUser user)
+		public static async Task RegisterUser(uint lbId, SocketGuildUser user)
 		{
 			dynamic lbPlayer = await GetLbPlayer(lbId);
 
 			List<DdUser> list = DdUsers;
 			list.Add(new DdUser(user.Id, (int)lbPlayer!.id, (int)lbPlayer.time / 10000));
 			UpdateDbFile(list);
-
-			return "✅ Successfully registered";
 		}
 
 		public static async Task<dynamic> GetLbPlayer(uint lbId)
@@ -45,7 +43,7 @@ namespace Clubber.Helpers
 			}
 		}
 
-		public static string RemoveUser(ulong discordId)
+		public static bool RemoveUser(ulong discordId)
 		{
 			List<DdUser> list = DdUsers;
 			DdUser? toRemove = list.Find(du => du.DiscordId == discordId);
@@ -53,11 +51,11 @@ namespace Clubber.Helpers
 			{
 				list.Remove(toRemove);
 				UpdateDbFile(list);
-				return "✅ Successfully removed.";
+				return true;
 			}
 			else
 			{
-				return "User not registered.";
+				return false;
 			}
 		}
 

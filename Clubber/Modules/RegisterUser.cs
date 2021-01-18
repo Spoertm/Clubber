@@ -28,7 +28,8 @@ namespace Clubber.Modules
 			if (!await UserIsClean(user, true, true, true, false))
 				return;
 
-			await ReplyAsync(await DatabaseHelper.RegisterUser(lbId, user));
+			await DatabaseHelper.RegisterUser(lbId, user);
+			await ReplyAsync("✅ Successfully registered.");
 		}
 	}
 }
