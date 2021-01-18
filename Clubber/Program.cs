@@ -63,8 +63,8 @@ namespace Clubber
 			string logText = $"{DateTime.Now:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
 			File.AppendAllText(LogFile, $"{logText}\n\n");
 
-			SocketTextChannel clubberExceptionsChannel = (SocketTextChannel)_client.GetChannel(Constants.ClubberExceptionsChannel);
-			_ = await clubberExceptionsChannel.SendMessageAsync(Format.Code(logText));
+			SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
+			_ = await clubberExceptionsChannel!.SendMessageAsync(Format.Code(logText));
 		}
 
 		private static async Task MessageRecievedAsync(SocketMessage msg)
