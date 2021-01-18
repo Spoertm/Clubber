@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 namespace Clubber.Modules
 {
 	[Name("Info")]
-	[Group("help")]
-	[Summary("Get a list of commands, or info regarding a specific command.")]
 	public class HelpCommand : AbstractModule<SocketCommandContext>
 	{
 		private readonly CommandService _service;
@@ -17,7 +15,12 @@ namespace Clubber.Modules
 			_service = service;
 		}
 
-		[Command]
+		[Command("whyareyou")]
+		[Summary("Describes what the bot does.")]
+		public async Task WhyAreYou() => await ReplyAsync(Constants.WhyAreYou);
+
+		[Command("help")]
+		[Summary("Get a list of commands, or info regarding a specific command.")]
 		public async Task Help([Remainder] string command)
 		{
 			SearchResult result = _service.Search(Context, command);
@@ -54,7 +57,8 @@ namespace Clubber.Modules
 			await ReplyAsync(null, false, embedBuilder.Build());
 		}
 
-		[Command]
+		[Command("help")]
+		[Summary("Get a list of commands, or info regarding a specific command.")]
 		public async Task Help()
 		{
 			EmbedBuilder embed = new EmbedBuilder()
