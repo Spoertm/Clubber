@@ -15,7 +15,7 @@ namespace Clubber.Modules
 	{
 		[Command("database")]
 		[Priority(4)]
-		[RequireUserPermission(GuildPermission.ManageRoles)]
+		[RequireOwner]
 		public async Task UpdateDatabase()
 		{
 			Stopwatch stopwatch = new Stopwatch();
@@ -41,7 +41,7 @@ namespace Clubber.Modules
 			}
 			else
 			{
-				await msg.ModifyAsync(m => m.Content = $"No updated needed today.\nExecution took {elapsedMilliseconds} ms");
+				await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms");
 			}
 		}
 
