@@ -1,7 +1,4 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace Clubber.Files
+﻿namespace Clubber.Files
 {
 	public class DdUser
 	{
@@ -12,12 +9,8 @@ namespace Clubber.Files
 			Score = score;
 		}
 
-		[BsonId]
-		[BsonRepresentation(BsonType.Int64)]
 		public ulong DiscordId { get; set; }
-		[BsonRepresentation(BsonType.Int32)]
 		public int LeaderboardId { get; set; }
-		[BsonRepresentation(BsonType.Int32)]
 		public int Score { get; set; }
 	}
 }
