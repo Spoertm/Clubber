@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
-	[Name("Info")]
-	public class HelpCommand : AbstractModule<SocketCommandContext>
+	public class Info : AbstractModule<SocketCommandContext>
 	{
 		private readonly CommandService _service;
 
-		public HelpCommand(CommandService service)
+		public Info(CommandService service)
 		{
 			_service = service;
 		}
