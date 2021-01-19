@@ -49,7 +49,7 @@ namespace Clubber.Modules
 		[Priority(3)]
 		public async Task UpdateRolesFromMention(SocketGuildUser user)
 		{
-			if (!await UserIsClean(user, true, false, false, true))
+			if (!await UserIsClean(user, true, true, false, true))
 				return;
 
 			UpdateRolesResponse response = await UpdateRolesHelper.UpdateUserRoles(user);
