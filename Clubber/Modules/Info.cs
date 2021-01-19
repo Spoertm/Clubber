@@ -14,6 +14,13 @@ namespace Clubber.Modules
 			_service = service;
 		}
 
+		[Command("stopbot")]
+		public async Task StopBot()
+		{
+			await ReplyAsync("Exiting...");
+			await Program.StopBot();
+		}
+
 		[Command("whyareyou")]
 		[Summary("Describes what the bot does.")]
 		public async Task WhyAreYou() => await ReplyAsync(Constants.WhyAreYou);

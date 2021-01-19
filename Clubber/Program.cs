@@ -86,5 +86,13 @@ namespace Clubber
 				}
 			}
 		}
+
+		public static async Task StopBot()
+		{
+			await _client.StopAsync();
+			System.Threading.Thread.Sleep(1000);
+			await _client.LogoutAsync();
+			Environment.Exit(0);
+		}
 	}
 }
