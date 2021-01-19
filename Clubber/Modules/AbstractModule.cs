@@ -36,18 +36,18 @@ namespace Clubber.Modules
 
 		public async Task<bool> UserIsClean(SocketGuildUser user, bool checkIfCheater, bool checkIfBot, bool checkIfAlreadyRegistered, bool checkIfNotRegistered)
 		{
+			if (checkIfBot && user.IsBot)
+			{
+				await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player.");
+				return false;
+			}
+
 			if (checkIfCheater && user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
 			{
 				_ = user.Id == Context.User.Id
 					? await ReplyAsync($"{user.Username}, you can't register because you've cheated.")
 					: await ReplyAsync($"{user.Username} can't be registered because they've cheated.");
 
-				return false;
-			}
-
-			if (checkIfBot && user.IsBot)
-			{
-				await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player.");
 				return false;
 			}
 
