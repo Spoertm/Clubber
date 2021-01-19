@@ -42,6 +42,8 @@ namespace Clubber
 
 		private static async Task RegisterCommandsAndLogAsync()
 		{
+			_client.Ready -= RegisterCommandsAndLogAsync;
+
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
 			_client.MessageReceived += MessageRecievedAsync;
