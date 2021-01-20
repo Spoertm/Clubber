@@ -21,7 +21,7 @@ namespace Clubber.Helpers
 			dynamic lbPlayer = await GetLbPlayer(lbId);
 
 			List<DdUser> list = DdUsers;
-			list.Add(new DdUser(user.Id, (int)lbPlayer!.id, (int)lbPlayer.time / 10000));
+			list.Add(new DdUser(user.Id, (int)lbPlayer!.id));
 			UpdateDbFile(list);
 		}
 
