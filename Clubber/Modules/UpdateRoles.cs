@@ -13,6 +13,13 @@ namespace Clubber.Modules
 	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{
+		private static DiscordSocketClient _client = null!;
+
+		public UpdateRoles(DiscordSocketClient client)
+		{
+			_client = client;
+		}
+
 		[Command("database")]
 		[Priority(4)]
 		[RequireOwner]
@@ -72,5 +79,11 @@ namespace Clubber.Modules
 		[Command]
 		[Priority(1)]
 		public async Task UpdateRolesFromCurrentUser() => await UpdateRolesFromMention(Context.Guild.GetUser(Context.User.Id));
+
+		public static async Task BackupDbFile(System.IO.Stream stream, string fileName)
+		{
+			SocketTextChannel? backupChannel = _client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel;
+			await backupChannel!.SendFileAsync(stream, fileName, string.Empty);
+		}
 	}
 }

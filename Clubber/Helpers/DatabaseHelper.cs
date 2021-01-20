@@ -1,5 +1,6 @@
 ﻿using Clubber.Database;
 using Clubber.Files;
+using Clubber.Modules;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
@@ -13,8 +14,8 @@ namespace Clubber.Helpers
 {
 	public static class DatabaseHelper
 	{
-		private static readonly string _jsonDbFile = Path.Combine(AppContext.BaseDirectory, "Database", "UsersJson.json");
-		public static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(_jsonDbFile));
+		public static readonly string JsonDbFile = Path.Combine(AppContext.BaseDirectory, "Database", "UsersJson.json");
+		public static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(JsonDbFile));
 
 		public static async Task RegisterUser(uint lbId, SocketGuildUser user)
 		{
@@ -22,7 +23,7 @@ namespace Clubber.Helpers
 
 			List<DdUser> list = DdUsers;
 			list.Add(new DdUser(user.Id, (int)lbPlayer!.id));
-			UpdateDbFile(list);
+			await UpdateDbFile(list, $"Add-{user.Username}-{lbId}");
 		}
 
 		public static async Task<dynamic> GetLbPlayer(uint lbId)
@@ -43,14 +44,14 @@ namespace Clubber.Helpers
 			}
 		}
 
-		public static bool RemoveUser(ulong discordId)
+		public static async Task<bool> RemoveUser(SocketGuildUser user)
 		{
 			List<DdUser> list = DdUsers;
-			DdUser? toRemove = list.Find(du => du.DiscordId == discordId);
+			DdUser? toRemove = list.Find(du => du.DiscordId == user.Id);
 			if (toRemove != null)
 			{
 				list.Remove(toRemove);
-				UpdateDbFile(list);
+				await UpdateDbFile(list, $"Remove-{user.Username}-{toRemove.LeaderboardId}");
 				return true;
 			}
 			else
@@ -59,7 +60,21 @@ namespace Clubber.Helpers
 			}
 		}
 
-		private static void UpdateDbFile(List<DdUser> list) => File.WriteAllText(_jsonDbFile, JsonConvert.SerializeObject(list, Formatting.Indented));
+		private static async Task UpdateDbFile(List<DdUser> list, string change)
+		{
+			string file = JsonConvert.SerializeObject(list, Formatting.Indented);
+			File.WriteAllText(JsonDbFile, file);
+
+			using (Stream stream = new MemoryStream())
+			{
+				StreamWriter writer = new StreamWriter(stream);
+				writer.Write(file);
+				writer.Flush();
+				stream.Position = 0;
+				await UpdateRoles.BackupDbFile(stream, $"{DateTime.Now}--{change}");
+				writer.Dispose();
+			}
+		}
 
 		public static bool UserIsRegistered(ulong discordId) => DdUsers.Any(du => du.DiscordId == discordId);
 	}

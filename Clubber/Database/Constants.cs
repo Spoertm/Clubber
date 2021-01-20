@@ -15,6 +15,7 @@ To speed this up, you can manually update your own or someone else's roles by us
 		public const ulong Top3RoleId = 472451008342261820;
 		public const ulong Top10RoleId = 556255819323277312;
 		public const ulong ClubberExceptionsChannel = 800012212532936714;
+		public const ulong DatabaseBackupChannel = 801407839590547497;
 		public const ulong TestingChannel = 447487662891466752;
 		public const ulong DdPals = 399568958669455364;
 
