@@ -10,6 +10,7 @@ namespace Clubber.Modules
 {
 	[Name("Roles")]
 	[Group("updateroles")]
+	[Alias("pb")]
 	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{

@@ -6,7 +6,7 @@ namespace Clubber
 	{
 		public const string WhyAreYou = @"Every day or so, I automatically update people's DD roles.
 For example, if someone beats their score of 300s and gets 400s, I update their role from `300+ club` to `400+ club`.
-To speed this up, you can manually update your own or someone else's roles by using the `updateroles` command.";
+To speed this up, you can manually update your own or someone else's roles by using the `+pb` or `+updateroles` command.";
 
 		public const string Prefix = "+";
 		public const string Token = "NzQzNDMxNTAyODQyMjk4MzY4.XzUkig.UQrKlF7axeeFqewonpkTTAwaIIo";
