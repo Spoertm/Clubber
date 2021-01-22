@@ -28,7 +28,7 @@ namespace Clubber.Modules
 				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
 
-			if (!await IsError(!userMatches.Any(), "User not found.") && !await IsError(userMatches.Count() > 1, $"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or specify their ID."))
+			if (!await IsError(!userMatches.Any(), "User not found.") && !await IsError(userMatches.Count() > 1, $"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or type their full username instead."))
 				return (true, userMatches.FirstOrDefault());
 			else
 				return (false, null);

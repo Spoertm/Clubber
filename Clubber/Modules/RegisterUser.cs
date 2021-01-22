@@ -23,12 +23,16 @@ namespace Clubber.Modules
 
 		[Command]
 		[Priority(2)]
-		public async Task RegisterByTag([Name("Leaderboard ID")] uint lbId, [Name("User tag")] SocketGuildUser user)
+		public async Task RegisterByTag([Name("Leaderboard ID")] uint lbId, [Name("User tag")] SocketGuildUser iUser)
 		{
-			if (!await UserIsClean(user, true, true, true, false))
+			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(iUser.Username);
+			if (!success)
 				return;
 
-			await DatabaseHelper.RegisterUser(lbId, user);
+			if (!await UserIsClean(user!, true, true, true, false))
+				return;
+
+			await DatabaseHelper.RegisterUser(lbId, user!);
 			await ReplyAsync("✅ Successfully registered.");
 		}
 	}

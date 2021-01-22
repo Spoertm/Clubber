@@ -13,16 +13,20 @@ namespace Clubber.Modules
 	{
 		[Command]
 		[Priority(3)]
-		public async Task StatsFromMention(SocketGuildUser user)
+		public async Task StatsFromMention(SocketGuildUser iUser)
 		{
-			if (!await UserIsClean(user, true, true, false, true))
+			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(iUser.Username);
+			if (!success)
 				return;
 
-			dynamic lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == user.Id)!.LeaderboardId);
+			if (!await UserIsClean(user!, true, true, false, true))
+				return;
+
+			dynamic lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == user!.Id)!.LeaderboardId);
 
 			EmbedBuilder embed = new()
 			{
-				Title = $"Stats for {user.Username}",
+				Title = $"Stats for {user!.Username}",
 				Description =
 $@"✏️ Leaderboard name: {lbPlayer.username}
 🛂 Leaderboard ID: {lbPlayer.id}
