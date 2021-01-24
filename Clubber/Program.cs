@@ -18,8 +18,7 @@ namespace Clubber
 		private static CommandService _commands = null!;
 		private static IServiceProvider _services = null!;
 		private static SocketCommandContext _context = null!;
-		internal static string DatabaseFile { get; private set; }
-		private static string DatabaseDirectory => Path.Combine(AppContext.BaseDirectory, "Database");
+		public static string DatabaseDirectory => Path.Combine(AppContext.BaseDirectory, "Database");
 		private static string LogDirectory => Path.Combine(AppContext.BaseDirectory, "Logs");
 		private static string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.txt");
 
@@ -47,7 +46,7 @@ namespace Clubber
 		{
 			_client.Ready -= OnReadyAsync;
 
-			await RetrieveDatabaseFile();
+			await GetDatabaseFileIntoFolder((_client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!, (_client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!);
 
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
@@ -56,28 +55,25 @@ namespace Clubber
 			_commands.Log += LogAsync;
 		}
 
-		private static async Task RetrieveDatabaseFile()
+		public static async Task GetDatabaseFileIntoFolder(SocketTextChannel backupChannel, SocketTextChannel exceptionsChannel)
 		{
-			SocketTextChannel? backupChannel = _client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel;
-			SocketTextChannel? infoChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
-
 			try
 			{
-				IAttachment? latestAttachment = (await backupChannel!.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault().Attachments.First();
+				IAttachment? latestAttachment = (await backupChannel!.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault()!.Attachments.First();
 
-				if (!Directory.Exists(DatabaseDirectory))
-					Directory.CreateDirectory(DatabaseDirectory);
+				if (Directory.Exists(DatabaseDirectory))
+					Directory.Delete(DatabaseDirectory, true);
 
+				Directory.CreateDirectory(DatabaseDirectory);
 				string filePath = Path.Combine(DatabaseDirectory, latestAttachment.Filename);
 
 				using HttpClient client = new();
 				string databaseJson = await client.GetStringAsync(latestAttachment.Url);
 				File.WriteAllText(filePath, databaseJson);
-				DatabaseFile = filePath;
 			}
 			catch (Exception ex)
 			{
-				await infoChannel!.SendMessageAsync($"`{DateTime.Now:hh:mm:ss} [Critical] No database found. Exiting.`\n" + ex.Message);
+				await exceptionsChannel!.SendMessageAsync($"`{DateTime.Now:hh:mm:ss} [Critical] No database found. Exiting.`\n" + ex.Message);
 				await StopBot();
 			}
 		}

@@ -27,6 +27,8 @@ namespace ClubberDatabaseUpdateCron
 
 		public static async Task OnReady()
 		{
+			await Clubber.Program.GetDatabaseFileIntoFolder((_client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!, (_client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!);
+
 			SocketGuild? ddPals = _client.GetGuild(Constants.DdPals);
 			IMessageChannel? testingChannel = _client.GetChannel(Constants.TestingChannel) as IMessageChannel;
 

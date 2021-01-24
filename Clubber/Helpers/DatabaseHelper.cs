@@ -14,7 +14,7 @@ namespace Clubber.Helpers
 {
 	public static class DatabaseHelper
 	{
-		public static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(Program.DatabaseFile));
+		public static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(Directory.GetFiles(Program.DatabaseDirectory, "*.json")[0]));
 
 		public static async Task RegisterUser(uint lbId, SocketGuildUser user)
 		{
@@ -62,7 +62,7 @@ namespace Clubber.Helpers
 		public static async Task UpdateDbFile(List<DdUser> list, string change)
 		{
 			string file = JsonConvert.SerializeObject(list, Formatting.Indented);
-			File.WriteAllText(Program.DatabaseFile, file);
+			File.WriteAllText(Directory.GetFiles(Program.DatabaseDirectory, "*.json")[0], file);
 
 			using (Stream stream = new MemoryStream())
 			{
