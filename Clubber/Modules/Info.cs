@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,10 +9,12 @@ namespace Clubber.Modules
 	public class Info : AbstractModule<SocketCommandContext>
 	{
 		private readonly CommandService _service;
+		private static DiscordSocketClient _client = null!;
 
-		public Info(CommandService service)
+		public Info(CommandService service, DiscordSocketClient client)
 		{
 			_service = service;
+			_client = client;
 		}
 
 		[Command("stopbot")]
@@ -90,7 +93,13 @@ namespace Clubber.Modules
 		/// <summary>
 		/// Returns the command and its params in the format: commandName [requiredParam] (optionalParam).
 		/// </summary>
-		public static string GetCommandAndParameterString(CommandInfo cmd)
+		private static string GetCommandAndParameterString(CommandInfo cmd)
 			=> $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**({p.Name})**" : $"**({p.Name} = {p.DefaultValue})**" : $"**[{p.Name}]**"))}";
+
+		public static async Task BackupDbFile(System.IO.Stream stream, string fileName)
+		{
+			SocketTextChannel? backupChannel = _client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel;
+			await backupChannel!.SendFileAsync(stream, fileName, string.Empty);
+		}
 	}
 }

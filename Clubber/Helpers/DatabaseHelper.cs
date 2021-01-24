@@ -71,7 +71,7 @@ namespace Clubber.Helpers
 				writer.Write(file);
 				writer.Flush();
 				stream.Position = 0;
-				await UpdateRoles.BackupDbFile(stream, $"{DateTime.Now}--{change}.json");
+				await Info.BackupDbFile(stream, $"{DateTime.Now}--{change}.json");
 				writer.Dispose();
 			}
 		}

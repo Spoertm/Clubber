@@ -84,11 +84,5 @@ namespace Clubber.Modules
 		[Command]
 		[Priority(1)]
 		public async Task UpdateRolesFromCurrentUser() => await CheckUserAndUpdateRoles(Context.Guild.GetUser(Context.User.Id));
-
-		public static async Task BackupDbFile(System.IO.Stream stream, string fileName)
-		{
-			SocketTextChannel? backupChannel = _client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel;
-			await backupChannel!.SendFileAsync(stream, fileName, string.Empty);
-		}
 	}
 }
