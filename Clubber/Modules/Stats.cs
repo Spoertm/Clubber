@@ -11,21 +11,36 @@ namespace Clubber.Modules
 	[Summary("Provides statistics from the leaderboard.")]
 	public class Stats : AbstractModule<SocketCommandContext>
 	{
-		[Command]
+		[Command("id")]
 		[Priority(3)]
-		public async Task StatsFromMention(SocketGuildUser iUser)
+		public async Task StatsFromDiscordId(ulong discordId)
 		{
-			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(iUser.Username);
-			if (!success)
-				return;
-			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
+			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
+			if (success && user != null)
+				await CheckUserAndShowStats(user);
+		}
 
-			if (!await UserIsClean(user!, true, true, false, true))
+		[Command]
+		[Priority(2)]
+		public async Task StatsFromName([Remainder] string name)
+		{
+			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
+			if (success && user != null)
+				await CheckUserAndShowStats(user);
+		}
+
+		[Command]
+		[Priority(1)]
+		public async Task StatsFromCurrentUser() => await CheckUserAndShowStats(Context.Guild.GetUser(Context.User.Id));
+
+		private async Task CheckUserAndShowStats(SocketGuildUser user)
+		{
+			if (!await UserIsClean(user, true, true, false, true))
 				return;
 
 			dynamic lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == user!.Id)!.LeaderboardId);
 
-			EmbedBuilder embed = new()
+			await ReplyAsync(null, false, new EmbedBuilder()
 			{
 				Title = $"Stats for {user!.Username}",
 				Description =
@@ -34,21 +49,7 @@ $@"✏️ Leaderboard name: {lbPlayer.username}
 ⏱ Score: {(lbPlayer.time / 10000f).ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture)}s
 🥇 Rank: {lbPlayer.rank}",
 				ThumbnailUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl(),
-			};
-
-			await ReplyAsync(null, false, embed.Build());
+			}.Build());
 		}
-
-		[Command]
-		[Priority(2)]
-		public async Task StatsFromName([Remainder] string name)
-		{
-			if (success && user != null)
-				await StatsFromMention(user);
-		}
-
-		[Command]
-		[Priority(1)]
-		public async Task StatsFromCurrentUser() => await StatsFromMention(Context.Guild.GetUser(Context.User.Id));
 	}
 }

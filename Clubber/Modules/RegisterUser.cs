@@ -12,27 +12,30 @@ namespace Clubber.Modules
 	[RequireUserPermission(GuildPermission.ManageRoles)]
 	public class RegisterUser : AbstractModule<SocketCommandContext>
 	{
+		[Command("id")]
+		[Priority(2)]
+		public async Task RegisterByDiscordId([Name("Leaderboard ID")] uint lbId, [Name("Discord ID")] ulong discordId)
+		{
+			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
+			if (success && user != null)
+				await CheckUserAndRegister(lbId, user);
+		}
+
 		[Command]
 		[Priority(1)]
 		public async Task RegisterByName([Name("Leaderboard ID")] uint lbId, [Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
-				await RegisterByTag(lbId, user);
+				await CheckUserAndRegister(lbId, user);
 		}
 
-		[Command]
-		[Priority(2)]
-		public async Task RegisterByTag([Name("Leaderboard ID")] uint lbId, [Name("User tag")] SocketGuildUser iUser)
+		private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 		{
-			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(iUser.Username);
-			if (!success)
+			if (!await UserIsClean(user, true, true, true, false))
 				return;
 
-			if (!await UserIsClean(user!, true, true, true, false))
-				return;
-
-			await DatabaseHelper.RegisterUser(lbId, user!);
+			await DatabaseHelper.RegisterUser(lbId, user);
 			await ReplyAsync("✅ Successfully registered.");
 		}
 	}

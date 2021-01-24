@@ -52,9 +52,7 @@ namespace Clubber.Modules
 			}
 		}
 
-		[Command]
-		[Priority(3)]
-		public async Task UpdateRolesFromMention(SocketGuildUser user)
+		private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
 		{
 			if (!await UserIsClean(user, true, true, false, true))
 				return;
@@ -68,17 +66,26 @@ namespace Clubber.Modules
 		}
 
 		[Command]
+		[Priority(3)]
+		public async Task UpdateRolesFromDiscordId(ulong discordId)
+		{
+			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
+			if (success && user != null)
+				await CheckUserAndUpdateRoles(user);
+		}
+
+		[Command]
 		[Priority(2)]
 		public async Task UpdateRolesFromName([Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
-				await UpdateRolesFromMention(user);
+				await CheckUserAndUpdateRoles(user);
 		}
 
 		[Command]
 		[Priority(1)]
-		public async Task UpdateRolesFromCurrentUser() => await UpdateRolesFromMention(Context.Guild.GetUser(Context.User.Id));
+		public async Task UpdateRolesFromCurrentUser() => await CheckUserAndUpdateRoles(Context.Guild.GetUser(Context.User.Id));
 
 		public static async Task BackupDbFile(System.IO.Stream stream, string fileName)
 		{

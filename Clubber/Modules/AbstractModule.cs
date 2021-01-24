@@ -22,13 +22,23 @@ namespace Clubber.Modules
 			return false;
 		}
 
-		public async Task<(bool Success, SocketGuildUser? User)> FoundOneGuildUser(string name)
+		public async Task<(bool Success, SocketGuildUser? User)> FoundUserFromDiscordId(ulong discordId)
+		{
+			SocketGuildUser? user = Context.Guild.GetUser(discordId);
+
+			if (!await IsError(user == null, "User not found."))
+				return (true, user);
+			else
+				return (false, null);
+		}
+
+		public async Task<(bool Success, SocketGuildUser? User)> FoundOneUserFromName(string name)
 		{
 			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u =>
 				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
 
-			if (!await IsError(!userMatches.Any(), "User not found.") && !await IsError(userMatches.Count() > 1, $"Multiple people in the server have `{name.ToLower()}` in their name. Mention the user or type their full username instead."))
+			if (!await IsError(!userMatches.Any(), "User not found.") && !await IsError(userMatches.Count() > 1, $"Multiple people in the server have `{name.ToLower()}` in their name. Specify their Discord ID instead."))
 				return (true, userMatches.FirstOrDefault());
 			else
 				return (false, null);
