@@ -60,7 +60,7 @@ namespace Clubber.Helpers
 			}
 		}
 
-		private static async Task UpdateDbFile(List<DdUser> list, string change)
+		public static async Task UpdateDbFile(List<DdUser> list, string change)
 		{
 			string file = JsonConvert.SerializeObject(list, Formatting.Indented);
 			File.WriteAllText(JsonDbFile, file);
