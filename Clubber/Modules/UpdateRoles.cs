@@ -3,6 +3,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -38,11 +39,8 @@ namespace Clubber.Modules
 
 			if (response.UpdatedUsers > 0)
 			{
-				foreach (UpdateRolesResponse updateResponse in response.UpdateResponses)
-				{
-					if (updateResponse.Success)
-						await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(updateResponse));
-				}
+				foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
+					await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(updateResponse));
 
 				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
 			}
