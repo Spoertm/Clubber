@@ -38,10 +38,22 @@ namespace Clubber.Modules
 				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
 
-			if (!await IsError(!userMatches.Any(), "User not found.") && !await IsError(userMatches.Count() > 1, $"Multiple people in the server have `{name.ToLower()}` in their name. Specify their Discord ID instead."))
+			if (!await IsError(!userMatches.Any(), "User not found.") &&
+				!await IsError(userMatches.Count() > 1, GetMatchesString(userMatches, name)))
 				return (true, userMatches.FirstOrDefault());
 			else
 				return (false, null);
+		}
+
+		private string GetMatchesString(IEnumerable<SocketGuildUser> userMatches, string search)
+		{
+			string baseMessage = $"Found multiple matches for `{search.ToLower()}`. Specify their entire username, or their Discord ID in the format '+command id `the id`'.";
+			string matchesMessage = "\nMatches:\n" + string.Join("\n", userMatches.Select(m => $"- **{m.Username}** ({m.Id})"));
+
+			if (matchesMessage.Length + baseMessage.Length < 2048)
+				return baseMessage + matchesMessage;
+			else
+				return baseMessage;
 		}
 
 		public async Task<bool> UserIsClean(SocketGuildUser user, bool checkIfCheater, bool checkIfBot, bool checkIfAlreadyRegistered, bool checkIfNotRegistered)
