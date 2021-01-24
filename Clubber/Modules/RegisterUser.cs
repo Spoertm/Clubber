@@ -16,7 +16,7 @@ namespace Clubber.Modules
 		[Priority(1)]
 		public async Task RegisterByName([Name("Leaderboard ID")] uint lbId, [Remainder] string name)
 		{
-			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(name);
+			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
 				await RegisterByTag(lbId, user);
 		}

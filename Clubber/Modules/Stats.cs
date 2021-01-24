@@ -18,6 +18,7 @@ namespace Clubber.Modules
 			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(iUser.Username);
 			if (!success)
 				return;
+			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 
 			if (!await UserIsClean(user!, true, true, false, true))
 				return;
@@ -42,7 +43,6 @@ $@"✏️ Leaderboard name: {lbPlayer.username}
 		[Priority(2)]
 		public async Task StatsFromName([Remainder] string name)
 		{
-			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(name);
 			if (success && user != null)
 				await StatsFromMention(user);
 		}

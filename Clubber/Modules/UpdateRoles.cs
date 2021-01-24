@@ -71,7 +71,7 @@ namespace Clubber.Modules
 		[Priority(2)]
 		public async Task UpdateRolesFromName([Remainder] string name)
 		{
-			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(name);
+			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
 				await UpdateRolesFromMention(user);
 		}

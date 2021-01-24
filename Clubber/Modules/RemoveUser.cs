@@ -15,7 +15,7 @@ namespace Clubber.Modules
 		[Command]
 		public async Task RemoveByName([Remainder] string name)
 		{
-			(bool success, SocketGuildUser? user) = await FoundOneGuildUser(name);
+			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
 			{
 				if (await DatabaseHelper.RemoveUser(user))
