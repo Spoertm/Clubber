@@ -5,6 +5,8 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -16,6 +18,7 @@ namespace Clubber
 		private static CommandService _commands = null!;
 		private static IServiceProvider _services = null!;
 		private static SocketCommandContext _context = null!;
+		internal static string DatabaseFile { get; private set; }
 
 		private static string LogDirectory => Path.Combine(AppContext.BaseDirectory, "Logs");
 		private static string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.txt");
@@ -24,7 +27,7 @@ namespace Clubber
 
 		public static async Task RunBotAsync()
 		{
-			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true });
+			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
 			_commands = new CommandService(new CommandServiceConfig() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 			_services = new ServiceCollection()
 				.AddSingleton(_client)
@@ -35,20 +38,42 @@ namespace Clubber
 			await _client.StartAsync();
 			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
 
-			_client.Ready += RegisterCommandsAndLogAsync;
+			_client.Ready += OnReadyAsync;
 
 			await Task.Delay(-1);
 		}
 
-		private static async Task RegisterCommandsAndLogAsync()
+		private static async Task OnReadyAsync()
 		{
-			_client.Ready -= RegisterCommandsAndLogAsync;
+			_client.Ready -= OnReadyAsync;
+
+			await RetrieveDatabaseFile();
 
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 
 			_client.MessageReceived += MessageRecievedAsync;
 			_client.Log += LogAsync;
 			_commands.Log += LogAsync;
+		}
+
+		private static async Task RetrieveDatabaseFile()
+		{
+			SocketTextChannel? backupChannel = _client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel;
+
+			IMessage? latestMessage = (await backupChannel!.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+			if (latestMessage == null)
+			{
+				await (_client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!.SendMessageAsync($"`{DateTime.Now:hh:mm:ss} [Critical] No database found. Exiting.`");
+				await StopBot();
+			}
+
+			IAttachment latestAttachment = latestMessage!.Attachments.First();
+			string filePath = Path.Combine(AppContext.BaseDirectory, "Database", latestAttachment.Filename);
+
+			using HttpClient client = new();
+			string databaseJson = await client.GetStringAsync(latestAttachment.Url);
+			File.WriteAllText(filePath, databaseJson);
+			DatabaseFile = filePath;
 		}
 
 		private static async Task LogAsync(LogMessage msg)
