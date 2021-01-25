@@ -47,7 +47,7 @@ namespace Clubber.Modules
 
 		private string GetMatchesString(IEnumerable<SocketGuildUser> userMatches, string search)
 		{
-			string baseMessage = $"Found multiple matches for `{search.ToLower()}`. Specify their entire username, or their Discord ID in the format '+command id `the id`'.";
+			string baseMessage = $"Found multiple matches for `{search.ToLower()}`. Specify their entire username, or their Discord ID in the format `+command id <the id>`.";
 			string matchesMessage = "\nMatches:\n" + string.Join("\n", userMatches.Select(m => $"- **{m.Username}** ({m.Id})"));
 
 			if (matchesMessage.Length + baseMessage.Length < 2048)
