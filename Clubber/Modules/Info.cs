@@ -18,6 +18,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("stopbot")]
+		[RequireOwner]
 		public async Task StopBot()
 		{
 			await ReplyAsync("Exiting...");
