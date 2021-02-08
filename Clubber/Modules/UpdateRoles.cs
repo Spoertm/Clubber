@@ -14,13 +14,6 @@ namespace Clubber.Modules
 	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{
-		private static DiscordSocketClient _client = null!;
-
-		public UpdateRoles(DiscordSocketClient client)
-		{
-			_client = client;
-		}
-
 		[Command("database")]
 		[Priority(4)]
 		[RequireOwner]
