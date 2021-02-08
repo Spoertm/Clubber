@@ -11,7 +11,7 @@ namespace Clubber.Modules
 	[Name("Roles")]
 	[Group("pb")]
 	[Alias("updateroles")]
-	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles based on the input type.")]
+	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles.")]
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{
 		[Command("database")]
