@@ -56,7 +56,7 @@ namespace Clubber.Modules
 				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(response));
 		}
 
-		[Command]
+		[Command("id")]
 		[Priority(3)]
 		public async Task UpdateRolesFromDiscordId(ulong discordId)
 		{
