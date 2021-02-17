@@ -34,7 +34,7 @@ namespace Clubber.Helpers
 			{
 				List<KeyValuePair<string?, string?>> postValues = new()
 				{
-					new("uid", lbId.ToString(CultureInfo.InvariantCulture)),
+					new("uid", $"{lbId}"),
 				};
 
 				using FormUrlEncodedContent content = new(postValues);

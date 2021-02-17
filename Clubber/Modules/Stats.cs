@@ -48,11 +48,11 @@ namespace Clubber.Modules
 				Description =
 $@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
-⏱ Score: {(lbPlayer.Time / 10000f).ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture)}s
+⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
 🥇 Rank: {lbPlayer.Rank}
 💀 Kills: {lbPlayer.Kills}
 ♦️ Gems: {lbPlayer.Gems}
-🎯 Accuracy: {((double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}%",
+🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%",
 				ThumbnailUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl(),
 			}.Build());
 		}

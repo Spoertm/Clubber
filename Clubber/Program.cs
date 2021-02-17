@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -26,6 +27,8 @@ namespace Clubber
 
 		public static async Task RunBotAsync()
 		{
+			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+
 			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
 			_commands = new CommandService(new CommandServiceConfig() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 			_services = new ServiceCollection()
