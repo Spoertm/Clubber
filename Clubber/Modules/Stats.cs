@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace Clubber.Modules
 {
 	[Name("Info")]
+	[Alias("me")]
 	[Group("stats")]
 	[Summary("Provides statistics from the leaderboard.")]
 	public class Stats : AbstractModule<SocketCommandContext>
