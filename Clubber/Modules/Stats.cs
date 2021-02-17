@@ -48,7 +48,10 @@ namespace Clubber.Modules
 $@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
 ⏱ Score: {(lbPlayer.Time / 10000f).ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture)}s
-🥇 Rank: {lbPlayer.Rank}",
+🥇 Rank: {lbPlayer.Rank}
+💀 Kills: {lbPlayer.Kills}
+♦️ Gems: {lbPlayer.Gems}
+🎯 Accuracy: {((double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}%",
 				ThumbnailUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl(),
 			}.Build());
 		}
