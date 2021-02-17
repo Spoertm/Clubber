@@ -33,11 +33,11 @@ namespace Clubber.Helpers
 			{
 				List<DdUser> usersList = DatabaseHelper.DdUsers;
 				DdUser ddUser = usersList.Find(du => du.DiscordId == user.Id)!;
-				dynamic lbPlayer = await DatabaseHelper.GetLbPlayer((uint)ddUser.LeaderboardId);
+				LeaderboardUser lbPlayer = await DatabaseHelper.GetLbPlayer((uint)ddUser.LeaderboardId);
 
 				IEnumerable<ulong> userRolesIds = user.Roles.Select(r => r.Id);
-				(IEnumerable<ulong> scoreRoleToAdd, IEnumerable<ulong> scoreRolesToRemove) = HandleScoreRoles(userRolesIds, (int)lbPlayer.time);
-				(IEnumerable<ulong> topRoleToAdd, IEnumerable<ulong> topRolesToRemove) = HandleTopRoles(userRolesIds, (int)lbPlayer.rank);
+				(IEnumerable<ulong> scoreRoleToAdd, IEnumerable<ulong> scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbPlayer.Time);
+				(IEnumerable<ulong> topRoleToAdd, IEnumerable<ulong> topRolesToRemove) = HandleTopRoles(userRolesIds, lbPlayer.Rank);
 
 				if (!scoreRoleToAdd.Any() && !scoreRolesToRemove.Any() && !topRoleToAdd.Any() && !topRolesToRemove.Any())
 					return new(false, null, null, null);

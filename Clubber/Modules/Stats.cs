@@ -1,4 +1,5 @@
-﻿using Clubber.Helpers;
+﻿using Clubber.Database;
+using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -38,16 +39,16 @@ namespace Clubber.Modules
 			if (!await UserIsClean(user, true, true, false, true))
 				return;
 
-			dynamic lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == user!.Id)!.LeaderboardId);
+			LeaderboardUser lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == user!.Id)!.LeaderboardId);
 
 			await ReplyAsync(null, false, new EmbedBuilder()
 			{
 				Title = $"Stats for {user!.Username}",
 				Description =
-$@"✏️ Leaderboard name: {lbPlayer.username}
-🛂 Leaderboard ID: {lbPlayer.id}
-⏱ Score: {(lbPlayer.time / 10000f).ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture)}s
-🥇 Rank: {lbPlayer.rank}",
+$@"✏️ Leaderboard name: {lbPlayer.Username}
+🛂 Leaderboard ID: {lbPlayer.Id}
+⏱ Score: {(lbPlayer.Time / 10000f).ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture)}s
+🥇 Rank: {lbPlayer.Rank}",
 				ThumbnailUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl(),
 			}.Build());
 		}

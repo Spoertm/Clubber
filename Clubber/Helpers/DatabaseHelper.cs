@@ -5,9 +5,11 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Clubber.Helpers
@@ -18,29 +20,62 @@ namespace Clubber.Helpers
 
 		public static async Task RegisterUser(uint lbId, SocketGuildUser user)
 		{
-			dynamic lbPlayer = await GetLbPlayer(lbId);
+			LeaderboardUser lbPlayer = await GetLbPlayer(lbId);
 
 			List<DdUser> list = DdUsers;
-			list.Add(new DdUser(user.Id, (int)lbPlayer!.id));
+			list.Add(new DdUser(user.Id, lbPlayer.Id));
 			await UpdateDbFile(list, $"Add-{user.Username}-{lbId}");
 		}
 
-		public static async Task<dynamic> GetLbPlayer(uint lbId)
+		public static async Task<LeaderboardUser> GetLbPlayer(uint lbId)
 		{
 			using HttpClient client = new();
 			try
 			{
-				string json = await client.GetStringAsync($"https://devildaggers.info/api/leaderboards/user/by-id?userId={lbId}");
-				return JsonConvert.DeserializeObject<dynamic>(json);
-			}
-			catch (JsonException jsonEx)
-			{
-				throw new CustomException("Something went wrong. Chupacabra will get on it soon:tm:.", jsonEx);
+				List<KeyValuePair<string?, string?>> postValues = new()
+				{
+					new("uid", lbId.ToString(CultureInfo.InvariantCulture)),
+				};
+
+				using FormUrlEncodedContent content = new(postValues);
+				HttpResponseMessage response = await client.PostAsync("http://dd.hasmodai.com/backend16/get_user_by_id_public.php", content);
+				byte[] data = await response.Content.ReadAsByteArrayAsync();
+
+				int bytePosition = 19;
+
+				return new LeaderboardUser(
+					GetUserName(data, ref bytePosition),
+					BitConverter.ToInt32(data, bytePosition),
+					BitConverter.ToInt32(data, bytePosition + 4),
+					BitConverter.ToInt32(data, bytePosition + 12),
+					BitConverter.ToInt32(data, bytePosition + 16),
+					BitConverter.ToInt32(data, bytePosition + 28),
+					BitConverter.ToInt32(data, bytePosition + 24),
+					BitConverter.ToInt32(data, bytePosition + 20),
+					BitConverter.ToInt16(data, bytePosition + 32),
+					BitConverter.ToUInt64(data, bytePosition + 60),
+					BitConverter.ToUInt64(data, bytePosition + 44),
+					BitConverter.ToUInt64(data, bytePosition + 68),
+					BitConverter.ToUInt64(data, bytePosition + 36),
+					BitConverter.ToUInt64(data, bytePosition + 76),
+					BitConverter.ToUInt64(data, bytePosition + 52));
 			}
 			catch
 			{
-				throw new CustomException("DdInfo API issue. Please try again later.");
+				throw new CustomException("DD servers are experiencing issues atm. Try again later.");
 			}
+		}
+
+		public static string GetUserName(byte[] data, ref int bytePos)
+		{
+			short usernameLength = BitConverter.ToInt16(data, bytePos);
+			bytePos += 2;
+
+			byte[] usernameBytes = new byte[usernameLength];
+			Buffer.BlockCopy(data, bytePos, usernameBytes, 0, usernameLength);
+
+			bytePos += usernameLength;
+			return Encoding.UTF8.GetString(usernameBytes);
 		}
 
 		public static async Task<bool> RemoveUser(SocketGuildUser user)
