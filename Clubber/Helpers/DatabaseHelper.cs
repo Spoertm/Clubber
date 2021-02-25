@@ -45,24 +45,24 @@ namespace Clubber.Helpers
 
 				return new LeaderboardUser(
 					GetUserName(data, ref bytePosition),
-					BitConverter.ToInt32(data, bytePosition),
-					BitConverter.ToInt32(data, bytePosition + 4),
-					BitConverter.ToInt32(data, bytePosition + 12),
-					BitConverter.ToInt32(data, bytePosition + 16),
-					BitConverter.ToInt32(data, bytePosition + 28),
-					BitConverter.ToInt32(data, bytePosition + 24),
-					BitConverter.ToInt32(data, bytePosition + 20),
-					BitConverter.ToInt16(data, bytePosition + 32),
-					BitConverter.ToUInt64(data, bytePosition + 60),
-					BitConverter.ToUInt64(data, bytePosition + 44),
-					BitConverter.ToUInt64(data, bytePosition + 68),
-					BitConverter.ToUInt64(data, bytePosition + 36),
-					BitConverter.ToUInt64(data, bytePosition + 76),
-					BitConverter.ToUInt64(data, bytePosition + 52));
+					Rank: BitConverter.ToInt32(data, bytePosition),
+					Id: BitConverter.ToInt32(data, bytePosition + 4),
+					Time: BitConverter.ToInt32(data, bytePosition + 12),
+					Kills: BitConverter.ToInt32(data, bytePosition + 16),
+					Gems: BitConverter.ToInt32(data, bytePosition + 28),
+					DaggersHit: BitConverter.ToInt32(data, bytePosition + 24),
+					DaggersFired: BitConverter.ToInt32(data, bytePosition + 20),
+					DeathType: BitConverter.ToInt16(data, bytePosition + 32),
+					TimeTotal: BitConverter.ToUInt64(data, bytePosition + 60),
+					KillsTotal: BitConverter.ToUInt64(data, bytePosition + 44),
+					GemsTotal: BitConverter.ToUInt64(data, bytePosition + 68),
+					DeathsTotal: BitConverter.ToUInt64(data, bytePosition + 36),
+					DaggersHitTotal: BitConverter.ToUInt64(data, bytePosition + 76),
+					DaggersFiredTotal: BitConverter.ToUInt64(data, bytePosition + 52));
 			}
-			catch
+			catch (Exception e)
 			{
-				throw new CustomException("DD servers are experiencing issues atm. Try again later.");
+				throw new CustomException("DD servers are experiencing issues atm. Try again later.", e);
 			}
 		}
 
