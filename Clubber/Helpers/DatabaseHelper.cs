@@ -44,7 +44,7 @@ namespace Clubber.Helpers
 				int bytePosition = 19;
 
 				return new LeaderboardUser(
-					GetUserName(data, ref bytePosition),
+					Username: GetUserName(data, ref bytePosition),
 					Rank: BitConverter.ToInt32(data, bytePosition),
 					Id: BitConverter.ToInt32(data, bytePosition + 4),
 					Time: BitConverter.ToInt32(data, bytePosition + 12),
