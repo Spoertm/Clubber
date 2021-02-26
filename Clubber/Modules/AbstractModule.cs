@@ -22,6 +22,9 @@ namespace Clubber.Modules
 			return false;
 		}
 
+		public async Task<IMessage> InlineReplayAsync(string message, bool ping = false)
+			=> await ReplyAsync(message, false, null, null, ping ? null : AllowedMentions.None, new MessageReference(Context.Message.Id));
+
 		public async Task<(bool Success, SocketGuildUser? User)> FoundUserFromDiscordId(ulong discordId)
 		{
 			SocketGuildUser? user = Context.Guild.GetUser(discordId);
