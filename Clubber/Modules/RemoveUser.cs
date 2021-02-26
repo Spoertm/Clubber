@@ -24,11 +24,11 @@ namespace Clubber.Modules
 			{
 				list.Remove(toRemove);
 				await DatabaseHelper.UpdateDbFile(list, $"Remove-{discordId}-{toRemove.LeaderboardId}");
-				await ReplyAsync("✅ Successfully removed.");
+				await InlineReplayAsync("✅ Successfully removed.");
 			}
 			else
 			{
-				await ReplyAsync("User not registered.");
+				await InlineReplayAsync("User not registered.");
 			}
 		}
 
@@ -40,9 +40,9 @@ namespace Clubber.Modules
 			if (success && user != null)
 			{
 				if (await DatabaseHelper.RemoveUser(user))
-					await ReplyAsync("✅ Successfully removed.");
+					await InlineReplayAsync("✅ Successfully removed.");
 				else
-					await ReplyAsync("User not registered.");
+					await InlineReplayAsync("User not registered.");
 			}
 		}
 	}

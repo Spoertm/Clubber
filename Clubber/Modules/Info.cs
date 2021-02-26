@@ -27,7 +27,7 @@ namespace Clubber.Modules
 
 		[Command("whyareyou")]
 		[Summary("Describes what the bot does.")]
-		public async Task WhyAreYou() => await ReplyAsync(Constants.WhyAreYou);
+		public async Task WhyAreYou() => await InlineReplayAsync(Constants.WhyAreYou);
 
 		[Command("help")]
 		[Summary("Get a list of commands, or info regarding a specific command.")]
@@ -64,7 +64,7 @@ namespace Clubber.Modules
 			if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
 				embedBuilder.Footer = new EmbedFooterBuilder { Text = "[]: Required⠀⠀(): Optional\nText within \" \" will be counted as one argument." };
 
-			await ReplyAsync(null, false, embedBuilder.Build());
+			await ReplyAsync(null, false, embedBuilder.Build(), null, null, new MessageReference(Context.Message.Id));
 		}
 
 		[Command("help")]
@@ -88,7 +88,7 @@ namespace Clubber.Modules
 					embed.AddField(group.Key, groupCommands);
 			}
 
-			await ReplyAsync(null, false, embed.Build());
+			await ReplyAsync(null, false, embed.Build(), null, null, new MessageReference(Context.Message.Id));
 		}
 
 		/// <summary>

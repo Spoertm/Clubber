@@ -51,9 +51,9 @@ namespace Clubber.Modules
 			UpdateRolesResponse response = await UpdateRolesHelper.UpdateUserRoles(user);
 
 			if (!response.Success)
-				await ReplyAsync("No updates were needed.");
+				await InlineReplayAsync("No updates were needed.");
 			else
-				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(response));
+				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(response), null, null, new MessageReference(Context.Message.Id));
 		}
 
 		[Command("id")]

@@ -1,10 +1,11 @@
-﻿using Clubber.Helpers;
-using Discord.Commands;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Clubber.Helpers;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 
 namespace Clubber.Modules
 {
@@ -15,7 +16,7 @@ namespace Clubber.Modules
 		{
 			if (condition)
 			{
-				await ReplyAsync(output);
+				await InlineReplayAsync(output);
 				return true;
 			}
 
@@ -63,30 +64,30 @@ namespace Clubber.Modules
 		{
 			if (checkIfBot && user.IsBot)
 			{
-				await ReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player.");
+				await InlineReplayAsync($"{user.Mention} is a bot. It can't be registered as a DD player.");
 				return false;
 			}
 
 			if (checkIfCheater && user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
 			{
 				_ = user.Id == Context.User.Id
-					? await ReplyAsync($"{user.Username}, you can't register because you've cheated.")
-					: await ReplyAsync($"{user.Username} can't be registered because they've cheated.");
+					? await InlineReplayAsync($"{user.Username}, you can't register because you've cheated.")
+					: await InlineReplayAsync($"{user.Username} can't be registered because they've cheated.");
 
 				return false;
 			}
 
 			if (checkIfAlreadyRegistered && DatabaseHelper.UserIsRegistered(user.Id))
 			{
-				await ReplyAsync($"User `{user.Username}` is already registered.");
+				await InlineReplayAsync($"User `{user.Username}` is already registered.");
 				return false;
 			}
 
 			if (checkIfNotRegistered && !DatabaseHelper.UserIsRegistered(user.Id))
 			{
 				_ = user.Id == Context.User.Id
-					? await ReplyAsync($"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you.")
-					: await ReplyAsync($"`{user.Username}` is not registered. Please ask an admin/moderator/role assigner to register them.");
+					? await InlineReplayAsync($"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you.")
+					: await InlineReplayAsync($"`{user.Username}` is not registered. Please ask an admin/moderator/role assigner to register them.");
 
 				return false;
 			}
