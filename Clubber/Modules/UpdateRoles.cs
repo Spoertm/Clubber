@@ -53,7 +53,7 @@ namespace Clubber.Modules
 			if (!response.Success)
 				await InlineReplayAsync("No updates were needed.");
 			else
-				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(response), null, null, new MessageReference(Context.Message.Id));
+				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(response), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
 
 		[Command("id")]

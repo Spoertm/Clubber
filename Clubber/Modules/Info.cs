@@ -64,7 +64,7 @@ namespace Clubber.Modules
 			if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
 				embedBuilder.Footer = new EmbedFooterBuilder { Text = "[]: Required⠀⠀(): Optional\nText within \" \" will be counted as one argument." };
 
-			await ReplyAsync(null, false, embedBuilder.Build(), null, null, new MessageReference(Context.Message.Id));
+			await ReplyAsync(null, false, embedBuilder.Build(), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
 
 		[Command("help")]
@@ -88,7 +88,7 @@ namespace Clubber.Modules
 					embed.AddField(group.Key, groupCommands);
 			}
 
-			await ReplyAsync(null, false, embed.Build(), null, null, new MessageReference(Context.Message.Id));
+			await ReplyAsync(null, false, embed.Build(), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
 
 		/// <summary>
