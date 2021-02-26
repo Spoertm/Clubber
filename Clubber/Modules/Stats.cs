@@ -10,7 +10,7 @@ namespace Clubber.Modules
 	[Name("Info")]
 	[Alias("me")]
 	[Group("stats")]
-	[Summary("Provides statistics from the leaderboard.")]
+	[Summary("Provides statistics from the leaderboard for users that are in this server and registered.")]
 	public class Stats : AbstractModule<SocketCommandContext>
 	{
 		[Command("id")]
