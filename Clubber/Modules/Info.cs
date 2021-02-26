@@ -73,7 +73,7 @@ namespace Clubber.Modules
 		{
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle("List of commands")
-				.WithDescription($"Prefix: {Format.Code(Constants.Prefix)}\n\n")
+				.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
 				.WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
 				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
 
