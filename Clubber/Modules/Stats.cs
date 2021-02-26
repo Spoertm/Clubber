@@ -42,7 +42,7 @@ namespace Clubber.Modules
 
 			LeaderboardUser lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == user!.Id)!.LeaderboardId);
 
-			await ReplyAsync(null, false, new EmbedBuilder()
+			Embed statsEmbed = new EmbedBuilder()
 			{
 				Title = $"Stats for {user!.Username}",
 				Description =
@@ -54,7 +54,10 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 ♦️ Gems: {lbPlayer.Gems}
 🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%",
 				ThumbnailUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl(),
-			}.Build());
+			}
+			.Build();
+
+			await ReplyAsync(null, false, statsEmbed, null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
 	}
 }
