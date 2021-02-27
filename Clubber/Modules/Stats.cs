@@ -19,7 +19,7 @@ namespace Clubber.Modules
 		public async Task StatsFromCurrentUser() => await CheckUserAndShowStats(Context.Guild.GetUser(Context.User.Id));
 
 		[Command]
-		[Remarks("stats chupacabra")]
+		[Remarks("stats clubber\nstats <@743431502842298368>")]
 		[Priority(2)]
 		public async Task StatsFromName([Name("name | tag")] [Remainder] string name)
 		{
@@ -29,7 +29,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("id")]
-		[Remarks("stats id 222079115849629696")]
+		[Remarks("stats id 743431502842298368")]
 		[Priority(3)]
 		public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
 		{

@@ -15,7 +15,7 @@ namespace Clubber.Modules
 	public class RemoveUser : AbstractModule<SocketCommandContext>
 	{
 		[Command]
-		[Remarks("remove chupacabra")]
+		[Remarks("remove clubber\nremove <@743431502842298368>")]
 		[Priority(1)]
 		public async Task RemoveByName([Name("name | tag")] [Remainder] string name)
 		{
@@ -30,7 +30,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("id")]
-		[Remarks("remove id 222079115849629696")]
+		[Remarks("remove id 743431502842298368")]
 		[Priority(2)]
 		public async Task RemoveByDiscordId([Name("Discord ID")] ulong discordId)
 		{
