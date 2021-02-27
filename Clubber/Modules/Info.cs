@@ -73,7 +73,6 @@ namespace Clubber.Modules
 			CommandInfo cmd = result.Commands[0].Command;
 
 			embedBuilder
-				.WithAuthor(Context.Client.CurrentUser.Username, Context.Client.CurrentUser.GetAvatarUrl())
 				.WithTitle(result.Commands[0].Alias)
 				.WithDescription(cmd.Summary ?? cmd.Module.Summary);
 
