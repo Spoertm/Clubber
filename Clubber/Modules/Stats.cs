@@ -14,6 +14,7 @@ namespace Clubber.Modules
 	public class Stats : AbstractModule<SocketCommandContext>
 	{
 		[Command("id")]
+		[Remarks("stats id 222079115849629696")]
 		[Priority(3)]
 		public async Task StatsFromDiscordId(ulong discordId)
 		{
@@ -23,6 +24,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
+		[Remarks("stats chupacabra")]
 		[Priority(2)]
 		public async Task StatsFromName([Remainder] string name)
 		{
@@ -32,6 +34,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
+		[Remarks("me")]
 		[Priority(1)]
 		public async Task StatsFromCurrentUser() => await CheckUserAndShowStats(Context.Guild.GetUser(Context.User.Id));
 

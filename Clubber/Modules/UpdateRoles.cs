@@ -57,6 +57,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("id")]
+		[Remarks("pb id 222079115849629696")]
 		[Priority(3)]
 		public async Task UpdateRolesFromDiscordId(ulong discordId)
 		{
@@ -66,6 +67,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
+		[Remarks("pb chupacabra")]
 		[Priority(2)]
 		public async Task UpdateRolesFromName([Remainder] string name)
 		{
@@ -75,6 +77,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
+		[Remarks("pb")]
 		[Priority(1)]
 		public async Task UpdateRolesFromCurrentUser() => await CheckUserAndUpdateRoles(Context.Guild.GetUser(Context.User.Id));
 	}

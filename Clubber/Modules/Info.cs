@@ -32,6 +32,7 @@ namespace Clubber.Modules
 
 		[Command("help")]
 		[Summary("Get a list of commands, or info regarding a specific command.")]
+		[Remarks("help pb\nhelp stats")]
 		public async Task Help([Remainder] string command)
 		{
 			SearchResult result = _service.Search(Context, command);

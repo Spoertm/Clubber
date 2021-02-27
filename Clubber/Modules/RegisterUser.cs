@@ -13,6 +13,7 @@ namespace Clubber.Modules
 	public class RegisterUser : AbstractModule<SocketCommandContext>
 	{
 		[Command("id")]
+		[Remarks("register id 118832 222079115849629696")]
 		[Priority(2)]
 		public async Task RegisterByDiscordId([Name("Leaderboard ID")] uint lbId, [Name("Discord ID")] ulong discordId)
 		{
@@ -22,6 +23,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
+		[Remarks("register 118832 chupacabra")]
 		[Priority(1)]
 		public async Task RegisterByName([Name("Leaderboard ID")] uint lbId, [Remainder] string name)
 		{
