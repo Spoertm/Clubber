@@ -14,6 +14,21 @@ namespace Clubber.Modules
 	[RequireUserPermission(GuildPermission.ManageRoles)]
 	public class RemoveUser : AbstractModule<SocketCommandContext>
 	{
+		[Command]
+		[Remarks("remove chupacabra")]
+		[Priority(1)]
+		public async Task RemoveByName([Remainder] string name)
+		{
+			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
+			if (success && user != null)
+			{
+				if (await DatabaseHelper.RemoveUser(user))
+					await InlineReplayAsync("✅ Successfully removed.");
+				else
+					await InlineReplayAsync("User not registered.");
+			}
+		}
+
 		[Command("id")]
 		[Remarks("remove id 222079115849629696")]
 		[Priority(2)]
@@ -30,21 +45,6 @@ namespace Clubber.Modules
 			else
 			{
 				await InlineReplayAsync("No such ID found.");
-			}
-		}
-
-		[Command]
-		[Remarks("remove chupacabra")]
-		[Priority(1)]
-		public async Task RemoveByName([Remainder] string name)
-		{
-			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-			if (success && user != null)
-			{
-				if (await DatabaseHelper.RemoveUser(user))
-					await InlineReplayAsync("✅ Successfully removed.");
-				else
-					await InlineReplayAsync("User not registered.");
 			}
 		}
 	}

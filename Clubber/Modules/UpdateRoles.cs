@@ -14,6 +14,44 @@ namespace Clubber.Modules
 	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles.")]
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{
+		[Command]
+		[Remarks("pb")]
+		[Priority(1)]
+		public async Task UpdateRolesFromCurrentUser() => await CheckUserAndUpdateRoles(Context.Guild.GetUser(Context.User.Id));
+
+		[Command]
+		[Remarks("pb chupacabra")]
+		[Priority(2)]
+		public async Task UpdateRolesFromName([Remainder] string name)
+		{
+			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
+			if (success && user != null)
+				await CheckUserAndUpdateRoles(user);
+		}
+
+		[Command("id")]
+		[Remarks("pb id 222079115849629696")]
+		[Priority(3)]
+		public async Task UpdateRolesFromDiscordId(ulong discordId)
+		{
+			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
+			if (success && user != null)
+				await CheckUserAndUpdateRoles(user);
+		}
+
+		private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
+		{
+			if (!await UserIsClean(user, true, true, false, true))
+				return;
+
+			UpdateRolesResponse response = await UpdateRolesHelper.UpdateUserRoles(user);
+
+			if (!response.Success)
+				await InlineReplayAsync("No updates were needed.");
+			else
+				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(response), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
+		}
+
 		[Command("database")]
 		[Priority(4)]
 		[RequireOwner]
@@ -42,43 +80,5 @@ namespace Clubber.Modules
 				await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms");
 			}
 		}
-
-		private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
-		{
-			if (!await UserIsClean(user, true, true, false, true))
-				return;
-
-			UpdateRolesResponse response = await UpdateRolesHelper.UpdateUserRoles(user);
-
-			if (!response.Success)
-				await InlineReplayAsync("No updates were needed.");
-			else
-				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(response), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
-		}
-
-		[Command("id")]
-		[Remarks("pb id 222079115849629696")]
-		[Priority(3)]
-		public async Task UpdateRolesFromDiscordId(ulong discordId)
-		{
-			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-			if (success && user != null)
-				await CheckUserAndUpdateRoles(user);
-		}
-
-		[Command]
-		[Remarks("pb chupacabra")]
-		[Priority(2)]
-		public async Task UpdateRolesFromName([Remainder] string name)
-		{
-			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-			if (success && user != null)
-				await CheckUserAndUpdateRoles(user);
-		}
-
-		[Command]
-		[Remarks("pb")]
-		[Priority(1)]
-		public async Task UpdateRolesFromCurrentUser() => await CheckUserAndUpdateRoles(Context.Guild.GetUser(Context.User.Id));
 	}
 }

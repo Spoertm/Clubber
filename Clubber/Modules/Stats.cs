@@ -13,15 +13,10 @@ namespace Clubber.Modules
 	[Summary("Provides statistics from the leaderboard for users that are in this server and registered.")]
 	public class Stats : AbstractModule<SocketCommandContext>
 	{
-		[Command("id")]
-		[Remarks("stats id 222079115849629696")]
-		[Priority(3)]
-		public async Task StatsFromDiscordId(ulong discordId)
-		{
-			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-			if (success && user != null)
-				await CheckUserAndShowStats(user);
-		}
+		[Command]
+		[Remarks("me")]
+		[Priority(1)]
+		public async Task StatsFromCurrentUser() => await CheckUserAndShowStats(Context.Guild.GetUser(Context.User.Id));
 
 		[Command]
 		[Remarks("stats chupacabra")]
@@ -33,10 +28,15 @@ namespace Clubber.Modules
 				await CheckUserAndShowStats(user);
 		}
 
-		[Command]
-		[Remarks("me")]
-		[Priority(1)]
-		public async Task StatsFromCurrentUser() => await CheckUserAndShowStats(Context.Guild.GetUser(Context.User.Id));
+		[Command("id")]
+		[Remarks("stats id 222079115849629696")]
+		[Priority(3)]
+		public async Task StatsFromDiscordId(ulong discordId)
+		{
+			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
+			if (success && user != null)
+				await CheckUserAndShowStats(user);
+		}
 
 		private async Task CheckUserAndShowStats(SocketGuildUser user)
 		{

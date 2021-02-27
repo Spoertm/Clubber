@@ -32,7 +32,33 @@ namespace Clubber.Modules
 
 		[Command("help")]
 		[Summary("Get a list of commands, or info regarding a specific command.")]
+		[Priority(0)]
+		public async Task Help()
+		{
+			EmbedBuilder embed = new EmbedBuilder()
+				.WithTitle("List of commands")
+				.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
+				.WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
+				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
+
+			foreach (IGrouping<string, CommandInfo>? group in _service.Commands.GroupBy(x => x.Module.Name))
+			{
+				string groupCommands = string.Join(", ", group
+					.Where(cmd => cmd.CheckPreconditionsAsync(Context).Result.IsSuccess)
+					.Select(x => Format.Code(x.Aliases[0]))
+					.Distinct());
+
+				if (!string.IsNullOrEmpty(groupCommands))
+					embed.AddField(group.Key, groupCommands);
+			}
+
+			await ReplyAsync(null, false, embed.Build(), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
+		}
+
+		[Command("help")]
+		[Summary("Get a list of commands, or info regarding a specific command.")]
 		[Remarks("help pb\nhelp stats")]
+		[Priority(1)]
 		public async Task Help([Remainder] string command)
 		{
 			SearchResult result = _service.Search(Context, command);
@@ -71,30 +97,6 @@ namespace Clubber.Modules
 				embedBuilder.WithFooter("[]: Required⠀⠀(): Optional\nText within \" \" will be counted as one argument.");
 
 			await ReplyAsync(null, false, embedBuilder.Build(), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
-		}
-
-		[Command("help")]
-		[Summary("Get a list of commands, or info regarding a specific command.")]
-		public async Task Help()
-		{
-			EmbedBuilder embed = new EmbedBuilder()
-				.WithTitle("List of commands")
-				.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
-				.WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
-				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
-
-			foreach (IGrouping<string, CommandInfo>? group in _service.Commands.GroupBy(x => x.Module.Name))
-			{
-				string groupCommands = string.Join(", ", group
-					.Where(cmd => cmd.CheckPreconditionsAsync(Context).Result.IsSuccess)
-					.Select(x => Format.Code(x.Aliases[0]))
-					.Distinct());
-
-				if (!string.IsNullOrEmpty(groupCommands))
-					embed.AddField(group.Key, groupCommands);
-			}
-
-			await ReplyAsync(null, false, embed.Build(), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
 
 		/// <summary>
