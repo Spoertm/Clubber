@@ -38,6 +38,15 @@ namespace Clubber.Modules
 
 		public async Task<(bool Success, SocketGuildUser? User)> FoundOneUserFromName(string name)
 		{
+			string trimmedName = name.TrimStart('<', '@').TrimEnd('>');
+
+			if (ulong.TryParse(trimmedName, out ulong userID))
+			{
+				SocketGuildUser? user = Context.Guild.GetUser(userID);
+				if (user != null)
+					return (true, user);
+			}
+
 			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u =>
 				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
