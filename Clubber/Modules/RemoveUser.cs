@@ -29,7 +29,7 @@ namespace Clubber.Modules
 			}
 			else
 			{
-				await InlineReplayAsync("User not registered.");
+				await InlineReplayAsync("No such ID found.");
 			}
 		}
 
