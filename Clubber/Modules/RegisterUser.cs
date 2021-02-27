@@ -15,7 +15,7 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("register 118832 chupacabra")]
 		[Priority(1)]
-		public async Task RegisterByName([Name("Leaderboard ID")] uint lbId, [Remainder] string name)
+		public async Task RegisterByName([Name("leaderboard ID")] uint lbId, [Name("name | tag")] [Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
@@ -25,7 +25,7 @@ namespace Clubber.Modules
 		[Command("id")]
 		[Remarks("register id 118832 222079115849629696")]
 		[Priority(2)]
-		public async Task RegisterByDiscordId([Name("Leaderboard ID")] uint lbId, [Name("Discord ID")] ulong discordId)
+		public async Task RegisterByDiscordId([Name("leaderboard ID")] uint lbId, [Name("Discord ID")] ulong discordId)
 		{
 			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
 			if (success && user != null)

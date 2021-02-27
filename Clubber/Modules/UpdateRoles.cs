@@ -22,7 +22,7 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("pb chupacabra")]
 		[Priority(2)]
-		public async Task UpdateRolesFromName([Remainder] string name)
+		public async Task UpdateRolesFromName([Name("name | tag")] [Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
@@ -32,7 +32,7 @@ namespace Clubber.Modules
 		[Command("id")]
 		[Remarks("pb id 222079115849629696")]
 		[Priority(3)]
-		public async Task UpdateRolesFromDiscordId(ulong discordId)
+		public async Task UpdateRolesFromDiscordId([Name("Discord ID")] ulong discordId)
 		{
 			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
 			if (success && user != null)

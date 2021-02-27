@@ -17,7 +17,7 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("remove chupacabra")]
 		[Priority(1)]
-		public async Task RemoveByName([Remainder] string name)
+		public async Task RemoveByName([Name("name | tag")] [Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
@@ -32,7 +32,7 @@ namespace Clubber.Modules
 		[Command("id")]
 		[Remarks("remove id 222079115849629696")]
 		[Priority(2)]
-		public async Task RemoveByDiscordId(ulong discordId)
+		public async Task RemoveByDiscordId([Name("Discord ID")] ulong discordId)
 		{
 			List<DdUser> list = DatabaseHelper.DdUsers;
 			DdUser? toRemove = list.Find(du => du.DiscordId == discordId);

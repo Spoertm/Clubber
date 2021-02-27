@@ -21,7 +21,7 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("stats chupacabra")]
 		[Priority(2)]
-		public async Task StatsFromName([Remainder] string name)
+		public async Task StatsFromName([Name("name | tag")] [Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
@@ -31,7 +31,7 @@ namespace Clubber.Modules
 		[Command("id")]
 		[Remarks("stats id 222079115849629696")]
 		[Priority(3)]
-		public async Task StatsFromDiscordId(ulong discordId)
+		public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
 		{
 			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
 			if (success && user != null)
