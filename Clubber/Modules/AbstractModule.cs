@@ -48,8 +48,9 @@ namespace Clubber.Modules
 			}
 
 			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u =>
-				u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true);
+				!u.IsBot &&
+				(u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
+				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true));
 
 			if (!await IsError(!userMatches.Any(), "User not found.") &&
 				!await IsError(userMatches.Count() > 1, GetMatchesString(userMatches, name)))
