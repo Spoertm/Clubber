@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -41,28 +42,32 @@ namespace Clubber.Modules
 			if (await IsError(!preCondCheck.IsSuccess, $"The command `{command}` couldn't be executed.\nReason: " + preCondCheck.ErrorReason))
 				return;
 
-			string aliases = string.Empty;
 			EmbedBuilder embedBuilder = new();
+			CommandInfo cmd = result.Commands[0].Command;
 
-			CommandInfo? cmd = result.Commands[0].Command;
-			if (cmd.Module.Group == null)
-			{
-				if (cmd.Aliases.Count > 1)
-					aliases = $"\nAliases: {string.Join(", ", cmd.Aliases)}";
-			}
-			else
-			{
-				aliases = $"\nAliases: {string.Join(", ", cmd.Module.Aliases)}";
-			}
+			embedBuilder
+				.WithAuthor(Context.Client.CurrentUser.Username, Context.Client.CurrentUser.GetAvatarUrl())
+				.WithTitle(result.Commands[0].Alias)
+				.WithDescription(cmd.Summary ?? cmd.Module.Summary);
+
+			if (cmd.Aliases.Count > 1)
+				embedBuilder.AddField("Aliases", string.Join('\n', result.Commands[0].Command.Aliases), true);
+
+			IEnumerable<CommandInfo> checkedCommands;
 
 			if (result.Commands[0].Command.Module.Group == null)
-				embedBuilder.Title = $"{string.Join("\n", result.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => GetCommandAndParameterString(c.Command)))}\n{aliases}";
+				checkedCommands = result.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => c.Command);
 			else
-				embedBuilder.Title = $"{string.Join("\n", result.Commands[0].Command.Module.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => GetCommandAndParameterString(c)))}\n{aliases}";
-			embedBuilder.Description = cmd.Summary ?? cmd.Module.Summary;
+				checkedCommands = result.Commands[0].Command.Module.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess);
+
+			if (checkedCommands.Count() > 1 || checkedCommands.Any(cc => cc.Parameters.Count > 0))
+			{
+				embedBuilder.AddField("Overloads", string.Join('\n', checkedCommands.Select(cc => GetCommandAndParameterString(cc))), true);
+				embedBuilder.AddField("Examples", string.Join('\n', checkedCommands.Select(cc => cc.Remarks)));
+			}
 
 			if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
-				embedBuilder.Footer = new EmbedFooterBuilder { Text = "[]: Required⠀⠀(): Optional\nText within \" \" will be counted as one argument." };
+				embedBuilder.WithFooter("[]: Required⠀⠀(): Optional\nText within \" \" will be counted as one argument.");
 
 			await ReplyAsync(null, false, embedBuilder.Build(), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
@@ -95,7 +100,7 @@ namespace Clubber.Modules
 		/// Returns the command and its params in the format: commandName [requiredParam] (optionalParam).
 		/// </summary>
 		private static string GetCommandAndParameterString(CommandInfo cmd)
-			=> $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"**({p.Name})**" : $"**({p.Name} = {p.DefaultValue})**" : $"**[{p.Name}]**"))}";
+			=> $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"({p.Name})" : $"({p.Name} = {p.DefaultValue})" : $"[{p.Name}]"))}";
 
 		public static async Task BackupDbFile(System.IO.Stream stream, string fileName)
 		{
