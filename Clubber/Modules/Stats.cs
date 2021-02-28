@@ -17,7 +17,8 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("me")]
 		[Priority(1)]
-		public async Task StatsFromCurrentUser() => await CheckUserAndShowStats(Context.Guild.GetUser(Context.User.Id));
+		public async Task StatsFromCurrentUser()
+			=> await CheckUserAndShowStats(Context.User.Id);
 
 		[Command]
 		[Remarks("stats clubber\nstats <@743431502842298368>")]
@@ -26,25 +27,29 @@ namespace Clubber.Modules
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
-				await CheckUserAndShowStats(user);
+				await CheckUserAndShowStats(user.Id);
 		}
 
 		[Command("id")]
 		[Remarks("stats id 743431502842298368")]
 		[Priority(3)]
 		public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
-		{
-			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-			if (success && user != null)
-				await CheckUserAndShowStats(user);
-		}
+			=> await CheckUserAndShowStats(discordId);
 
-		private async Task CheckUserAndShowStats(SocketGuildUser user)
+		private async Task CheckUserAndShowStats(ulong discordId)
 		{
-			if (!await UserIsClean(user, true, true, false, true))
+			SocketGuildUser? user = Context.Guild.GetUser(discordId);
+			if (user != null)
+			{
+				if (!await UserIsClean(user, true, true, false, true))
+					return;
+			}
+			else if (await IsError(!DatabaseHelper.UserIsRegistered(discordId), "User not found."))
+			{
 				return;
+			}
 
-			LeaderboardUser lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == user!.Id)!.LeaderboardId);
+			LeaderboardUser lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == discordId)!.LeaderboardId);
 			EmbedBuilder statsEmbed = new();
 
 			if (Context.Message.Content.StartsWith("+statsf") || Context.Message.Content.StartsWith("+statsfull"))
@@ -81,7 +86,9 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%";
 			}
 
-			statsEmbed.WithTitle($"Stats for {user!.Username}").WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
+			statsEmbed
+				.WithTitle($"Stats for {user?.Username ?? discordId.ToString()}")
+				.WithThumbnailUrl(user?.GetAvatarUrl() ?? user?.GetDefaultAvatarUrl() ?? string.Empty);
 
 			await ReplyAsync(null, false, statsEmbed.Build(), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
