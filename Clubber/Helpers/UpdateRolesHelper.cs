@@ -18,11 +18,10 @@ namespace Clubber.Helpers
 
 			int nonMemberCount = usersList.Count - registeredUsersInGuild.Count();
 
-			List<Task<UpdateRolesResponse>> tasks = new();
+			List<UpdateRolesResponse> responses = new();
 			foreach (SocketGuildUser user in registeredUsersInGuild)
-				tasks.Add(UpdateUserRoles(user));
+				responses.Add(await UpdateUserRoles(user));
 
-			UpdateRolesResponse[] responses = await Task.WhenAll(tasks);
 			int usersUpdated = responses.Count(b => b.Success);
 			return new(nonMemberCount, usersUpdated, responses);
 		}
@@ -115,5 +114,5 @@ namespace Clubber.Helpers
 	}
 
 	public record UpdateRolesResponse(bool Success, SocketGuildUser? User, IEnumerable<SocketRole>? RolesAdded, IEnumerable<SocketRole>? RolesRemoved);
-	public record DatabaseUpdateResponse(int NonMemberCount, int UpdatedUsers, UpdateRolesResponse[] UpdateResponses);
+	public record DatabaseUpdateResponse(int NonMemberCount, int UpdatedUsers, IEnumerable<UpdateRolesResponse> UpdateResponses);
 }
