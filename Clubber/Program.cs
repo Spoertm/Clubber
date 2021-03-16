@@ -1,4 +1,5 @@
 ﻿using Clubber.Database;
+using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -93,33 +94,12 @@ namespace Clubber
 			if (msg.Exception?.InnerException is CustomException customException)
 				await _context.Channel.SendMessageAsync(customException.Message);
 
-			EmbedBuilder exceptionEmbed = new EmbedBuilder()
-				.WithTitle(msg.Exception?.GetType().Name ?? "Exception thrown")
-				.AddField("Severity", msg.Severity, true)
-				.AddField("Source", msg.Source, true)
-				.AddField("User message", Format.Code(_context.Message.Content))
-				.WithCurrentTimestamp();
-
-			Exception? ex = msg.Exception;
-
-			string? exString = ex?.ToString();
-			if (exString != null)
-			{
-				Match regexMatch = Regex.Match(exString, "(?<=   )at.+\n", RegexOptions.Compiled);
-				exceptionEmbed.AddField("Location", regexMatch.Value);
-			}
-
-			while (ex != null)
-			{
-				exceptionEmbed.AddField(ex.GetType().Name, ex.Message);
-				ex = ex.InnerException;
-			}
-
 			string logText = $"{DateTime.Now:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
 			File.AppendAllText(LogFile, $"{logText}\n\n");
 
 			SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
-			_ = await clubberExceptionsChannel!.SendMessageAsync(null, false, exceptionEmbed.Build());
+			Embed exceptionEmbed = EmbedHelper.GetExceptionEmbed(msg, _context.Message);
+			_ = await clubberExceptionsChannel!.SendMessageAsync(null, false, exceptionEmbed);
 		}
 
 		private static async Task MessageRecievedAsync(SocketMessage msg)
