@@ -15,23 +15,23 @@ namespace Clubber.Helpers
 		{
 			List<DdUser> dbUsers = DatabaseHelper.DdUsers;
 
-			IEnumerable<DdUser> registeredDbUsers = dbUsers.Join(
+			IEnumerable<(DdUser DdUser, SocketGuildUser GuildUser)> registeredUsers = dbUsers.Join(
 				inner: guildUsers,
 				outerKeySelector: dbu => dbu.DiscordId,
 				innerKeySelector: gu => gu.Id,
-				resultSelector: (x, _) => x);
+				resultSelector: (ddUser, guildUser) => (ddUser, guildUser));
 
-			IEnumerable<uint> lbIdsToRequest = registeredDbUsers.Select(dbu => (uint)dbu.LeaderboardId);
+			IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
 			IEnumerable<LeaderboardUser> lbPlayers = await DatabaseHelper.GetLbPlayers(lbIdsToRequest);
 
 			List<Task<UpdateRolesResponse>> tasks = new();
-			foreach (DdUser ddUser in registeredDbUsers)
-				tasks.Add(ExecuteRoleUpdate(guildUsers.First(gu => gu.Id == ddUser.DiscordId), lbPlayers.First(lbp => lbp.Id == ddUser.LeaderboardId)));
+			foreach ((DdUser DdUser, SocketGuildUser GuildUser) user in registeredUsers)
+				tasks.Add(ExecuteRoleUpdate(user.GuildUser, lbPlayers.First(lbp => lbp.Id == user.DdUser.LeaderboardId)));
 
 			UpdateRolesResponse[] responses = await Task.WhenAll(tasks);
 
 			int usersUpdated = responses.Count(b => b.Success);
-			return new(dbUsers.Count - registeredDbUsers.Count(), usersUpdated, responses);
+			return new(dbUsers.Count - registeredUsers.Count(), usersUpdated, responses);
 		}
 
 		public static async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
