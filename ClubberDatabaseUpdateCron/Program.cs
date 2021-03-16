@@ -3,6 +3,7 @@ using Clubber.Helpers;
 using Discord;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ namespace ClubberDatabaseUpdateCron
 
 		public static async Task OnReady()
 		{
+			List<Exception> exceptionList = new();
 			await Clubber.Program.GetDatabaseFileIntoFolder((_client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!, (_client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!);
 
 			SocketGuild? ddPals = _client.GetGuild(Constants.DdPals);
@@ -55,7 +57,7 @@ namespace ClubberDatabaseUpdateCron
 					int updatedUsers = 0;
 					foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
 					{
-						await testingChannel!.SendMessageAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(updateResponse));
+						await testingChannel!.SendMessageAsync(null, false, EmbedHelper.GetUpdateRolesEmbed(updateResponse));
 						updatedUsers++;
 					}
 
@@ -66,12 +68,18 @@ namespace ClubberDatabaseUpdateCron
 
 					success = true;
 				}
-				catch
+				catch (Exception ex)
 				{
+					exceptionList.Add(ex);
 					tries++;
 					if (tries > maxTries)
 					{
 						await testingChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
+
+						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
+						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
+							await clubberExceptionsChannel!.SendMessageAsync(null, false, EmbedHelper.GetExceptionEmbed(exc));
+
 						break;
 					}
 					else
