@@ -62,7 +62,7 @@ namespace Clubber.Modules
 
 			IUserMessage msg = await ReplyAsync("Processing...");
 
-			DatabaseUpdateResponse response = await UpdateRolesHelper.UpdateRolesAndDb(Context.Guild);
+			DatabaseUpdateResponse response = await UpdateRolesHelper.UpdateRolesAndDb(Context.Guild.Users);
 			long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
 			if (response.NonMemberCount > 0)

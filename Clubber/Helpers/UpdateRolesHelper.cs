@@ -11,43 +11,37 @@ namespace Clubber.Helpers
 {
 	public static class UpdateRolesHelper
 	{
-		public static async Task<DatabaseUpdateResponse> UpdateRolesAndDb(SocketGuild guild)
+		public static async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)
 		{
-			List<DdUser> usersList = DatabaseHelper.DdUsers;
-			IEnumerable<SocketGuildUser> registeredUsersInGuild = guild.Users.Where(u => usersList.Any(du => du.DiscordId == u.Id));
+			List<DdUser> dbUsers = DatabaseHelper.DdUsers;
 
-			int nonMemberCount = usersList.Count - registeredUsersInGuild.Count();
+			IEnumerable<DdUser> registeredDbUsers = dbUsers.Join(
+				inner: guildUsers,
+				outerKeySelector: dbu => dbu.DiscordId,
+				innerKeySelector: gu => gu.Id,
+				resultSelector: (x, _) => x);
 
-			List<UpdateRolesResponse> responses = new();
-			foreach (SocketGuildUser user in registeredUsersInGuild)
-				responses.Add(await UpdateUserRoles(user));
+			IEnumerable<uint> test = registeredDbUsers.Select(dbu => (uint)dbu.LeaderboardId);
+
+			IEnumerable<LeaderboardUser> lbPlayers = await DatabaseHelper.GetLbPlayers(test);
+
+			List<Task<UpdateRolesResponse>> tasks = new();
+			foreach (DdUser ddUser in registeredDbUsers)
+				tasks.Add(ExecuteRoleUpdate(guildUsers.First(gu => gu.Id == ddUser.DiscordId), lbPlayers.First(lbp => lbp.Id == ddUser.LeaderboardId)));
+
+			UpdateRolesResponse[] responses = await Task.WhenAll(tasks);
 
 			int usersUpdated = responses.Count(b => b.Success);
-			return new(nonMemberCount, usersUpdated, responses);
+			return new(dbUsers.Count - registeredDbUsers.Count(), usersUpdated, responses);
 		}
 
 		public static async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
 		{
 			try
 			{
-				List<DdUser> usersList = DatabaseHelper.DdUsers;
-				DdUser ddUser = usersList.Find(du => du.DiscordId == user.Id)!;
-				LeaderboardUser lbPlayer = await DatabaseHelper.GetLbPlayer((uint)ddUser.LeaderboardId);
-
-				IEnumerable<ulong> userRolesIds = user.Roles.Select(r => r.Id);
-				(IEnumerable<ulong> scoreRoleToAdd, IEnumerable<ulong> scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbPlayer.Time);
-				(IEnumerable<ulong> topRoleToAdd, IEnumerable<ulong> topRolesToRemove) = HandleTopRoles(userRolesIds, lbPlayer.Rank);
-
-				if (!scoreRoleToAdd.Any() && !scoreRolesToRemove.Any() && !topRoleToAdd.Any() && !topRolesToRemove.Any())
-					return new(false, null, null, null);
-
-				IEnumerable<SocketRole> socketRolesToAdd = scoreRoleToAdd.Concat(topRoleToAdd).Select(r => user.Guild.GetRole(r));
-				IEnumerable<SocketRole> socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove).Select(r => user.Guild.GetRole(r));
-
-				await user.AddRolesAsync(socketRolesToAdd);
-				await user.RemoveRolesAsync(socketRolesToRemove);
-
-				return new(true, user, socketRolesToAdd, socketRolesToRemove);
+				int lbId = DatabaseHelper.DdUsers.Find(ddu => ddu.DiscordId == user.Id)!.LeaderboardId;
+				IEnumerable<LeaderboardUser> lbPlayerList = await DatabaseHelper.GetLbPlayers(new uint[] { (uint)lbId });
+				return await ExecuteRoleUpdate(user, lbPlayerList.First());
 			}
 			catch (CustomException)
 			{
@@ -55,8 +49,27 @@ namespace Clubber.Helpers
 			}
 			catch (Exception ex)
 			{
-				throw new CustomException("Something went wrong. Chupacabra will get on it soon:tm:.", ex);
+				throw new CustomException("Something went wrong. Chupacabra will get on it soon™.", ex);
 			}
+		}
+
+		private static async Task<UpdateRolesResponse> ExecuteRoleUpdate(SocketGuildUser guildUser, LeaderboardUser lbUser)
+		{
+
+			IEnumerable<ulong> userRolesIds = guildUser.Roles.Select(r => r.Id);
+			(IEnumerable<ulong> scoreRoleToAdd, IEnumerable<ulong> scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbUser.Time);
+			(IEnumerable<ulong> topRoleToAdd, IEnumerable<ulong> topRolesToRemove) = HandleTopRoles(userRolesIds, lbUser.Rank);
+
+			if (!scoreRoleToAdd.Any() && !scoreRolesToRemove.Any() && !topRoleToAdd.Any() && !topRolesToRemove.Any())
+				return new(false, null, null, null);
+
+			IEnumerable<SocketRole> socketRolesToAdd = scoreRoleToAdd.Concat(topRoleToAdd).Select(r => guildUser.Guild.GetRole(r));
+			IEnumerable<SocketRole> socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove).Select(r => guildUser.Guild.GetRole(r));
+
+			await guildUser.AddRolesAsync(socketRolesToAdd);
+			await guildUser.RemoveRolesAsync(socketRolesToRemove);
+
+			return new(true, guildUser, socketRolesToAdd, socketRolesToRemove);
 		}
 
 		private static (IEnumerable<ulong> ScoreRoleToAdd, IEnumerable<ulong> ScoreRolesToRemove) HandleScoreRoles(IEnumerable<ulong> userRolesIds, int playerTime)

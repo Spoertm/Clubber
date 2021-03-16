@@ -4,6 +4,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -49,7 +50,8 @@ namespace Clubber.Modules
 				return;
 			}
 
-			LeaderboardUser lbPlayer = await DatabaseHelper.GetLbPlayer((uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == discordId)!.LeaderboardId);
+			uint lbPlayerId = (uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == discordId)!.LeaderboardId;
+			LeaderboardUser lbPlayer = DatabaseHelper.GetLbPlayers(new uint[] { lbPlayerId }).Result.First();
 			EmbedBuilder statsEmbed = new();
 
 			if (Context.Message.Content.StartsWith("+statsf") || Context.Message.Content.StartsWith("+statsfull"))

@@ -15,49 +15,56 @@ namespace Clubber.Helpers
 {
 	public static class DatabaseHelper
 	{
+		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
 		public static List<DdUser> DdUsers => JsonConvert.DeserializeObject<List<DdUser>>(File.ReadAllText(Directory.GetFiles(Program.DatabaseDirectory, "*.json")[0]));
 
 		public static async Task RegisterUser(uint lbId, SocketGuildUser user)
 		{
-			LeaderboardUser lbPlayer = await GetLbPlayer(lbId);
-
+			LeaderboardUser lbPlayer = GetLbPlayers(new uint[] { lbId }).Result.First();
 			List<DdUser> list = DdUsers;
 			list.Add(new DdUser(user.Id, lbPlayer.Id));
 			await UpdateDbFile(list, $"Add-{user.Username}-{lbId}");
 		}
 
-		public static async Task<LeaderboardUser> GetLbPlayer(uint lbId)
+		public static async Task<IEnumerable<LeaderboardUser>> GetLbPlayers(IEnumerable<uint> ids)
 		{
 			using HttpClient client = new();
 			try
 			{
 				List<KeyValuePair<string?, string?>> postValues = new()
 				{
-					new("uid", $"{lbId}"),
+					new("uid", string.Join(',', ids)),
 				};
 
 				using FormUrlEncodedContent content = new(postValues);
-				HttpResponseMessage response = await client.PostAsync("http://dd.hasmodai.com/backend16/get_user_by_id_public.php", content);
+				HttpResponseMessage response = await client.PostAsync(_getMultipleUsersByIdUrl, content);
 				byte[] data = await response.Content.ReadAsByteArrayAsync();
 
 				int bytePosition = 19;
+				List<LeaderboardUser> users = new();
+				while (bytePosition < data.Length)
+				{
+					users.Add(new LeaderboardUser(
+						Username: GetUserName(data, ref bytePosition),
+						Rank: BitConverter.ToInt32(data, bytePosition),
+						Id: BitConverter.ToInt32(data, bytePosition + 4),
+						Time: BitConverter.ToInt32(data, bytePosition + 12),
+						Kills: BitConverter.ToInt32(data, bytePosition + 16),
+						Gems: BitConverter.ToInt32(data, bytePosition + 28),
+						DaggersHit: BitConverter.ToInt32(data, bytePosition + 24),
+						DaggersFired: BitConverter.ToInt32(data, bytePosition + 20),
+						DeathType: BitConverter.ToInt16(data, bytePosition + 32),
+						TimeTotal: BitConverter.ToUInt64(data, bytePosition + 60),
+						KillsTotal: BitConverter.ToUInt64(data, bytePosition + 44),
+						GemsTotal: BitConverter.ToUInt64(data, bytePosition + 68),
+						DeathsTotal: BitConverter.ToUInt64(data, bytePosition + 36),
+						DaggersHitTotal: BitConverter.ToUInt64(data, bytePosition + 76),
+						DaggersFiredTotal: BitConverter.ToUInt64(data, bytePosition + 52)));
 
-				return new LeaderboardUser(
-					Username: GetUserName(data, ref bytePosition),
-					Rank: BitConverter.ToInt32(data, bytePosition),
-					Id: BitConverter.ToInt32(data, bytePosition + 4),
-					Time: BitConverter.ToInt32(data, bytePosition + 12),
-					Kills: BitConverter.ToInt32(data, bytePosition + 16),
-					Gems: BitConverter.ToInt32(data, bytePosition + 28),
-					DaggersHit: BitConverter.ToInt32(data, bytePosition + 24),
-					DaggersFired: BitConverter.ToInt32(data, bytePosition + 20),
-					DeathType: BitConverter.ToInt16(data, bytePosition + 32),
-					TimeTotal: BitConverter.ToUInt64(data, bytePosition + 60),
-					KillsTotal: BitConverter.ToUInt64(data, bytePosition + 44),
-					GemsTotal: BitConverter.ToUInt64(data, bytePosition + 68),
-					DeathsTotal: BitConverter.ToUInt64(data, bytePosition + 36),
-					DaggersHitTotal: BitConverter.ToUInt64(data, bytePosition + 76),
-					DaggersFiredTotal: BitConverter.ToUInt64(data, bytePosition + 52));
+					bytePosition += 88;
+				}
+
+				return users;
 			}
 			catch (Exception e)
 			{
@@ -65,7 +72,7 @@ namespace Clubber.Helpers
 			}
 		}
 
-		public static string GetUserName(byte[] data, ref int bytePos)
+		private static string GetUserName(byte[] data, ref int bytePos)
 		{
 			short usernameLength = BitConverter.ToInt16(data, bytePos);
 			bytePos += 2;
@@ -100,7 +107,7 @@ namespace Clubber.Helpers
 
 			using (Stream stream = new MemoryStream())
 			{
-				StreamWriter writer = new StreamWriter(stream);
+				StreamWriter writer = new(stream);
 				writer.Write(file);
 				writer.Flush();
 				stream.Position = 0;
