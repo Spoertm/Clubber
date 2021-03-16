@@ -98,9 +98,15 @@ namespace Clubber.Modules
 
 			if (checkIfNotRegistered && !DatabaseHelper.UserIsRegistered(user.Id))
 			{
+				if ((Context.User as SocketGuildUser)!.GuildPermissions.ManageRoles)
+				{
+					_ = await InlineReplyAsync($"`{user.Username}` is not registered.");
+					return false;
+				}
+
 				_ = user.Id == Context.User.Id
-					? await InlineReplyAsync($"You're not registered, {user.Username}. Please ask an admin/moderator/role assigner to register you.")
-					: await InlineReplyAsync($"`{user.Username}` is not registered. Please ask an admin/moderator/role assigner to register them.");
+					? await InlineReplyAsync($"You're not registered, {user.Username}. Only a <@&{Constants.RoleAssignerRoleId}> can register you, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannel}> for more info.")
+					: await InlineReplyAsync($"`{user.Username}` is not registered. Only a <@&{Constants.RoleAssignerRoleId}> can register them, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannel}> for more info.");
 
 				return false;
 			}
