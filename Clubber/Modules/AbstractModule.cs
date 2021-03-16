@@ -38,7 +38,7 @@ namespace Clubber.Modules
 
 		public async Task<(bool Success, SocketGuildUser? User)> FoundOneUserFromName(string name)
 		{
-			string trimmedName = name.TrimStart('<', '@').TrimEnd('>');
+			string trimmedName = name.TrimStart('<', '@', '!').TrimEnd('>');
 
 			if (ulong.TryParse(trimmedName, out ulong userID))
 			{
