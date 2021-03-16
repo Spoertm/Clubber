@@ -12,6 +12,7 @@ namespace Clubber.Helpers
 		{
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle($"Updated roles for {response.User!.Username}")
+				.WithDescription($"User: {response.User!.Mention}")
 				.WithThumbnailUrl(response.User!.GetAvatarUrl() ?? response.User!.GetDefaultAvatarUrl());
 
 			if (response.RolesRemoved!.Any())
