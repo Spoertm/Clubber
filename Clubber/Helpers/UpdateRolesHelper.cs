@@ -24,11 +24,8 @@ namespace Clubber.Helpers
 			IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
 			IEnumerable<LeaderboardUser> lbPlayers = await DatabaseHelper.GetLbPlayers(lbIdsToRequest);
 
-			List<Task<UpdateRolesResponse>> tasks = new();
-			foreach ((DdUser DdUser, SocketGuildUser GuildUser) user in registeredUsers)
-				tasks.Add(ExecuteRoleUpdate(user.GuildUser, lbPlayers.First(lbp => lbp.Id == user.DdUser.LeaderboardId)));
-
-			UpdateRolesResponse[] responses = await Task.WhenAll(tasks);
+			List<UpdateRolesResponse> responses = new();
+			Parallel.ForEach(registeredUsers, async user => responses.Add(await ExecuteRoleUpdate(user.GuildUser, lbPlayers.First(lbp => lbp.Id == user.DdUser.LeaderboardId))));
 
 			int usersUpdated = responses.Count(b => b.Success);
 			return new(dbUsers.Count - registeredUsers.Count(), usersUpdated, responses);
