@@ -15,7 +15,7 @@ namespace Clubber.Database
 
 		public CustomException(string? message, Exception innerException)
 			: base(message, innerException)
-        {
-        }
+		{
+		}
 	}
 }

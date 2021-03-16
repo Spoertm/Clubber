@@ -22,7 +22,7 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("pb clubber\npb <@743431502842298368>")]
 		[Priority(2)]
-		public async Task UpdateRolesFromName([Name("name | tag")] [Remainder] string name)
+		public async Task UpdateRolesFromName([Name("name | tag")][Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)

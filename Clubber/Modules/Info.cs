@@ -86,7 +86,7 @@ namespace Clubber.Modules
 			else
 				checkedCommands = result.Commands[0].Command.Module.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess);
 
-			if (checkedCommands.Count() > 1 || checkedCommands.Any(cc => cc.Parameters.Count > 0))
+			if (checkedCommands.Count() > 1 || checkedCommands.Any(cc => cc.Parameters.Count > 0))
 			{
 				embedBuilder.AddField("Overloads", string.Join('\n', checkedCommands.Select(cc => GetCommandAndParameterString(cc))), true);
 				embedBuilder.AddField("Examples", string.Join('\n', checkedCommands.Select(cc => cc.Remarks)));

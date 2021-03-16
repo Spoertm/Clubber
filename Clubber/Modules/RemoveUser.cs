@@ -17,7 +17,7 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("remove clubber\nremove <@743431502842298368>")]
 		[Priority(1)]
-		public async Task RemoveByName([Name("name | tag")] [Remainder] string name)
+		public async Task RemoveByName([Name("name | tag")][Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)

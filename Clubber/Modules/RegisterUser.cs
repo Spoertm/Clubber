@@ -15,7 +15,7 @@ namespace Clubber.Modules
 		[Command]
 		[Remarks("register 118832 clubber\nregister 118832 <@743431502842298368>")]
 		[Priority(1)]
-		public async Task RegisterByName([Name("leaderboard ID")] uint lbId, [Name("name | tag")] [Remainder] string name)
+		public async Task RegisterByName([Name("leaderboard ID")] uint lbId, [Name("name | tag")][Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user != null)
