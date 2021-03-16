@@ -28,7 +28,7 @@ namespace Clubber.Modules
 
 		[Command("whyareyou")]
 		[Summary("Describes what the bot does.")]
-		public async Task WhyAreYou() => await InlineReplayAsync(Constants.WhyAreYou);
+		public async Task WhyAreYou() => await InlineReplyAsync(Constants.WhyAreYou);
 
 		[Command("help")]
 		[Summary("Get a list of commands, or info regarding a specific command.")]

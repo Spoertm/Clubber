@@ -38,7 +38,7 @@ namespace Clubber.Modules
 				return;
 
 			await DatabaseHelper.RegisterUser(lbId, user);
-			await InlineReplayAsync("✅ Successfully registered.");
+			await InlineReplyAsync("✅ Successfully registered.");
 		}
 	}
 }
