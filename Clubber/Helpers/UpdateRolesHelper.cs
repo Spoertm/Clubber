@@ -1,6 +1,5 @@
 ﻿using Clubber.Database;
 using Clubber.Files;
-using Discord;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -91,32 +90,6 @@ namespace Clubber.Helpers
 
 			IEnumerable<ulong> filteredTopRoles = Constants.RankRoles.Values.Where(rid => rid != rankRole.Value.Value);
 			return new(topRoleToAdd, userRolesIds.Intersect(filteredTopRoles));
-		}
-
-		public static Embed GetUpdateRolesEmbed(UpdateRolesResponse response)
-		{
-			EmbedBuilder embed = new EmbedBuilder()
-				.WithTitle($"Updated roles for {response.User!.Username}")
-				.WithDescription($"User: {response.User!.Mention}")
-				.WithThumbnailUrl(response.User!.GetAvatarUrl() ?? response.User!.GetDefaultAvatarUrl());
-
-			if (response.RolesRemoved!.Any())
-			{
-				embed.AddField(new EmbedFieldBuilder()
-					.WithName("Removed:")
-					.WithValue(string.Join('\n', response.RolesRemoved!.Select(rr => rr.Mention)))
-					.WithIsInline(true));
-			}
-
-			if (response.RolesAdded!.Any())
-			{
-				embed.AddField(new EmbedFieldBuilder()
-					.WithName("Added:")
-					.WithValue(string.Join('\n', response.RolesAdded!.Select(ar => ar.Mention)))
-					.WithIsInline(true));
-			}
-
-			return embed.Build();
 		}
 	}
 
