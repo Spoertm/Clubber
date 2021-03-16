@@ -21,9 +21,8 @@ namespace Clubber.Helpers
 				innerKeySelector: gu => gu.Id,
 				resultSelector: (x, _) => x);
 
-			IEnumerable<uint> test = registeredDbUsers.Select(dbu => (uint)dbu.LeaderboardId);
-
-			IEnumerable<LeaderboardUser> lbPlayers = await DatabaseHelper.GetLbPlayers(test);
+			IEnumerable<uint> lbIdsToRequest = registeredDbUsers.Select(dbu => (uint)dbu.LeaderboardId);
+			IEnumerable<LeaderboardUser> lbPlayers = await DatabaseHelper.GetLbPlayers(lbIdsToRequest);
 
 			List<Task<UpdateRolesResponse>> tasks = new();
 			foreach (DdUser ddUser in registeredDbUsers)
