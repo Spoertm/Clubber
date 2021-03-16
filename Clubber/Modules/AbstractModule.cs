@@ -65,8 +65,7 @@ namespace Clubber.Modules
 
 			int padding = userMatches.Max(um => um.Username.Length + (um.Nickname?.Length + 3 ?? 0)) + 2;
 			string matchesMessage = "\n\nMatches:\n" + string.Join("\n", userMatches
-				.Select(m => $"`{m.Username + (m.Nickname != null ? $" ({m.Nickname})" : string.Empty)}"
-					.PadRight(padding) + $"{m.Id}`"));
+				.Select(m => Format.Code($"{(m.Username + (m.Nickname is null ? null : $" ({m.Nickname})")).PadRight(padding)}{m.Id}")));
 
 			if (matchesMessage.Length + baseMessage.Length < 2048)
 				return baseMessage + matchesMessage;
