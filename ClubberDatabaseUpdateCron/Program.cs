@@ -4,6 +4,7 @@ using Discord;
 using Discord.WebSocket;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ClubberDatabaseUpdateCron
@@ -45,26 +46,23 @@ namespace ClubberDatabaseUpdateCron
 				{
 					stopwatch.Restart();
 
-					DatabaseUpdateResponse response = await UpdateRolesHelper.UpdateRolesAndDb(ddPals);
+					DatabaseUpdateResponse response = await UpdateRolesHelper.UpdateRolesAndDb(ddPals.Users);
 					long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
 					if (response.NonMemberCount > 0)
 						await testingChannel!.SendMessageAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s) because they're not in the server.");
 
-					if (response.UpdatedUsers > 0)
+					int updatedUsers = 0;
+					foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
 					{
-						foreach (UpdateRolesResponse updateResponse in response.UpdateResponses)
-						{
-							if (updateResponse.Success)
-								await testingChannel!.SendMessageAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(updateResponse));
-						}
+						await testingChannel!.SendMessageAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(updateResponse));
+						updatedUsers++;
+					}
 
-						await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
-					}
+					if (updatedUsers > 0)
+						await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
 					else
-					{
 						await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms.");
-					}
 
 					success = true;
 				}

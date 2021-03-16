@@ -27,8 +27,7 @@ namespace Clubber.Helpers
 			List<UpdateRolesResponse> responses = new();
 			Parallel.ForEach(registeredUsers, async user => responses.Add(await ExecuteRoleUpdate(user.GuildUser, lbPlayers.First(lbp => lbp.Id == user.DdUser.LeaderboardId))));
 
-			int usersUpdated = responses.Count(b => b.Success);
-			return new(dbUsers.Count - registeredUsers.Count(), usersUpdated, responses);
+			return new(dbUsers.Count - registeredUsers.Count(), responses);
 		}
 
 		public static async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
@@ -122,5 +121,5 @@ namespace Clubber.Helpers
 	}
 
 	public record UpdateRolesResponse(bool Success, SocketGuildUser? User, IEnumerable<SocketRole>? RolesAdded, IEnumerable<SocketRole>? RolesRemoved);
-	public record DatabaseUpdateResponse(int NonMemberCount, int UpdatedUsers, IEnumerable<UpdateRolesResponse> UpdateResponses);
+	public record DatabaseUpdateResponse(int NonMemberCount, IEnumerable<UpdateRolesResponse> UpdateResponses);
 }

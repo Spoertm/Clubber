@@ -68,17 +68,17 @@ namespace Clubber.Modules
 			if (response.NonMemberCount > 0)
 				await ReplyAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s) because they're not in the server.");
 
-			if (response.UpdatedUsers > 0)
+			int updatedUsers = 0;
+			foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
 			{
-				foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
-					await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(updateResponse));
+				await ReplyAsync(null, false, UpdateRolesHelper.GetUpdateRolesEmbed(updateResponse));
+				updatedUsers++;
+			}
 
-				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {response.UpdatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
-			}
+			if (updatedUsers > 0)
+				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
 			else
-			{
-				await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms");
-			}
+				await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms.");
 		}
 	}
 }
