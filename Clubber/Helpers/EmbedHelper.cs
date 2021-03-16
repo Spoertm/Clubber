@@ -32,5 +32,54 @@ namespace Clubber.Helpers
 
 			return embed.Build();
 		}
+
+		public static Embed GetExceptionEmbed(LogMessage msg, SocketUserMessage userMessage)
+		{
+			EmbedBuilder exceptionEmbed = new EmbedBuilder()
+				.WithTitle(msg.Exception?.GetType().Name ?? "Exception thrown")
+				.AddField("Severity", msg.Severity, true)
+				.AddField("Source", msg.Source, true)
+				.AddField("User message", Format.Code(userMessage.Content))
+				.WithCurrentTimestamp();
+
+			Exception? ex = msg.Exception;
+
+			string? exString = ex?.ToString();
+			if (exString != null)
+			{
+				Match regexMatch = Regex.Match(exString, "(?<=   )at.+\n?", RegexOptions.Compiled);
+				exceptionEmbed.AddField("Location", regexMatch.Value);
+			}
+
+			while (ex != null)
+			{
+				exceptionEmbed.AddField(ex.GetType().Name, ex.Message ?? "No message.");
+				ex = ex.InnerException;
+			}
+
+			return exceptionEmbed.Build();
+		}
+
+		public static Embed GetExceptionEmbed(Exception? exception)
+		{
+			EmbedBuilder exceptionEmbed = new EmbedBuilder()
+				.WithTitle("Cron project - " + exception?.GetType().Name ?? "Exception thrown")
+				.WithCurrentTimestamp();
+
+			string? exString = exception?.ToString();
+			if (exString != null)
+			{
+				Match regexMatch = Regex.Match(exString, "(?<=   )at.+\n?", RegexOptions.Compiled);
+				exceptionEmbed.AddField("Location", regexMatch.Value);
+			}
+
+			while (exception != null)
+			{
+				exceptionEmbed.AddField(exception.GetType().Name, exception.Message ?? "No message.");
+				exception = exception.InnerException;
+			}
+
+			return exceptionEmbed.Build();
+		}
 	}
 }
