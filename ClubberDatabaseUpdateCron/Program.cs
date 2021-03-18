@@ -12,6 +12,7 @@ namespace ClubberDatabaseUpdateCron
 {
 	public static class Program
 	{
+		private const ulong _modsChannelId = 701124439990993036;
 		private static DiscordSocketClient _client = null!;
 
 		public static void Main() => RunAsync().GetAwaiter().GetResult();
@@ -33,9 +34,9 @@ namespace ClubberDatabaseUpdateCron
 			await Clubber.Program.GetDatabaseFileIntoFolder((_client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!, (_client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!);
 
 			SocketGuild? ddPals = _client.GetGuild(Constants.DdPals);
-			IMessageChannel? testingChannel = _client.GetChannel(Constants.TestingChannel) as IMessageChannel;
+			IMessageChannel? modsChannel = _client.GetChannel(_modsChannelId) as IMessageChannel;
 
-			IUserMessage msg = await testingChannel!.SendMessageAsync("Processing...");
+			IUserMessage msg = await modsChannel!.SendMessageAsync("Processing...");
 			Stopwatch stopwatch = new();
 
 			int tries = 1;
@@ -52,12 +53,12 @@ namespace ClubberDatabaseUpdateCron
 					long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
 					if (response.NonMemberCount > 0)
-						await testingChannel!.SendMessageAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s) because they're not in the server.");
+						await modsChannel!.SendMessageAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s) because they're not in the server.");
 
 					int updatedUsers = 0;
 					foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
 					{
-						await testingChannel!.SendMessageAsync(null, false, EmbedHelper.GetUpdateRolesEmbed(updateResponse));
+						await modsChannel!.SendMessageAsync(null, false, EmbedHelper.GetUpdateRolesEmbed(updateResponse));
 						updatedUsers++;
 					}
 
@@ -74,7 +75,7 @@ namespace ClubberDatabaseUpdateCron
 					tries++;
 					if (tries > maxTries)
 					{
-						await testingChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
+						await modsChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 
 						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
 						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
@@ -84,7 +85,7 @@ namespace ClubberDatabaseUpdateCron
 					}
 					else
 					{
-						await testingChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
+						await modsChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
 						System.Threading.Thread.Sleep(10000); // Sleep 10s
 					}
 				}
