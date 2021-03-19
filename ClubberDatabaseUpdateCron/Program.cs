@@ -39,7 +39,7 @@ namespace ClubberDatabaseUpdateCron
 			IUserMessage msg = await modsChannel!.SendMessageAsync("Processing...");
 			Stopwatch stopwatch = new();
 
-			int tries = 1;
+			int tries = 0;
 			const int maxTries = 5;
 
 			bool success = false;
