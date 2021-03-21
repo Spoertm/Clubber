@@ -87,10 +87,10 @@ namespace Clubber.Helpers
 		/// <summary>
 		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?, ulong)"/>.
 		/// </summary>
-		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
+		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
 		{
 			return new EmbedBuilder()
-						   .WithTitle($"Stats for {guildUser?.Username ?? discordId.ToString()}")
+						   .WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 						   .WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 						   .WithDescription(
 $@"✏️ Leaderboard name: {lbPlayer.Username}
@@ -106,11 +106,11 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		/// <summary>
 		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?, ulong)"/>.
 		/// </summary>
-		public static Embed FullStats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
+		public static Embed FullStats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
 		{
 			TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 			return new EmbedBuilder()
-				.WithTitle($"Stats for {guildUser?.Username ?? discordId.ToString()}")
+				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 				.WithDescription(
 $@"✏️ Leaderboard name: {lbPlayer.Username}
