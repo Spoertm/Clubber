@@ -114,7 +114,7 @@ namespace Clubber
 				if (!result.IsSuccess && result.Error.HasValue)
 				{
 					if (result.Error.Value == CommandError.UnknownCommand)
-						await msg.AddReactionAsync(new Emoji("❔"));
+						await message.AddReactionAsync(new Emoji("❔"));
 					else
 						await _context.Channel.SendMessageAsync(result.ErrorReason);
 				}
