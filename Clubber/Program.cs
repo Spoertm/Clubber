@@ -50,15 +50,16 @@ namespace Clubber
 				.AddSingleton(new MessageHandlerService(_client, _commands, _services))
 				.BuildServiceProvider();
 
-			await GetDatabaseFileIntoFolder((_client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!, (_client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!);
+			await GetDatabaseFileIntoFolder();
 
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
 		}
 
-		public static async Task GetDatabaseFileIntoFolder(SocketTextChannel backupChannel, SocketTextChannel exceptionsChannel)
+		public static async Task GetDatabaseFileIntoFolder()
 		{
 			try
 			{
+				SocketTextChannel backupChannel = (_client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!;
 				IAttachment? latestAttachment = (await backupChannel!.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault()!.Attachments.First();
 
 				if (Directory.Exists(DatabaseDirectory))
@@ -73,7 +74,8 @@ namespace Clubber
 			}
 			catch (Exception ex)
 			{
-				await exceptionsChannel!.SendMessageAsync($"`{DateTime.Now:hh:mm:ss} [Critical] No database found. Exiting.`\n" + ex.Message);
+				await _services.GetRequiredService<LoggingService>()
+					.LogAsync(new LogMessage(LogSeverity.Critical, "Startup", "Failed to get database file into folder.", ex));
 				await StopBot();
 			}
 		}
