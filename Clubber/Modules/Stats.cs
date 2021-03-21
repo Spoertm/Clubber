@@ -1,4 +1,5 @@
 ﻿using Clubber.Database;
+using Clubber.Files;
 using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
@@ -39,24 +40,31 @@ namespace Clubber.Modules
 		private async Task CheckUserAndShowStats(ulong discordId)
 		{
 			SocketGuildUser? user = Context.Guild.GetUser(discordId);
-			if (user != null)
+			DdUser? ddUser = DatabaseHelper.GetDdUser(discordId);
+
+			if (ddUser is null)
 			{
-				if (!await UserIsClean(user, true, true, false, true))
-					return;
-			}
-			else if (await IsError(!DatabaseHelper.UserIsRegistered(discordId), "User not found."))
-			{
+				if (user is null)
+					await InlineReplyAsync("User not found.");
+				else
+					await UserIsClean(user, true, true, false, true);
+
 				return;
 			}
 
-			uint lbPlayerId = (uint)DatabaseHelper.DdUsers.Find(du => du.DiscordId == discordId)!.LeaderboardId;
-			LeaderboardUser lbPlayer = DatabaseHelper.GetLbPlayers(new uint[] { lbPlayerId }).Result.First();
+			await ShowStats(ddUser, user);
+		}
+
+		private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
+		{
+			uint lbPlayerId = (uint)ddUser.LeaderboardId;
+			LeaderboardUser lbPlayer = (await DatabaseHelper.GetLbPlayers(new uint[] { lbPlayerId })).First();
 			Embed statsEmbed;
 
 			if (Context.Message.Content.StartsWith("+statsf") || Context.Message.Content.StartsWith("+statsfull"))
-				statsEmbed = EmbedHelper.GetFullStatsEmbed(lbPlayer, user, discordId);
+				statsEmbed = EmbedHelper.FullStats(lbPlayer, user);
 			else
-				statsEmbed = EmbedHelper.GetStatsEmbed(lbPlayer, user, discordId);
+				statsEmbed = EmbedHelper.Stats(lbPlayer, user);
 
 			await ReplyAsync(null, false, statsEmbed, null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
