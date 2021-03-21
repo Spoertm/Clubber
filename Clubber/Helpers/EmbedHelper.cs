@@ -35,13 +35,13 @@ namespace Clubber.Helpers
 			return embed.Build();
 		}
 
-		public static Embed Exception(LogMessage msg, SocketUserMessage userMessage)
+		public static Embed Exception(LogMessage msg, IUserMessage? userMessage)
 		{
 			EmbedBuilder exceptionEmbed = new EmbedBuilder()
 				.WithTitle(msg.Exception?.GetType().Name ?? "Exception thrown")
 				.AddField("Severity", msg.Severity, true)
 				.AddField("Source", msg.Source, true)
-				.AddField("User message", Format.Code(userMessage.Content))
+				.AddField("User message", Format.Code(userMessage?.Content ?? "null"))
 				.WithCurrentTimestamp();
 
 			Exception? ex = msg.Exception;
