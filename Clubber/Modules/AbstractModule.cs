@@ -90,13 +90,13 @@ namespace Clubber.Modules
 				return false;
 			}
 
-			if (checkIfAlreadyRegistered && DatabaseHelper.UserIsRegistered(user.Id))
+			if (checkIfAlreadyRegistered && DatabaseHelper.GetDdUser(user.Id) is not null)
 			{
 				await InlineReplyAsync($"User `{user.Username}` is already registered.");
 				return false;
 			}
 
-			if (checkIfNotRegistered && !DatabaseHelper.UserIsRegistered(user.Id))
+			if (checkIfNotRegistered && DatabaseHelper.GetDdUser(user.Id) is null)
 			{
 				if ((Context.User as SocketGuildUser)!.GuildPermissions.ManageRoles)
 				{
