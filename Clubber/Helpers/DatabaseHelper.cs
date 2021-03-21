@@ -116,6 +116,6 @@ namespace Clubber.Helpers
 			}
 		}
 
-		public static bool UserIsRegistered(ulong discordId) => DdUsers.Any(du => du.DiscordId == discordId);
+		public static DdUser? GetDdUser(ulong discordId) => DdUsers.Find(du => du.DiscordId == discordId);
 	}
 }
