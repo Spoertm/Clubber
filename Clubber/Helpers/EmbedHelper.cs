@@ -9,7 +9,7 @@ namespace Clubber.Helpers
 {
 	public static class EmbedHelper
 	{
-		public static Embed GetUpdateRolesEmbed(UpdateRolesResponse response)
+		public static Embed UpdateRoles(UpdateRolesResponse response)
 		{
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle($"Updated roles for {response.User!.Username}")
@@ -35,7 +35,7 @@ namespace Clubber.Helpers
 			return embed.Build();
 		}
 
-		public static Embed GetExceptionEmbed(LogMessage msg, SocketUserMessage userMessage)
+		public static Embed Exception(LogMessage msg, SocketUserMessage userMessage)
 		{
 			EmbedBuilder exceptionEmbed = new EmbedBuilder()
 				.WithTitle(msg.Exception?.GetType().Name ?? "Exception thrown")
@@ -62,7 +62,7 @@ namespace Clubber.Helpers
 			return exceptionEmbed.Build();
 		}
 
-		public static Embed GetExceptionEmbed(Exception? exception)
+		public static Embed Exception(Exception? exception)
 		{
 			EmbedBuilder exceptionEmbed = new EmbedBuilder()
 				.WithTitle("Cron project - " + exception?.GetType().Name ?? "Exception thrown")
@@ -85,9 +85,9 @@ namespace Clubber.Helpers
 		}
 
 		/// <summary>
-		/// Returns default stats Embed. For the full stats Embed use <see cref="GetFullStatsEmbed(LeaderboardUser, SocketGuildUser?, ulong)"/>.
+		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?, ulong)"/>.
 		/// </summary>
-		public static Embed GetStatsEmbed(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
+		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
 		{
 			return new EmbedBuilder()
 						   .WithTitle($"Stats for {guildUser?.Username ?? discordId.ToString()}")
@@ -104,9 +104,9 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		}
 
 		/// <summary>
-		/// Returns full stats Embed. For the default stats Embed use <see cref="GetStatsEmbed(LeaderboardUser, SocketGuildUser?, ulong)"/>.
+		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?, ulong)"/>.
 		/// </summary>
-		public static Embed GetFullStatsEmbed(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
+		public static Embed FullStats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
 		{
 			TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 			return new EmbedBuilder()

@@ -49,7 +49,7 @@ namespace Clubber.Modules
 			if (!response.Success)
 				await InlineReplyAsync("No updates were needed.");
 			else
-				await ReplyAsync(null, false, EmbedHelper.GetUpdateRolesEmbed(response), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
+				await ReplyAsync(null, false, EmbedHelper.UpdateRoles(response), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
 
 		[Command("database")]
@@ -71,7 +71,7 @@ namespace Clubber.Modules
 			int updatedUsers = 0;
 			foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
 			{
-				await ReplyAsync(null, false, EmbedHelper.GetUpdateRolesEmbed(updateResponse));
+				await ReplyAsync(null, false, EmbedHelper.UpdateRoles(updateResponse));
 				updatedUsers++;
 			}
 

@@ -97,7 +97,7 @@ namespace Clubber
 			File.AppendAllText(LogFile, $"{logText}\n\n");
 
 			SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
-			Embed exceptionEmbed = EmbedHelper.GetExceptionEmbed(msg, _context.Message);
+			Embed exceptionEmbed = EmbedHelper.Exception(msg, _context.Message);
 			_ = await clubberExceptionsChannel!.SendMessageAsync(null, false, exceptionEmbed);
 		}
 

@@ -58,7 +58,7 @@ namespace ClubberDatabaseUpdateCron
 					int updatedUsers = 0;
 					foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
 					{
-						await modsChannel!.SendMessageAsync(null, false, EmbedHelper.GetUpdateRolesEmbed(updateResponse));
+						await modsChannel!.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(updateResponse));
 						updatedUsers++;
 					}
 
@@ -79,7 +79,7 @@ namespace ClubberDatabaseUpdateCron
 
 						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
 						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
-							await clubberExceptionsChannel!.SendMessageAsync(null, false, EmbedHelper.GetExceptionEmbed(exc));
+							await clubberExceptionsChannel!.SendMessageAsync(null, false, EmbedHelper.Exception(exc));
 
 						break;
 					}
