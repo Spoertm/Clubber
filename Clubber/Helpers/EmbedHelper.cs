@@ -84,6 +84,9 @@ namespace Clubber.Helpers
 			return exceptionEmbed.Build();
 		}
 
+		/// <summary>
+		/// Returns default stats Embed. For the full stats Embed use <see cref="GetFullStatsEmbed(LeaderboardUser, SocketGuildUser?, ulong)"/>.
+		/// </summary>
 		public static Embed GetStatsEmbed(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
 		{
 			return new EmbedBuilder()
@@ -100,6 +103,9 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 						   .Build();
 		}
 
+		/// <summary>
+		/// Returns full stats Embed. For the default stats Embed use <see cref="GetStatsEmbed(LeaderboardUser, SocketGuildUser?, ulong)"/>.
+		/// </summary>
 		public static Embed GetFullStatsEmbed(LeaderboardUser lbPlayer, SocketGuildUser? guildUser, ulong discordId)
 		{
 			TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
