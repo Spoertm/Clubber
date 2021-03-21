@@ -62,7 +62,7 @@ namespace Clubber
 				IAttachment? latestAttachment = (await backupChannel!.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault()!.Attachments.First();
 
 				if (Directory.Exists(DatabaseDirectory))
-					Directory.Delete(DatabaseDirectory, true);
+					Directory.Delete(DatabaseDirectory, recursive: true);
 
 				Directory.CreateDirectory(DatabaseDirectory);
 				string filePath = Path.Combine(DatabaseDirectory, latestAttachment.Filename);
