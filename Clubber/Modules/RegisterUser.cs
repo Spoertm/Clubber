@@ -34,7 +34,7 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 		{
-			if (!await UserIsClean(user, true, true, true, false))
+			if (!await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: true, checkIfNotRegistered: false))
 				return;
 
 			await DatabaseHelper.RegisterUser(lbId, user);

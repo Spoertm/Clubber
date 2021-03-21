@@ -41,7 +41,7 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
 		{
-			if (!await UserIsClean(user, true, true, false, true))
+			if (!await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: false, checkIfNotRegistered: true))
 				return;
 
 			UpdateRolesResponse response = await UpdateRolesHelper.UpdateUserRoles(user);

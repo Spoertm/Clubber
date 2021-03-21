@@ -47,7 +47,7 @@ namespace Clubber.Modules
 				if (user is null)
 					await InlineReplyAsync("User not found.");
 				else
-					await UserIsClean(user, true, true, false, true);
+					await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: false, checkIfNotRegistered: true);
 
 				return;
 			}
