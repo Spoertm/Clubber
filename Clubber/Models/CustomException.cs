@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Clubber.Database
 {
+	[Serializable]
 	public class CustomException : Exception
 	{
 		public CustomException()
@@ -15,6 +17,11 @@ namespace Clubber.Database
 
 		public CustomException(string? message, Exception innerException)
 			: base(message, innerException)
+		{
+		}
+
+		protected CustomException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 	}
