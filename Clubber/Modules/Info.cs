@@ -34,7 +34,6 @@ namespace Clubber.Modules
 		[Priority(0)]
 		public async Task Help()
 		{
-			throw new System.Exception("nice");
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle("List of commands")
 				.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
