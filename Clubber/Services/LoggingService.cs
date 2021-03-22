@@ -40,11 +40,7 @@ namespace Clubber
 
 		public async Task LogAsync(LogMessage logMessage)
 		{
-			if (!Directory.Exists(LogDirectory))
-				Directory.CreateDirectory(LogDirectory);
-
-			if (!File.Exists(LogFile))
-				File.Create(LogFile).Dispose();
+			Directory.CreateDirectory(LogDirectory);
 
 			ICommandContext? context = (logMessage.Exception as CommandException)?.Context;
 			if (logMessage.Exception?.InnerException is CustomException customException && context is not null)
