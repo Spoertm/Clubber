@@ -12,13 +12,21 @@ namespace Clubber.Modules
 	[RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "Only users with higher permissions can use this command. Ask a `Role assigner` or a Moderator/Admin to help you.")]
 	public class RegisterUser : AbstractModule<SocketCommandContext>
 	{
+		private readonly DatabaseHelper _databaseHelper;
+
+		public RegisterUser(DatabaseHelper databaseHelper)
+			: base(databaseHelper)
+		{
+			_databaseHelper = databaseHelper;
+		}
+
 		[Command]
 		[Remarks("register 118832 clubber\nregister 118832 <@743431502842298368>")]
 		[Priority(1)]
 		public async Task RegisterByName([Name("leaderboard ID")] uint lbId, [Name("name | tag")][Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-			if (success && user != null)
+			if (success && user is not null)
 				await CheckUserAndRegister(lbId, user);
 		}
 
@@ -28,7 +36,7 @@ namespace Clubber.Modules
 		public async Task RegisterByDiscordId([Name("leaderboard ID")] uint lbId, [Name("Discord ID")] ulong discordId)
 		{
 			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-			if (success && user != null)
+			if (success && user is not null)
 				await CheckUserAndRegister(lbId, user);
 		}
 
@@ -37,7 +45,7 @@ namespace Clubber.Modules
 			if (!await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: true, checkIfNotRegistered: false))
 				return;
 
-			await DatabaseHelper.RegisterUser(lbId, user);
+			await _databaseHelper.RegisterUser(lbId, user);
 			await InlineReplyAsync("✅ Successfully registered.");
 		}
 	}

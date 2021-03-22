@@ -3,7 +3,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -14,6 +13,14 @@ namespace Clubber.Modules
 	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles.")]
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{
+		private readonly UpdateRolesHelper _updateRolesHelper;
+
+		public UpdateRoles(DatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper)
+			: base(databaseHelper)
+		{
+			_updateRolesHelper = updateRolesHelper;
+		}
+
 		[Command]
 		[Remarks("pb")]
 		[Priority(1)]
@@ -25,7 +32,7 @@ namespace Clubber.Modules
 		public async Task UpdateRolesFromName([Name("name | tag")][Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-			if (success && user != null)
+			if (success && user is not null)
 				await CheckUserAndUpdateRoles(user);
 		}
 
@@ -35,7 +42,7 @@ namespace Clubber.Modules
 		public async Task UpdateRolesFromDiscordId([Name("Discord ID")] ulong discordId)
 		{
 			(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-			if (success && user != null)
+			if (success && user is not null)
 				await CheckUserAndUpdateRoles(user);
 		}
 
@@ -44,7 +51,7 @@ namespace Clubber.Modules
 			if (!await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: false, checkIfNotRegistered: true))
 				return;
 
-			UpdateRolesResponse response = await UpdateRolesHelper.UpdateUserRoles(user);
+			UpdateRolesResponse response = await _updateRolesHelper.UpdateUserRoles(user);
 
 			if (!response.Success)
 				await InlineReplyAsync("No updates were needed.");
@@ -60,25 +67,14 @@ namespace Clubber.Modules
 			Stopwatch stopwatch = new();
 			stopwatch.Start();
 
-			IUserMessage msg = await ReplyAsync("Processing...");
+			const string checkingString = "Checking for role updates...";
+			IUserMessage msg = await ReplyAsync(checkingString);
 
-			DatabaseUpdateResponse response = await UpdateRolesHelper.UpdateRolesAndDb(Context.Guild.Users);
-			long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+			DatabaseUpdateResponse response = await _updateRolesHelper.UpdateRolesAndDb(Context.Guild.Users);
+			await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{response.Message}");
 
-			if (response.NonMemberCount > 0)
-				await ReplyAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s) because they're not in the server.");
-
-			int updatedUsers = 0;
-			foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
-			{
-				await ReplyAsync(null, false, EmbedHelper.UpdateRoles(updateResponse));
-				updatedUsers++;
-			}
-
-			if (updatedUsers > 0)
-				await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
-			else
-				await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms.");
+			for (int i = 0; i < response.RoleUpdateEmbeds.Length; i++)
+				await ReplyAsync(null, false, response.RoleUpdateEmbeds[i]);
 		}
 	}
 }

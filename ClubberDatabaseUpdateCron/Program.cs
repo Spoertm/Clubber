@@ -1,10 +1,11 @@
 ﻿using Clubber;
 using Clubber.Helpers;
+using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +20,7 @@ namespace ClubberDatabaseUpdateCron
 
 		public static async Task RunAsync()
 		{
-			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true });
+			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Info });
 
 			await _client.LoginAsync(TokenType.Bot, Constants.Token);
 			await _client.StartAsync();
@@ -30,14 +31,25 @@ namespace ClubberDatabaseUpdateCron
 
 		public static async Task OnReady()
 		{
+			IServiceProvider services = new ServiceCollection()
+				.AddSingleton(_client)
+				.AddSingleton<LoggingService>()
+				.AddSingleton<IOService>()
+				.AddSingleton<DatabaseHelper>()
+				.AddSingleton<UpdateRolesHelper>()
+				.AddSingleton<WebService>()
+				.BuildServiceProvider();
+
+			ActivatorUtilities.GetServiceOrCreateInstance<LoggingService>(services);
+
 			List<Exception> exceptionList = new();
-			await Clubber.Program.GetDatabaseFileIntoFolder((_client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!, (_client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!);
+			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();
 
 			SocketGuild? ddPals = _client.GetGuild(Constants.DdPals);
 			IMessageChannel? modsChannel = _client.GetChannel(_modsChannelId) as IMessageChannel;
 
-			IUserMessage msg = await modsChannel!.SendMessageAsync("Processing...");
-			Stopwatch stopwatch = new();
+			const string checkingString = "Checking for role updates...";
+			IUserMessage msg = await modsChannel!.SendMessageAsync(checkingString);
 
 			int tries = 0;
 			const int maxTries = 5;
@@ -47,25 +59,12 @@ namespace ClubberDatabaseUpdateCron
 			{
 				try
 				{
-					stopwatch.Restart();
+					DatabaseUpdateResponse response = await services.GetRequiredService<UpdateRolesHelper>().UpdateRolesAndDb(ddPals.Users);
 
-					DatabaseUpdateResponse response = await UpdateRolesHelper.UpdateRolesAndDb(ddPals.Users);
-					long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+					await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{response.Message}");
 
-					if (response.NonMemberCount > 0)
-						await modsChannel!.SendMessageAsync($"ℹ️ Unable to update {response.NonMemberCount} user(s) because they're not in the server.");
-
-					int updatedUsers = 0;
-					foreach (UpdateRolesResponse updateResponse in response.UpdateResponses.Where(ur => ur.Success))
-					{
-						await modsChannel!.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(updateResponse));
-						updatedUsers++;
-					}
-
-					if (updatedUsers > 0)
-						await msg.ModifyAsync(m => m.Content = $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {elapsedMilliseconds} ms.");
-					else
-						await msg.ModifyAsync(m => m.Content = $"No updates needed today.\nExecution took {elapsedMilliseconds} ms.");
+					for (int i = 0; i < response.RoleUpdateEmbeds.Length; i++)
+						await modsChannel.SendMessageAsync(null, false, response.RoleUpdateEmbeds[i]);
 
 					success = true;
 				}

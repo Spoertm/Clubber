@@ -23,6 +23,18 @@ namespace Clubber
 			_clubberExceptionsChannel = (client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!;
 		}
 
+		/// <summary>
+		/// This ctor exists for the cron project as it uses no CommandService.
+		/// </summary>
+		public LoggingService(DiscordSocketClient client)
+		{
+			LogDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
+
+			client.Log += LogAsync;
+
+			_clubberExceptionsChannel = (client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!;
+		}
+
 		private string LogDirectory { get; }
 		private string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.txt");
 

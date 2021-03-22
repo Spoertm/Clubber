@@ -1,6 +1,7 @@
 ﻿using Clubber.Database;
 using Clubber.Files;
 using Clubber.Helpers;
+using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -15,6 +16,16 @@ namespace Clubber.Modules
 	[Summary("Provides statistics from the leaderboard for users that are in this server and registered.\n`statsf` shows all the information available.")]
 	public class Stats : AbstractModule<SocketCommandContext>
 	{
+		private readonly DatabaseHelper _databaseHelper;
+		private readonly WebService _webService;
+
+		public Stats(DatabaseHelper databaseHelper, WebService webService)
+			: base(databaseHelper)
+		{
+			_databaseHelper = databaseHelper;
+			_webService = webService;
+		}
+
 		[Command]
 		[Remarks("me")]
 		[Priority(1)]
@@ -27,7 +38,7 @@ namespace Clubber.Modules
 		public async Task StatsFromName([Name("name | tag")][Remainder] string name)
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-			if (success && user != null)
+			if (success && user is not null)
 				await CheckUserAndShowStats(user.Id);
 		}
 
@@ -40,7 +51,7 @@ namespace Clubber.Modules
 		private async Task CheckUserAndShowStats(ulong discordId)
 		{
 			SocketGuildUser? user = Context.Guild.GetUser(discordId);
-			DdUser? ddUser = DatabaseHelper.GetDdUser(discordId);
+			DdUser? ddUser = _databaseHelper.GetDdUserByDiscordId(discordId);
 
 			if (ddUser is null)
 			{
@@ -58,7 +69,7 @@ namespace Clubber.Modules
 		private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
 		{
 			uint lbPlayerId = (uint)ddUser.LeaderboardId;
-			LeaderboardUser lbPlayer = (await DatabaseHelper.GetLbPlayers(new uint[] { lbPlayerId })).First();
+			LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(new uint[] { lbPlayerId })).First();
 			Embed statsEmbed;
 
 			if (Context.Message.Content.StartsWith("+statsf") || Context.Message.Content.StartsWith("+statsfull"))

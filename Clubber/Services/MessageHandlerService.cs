@@ -23,7 +23,7 @@ namespace Clubber.Services
 
 		public async Task OnMessageRecievedAsync(SocketMessage msg)
 		{
-			if (msg is not SocketUserMessage message || message.Author.IsBot)
+			if (msg is not SocketUserMessage message || message.Source != MessageSource.User)
 				return;
 
 			int argumentPos = 0;

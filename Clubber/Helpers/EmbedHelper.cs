@@ -46,14 +46,17 @@ namespace Clubber.Helpers
 
 			Exception? ex = msg.Exception;
 
+			if (ex is null)
+				exceptionEmbed.AddField("Message", msg.Message);
+
 			string? exString = ex?.ToString();
-			if (exString != null)
+			if (exString is not null)
 			{
 				Match regexMatch = Regex.Match(exString, "(?<=   )at.+\n?", RegexOptions.Compiled);
 				exceptionEmbed.AddField("Location", regexMatch.Value);
 			}
 
-			while (ex != null)
+			while (ex is not null)
 			{
 				exceptionEmbed.AddField(ex.GetType().Name, ex.Message ?? "No message.");
 				ex = ex.InnerException;
@@ -69,13 +72,13 @@ namespace Clubber.Helpers
 				.WithCurrentTimestamp();
 
 			string? exString = exception?.ToString();
-			if (exString != null)
+			if (exString is not null)
 			{
 				Match regexMatch = Regex.Match(exString, "(?<=   )at.+\n?", RegexOptions.Compiled);
 				exceptionEmbed.AddField("Location", regexMatch.Value);
 			}
 
-			while (exception != null)
+			while (exception is not null)
 			{
 				exceptionEmbed.AddField(exception.GetType().Name, exception.Message ?? "No message.");
 				exception = exception.InnerException;

@@ -12,6 +12,13 @@ namespace Clubber.Modules
 	public abstract class AbstractModule<T> : ModuleBase<T>
 		where T : SocketCommandContext
 	{
+		private readonly DatabaseHelper _databaseHelper;
+
+		protected AbstractModule(DatabaseHelper databaseHelper)
+		{
+			_databaseHelper = databaseHelper;
+		}
+
 		public async Task<bool> IsError(bool condition, string output)
 		{
 			if (condition)
@@ -30,7 +37,7 @@ namespace Clubber.Modules
 		{
 			SocketGuildUser? user = Context.Guild.GetUser(discordId);
 
-			if (!await IsError(user == null, "User not found."))
+			if (!await IsError(user is null, "User not found."))
 				return (true, user);
 			else
 				return (false, null);
@@ -43,7 +50,7 @@ namespace Clubber.Modules
 			if (ulong.TryParse(trimmedName, out ulong userID))
 			{
 				SocketGuildUser? user = Context.Guild.GetUser(userID);
-				if (user != null)
+				if (user is not null)
 					return (true, user);
 			}
 
@@ -90,13 +97,13 @@ namespace Clubber.Modules
 				return false;
 			}
 
-			if (checkIfAlreadyRegistered && DatabaseHelper.GetDdUser(user.Id) is not null)
+			if (checkIfAlreadyRegistered && _databaseHelper.GetDdUserByDiscordId(user.Id) is not null)
 			{
 				await InlineReplyAsync($"User `{user.Username}` is already registered.");
 				return false;
 			}
 
-			if (checkIfNotRegistered && DatabaseHelper.GetDdUser(user.Id) is null)
+			if (checkIfNotRegistered && _databaseHelper.GetDdUserByDiscordId(user.Id) is null)
 			{
 				if ((Context.User as SocketGuildUser)!.GuildPermissions.ManageRoles)
 				{

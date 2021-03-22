@@ -1,18 +1,57 @@
 ﻿using Clubber.Database;
 using Clubber.Files;
+using Clubber.Services;
+using Discord;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {
-	public static class UpdateRolesHelper
+	public class UpdateRolesHelper
 	{
-		public static async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)
+		private readonly DatabaseHelper _databaseHelper;
+		private readonly WebService _webService;
+
+		public UpdateRolesHelper(DatabaseHelper databaseHelper, WebService webService)
 		{
-			List<DdUser> dbUsers = DatabaseHelper.DdUsers;
+			_databaseHelper = databaseHelper;
+			_webService = webService;
+		}
+
+		public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)
+		{
+			Stopwatch sw = Stopwatch.StartNew();
+			(int nonMemberCount, List<UpdateRolesResponse> updateRolesResponses) = await ExecuteRolesAndDbUpdate(guildUsers);
+			sw.Stop();
+
+			string message = string.Empty;
+
+			int updatedUsers = 0;
+			List<Embed> embedList = new();
+			foreach (UpdateRolesResponse updateResponse in updateRolesResponses.Where(ur => ur.Success))
+			{
+				embedList.Add(EmbedHelper.UpdateRoles(updateResponse));
+				updatedUsers++;
+			}
+
+			if (updatedUsers > 0)
+				message += $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms.\n";
+			else
+				message += $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.\n";
+
+			if (nonMemberCount > 0)
+				message += $"ℹ️ {nonMemberCount} user(s) are registered but aren't in the server.";
+
+			return new(message, embedList.ToArray());
+		}
+
+		private async Task<(int NonMemberCount, List<UpdateRolesResponse> UpdateRolesResponses)> ExecuteRolesAndDbUpdate(IEnumerable<SocketGuildUser> guildUsers)
+		{
+			List<DdUser> dbUsers = _databaseHelper.Database;
 
 			IEnumerable<(DdUser DdUser, SocketGuildUser GuildUser)> registeredUsers = dbUsers.Join(
 				inner: guildUsers,
@@ -21,22 +60,30 @@ namespace Clubber.Helpers
 				resultSelector: (ddUser, guildUser) => (ddUser, guildUser));
 
 			IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
-			IEnumerable<LeaderboardUser> lbPlayers = await DatabaseHelper.GetLbPlayers(lbIdsToRequest);
+			IEnumerable<LeaderboardUser> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
+
+			(SocketGuildUser GuildUser, LeaderboardUser LbUser)[] updatedUsers = registeredUsers.Join(
+				inner: lbPlayers,
+				outerKeySelector: ru => ru.DdUser.LeaderboardId,
+				innerKeySelector: lbp => lbp.Id,
+				resultSelector: (ru, lbp) => (ru.GuildUser, lbp))
+				.ToArray();
 
 			List<UpdateRolesResponse> responses = new();
-			foreach ((DdUser DdUser, SocketGuildUser GuildUser) user in registeredUsers)
-				responses.Add(await ExecuteRoleUpdate(user.GuildUser, lbPlayers.First(lbp => lbp.Id == user.DdUser.LeaderboardId)));
 
-			return new(dbUsers.Count - registeredUsers.Count(), responses);
+			for (int i = 0; i < updatedUsers.Length; i++)
+				responses.Add(await ExecuteRoleUpdate(updatedUsers[i].GuildUser, updatedUsers[i].LbUser));
+
+			return (dbUsers.Count - registeredUsers.Count(), responses);
 		}
 
-		public static async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
+		public async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
 		{
 			try
 			{
-				int lbId = DatabaseHelper.DdUsers.Find(ddu => ddu.DiscordId == user.Id)!.LeaderboardId;
-				IEnumerable<LeaderboardUser> lbPlayerList = await DatabaseHelper.GetLbPlayers(new uint[] { (uint)lbId });
-				return await ExecuteRoleUpdate(user, lbPlayerList.First());
+				int lbId = _databaseHelper.GetDdUserByDiscordId(user.Id)!.LeaderboardId;
+				List<LeaderboardUser> lbPlayerList = await _webService.GetLbPlayers(new uint[] { (uint)lbId });
+				return await ExecuteRoleUpdate(user, lbPlayerList[0]);
 			}
 			catch (CustomException)
 			{
@@ -95,5 +142,5 @@ namespace Clubber.Helpers
 	}
 
 	public record UpdateRolesResponse(bool Success, SocketGuildUser? User, IEnumerable<SocketRole>? RolesAdded, IEnumerable<SocketRole>? RolesRemoved);
-	public record DatabaseUpdateResponse(int NonMemberCount, IEnumerable<UpdateRolesResponse> UpdateResponses);
+	public record DatabaseUpdateResponse(string Message, Embed[] RoleUpdateEmbeds);
 }

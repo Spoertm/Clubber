@@ -1,6 +1,6 @@
-﻿using Discord;
+﻿using Clubber.Helpers;
+using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,12 +10,11 @@ namespace Clubber.Modules
 	public class Info : AbstractModule<SocketCommandContext>
 	{
 		private readonly CommandService _service;
-		private static DiscordSocketClient _client = null!;
 
-		public Info(CommandService service, DiscordSocketClient client)
+		public Info(DatabaseHelper databaseHelper, CommandService service)
+			: base(databaseHelper)
 		{
 			_service = service;
-			_client = client;
 		}
 
 		[Command("stopbot")]
@@ -35,6 +34,7 @@ namespace Clubber.Modules
 		[Priority(0)]
 		public async Task Help()
 		{
+			throw new System.Exception("nice");
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle("List of commands")
 				.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
@@ -81,7 +81,7 @@ namespace Clubber.Modules
 
 			IEnumerable<CommandInfo> checkedCommands;
 
-			if (result.Commands[0].Command.Module.Group == null)
+			if (result.Commands[0].Command.Module.Group is null)
 				checkedCommands = result.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess).Select(c => c.Command);
 			else
 				checkedCommands = result.Commands[0].Command.Module.Commands.Where(c => c.CheckPreconditionsAsync(Context).Result.IsSuccess);
@@ -102,12 +102,8 @@ namespace Clubber.Modules
 		/// Returns the command and its params in the format: commandName [requiredParam] (optionalParam).
 		/// </summary>
 		private static string GetCommandAndParameterString(CommandInfo cmd)
-			=> $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue == null ? $"({p.Name})" : $"({p.Name} = {p.DefaultValue})" : $"[{p.Name}]"))}";
-
-		public static async Task BackupDbFile(System.IO.Stream stream, string fileName)
 		{
-			SocketTextChannel? backupChannel = _client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel;
-			await backupChannel!.SendFileAsync(stream, fileName, string.Empty);
+			return $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue is null ? $"({p.Name})" : $"({p.Name} = {p.DefaultValue})" : $"[{p.Name}]"))}";
 		}
 	}
 }
