@@ -20,7 +20,7 @@ namespace ClubberDatabaseUpdateCron
 
 		public static async Task RunAsync()
 		{
-			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Info });
+			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error });
 
 			await _client.LoginAsync(TokenType.Bot, Constants.Token);
 			await _client.StartAsync();
