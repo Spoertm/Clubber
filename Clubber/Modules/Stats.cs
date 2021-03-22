@@ -5,7 +5,6 @@ using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -69,7 +68,7 @@ namespace Clubber.Modules
 		private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
 		{
 			uint lbPlayerId = (uint)ddUser.LeaderboardId;
-			LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(new uint[] { lbPlayerId })).First();
+			LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(new uint[] { lbPlayerId }))[0];
 			Embed statsEmbed;
 
 			if (Context.Message.Content.StartsWith("+statsf") || Context.Message.Content.StartsWith("+statsfull"))
