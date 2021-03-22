@@ -15,7 +15,6 @@ namespace Clubber
 	{
 		private static DiscordSocketClient _client = null!;
 		private static CommandService _commands = null!;
-		private static IServiceProvider _services = null!;
 
 		private static void Main() => RunBotAsync().GetAwaiter().GetResult();
 
@@ -39,7 +38,7 @@ namespace Clubber
 		{
 			_client.Ready -= OnReadyAsync;
 
-			_services = new ServiceCollection()
+			IServiceProvider services = new ServiceCollection()
 				.AddSingleton(_client)
 				.AddSingleton(_commands)
 				.AddSingleton<LoggingService>()
@@ -50,13 +49,13 @@ namespace Clubber
 				.AddSingleton<WebService>()
 				.BuildServiceProvider();
 
-			ActivatorUtilities.GetServiceOrCreateInstance<LoggingService>(_services);
-			ActivatorUtilities.GetServiceOrCreateInstance<MessageHandlerService>(_services);
+			ActivatorUtilities.GetServiceOrCreateInstance<LoggingService>(services);
+			ActivatorUtilities.GetServiceOrCreateInstance<MessageHandlerService>(services);
 
-			IOService iOService = _services.GetRequiredService<IOService>();
+			IOService iOService = services.GetRequiredService<IOService>();
 			await iOService.GetDatabaseFileIntoFolder();
 
-			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
 		}
 
 		public static async Task StopBot()
