@@ -3,7 +3,6 @@ using Clubber.Files;
 using Clubber.Services;
 using Discord.WebSocket;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber.Helpers
@@ -25,7 +24,7 @@ namespace Clubber.Helpers
 
 		public async Task RegisterUser(uint lbId, SocketGuildUser user)
 		{
-			LeaderboardUser lbPlayer = _webService.GetLbPlayers(new uint[] { lbId }).Result.First();
+			LeaderboardUser lbPlayer = _webService.GetLbPlayers(new uint[] { lbId }).Result[0];
 			DdUser newDdUser = new(user.Id, lbPlayer.Id);
 			Database.Add(newDdUser);
 			await _iOService.UpdateAndBackupDbFile(Database, $"Add {user.Username}\n{newDdUser}\nTotal users: {Database.Count}");
