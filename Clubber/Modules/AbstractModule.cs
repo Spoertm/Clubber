@@ -72,12 +72,18 @@ namespace Clubber.Modules
 
 			int padding = userMatches.Max(um => um.Username.Length + (um.Nickname?.Length + 3 ?? 0)) + 2;
 			string matchesMessage = "\n\nMatches:\n" + string.Join("\n", userMatches
-				.Select(m => Format.Code($"{(m.Username + (m.Nickname is null ? null : $" ({m.Nickname})")).PadRight(padding)}{m.Id}")));
+				.Select(m => FormatUser(m, padding)));
 
 			if (matchesMessage.Length + baseMessage.Length < 2048)
 				return baseMessage + matchesMessage;
 			else
 				return baseMessage;
+		}
+
+		private static string FormatUser(SocketGuildUser user, int padding)
+		{
+			string formattedNickname = user.Nickname is null ? string.Empty : $" ({user.Nickname})";
+			return Format.Code($"{(user.Username + formattedNickname).PadRight(padding)}{user.Id}");
 		}
 
 		public async Task<bool> UserIsClean(SocketGuildUser user, bool checkIfCheater, bool checkIfBot, bool checkIfAlreadyRegistered, bool checkIfNotRegistered)
