@@ -30,6 +30,8 @@ namespace Clubber.Helpers
 			[15] = "ENTANGLED",
 			[16] = "HAUNTED",
 		};
+		private static readonly Regex _exceptionRegex = new("(?<=   )at.+\n?", RegexOptions.Compiled);
+
 		public static Embed UpdateRoles(UpdateRolesResponse response)
 		{
 			EmbedBuilder embed = new EmbedBuilder()
@@ -73,7 +75,7 @@ namespace Clubber.Helpers
 			string? exString = ex?.ToString();
 			if (exString is not null)
 			{
-				Match regexMatch = Regex.Match(exString, "(?<=   )at.+\n?", RegexOptions.Compiled);
+				Match regexMatch = _exceptionRegex.Match(exString);
 				exceptionEmbed.AddField("Location", regexMatch.Value);
 			}
 
@@ -95,7 +97,7 @@ namespace Clubber.Helpers
 			string? exString = exception?.ToString();
 			if (exString is not null)
 			{
-				Match regexMatch = Regex.Match(exString, "(?<=   )at.+\n?", RegexOptions.Compiled);
+				Match regexMatch = _exceptionRegex.Match(exString);
 				exceptionEmbed.AddField("Location", regexMatch.Value);
 			}
 
