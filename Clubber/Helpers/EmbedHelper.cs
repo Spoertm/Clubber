@@ -2,6 +2,7 @@
 using Discord;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -9,6 +10,26 @@ namespace Clubber.Helpers
 {
 	public static class EmbedHelper
 	{
+		private static readonly Dictionary<short, string> _deathtypeDict = new()
+		{
+			[0] = "FALLEN",
+			[1] = "SWARMED",
+			[2] = "IMPALED",
+			[3] = "GORED",
+			[4] = "INFESTED",
+			[5] = "OPENED",
+			[6] = "PURGED",
+			[7] = "DESECRATED",
+			[8] = "SACRIFICED",
+			[9] = "EVISCERATED",
+			[10] = "ANNIHILATED",
+			[11] = "INTOXICATED",
+			[12] = "ENVENOMATED",
+			[13] = "INCARNATED",
+			[14] = "DISCARNATED",
+			[15] = "ENTANGLED",
+			[16] = "HAUNTED",
+		};
 		public static Embed UpdateRoles(UpdateRolesResponse response)
 		{
 			EmbedBuilder embed = new EmbedBuilder()
@@ -132,7 +153,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
 🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
 😵 Total deaths: {lbPlayer.DeathsTotal}
-😵 Death type: {Constants.DeathtypeDict[lbPlayer.DeathType]}")
+😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}")
 				.Build();
 		}
 	}
