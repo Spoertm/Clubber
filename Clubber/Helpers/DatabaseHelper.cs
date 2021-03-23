@@ -17,7 +17,7 @@ namespace Clubber.Helpers
 			_iOService = iOService;
 			_webService = webService;
 
-			Database = _iOService.GetDatabase().Result;
+			Database = _iOService.GetDatabase();
 		}
 
 		public List<DdUser> Database { get; }

@@ -30,9 +30,9 @@ namespace Clubber.Services
 			await _webService.BackupDbFile(_databaseFilePath, text);
 		}
 
-		public async Task<List<DdUser>> GetDatabase()
+		public List<DdUser> GetDatabase()
 		{
-			string dbString = await File.ReadAllTextAsync(_databaseFilePath);
+			string dbString = File.ReadAllText(_databaseFilePath);
 			return JsonConvert.DeserializeObject<List<DdUser>>(dbString);
 		}
 
