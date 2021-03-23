@@ -66,7 +66,7 @@ namespace Clubber.Modules
 				return (false, null);
 		}
 
-		private string GetMatchesString(IEnumerable<SocketGuildUser> userMatches, string search)
+		private static string GetMatchesString(IEnumerable<SocketGuildUser> userMatches, string search)
 		{
 			string baseMessage = $"Found multiple matches for `{search.ToLower()}`.\nSpecify their entire username, tag them, or specify their Discord ID in the format `+command id <the id>`.";
 
