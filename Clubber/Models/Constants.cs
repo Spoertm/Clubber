@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Clubber
+﻿namespace Clubber
 {
 	public static class Constants
 	{
