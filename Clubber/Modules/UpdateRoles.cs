@@ -11,6 +11,7 @@ namespace Clubber.Modules
 	[Group("pb")]
 	[Alias("updateroles")]
 	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles.")]
+	[RequireContext(ContextType.Guild)]
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{
 		private readonly UpdateRolesHelper _updateRolesHelper;

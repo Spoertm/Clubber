@@ -10,6 +10,7 @@ namespace Clubber.Modules
 	[Group("register")]
 	[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
 	[RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "Only users with higher permissions can use this command. Ask a `Role assigner` or a Moderator/Admin to help you.")]
+	[RequireContext(ContextType.Guild)]
 	public class RegisterUser : AbstractModule<SocketCommandContext>
 	{
 		private readonly DatabaseHelper _databaseHelper;
