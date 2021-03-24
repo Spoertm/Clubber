@@ -49,8 +49,9 @@ namespace Clubber
 				.AddSingleton<WebService>()
 				.BuildServiceProvider();
 
-			ActivatorUtilities.GetServiceOrCreateInstance<LoggingService>(services);
-			ActivatorUtilities.GetServiceOrCreateInstance<MessageHandlerService>(services);
+			services.GetRequiredService<LoggingService>();
+			services.GetRequiredService<MessageHandlerService>();
+			services.GetRequiredService<DatabaseHelper>();
 
 			IOService iOService = services.GetRequiredService<IOService>();
 			await iOService.GetDatabaseFileIntoFolder();
