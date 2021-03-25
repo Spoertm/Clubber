@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -25,13 +26,19 @@ namespace Clubber
 			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
 			_commands = new CommandService(new CommandServiceConfig() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 
-			await _client.LoginAsync(TokenType.Bot, Constants.Token);
+			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
 			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
 
 			_client.Ready += OnReadyAsync;
 
 			await Task.Delay(-1);
+		}
+
+		private static string GetToken()
+		{
+			string tokenPath = Path.Combine(AppContext.BaseDirectory, "Models", "Token.txt");
+			return File.ReadAllText(tokenPath);
 		}
 
 		private static async Task OnReadyAsync()

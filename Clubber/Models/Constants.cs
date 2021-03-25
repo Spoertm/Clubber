@@ -7,7 +7,6 @@ For example, if someone beats their score of 300s and gets 400s, I update their 
 To speed this up, you can manually update your own or someone else's roles by using the `+pb` or `+updateroles` command.";
 
 		public const string Prefix = "+";
-		public const string Token = "NzQzNDMxNTAyODQyMjk4MzY4.XzUkig.UQrKlF7axeeFqewonpkTTAwaIIo";
 		public const ulong CheaterRoleId = 693432614727581727;
 		public const ulong WrRoleId = 446688666325090310;
 		public const ulong Top3RoleId = 472451008342261820;
