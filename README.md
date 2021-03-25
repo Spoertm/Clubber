@@ -18,18 +18,16 @@ Prefix is `+`.
 <br/>
 <br/>
 
-`me` - provides statistics from the leaderboard for users that are in this server and registered. `statsf` shows all the information available.
+`stats` - provides statistics from the leaderboard for users that are in this server and registered. `statsf` shows all the information available.
 
 #### Aliases
-`stats`
+`me`
 
 `statsf`
 
 `statsfull`
 
 #### Overloads
-`stats`
-
 `stats [me | @mention]`
 
 `stats id [Discord ID]`
