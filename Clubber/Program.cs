@@ -47,6 +47,7 @@ namespace Clubber
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
 				.AddSingleton<WebService>()
+				.AddSingleton<UserService>()
 				.BuildServiceProvider();
 
 			services.GetRequiredService<LoggingService>();

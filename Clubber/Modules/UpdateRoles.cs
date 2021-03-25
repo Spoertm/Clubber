@@ -1,4 +1,5 @@
 ﻿using Clubber.Helpers;
+using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -15,11 +16,12 @@ namespace Clubber.Modules
 	public class UpdateRoles : AbstractModule<SocketCommandContext>
 	{
 		private readonly UpdateRolesHelper _updateRolesHelper;
+		private readonly UserService _userService;
 
-		public UpdateRoles(DatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper)
-			: base(databaseHelper)
+		public UpdateRoles(UpdateRolesHelper updateRolesHelper, UserService userService)
 		{
 			_updateRolesHelper = updateRolesHelper;
+			_userService = userService;
 		}
 
 		[Command]
@@ -49,8 +51,12 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
 		{
-			if (!await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: false, checkIfNotRegistered: true))
+			UserValidationResponse userIsValidResponse = _userService.IsValid(user, Context);
+			if (userIsValidResponse.IsError)
+			{
+				await InlineReplyAsync(userIsValidResponse.Message!);
 				return;
+			}
 
 			UpdateRolesResponse response = await _updateRolesHelper.UpdateUserRoles(user);
 

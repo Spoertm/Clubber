@@ -1,4 +1,5 @@
 ﻿using Clubber.Helpers;
+using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -14,11 +15,12 @@ namespace Clubber.Modules
 	public class RegisterUser : AbstractModule<SocketCommandContext>
 	{
 		private readonly DatabaseHelper _databaseHelper;
+		private readonly UserService _userService;
 
-		public RegisterUser(DatabaseHelper databaseHelper)
-			: base(databaseHelper)
+		public RegisterUser(DatabaseHelper databaseHelper, UserService userService)
 		{
 			_databaseHelper = databaseHelper;
+			_userService = userService;
 		}
 
 		[Command]
@@ -43,8 +45,9 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 		{
-			if (!await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: true, checkIfNotRegistered: false))
-				return;
+			UserValidationResponse userServiceResponse = _userService.IsValidForRegistration(user, Context);
+			if (userServiceResponse.IsError && userServiceResponse.Message is not null)
+				await InlineReplyAsync(userServiceResponse.Message);
 
 			await _databaseHelper.RegisterUser(lbId, user);
 			await InlineReplyAsync("✅ Successfully registered.");

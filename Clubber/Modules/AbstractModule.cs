@@ -1,5 +1,4 @@
-﻿using Clubber.Helpers;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -12,13 +11,6 @@ namespace Clubber.Modules
 	public abstract class AbstractModule<T> : ModuleBase<T>
 		where T : SocketCommandContext
 	{
-		private readonly DatabaseHelper _databaseHelper;
-
-		protected AbstractModule(DatabaseHelper databaseHelper)
-		{
-			_databaseHelper = databaseHelper;
-		}
-
 		public async Task<bool> IsError(bool condition, string output)
 		{
 			if (condition)
@@ -84,47 +76,6 @@ namespace Clubber.Modules
 		{
 			string formattedNickname = user.Nickname is null ? string.Empty : $" ({user.Nickname})";
 			return Format.Code($"{(user.Username + formattedNickname).PadRight(padding)}{user.Id}");
-		}
-
-		public async Task<bool> UserIsClean(SocketGuildUser user, bool checkIfCheater, bool checkIfBot, bool checkIfAlreadyRegistered, bool checkIfNotRegistered)
-		{
-			if (checkIfBot && user.IsBot)
-			{
-				await InlineReplyAsync($"{user.Mention} is a bot. It can't be registered as a DD player.");
-				return false;
-			}
-
-			if (checkIfCheater && user.Roles.Any(r => r.Id == Constants.CheaterRoleId))
-			{
-				_ = user.Id == Context.User.Id
-					? await InlineReplyAsync($"{user.Username}, you can't register because you've cheated.")
-					: await InlineReplyAsync($"{user.Username} can't be registered because they've cheated.");
-
-				return false;
-			}
-
-			if (checkIfAlreadyRegistered && _databaseHelper.GetDdUserByDiscordId(user.Id) is not null)
-			{
-				await InlineReplyAsync($"User `{user.Username}` is already registered.");
-				return false;
-			}
-
-			if (checkIfNotRegistered && _databaseHelper.GetDdUserByDiscordId(user.Id) is null)
-			{
-				if ((Context.User as SocketGuildUser)!.GuildPermissions.ManageRoles)
-				{
-					_ = await InlineReplyAsync($"`{user.Username}` is not registered.");
-					return false;
-				}
-
-				_ = user.Id == Context.User.Id
-					? await InlineReplyAsync($"You're not registered, {user.Username}. Only a <@&{Constants.RoleAssignerRoleId}> can register you, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannel}> for more info.")
-					: await InlineReplyAsync($"`{user.Username}` is not registered. Only a <@&{Constants.RoleAssignerRoleId}> can register them, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannel}> for more info.");
-
-				return false;
-			}
-
-			return true;
 		}
 	}
 }

@@ -16,7 +16,6 @@ namespace Clubber.Modules
 		private readonly DatabaseHelper _databaseHelper;
 
 		public RemoveUser(DatabaseHelper databaseHelper)
-			: base(databaseHelper)
 		{
 			_databaseHelper = databaseHelper;
 		}

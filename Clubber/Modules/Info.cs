@@ -1,5 +1,4 @@
-﻿using Clubber.Helpers;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +11,7 @@ namespace Clubber.Modules
 	{
 		private readonly CommandService _service;
 
-		public Info(DatabaseHelper databaseHelper, CommandService service)
-			: base(databaseHelper)
+		public Info(CommandService service)
 		{
 			_service = service;
 		}

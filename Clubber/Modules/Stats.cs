@@ -18,19 +18,20 @@ namespace Clubber.Modules
 	{
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly WebService _webService;
+		private readonly UserService _userService;
 
-		public Stats(DatabaseHelper databaseHelper, WebService webService)
-			: base(databaseHelper)
+		public Stats(DatabaseHelper databaseHelper, WebService webService, UserService userService)
 		{
 			_databaseHelper = databaseHelper;
 			_webService = webService;
+			_userService = userService;
 		}
 
 		[Command]
 		[Remarks("me")]
 		[Priority(1)]
 		public async Task StatsFromCurrentUser()
-			=> await CheckUserAndShowStats(Context.User.Id);
+			=> await CheckUserAndShowStats((Context.User as SocketGuildUser)!);
 
 		[Command]
 		[Remarks("stats clubber\nstats <@743431502842298368>")]
@@ -39,16 +40,13 @@ namespace Clubber.Modules
 		{
 			(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
 			if (success && user is not null)
-				await CheckUserAndShowStats(user.Id);
+				await CheckUserAndShowStats(user);
 		}
 
 		[Command("id")]
 		[Remarks("stats id 743431502842298368")]
 		[Priority(3)]
 		public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
-			=> await CheckUserAndShowStats(discordId);
-
-		private async Task CheckUserAndShowStats(ulong discordId)
 		{
 			SocketGuildUser? user = Context.Guild.GetUser(discordId);
 			DdUser? ddUser = _databaseHelper.GetDdUserByDiscordId(discordId);
@@ -58,8 +56,21 @@ namespace Clubber.Modules
 				if (user is null)
 					await InlineReplyAsync("User not found.");
 				else
-					await UserIsClean(user, checkIfCheater: true, checkIfBot: true, checkIfAlreadyRegistered: false, checkIfNotRegistered: true);
+					await InlineReplyAsync(_userService.IsValid(user, Context).Message!);
 
+				return;
+			}
+
+			await ShowStats(ddUser, user);
+		}
+
+		private async Task CheckUserAndShowStats(SocketGuildUser user)
+		{
+			DdUser? ddUser = _databaseHelper.GetDdUserByDiscordId(user.Id);
+
+			if (ddUser is null)
+			{
+				await InlineReplyAsync(_userService.IsValid(user, Context).Message!);
 				return;
 			}
 
