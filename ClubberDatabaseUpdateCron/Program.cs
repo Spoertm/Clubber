@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,11 +22,17 @@ namespace ClubberDatabaseUpdateCron
 		{
 			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error });
 
-			await _client.LoginAsync(TokenType.Bot, Constants.Token);
+			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
 			_client.Ready += OnReady;
 
 			await Task.Delay(-1);
+		}
+
+		private static string GetToken()
+		{
+			string tokenPath = Path.Combine(AppContext.BaseDirectory, "Models", "Token.txt");
+			return File.ReadAllText(tokenPath);
 		}
 
 		public static async Task OnReady()
