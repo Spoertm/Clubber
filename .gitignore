@@ -359,4 +359,4 @@ MigrationBackup/
 .vscode/tasks.json
 Clubber/.vscode/launch.json
 Clubber/.vscode/tasks.json
-Clubber/Token.txt
+Clubber/Models/Token.txt
