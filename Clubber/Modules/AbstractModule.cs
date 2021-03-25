@@ -63,8 +63,7 @@ namespace Clubber.Modules
 			string baseMessage = $"Found multiple matches for `{search.ToLower()}`.\nSpecify their entire username, tag them, or specify their Discord ID in the format `+command id <the id>`.";
 
 			int padding = userMatches.Max(um => um.Username.Length + (um.Nickname?.Length + 3 ?? 0)) + 2;
-			string matchesMessage = "\n\nMatches:\n" + string.Join("\n", userMatches
-				.Select(m => FormatUser(m, padding)));
+			string matchesMessage = "\n\nMatches:\n" + string.Join("\n", userMatches.Select(m => FormatUser(m, padding)));
 
 			if (matchesMessage.Length + baseMessage.Length < 2048)
 				return baseMessage + matchesMessage;
