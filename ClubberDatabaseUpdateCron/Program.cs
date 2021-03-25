@@ -13,7 +13,6 @@ namespace ClubberDatabaseUpdateCron
 {
 	public static class Program
 	{
-		private const ulong _modsChannelId = 701124439990993036;
 		private static DiscordSocketClient _client = null!;
 
 		public static void Main() => RunAsync().GetAwaiter().GetResult();
@@ -40,13 +39,13 @@ namespace ClubberDatabaseUpdateCron
 				.AddSingleton<WebService>()
 				.BuildServiceProvider();
 
-			ActivatorUtilities.GetServiceOrCreateInstance<LoggingService>(services);
+			services.GetRequiredService<LoggingService>();
 
 			List<Exception> exceptionList = new();
 			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();
 
 			SocketGuild? ddPals = _client.GetGuild(Constants.DdPals);
-			IMessageChannel? modsChannel = _client.GetChannel(_modsChannelId) as IMessageChannel;
+			IMessageChannel? modsChannel = _client.GetChannel(Constants.ModsChannelId) as IMessageChannel;
 
 			const string checkingString = "Checking for role updates...";
 			IUserMessage msg = await modsChannel!.SendMessageAsync(checkingString);
