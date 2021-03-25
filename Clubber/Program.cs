@@ -50,12 +50,13 @@ namespace Clubber
 				.AddSingleton<UserService>()
 				.BuildServiceProvider();
 
-			services.GetRequiredService<LoggingService>();
 			services.GetRequiredService<MessageHandlerService>();
-			services.GetRequiredService<DatabaseHelper>();
+			services.GetRequiredService<LoggingService>();
 
 			IOService iOService = services.GetRequiredService<IOService>();
 			await iOService.GetDatabaseFileIntoFolder();
+
+			services.GetRequiredService<DatabaseHelper>();
 
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
 		}
