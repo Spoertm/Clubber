@@ -1,7 +1,6 @@
 ﻿using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -27,9 +26,6 @@ namespace Clubber.Modules
 		[RequireContext(ContextType.Guild)]
 		public async Task UpdateDatabase()
 		{
-			Stopwatch stopwatch = new();
-			stopwatch.Start();
-
 			const string checkingString = "Checking for role updates...";
 			IUserMessage msg = await ReplyAsync(checkingString);
 
