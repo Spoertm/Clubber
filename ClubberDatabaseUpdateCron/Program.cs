@@ -45,7 +45,7 @@ namespace ClubberDatabaseUpdateCron
 			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();
 
 			SocketGuild? ddPals = _client.GetGuild(Constants.DdPalsId);
-			IMessageChannel? modsChannel = _client.GetChannel(Constants.TestingChannelId) as IMessageChannel;
+			IMessageChannel? modsChannel = _client.GetChannel(Constants.ModsChannelId) as IMessageChannel;
 
 			const string checkingString = "Checking for role updates...";
 			IUserMessage msg = await modsChannel!.SendMessageAsync(checkingString);
