@@ -72,7 +72,7 @@ namespace Clubber.Modules
 			LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(new uint[] { lbPlayerId }))[0];
 			Embed statsEmbed;
 
-			if (Context.Message.Content.StartsWith("+statsf") || Context.Message.Content.StartsWith("+statsfull"))
+			if (Context.Message.Content.StartsWith("+statsf", System.StringComparison.InvariantCultureIgnoreCase) || Context.Message.Content.StartsWith("+statsfull", System.StringComparison.InvariantCultureIgnoreCase))
 				statsEmbed = EmbedHelper.FullStats(lbPlayer, user);
 			else
 				statsEmbed = EmbedHelper.Stats(lbPlayer, user);
