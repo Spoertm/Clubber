@@ -3,7 +3,6 @@ using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -64,24 +63,6 @@ namespace Clubber.Modules
 				await InlineReplyAsync("No updates were needed.");
 			else
 				await ReplyAsync(null, false, EmbedHelper.UpdateRoles(response), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
-		}
-
-		[Command("database")]
-		[Priority(4)]
-		[RequireOwner]
-		public async Task UpdateDatabase()
-		{
-			Stopwatch stopwatch = new();
-			stopwatch.Start();
-
-			const string checkingString = "Checking for role updates...";
-			IUserMessage msg = await ReplyAsync(checkingString);
-
-			DatabaseUpdateResponse response = await _updateRolesHelper.UpdateRolesAndDb(Context.Guild.Users);
-			await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{response.Message}");
-
-			for (int i = 0; i < response.RoleUpdateEmbeds.Length; i++)
-				await ReplyAsync(null, false, response.RoleUpdateEmbeds[i]);
 		}
 	}
 }

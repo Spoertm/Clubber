@@ -15,14 +15,6 @@ namespace Clubber.Modules
 			_commands = commands;
 		}
 
-		[Command("stopbot")]
-		[RequireOwner]
-		public async Task StopBot()
-		{
-			await ReplyAsync("Exiting...");
-			await Program.StopBot();
-		}
-
 		[Command("whyareyou")]
 		[Summary("Describes what the bot does.")]
 		public async Task WhyAreYou() => await InlineReplyAsync(Constants.WhyAreYou);
