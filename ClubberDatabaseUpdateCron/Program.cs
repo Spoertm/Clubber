@@ -44,8 +44,8 @@ namespace ClubberDatabaseUpdateCron
 			List<Exception> exceptionList = new();
 			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();
 
-			SocketGuild? ddPals = _client.GetGuild(Constants.DdPals);
-			IMessageChannel? modsChannel = _client.GetChannel(Constants.ModsChannelId) as IMessageChannel;
+			SocketGuild? ddPals = _client.GetGuild(Constants.DdPalsId);
+			IMessageChannel? modsChannel = _client.GetChannel(Constants.TestingChannelId) as IMessageChannel;
 
 			const string checkingString = "Checking for role updates...";
 			IUserMessage msg = await modsChannel!.SendMessageAsync(checkingString);
@@ -75,7 +75,7 @@ namespace ClubberDatabaseUpdateCron
 					{
 						await modsChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 
-						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel;
+						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannelId) as SocketTextChannel;
 						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
 							await clubberExceptionsChannel!.SendMessageAsync(null, false, EmbedHelper.Exception(exc));
 

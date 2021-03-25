@@ -20,7 +20,7 @@ namespace Clubber
 			client.Log += LogAsync;
 			commands.Log += LogAsync;
 
-			_clubberExceptionsChannel = (client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!;
+			_clubberExceptionsChannel = (client.GetChannel(Constants.ClubberExceptionsChannelId) as SocketTextChannel)!;
 		}
 
 		/// <summary>
@@ -32,7 +32,7 @@ namespace Clubber
 
 			client.Log += LogAsync;
 
-			_clubberExceptionsChannel = (client.GetChannel(Constants.ClubberExceptionsChannel) as SocketTextChannel)!;
+			_clubberExceptionsChannel = (client.GetChannel(Constants.ClubberExceptionsChannelId) as SocketTextChannel)!;
 		}
 
 		private string LogDirectory { get; }

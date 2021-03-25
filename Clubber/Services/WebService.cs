@@ -18,7 +18,7 @@ namespace Clubber.Services
 
 		public WebService(DiscordSocketClient client)
 		{
-			_backupChannel = (client.GetChannel(Constants.DatabaseBackupChannel) as SocketTextChannel)!;
+			_backupChannel = (client.GetChannel(Constants.DatabaseBackupChannelId) as SocketTextChannel)!;
 			_httpClient = new();
 		}
 
