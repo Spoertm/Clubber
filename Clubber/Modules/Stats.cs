@@ -14,7 +14,7 @@ namespace Clubber.Modules
 	[Alias("stats", "statsf", "statsfull")]
 	[Summary("Provides statistics from the leaderboard for users that are in this server and registered.\n`statsf` shows all the information available.")]
 	[RequireContext(ContextType.Guild)]
-	public class Stats : AbstractModule<SocketCommandContext>
+	public class Stats : ExtendedModulebase<SocketCommandContext>
 	{
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly WebService _webService;

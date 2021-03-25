@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Clubber.Modules
 {
 	[RequireContext(ContextType.Guild)]
-	public class Info : AbstractModule<SocketCommandContext>
+	public class Info : ExtendedModulebase<SocketCommandContext>
 	{
 		private readonly CommandService _service;
 

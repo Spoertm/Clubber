@@ -11,7 +11,7 @@ namespace Clubber.Modules
 	[Summary("Removes a user from the database.")]
 	[RequireUserPermission(GuildPermission.ManageRoles)]
 	[RequireContext(ContextType.Guild)]
-	public class RemoveUser : AbstractModule<SocketCommandContext>
+	public class RemoveUser : ExtendedModulebase<SocketCommandContext>
 	{
 		private readonly DatabaseHelper _databaseHelper;
 

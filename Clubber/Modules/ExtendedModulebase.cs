@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {
-	public abstract class AbstractModule<T> : ModuleBase<T>
+	public abstract class ExtendedModulebase<T> : ModuleBase<T>
 		where T : SocketCommandContext
 	{
 		public async Task<bool> IsError(bool condition, string output)

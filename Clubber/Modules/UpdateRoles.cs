@@ -13,7 +13,7 @@ namespace Clubber.Modules
 	[Alias("updateroles")]
 	[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles.")]
 	[RequireContext(ContextType.Guild)]
-	public class UpdateRoles : AbstractModule<SocketCommandContext>
+	public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 	{
 		private readonly UpdateRolesHelper _updateRolesHelper;
 		private readonly UserService _userService;
