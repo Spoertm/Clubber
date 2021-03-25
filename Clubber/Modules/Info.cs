@@ -8,11 +8,11 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class Info : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly CommandService _service;
+		private readonly CommandService _commands;
 
-		public Info(CommandService service)
+		public Info(CommandService commands)
 		{
-			_service = service;
+			_commands = commands;
 		}
 
 		[Command("stopbot")]
@@ -32,7 +32,7 @@ namespace Clubber.Modules
 		[Priority(0)]
 		public async Task Help()
 		{
-			Embed embed = EmbedHelper.GenericHelp(Context, _service);
+			Embed embed = EmbedHelper.GenericHelp(Context, _commands);
 			await ReplyAsync(null, false, embed, null, AllowedMentions.None, new MessageReference(Context.Message.Id));
 		}
 
@@ -42,7 +42,7 @@ namespace Clubber.Modules
 		[Priority(1)]
 		public async Task Help([Remainder] string command)
 		{
-			SearchResult searchResult = _service.Search(Context, command);
+			SearchResult searchResult = _commands.Search(Context, command);
 			if (await IsError(!searchResult.IsSuccess, $"The command `{command}` doesn't exist."))
 				return;
 
