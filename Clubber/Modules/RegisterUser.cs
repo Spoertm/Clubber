@@ -47,7 +47,10 @@ namespace Clubber.Modules
 		{
 			UserValidationResponse userServiceResponse = _userService.IsValidForRegistration(user, Context);
 			if (userServiceResponse.IsError && userServiceResponse.Message is not null)
+			{
 				await InlineReplyAsync(userServiceResponse.Message);
+				return;
+			}
 
 			await _databaseHelper.RegisterUser(lbId, user);
 			await InlineReplyAsync("✅ Successfully registered.");
