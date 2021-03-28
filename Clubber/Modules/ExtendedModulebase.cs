@@ -13,17 +13,15 @@ namespace Clubber.Modules
 	{
 		public async Task<bool> IsError(bool condition, string output)
 		{
-			if (condition)
-			{
-				await InlineReplyAsync(output);
-				return true;
-			}
+			if (!condition)
+				return false;
 
-			return false;
+			await InlineReplyAsync(output);
+			return true;
 		}
 
 		public async Task<IMessage> InlineReplyAsync(string message, bool ping = false)
-			=> await ReplyAsync(message, false, null, null, ping ? null : AllowedMentions.None, new MessageReference(Context.Message.Id));
+			=> await ReplyAsync(message, isTTS: false, embed: null, options: null, allowedMentions: ping ? null : AllowedMentions.None, messageReference: new MessageReference(Context.Message.Id));
 
 		public async Task<(bool Success, SocketGuildUser? User)> FoundUserFromDiscordId(ulong discordId)
 		{
@@ -31,8 +29,8 @@ namespace Clubber.Modules
 
 			if (!await IsError(user is null, "User not found."))
 				return (true, user);
-			else
-				return (false, null);
+
+			return (false, null);
 		}
 
 		public async Task<(bool Success, SocketGuildUser? User)> FoundOneUserFromName(string name)
@@ -53,9 +51,11 @@ namespace Clubber.Modules
 
 			if (!await IsError(!userMatches.Any(), "User not found.") &&
 				!await IsError(userMatches.Count() > 1, GetMatchesString(userMatches, name)))
+			{
 				return (true, userMatches.FirstOrDefault());
-			else
-				return (false, null);
+			}
+
+			return (false, null);
 		}
 
 		private static string GetMatchesString(IEnumerable<SocketGuildUser> userMatches, string search)
@@ -65,10 +65,10 @@ namespace Clubber.Modules
 			int padding = userMatches.Max(um => um.Username.Length + (um.Nickname?.Length + 3 ?? 0)) + 2;
 			string matchesMessage = "\n\nMatches:\n" + string.Join("\n", userMatches.Select(m => FormatUser(m, padding)));
 
-			if (matchesMessage.Length + baseMessage.Length < 2048)
-				return baseMessage + matchesMessage;
-			else
+			if (matchesMessage.Length + baseMessage.Length >= 2048)
 				return baseMessage;
+
+			return baseMessage + matchesMessage;
 		}
 
 		private static string FormatUser(SocketGuildUser user, int padding)

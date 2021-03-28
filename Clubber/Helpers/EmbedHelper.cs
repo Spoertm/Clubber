@@ -73,18 +73,7 @@ namespace Clubber.Helpers
 			if (ex is null)
 				exceptionEmbed.AddField("Message", msg.Message);
 
-			string? exString = ex?.ToString();
-			if (exString is not null)
-			{
-				Match regexMatch = _exceptionRegex.Match(exString);
-				exceptionEmbed.AddField("Location", regexMatch.Value);
-			}
-
-			while (ex is not null)
-			{
-				exceptionEmbed.AddField(ex.GetType().Name, ex.Message ?? "No message.");
-				ex = ex.InnerException;
-			}
+			FillExceptionEmbedBuilder(ex, exceptionEmbed);
 
 			return exceptionEmbed.Build();
 		}
@@ -95,6 +84,13 @@ namespace Clubber.Helpers
 				.WithTitle("Cron project - " + exception?.GetType().Name ?? "Exception thrown")
 				.WithCurrentTimestamp();
 
+			FillExceptionEmbedBuilder(exception, exceptionEmbed);
+
+			return exceptionEmbed.Build();
+		}
+
+		private static void FillExceptionEmbedBuilder(Exception? exception, EmbedBuilder exceptionEmbed)
+		{
 			string? exString = exception?.ToString();
 			if (exString is not null)
 			{
@@ -107,8 +103,6 @@ namespace Clubber.Helpers
 				exceptionEmbed.AddField(exception.GetType().Name, exception.Message ?? "No message.");
 				exception = exception.InnerException;
 			}
-
-			return exceptionEmbed.Build();
 		}
 
 		/// <summary>
@@ -163,10 +157,10 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		public static Embed GenericHelp(ICommandContext context, CommandService service)
 		{
 			EmbedBuilder embed = new EmbedBuilder()
-							.WithTitle("List of commands")
-							.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
-							.WithThumbnailUrl(context.Client.CurrentUser.GetAvatarUrl())
-							.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
+				.WithTitle("List of commands")
+				.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
+				.WithThumbnailUrl(context.Client.CurrentUser.GetAvatarUrl())
+				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
 
 			foreach (IGrouping<string, CommandInfo>? group in service.Commands.GroupBy(x => x.Module.Name))
 			{

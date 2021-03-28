@@ -89,7 +89,7 @@ namespace Clubber.Services
 			IAttachment? latestAttachment = (await _backupChannel.GetMessagesAsync(1).FlattenAsync())
 				.FirstOrDefault()?
 				.Attachments
-				.First();
+				.FirstOrDefault();
 
 			if (latestAttachment is null)
 				throw new CustomException("No files in backup channel.");
