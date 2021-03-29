@@ -236,8 +236,10 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 
 		private static string FormatUser(SocketGuildUser user)
 		{
-			string formattedNickname = user.Nickname is null ? string.Empty : $" ({user.Nickname})";
-			return user.Username + formattedNickname;
+			if (user.Nickname is null)
+				return user.Username;
+
+			return $"{user.Username} ({user.Nickname})";
 		}
 	}
 }
