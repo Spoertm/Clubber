@@ -214,5 +214,22 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		{
 			return $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue is null ? $"({p.Name})" : $"({p.Name} = {p.DefaultValue})" : $"[{p.Name}]"))}";
 		}
+
+		public static Embed MultipleMatches(IEnumerable<SocketGuildUser> userMatches, string search)
+		{
+			EmbedBuilder embedBuilder = new EmbedBuilder()
+				.WithTitle($"Found multiple matches for '{search.ToLower()}'")
+				.WithDescription("Specify their entire username, tag them, or specify their Discord ID in the format `+command id <the id>`.")
+				.AddField("User", string.Join("\n", userMatches.Select(um => $"- {FormatUser(um)}")), inline: true)
+				.AddField("Discord ID", string.Join("\n", userMatches.Select(um => um.Id)), inline: true);
+
+			return embedBuilder.Build();
+		}
+
+		private static string FormatUser(SocketGuildUser user)
+		{
+			string formattedNickname = user.Nickname is null ? string.Empty : $" ({user.Nickname})";
+			return user.Username + formattedNickname;
+		}
 	}
 }

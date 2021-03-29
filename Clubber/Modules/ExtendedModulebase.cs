@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Clubber.Helpers;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -49,32 +50,16 @@ namespace Clubber.Modules
 				(u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
 				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true));
 
-			if (!await IsError(!userMatches.Any(), "User not found.") &&
-				!await IsError(userMatches.Count() > 1, GetMatchesString(userMatches, name)))
+			if (await IsError(!userMatches.Any(), "User not found."))
+				return (false, null);
+
+			if (userMatches.Count() > 1)
 			{
-				return (true, userMatches.FirstOrDefault());
+				await ReplyAsync(message: null, isTTS: false, embed: EmbedHelper.MultipleMatches(userMatches, name), options: null, allowedMentions: AllowedMentions.None, messageReference: new MessageReference(Context.Message.Id));
+				return (false, null);
 			}
 
-			return (false, null);
-		}
-
-		private static string GetMatchesString(IEnumerable<SocketGuildUser> userMatches, string search)
-		{
-			string baseMessage = $"Found multiple matches for `{search.ToLower()}`.\nSpecify their entire username, tag them, or specify their Discord ID in the format `+command id <the id>`.";
-
-			int padding = userMatches.Max(um => um.Username.Length + (um.Nickname?.Length + 3 ?? 0)) + 2;
-			string matchesMessage = "\n\nMatches:\n" + string.Join("\n", userMatches.Select(m => FormatUser(m, padding)));
-
-			if (matchesMessage.Length + baseMessage.Length >= 2048)
-				return baseMessage;
-
-			return baseMessage + matchesMessage;
-		}
-
-		private static string FormatUser(SocketGuildUser user, int padding)
-		{
-			string formattedNickname = user.Nickname is null ? string.Empty : $" ({user.Nickname})";
-			return Format.Code($"{(user.Username + formattedNickname).PadRight(padding)}{user.Id}");
+			return (true, userMatches.FirstOrDefault());
 		}
 	}
 }
