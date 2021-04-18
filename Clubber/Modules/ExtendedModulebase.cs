@@ -38,12 +38,8 @@ namespace Clubber.Modules
 		{
 			string trimmedName = name.TrimStart('<', '@', '!').TrimEnd('>');
 
-			if (ulong.TryParse(trimmedName, out ulong userID))
-			{
-				SocketGuildUser? user = Context.Guild.GetUser(userID);
-				if (user is not null)
-					return (true, user);
-			}
+			if (ulong.TryParse(trimmedName, out ulong userID) && Context.Guild.GetUser(userID) is SocketGuildUser guildUser)
+				return (true, guildUser);
 
 			IEnumerable<SocketGuildUser> userMatches = Context.Guild.Users.Where(u =>
 				!u.IsBot &&
