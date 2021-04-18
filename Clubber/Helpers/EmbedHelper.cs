@@ -106,7 +106,7 @@ namespace Clubber.Helpers
 		}
 
 		/// <summary>
-		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?, ulong)"/>.
+		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?)"/>.
 		/// </summary>
 		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
 		{
@@ -125,7 +125,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		}
 
 		/// <summary>
-		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?, ulong)"/>.
+		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?)"/>.
 		/// </summary>
 		public static Embed FullStats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
 		{
