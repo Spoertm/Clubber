@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Clubber.Database
+namespace Clubber.Models
 {
 	[Serializable]
 	public class CustomException : Exception

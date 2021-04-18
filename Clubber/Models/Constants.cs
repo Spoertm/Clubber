@@ -1,4 +1,4 @@
-﻿namespace Clubber
+﻿namespace Clubber.Models
 {
 	public static class Constants
 	{

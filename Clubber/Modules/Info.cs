@@ -1,4 +1,5 @@
 ﻿using Clubber.Helpers;
+using Clubber.Models;
 using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;

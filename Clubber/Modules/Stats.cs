@@ -1,6 +1,5 @@
-﻿using Clubber.Database;
-using Clubber.Files;
-using Clubber.Helpers;
+﻿using Clubber.Helpers;
+using Clubber.Models;
 using Clubber.Services;
 using Discord;
 using Discord.Commands;

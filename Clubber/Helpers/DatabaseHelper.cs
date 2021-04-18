@@ -1,5 +1,4 @@
-﻿using Clubber.Database;
-using Clubber.Files;
+﻿using Clubber.Models;
 using Clubber.Services;
 using Discord.WebSocket;
 using System.Collections.Generic;

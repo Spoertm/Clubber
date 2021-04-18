@@ -1,4 +1,4 @@
-﻿namespace Clubber.Database
+﻿namespace Clubber.Models
 {
 	public sealed record LeaderboardUser(
 		string Username,
