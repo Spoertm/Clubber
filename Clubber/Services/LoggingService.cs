@@ -47,7 +47,7 @@ namespace Clubber
 				await context.Channel.SendMessageAsync(customException.Message);
 
 			string logText = $"{DateTime.Now:hh:mm:ss} [{logMessage.Severity}] {logMessage.Source}: {logMessage.Exception?.ToString() ?? logMessage.Message}";
-			File.AppendAllText(LogFile, $"{logText}\n\n");
+			await File.AppendAllTextAsync(LogFile, $"{logText}\n\n");
 
 			Embed exceptionEmbed = EmbedHelper.Exception(logMessage, context?.Message);
 			_ = await _clubberExceptionsChannel.SendMessageAsync(null, false, exceptionEmbed);
