@@ -100,8 +100,8 @@ namespace Clubber.Helpers
 
 			while (exception is not null)
 			{
-				exceptionEmbed.AddField(exception.GetType().Name, exception?.Message ?? "No message.");
-				exception = exception?.InnerException;
+				exceptionEmbed.AddField(exception.GetType().Name, string.IsNullOrEmpty(exception.Message) ? exception.Message : "No message.");
+				exception = exception.InnerException;
 			}
 		}
 
@@ -111,9 +111,9 @@ namespace Clubber.Helpers
 		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
 		{
 			return new EmbedBuilder()
-						   .WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
-						   .WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-						   .WithDescription(
+				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
+				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
+				.WithDescription(
 $@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
 ⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
@@ -121,7 +121,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 💀 Kills: {lbPlayer.Kills}
 ♦️ Gems: {lbPlayer.Gems}
 🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%")
-						   .Build();
+				.Build();
 		}
 
 		/// <summary>
@@ -179,21 +179,21 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		public static Embed CommandHelp(ICommandContext context, SearchResult result)
 		{
 			EmbedBuilder embedBuilder = new();
-			CommandInfo cmd = result.Commands[0].Command;
+			CommandInfo currentCommand = result.Commands[0].Command;
 
 			embedBuilder
 				.WithTitle(result.Commands[0].Alias)
-				.WithDescription(cmd.Summary ?? cmd.Module.Summary);
+				.WithDescription(currentCommand.Summary ?? currentCommand.Module.Summary);
 
-			if (cmd.Aliases.Count > 1)
-				embedBuilder.AddField("Aliases", string.Join('\n', result.Commands[0].Command.Aliases), true);
+			if (currentCommand.Aliases.Count > 1)
+				embedBuilder.AddField("Aliases", string.Join('\n', currentCommand.Aliases), true);
 
 			IEnumerable<CommandInfo> checkedCommands;
 
-			if (result.Commands[0].Command.Module.Group is null)
+			if (currentCommand.Module.Group is null)
 				checkedCommands = result.Commands.Where(c => c.CheckPreconditionsAsync(context).Result.IsSuccess).Select(c => c.Command);
 			else
-				checkedCommands = result.Commands[0].Command.Module.Commands.Where(c => c.CheckPreconditionsAsync(context).Result.IsSuccess);
+				checkedCommands = currentCommand.Module.Commands.Where(c => c.CheckPreconditionsAsync(context).Result.IsSuccess);
 
 			IEnumerable<CommandInfo> commandInfos = checkedCommands as CommandInfo[] ?? checkedCommands.ToArray();
 			if (commandInfos.Count() > 1 || commandInfos.Any(cc => cc.Parameters.Count > 0))
