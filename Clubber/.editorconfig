@@ -1,4 +1,4 @@
-root = true
+﻿root = true
 
 # All files
 [*]
@@ -11,8 +11,8 @@ indent_style = space
 indent_size  = 2
 
 # Code files for C#
-[*.{cs}]
-charset                                                                  = utf-8-bom
+[*.cs]
+charset                                                                  = utf-8
 insert_final_newline                                                     = false
 indent_size                                                              = 4
 trim_trailing_whitespace                                                 = true
@@ -102,6 +102,7 @@ dotnet_naming_rule.instance_fields_should_be_camel_case.symbols          = insta
 dotnet_naming_symbols.instance_fields.applicable_kinds                   = field
 
 dotnet_naming_rule.public_members_must_be_capitalized.severity           = warning
+dotnet_naming_rule.public_members_must_be_capitalized.symbols            = public_symbols
 dotnet_naming_rule.public_members_must_be_capitalized.style              = first_word_upper_case_style
 dotnet_naming_style.first_word_upper_case_style.capitalization           = first_word_upper
 dotnet_naming_style.instance_field_style.required_prefix                 = _
