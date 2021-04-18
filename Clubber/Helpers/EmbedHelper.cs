@@ -100,8 +100,8 @@ namespace Clubber.Helpers
 
 			while (exception is not null)
 			{
-				exceptionEmbed.AddField(exception.GetType().Name, exception.Message ?? "No message.");
-				exception = exception.InnerException;
+				exceptionEmbed.AddField(exception.GetType().Name, exception?.Message ?? "No message.");
+				exception = exception?.InnerException;
 			}
 		}
 
@@ -195,10 +195,11 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 			else
 				checkedCommands = result.Commands[0].Command.Module.Commands.Where(c => c.CheckPreconditionsAsync(context).Result.IsSuccess);
 
-			if (checkedCommands.Count() > 1 || checkedCommands.Any(cc => cc.Parameters.Count > 0))
+			IEnumerable<CommandInfo> commandInfos = checkedCommands as CommandInfo[] ?? checkedCommands.ToArray();
+			if (commandInfos.Count() > 1 || commandInfos.Any(cc => cc.Parameters.Count > 0))
 			{
-				embedBuilder.AddField("Overloads", string.Join('\n', checkedCommands.Select(cc => GetCommandAndParameterString(cc))), true);
-				embedBuilder.AddField("Examples", string.Join('\n', checkedCommands.Select(cc => cc.Remarks)));
+				embedBuilder.AddField("Overloads", string.Join('\n', commandInfos.Select(GetCommandAndParameterString)), true);
+				embedBuilder.AddField("Examples", string.Join('\n', commandInfos.Select(cc => cc.Remarks)));
 			}
 
 			if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
@@ -221,8 +222,9 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 				.WithTitle($"Found multiple matches for '{search.ToLower()}'")
 				.WithDescription("Specify their entire username, tag them, or specify their Discord ID in the format `+command id <the id>`.");
 
-			string userFieldValue = string.Join("\n", userMatches.Select(um => $"- {FormatUser(um)}"));
-			string discordIdFieldValue = string.Join("\n", userMatches.Select(um => um.Id));
+			IEnumerable<SocketGuildUser> socketGuildUsers = userMatches as SocketGuildUser[] ?? userMatches.ToArray();
+			string userFieldValue = string.Join("\n", socketGuildUsers.Select(um => $"- {FormatUser(um)}"));
+			string discordIdFieldValue = string.Join("\n", socketGuildUsers.Select(um => um.Id));
 
 			if (userFieldValue.Length <= 1024 && discordIdFieldValue.Length <= 1024)
 			{
@@ -234,7 +236,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 			return embedBuilder.Build();
 		}
 
-		private static string FormatUser(SocketGuildUser user)
+		private static string FormatUser(IGuildUser user)
 		{
 			if (user.Nickname is null)
 				return user.Username;
