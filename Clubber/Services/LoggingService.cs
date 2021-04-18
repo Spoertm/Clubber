@@ -7,7 +7,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Clubber
+namespace Clubber.Services
 {
 	public class LoggingService
 	{
@@ -24,9 +24,9 @@ namespace Clubber
 		}
 
 		/// <summary>
-		/// This ctor exists for the cron project as it uses no CommandService.
+		///     This ctor exists for the cron project as it uses no CommandService.
 		/// </summary>
-		public LoggingService(DiscordSocketClient client)
+		public LoggingService(BaseSocketClient client)
 		{
 			LogDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
 

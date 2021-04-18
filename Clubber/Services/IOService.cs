@@ -11,8 +11,8 @@ namespace Clubber.Services
 	public class IOService
 	{
 		private readonly string _databaseFilePath;
-		private readonly WebService _webService;
 		private readonly LoggingService _loggingService;
+		private readonly WebService _webService;
 
 		public IOService(WebService webService, LoggingService loggingService)
 		{
@@ -48,7 +48,7 @@ namespace Clubber.Services
 			}
 			catch (Exception ex)
 			{
-				await _loggingService.LogAsync(new LogMessage(LogSeverity.Critical, "Startup", "Failed to get database file into folder.", ex));
+				await _loggingService.LogAsync(new(LogSeverity.Critical, "Startup", "Failed to get database file into folder.", ex));
 				await Program.StopBot();
 			}
 		}

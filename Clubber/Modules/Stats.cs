@@ -5,6 +5,8 @@ using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -17,8 +19,8 @@ namespace Clubber.Modules
 	public class Stats : ExtendedModulebase<SocketCommandContext>
 	{
 		private readonly DatabaseHelper _databaseHelper;
-		private readonly WebService _webService;
 		private readonly UserService _userService;
+		private readonly WebService _webService;
 
 		public Stats(DatabaseHelper databaseHelper, WebService webService, UserService userService)
 		{
@@ -80,15 +82,18 @@ namespace Clubber.Modules
 		private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
 		{
 			uint lbPlayerId = (uint)ddUser.LeaderboardId;
-			LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(new uint[] { lbPlayerId }))[0];
+			List<LeaderboardUser> lbPlayers = await _webService.GetLbPlayers(new[]
+			{
+				lbPlayerId,
+			});
+
 			Embed statsEmbed;
-
-			if (Context.Message.Content.StartsWith("+statsf", System.StringComparison.InvariantCultureIgnoreCase) || Context.Message.Content.StartsWith("+statsfull", System.StringComparison.InvariantCultureIgnoreCase))
-				statsEmbed = EmbedHelper.FullStats(lbPlayer, user);
+			if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) || Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase))
+				statsEmbed = EmbedHelper.FullStats(lbPlayers[0], user);
 			else
-				statsEmbed = EmbedHelper.Stats(lbPlayer, user);
+				statsEmbed = EmbedHelper.Stats(lbPlayers[0], user);
 
-			await ReplyAsync(null, false, statsEmbed, null, AllowedMentions.None, new MessageReference(Context.Message.Id));
+			await ReplyAsync(null, false, statsEmbed, null, AllowedMentions.None, new(Context.Message.Id));
 		}
 	}
 }

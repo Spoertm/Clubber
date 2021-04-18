@@ -13,8 +13,8 @@ namespace Clubber.Services
 	public class WebService
 	{
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
-		private readonly HttpClient _httpClient;
 		private readonly SocketTextChannel _backupChannel;
+		private readonly HttpClient _httpClient;
 
 		public WebService(DiscordSocketClient client)
 		{
@@ -39,7 +39,7 @@ namespace Clubber.Services
 				List<LeaderboardUser> users = new();
 				while (bytePosition < data.Length)
 				{
-					users.Add(new LeaderboardUser(
+					users.Add(new(
 						Username: GetUserName(data, ref bytePosition),
 						Rank: BitConverter.ToInt32(data, bytePosition),
 						Id: BitConverter.ToInt32(data, bytePosition + 4),

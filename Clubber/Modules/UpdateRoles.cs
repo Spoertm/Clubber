@@ -62,7 +62,7 @@ namespace Clubber.Modules
 			if (!response.Success)
 				await InlineReplyAsync("No updates were needed.");
 			else
-				await ReplyAsync(null, false, EmbedHelper.UpdateRoles(response), null, AllowedMentions.None, new MessageReference(Context.Message.Id));
+				await ReplyAsync(null, false, EmbedHelper.UpdateRoles(response), null, AllowedMentions.None, new(Context.Message.Id));
 		}
 	}
 }

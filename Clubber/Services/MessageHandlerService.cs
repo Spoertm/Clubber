@@ -21,9 +21,9 @@ namespace Clubber.Services
 			client.MessageReceived += OnMessageRecievedAsync;
 		}
 
-		public async Task OnMessageRecievedAsync(SocketMessage msg)
+		private async Task OnMessageRecievedAsync(SocketMessage msg)
 		{
-			if (msg is not SocketUserMessage message || message.Source != MessageSource.User)
+			if (msg is not SocketUserMessage { Source: MessageSource.User } message)
 				return;
 
 			int argumentPos = 0;

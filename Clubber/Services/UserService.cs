@@ -52,16 +52,14 @@ namespace Clubber.Services
 			if (guildUser.IsBot)
 				return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 
-			if (guildUser.Roles.Any(r => r.Id == Constants.CheaterRoleId))
-			{
-				string message = guildUser.Id == context.User.Id
+			if (guildUser.Roles.All(r => r.Id != Constants.CheaterRoleId))
+				return new(IsError: false, Message: null);
+
+			string message = guildUser.Id == context.User.Id
 				? $"{guildUser.Username}, you can't register because you've cheated."
 				: $"{guildUser.Username} can't be registered because they've cheated.";
 
-				return new(IsError: true, Message: message);
-			}
-
-			return new(IsError: false, Message: null);
+			return new(IsError: true, Message: message);
 		}
 	}
 }
