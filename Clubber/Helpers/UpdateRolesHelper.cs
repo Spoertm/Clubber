@@ -139,17 +139,22 @@ namespace Clubber.Helpers
 			if (scoreRoleToAdd == 0 && scoreRolesToRemove.Length == 0 && topRoleToAdd == 0 && topRolesToRemove.Length == 0)
 				return new(false, null, null, null);
 
-			SocketRole[] socketRolesToAdd =
-			{
-				guildUser.Guild.GetRole(scoreRoleToAdd), guildUser.Guild.GetRole(topRoleToAdd),
-			};
+			List<SocketRole> socketRolesToAdd = new(2);
+			if (scoreRoleToAdd != 0)
+				socketRolesToAdd.Add(guildUser.Guild.GetRole(scoreRoleToAdd));
+
+			if (topRoleToAdd != 0)
+				socketRolesToAdd.Add(guildUser.Guild.GetRole(topRoleToAdd));
 
 			SocketRole[] socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove)
 				.Select(r => guildUser.Guild.GetRole(r))
 				.ToArray();
 
-			await guildUser.AddRolesAsync(socketRolesToAdd);
-			await guildUser.RemoveRolesAsync(socketRolesToRemove);
+			if (socketRolesToAdd.Count > 0)
+				await guildUser.AddRolesAsync(socketRolesToAdd);
+
+			if (socketRolesToRemove.Length > 0)
+				await guildUser.RemoveRolesAsync(socketRolesToRemove);
 
 			return new(true, guildUser, socketRolesToAdd, socketRolesToRemove);
 		}
