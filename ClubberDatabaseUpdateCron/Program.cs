@@ -1,5 +1,4 @@
-﻿using Clubber;
-using Clubber.Helpers;
+﻿using Clubber.Helpers;
 using Clubber.Models;
 using Clubber.Services;
 using Discord;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ClubberDatabaseUpdateCron
@@ -21,7 +21,10 @@ namespace ClubberDatabaseUpdateCron
 
 		private static async Task RunAsync()
 		{
-			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error });
+			_client = new(new()
+			{
+				AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error,
+			});
 
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
@@ -92,14 +95,14 @@ namespace ClubberDatabaseUpdateCron
 					else
 					{
 						await modsChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
-						System.Threading.Thread.Sleep(10000); // Sleep 10s
+						Thread.Sleep(10000); // Sleep 10s
 					}
 				}
 			}
 			while (!success);
 
 			await _client.StopAsync();
-			System.Threading.Thread.Sleep(1000);
+			Thread.Sleep(1000);
 			await _client.LogoutAsync();
 			Environment.Exit(0);
 		}
