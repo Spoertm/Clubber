@@ -19,7 +19,7 @@ namespace ClubberDatabaseUpdateCron
 
 		public static void Main() => RunAsync().GetAwaiter().GetResult();
 
-		public static async Task RunAsync()
+		private static async Task RunAsync()
 		{
 			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error });
 
@@ -36,7 +36,7 @@ namespace ClubberDatabaseUpdateCron
 			return File.ReadAllText(tokenPath);
 		}
 
-		public static async Task OnReady()
+		private static async Task OnReady()
 		{
 			IServiceProvider services = new ServiceCollection()
 				.AddSingleton(_client)
