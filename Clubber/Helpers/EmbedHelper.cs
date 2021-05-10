@@ -120,7 +120,9 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 🥇 Rank: {lbPlayer.Rank}
 💀 Kills: {lbPlayer.Kills}
 ♦️ Gems: {lbPlayer.Gems}
-🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%")
+🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+
+• For full stats, use `statsf`.")
 				.Build();
 		}
 
