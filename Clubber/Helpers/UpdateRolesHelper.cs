@@ -36,12 +36,13 @@ namespace Clubber.Helpers
 			[100] = 399569183966363648,
 			[0] = 461203024128376832,
 		};
-		private static readonly List<ulong> _uselessRoles = new() { 728663492424499200, 458375331468935178 };
+		private static readonly List<ulong> _uselessRoles = new()
+		{
+			728663492424499200, 458375331468935178,
+		};
 		private static readonly Dictionary<int, ulong> _rankRoles = new()
 		{
-			[1] = 446688666325090310,
-			[3] = 472451008342261820,
-			[10] = 556255819323277312,
+			[1] = 446688666325090310, [3] = 472451008342261820, [10] = 556255819323277312,
 		};
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly WebService _webService;
@@ -82,21 +83,21 @@ namespace Clubber.Helpers
 		private async Task<(int NonMemberCount, List<UpdateRolesResponse> UpdateRolesResponses)> ExecuteRolesAndDbUpdate(IEnumerable<SocketGuildUser> guildUsers)
 		{
 			List<DdUser> dbUsers = _databaseHelper.Database;
-
-			IEnumerable<(DdUser DdUser, SocketGuildUser GuildUser)> registeredUsers = dbUsers.Join(
-				inner: guildUsers,
-				outerKeySelector: dbu => dbu.DiscordId,
-				innerKeySelector: gu => gu.Id,
-				resultSelector: (ddUser, guildUser) => (ddUser, guildUser));
+			List<(DdUser DdUser, SocketGuildUser GuildUser)> registeredUsers = dbUsers.Join(
+					inner: guildUsers,
+					outerKeySelector: dbu => dbu.DiscordId,
+					innerKeySelector: gu => gu.Id,
+					resultSelector: (ddUser, guildUser) => (ddUser, guildUser))
+				.ToList();
 
 			IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
 			IEnumerable<LeaderboardUser> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
 			(SocketGuildUser GuildUser, LeaderboardUser LbUser)[] updatedUsers = registeredUsers.Join(
-				inner: lbPlayers,
-				outerKeySelector: ru => ru.DdUser.LeaderboardId,
-				innerKeySelector: lbp => lbp.Id,
-				resultSelector: (ru, lbp) => (ru.GuildUser, lbp))
+					inner: lbPlayers,
+					outerKeySelector: ru => ru.DdUser.LeaderboardId,
+					innerKeySelector: lbp => lbp.Id,
+					resultSelector: (ru, lbp) => (ru.GuildUser, lbp))
 				.ToArray();
 
 			List<UpdateRolesResponse> responses = new();
@@ -104,7 +105,7 @@ namespace Clubber.Helpers
 			for (int i = 0; i < updatedUsers.Length; i++)
 				responses.Add(await ExecuteRoleUpdate(updatedUsers[i].GuildUser, updatedUsers[i].LbUser));
 
-			return (dbUsers.Count - registeredUsers.Count(), responses);
+			return (dbUsers.Count - registeredUsers.Count, responses);
 		}
 
 		public async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
@@ -112,7 +113,11 @@ namespace Clubber.Helpers
 			try
 			{
 				int lbId = _databaseHelper.GetDdUserByDiscordId(user.Id)!.LeaderboardId;
-				List<LeaderboardUser> lbPlayerList = await _webService.GetLbPlayers(new uint[] { (uint)lbId });
+				List<LeaderboardUser> lbPlayerList = await _webService.GetLbPlayers(new[]
+				{
+					(uint)lbId,
+				});
+
 				return await ExecuteRoleUpdate(user, lbPlayerList[0]);
 			}
 			catch (CustomException)
@@ -127,15 +132,21 @@ namespace Clubber.Helpers
 
 		private static async Task<UpdateRolesResponse> ExecuteRoleUpdate(SocketGuildUser guildUser, LeaderboardUser lbUser)
 		{
-			IEnumerable<ulong> userRolesIds = guildUser.Roles.Select(r => r.Id);
-			(IEnumerable<ulong> scoreRoleToAdd, IEnumerable<ulong> scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbUser.Time);
-			(IEnumerable<ulong> topRoleToAdd, IEnumerable<ulong> topRolesToRemove) = HandleTopRoles(userRolesIds, lbUser.Rank);
+			ulong[] userRolesIds = guildUser.Roles.Select(r => r.Id).ToArray();
+			(ulong scoreRoleToAdd, ulong[] scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbUser.Time);
+			(ulong topRoleToAdd, ulong[] topRolesToRemove) = HandleTopRoles(userRolesIds, lbUser.Rank);
 
-			if (!scoreRoleToAdd.Any() && !scoreRolesToRemove.Any() && !topRoleToAdd.Any() && !topRolesToRemove.Any())
+			if (scoreRoleToAdd == 0 && scoreRolesToRemove.Length == 0 && topRoleToAdd == 0 && topRolesToRemove.Length == 0)
 				return new(false, null, null, null);
 
-			IEnumerable<SocketRole> socketRolesToAdd = scoreRoleToAdd.Concat(topRoleToAdd).Select(r => guildUser.Guild.GetRole(r));
-			IEnumerable<SocketRole> socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove).Select(r => guildUser.Guild.GetRole(r));
+			SocketRole[] socketRolesToAdd =
+			{
+				guildUser.Guild.GetRole(scoreRoleToAdd), guildUser.Guild.GetRole(topRoleToAdd),
+			};
+
+			SocketRole[] socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove)
+				.Select(r => guildUser.Guild.GetRole(r))
+				.ToArray();
 
 			await guildUser.AddRolesAsync(socketRolesToAdd);
 			await guildUser.RemoveRolesAsync(socketRolesToRemove);
@@ -143,31 +154,31 @@ namespace Clubber.Helpers
 			return new(true, guildUser, socketRolesToAdd, socketRolesToRemove);
 		}
 
-		private static (IEnumerable<ulong> ScoreRoleToAdd, IEnumerable<ulong> ScoreRolesToRemove) HandleScoreRoles(IEnumerable<ulong> userRolesIds, int playerTime)
+		private static (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(ulong[] userRolesIds, int playerTime)
 		{
-			KeyValuePair<int, ulong> scoreRole = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
+			(_, ulong scoreRoleId) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
 
-			List<ulong> scoreRoleToAdd = new();
-			if (!userRolesIds.Contains(scoreRole.Value))
-				scoreRoleToAdd.Add(scoreRole.Value);
+			ulong scoreRoleToAdd = 0;
+			if (!userRolesIds.Contains(scoreRoleId))
+				scoreRoleToAdd = scoreRoleId;
 
-			IEnumerable<ulong> filteredScoreRoles = _scoreRoles.Values.Where(rid => rid != scoreRole.Value).Concat(_uselessRoles);
-			return (scoreRoleToAdd, userRolesIds.Intersect(filteredScoreRoles));
+			IEnumerable<ulong> filteredScoreRoles = _scoreRoles.Values.Where(rid => rid != scoreRoleId).Concat(_uselessRoles);
+			return (scoreRoleToAdd, userRolesIds.Intersect(filteredScoreRoles).ToArray());
 		}
 
-		private static (IEnumerable<ulong> TopRoleToAdd, IEnumerable<ulong> TopRolesToRemove) HandleTopRoles(IEnumerable<ulong> userRolesIds, int rank)
+		private static (ulong TopRoleToAdd, ulong[] TopRolesToRemove) HandleTopRoles(ulong[] userRolesIds, int rank)
 		{
 			KeyValuePair<int, ulong>? rankRole = _rankRoles.FirstOrDefault(rr => rank <= rr.Key);
 
-			List<ulong> topRoleToAdd = new();
+			ulong topRoleToAdd = 0;
 			if (rankRole.Value.Value == 0)
-				return new(topRoleToAdd, userRolesIds.Intersect(_rankRoles.Values));
+				return new(topRoleToAdd, userRolesIds.Intersect(_rankRoles.Values).ToArray());
 
 			if (!userRolesIds.Contains(rankRole.Value.Value))
-				topRoleToAdd.Add(rankRole.Value.Value);
+				topRoleToAdd = rankRole.Value.Value;
 
 			IEnumerable<ulong> filteredTopRoles = _rankRoles.Values.Where(rid => rid != rankRole.Value.Value);
-			return new(topRoleToAdd, userRolesIds.Intersect(filteredTopRoles));
+			return new(topRoleToAdd, userRolesIds.Intersect(filteredTopRoles).ToArray());
 		}
 	}
 
