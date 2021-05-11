@@ -26,7 +26,7 @@ namespace Clubber.Services
 		/// <summary>
 		///     This ctor exists for the cron project as it uses no CommandService.
 		/// </summary>
-		public LoggingService(BaseSocketClient client)
+		public LoggingService(DiscordSocketClient client)
 		{
 			LogDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
 
