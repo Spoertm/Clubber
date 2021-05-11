@@ -92,11 +92,9 @@ namespace ClubberDatabaseUpdateCron
 
 						break;
 					}
-					else
-					{
-						await cronUpdateChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
-						Thread.Sleep(10000); // Sleep 10s
-					}
+
+					await cronUpdateChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
+					Thread.Sleep(10000); // Sleep 10s
 				}
 			}
 			while (!success);
