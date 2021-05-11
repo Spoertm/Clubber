@@ -56,10 +56,10 @@ namespace ClubberDatabaseUpdateCron
 			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();
 
 			SocketGuild? ddPals = _client.GetGuild(Constants.DdPalsId);
-			IMessageChannel? modsChannel = _client.GetChannel(Constants.ModsChannelId) as IMessageChannel;
+			IMessageChannel? cronUpdateChannel = _client.GetChannel(Constants.CronUpdateChannelId) as IMessageChannel;
 
 			const string checkingString = "Checking for role updates...";
-			IUserMessage msg = await modsChannel!.SendMessageAsync(checkingString);
+			IUserMessage msg = await cronUpdateChannel!.SendMessageAsync(checkingString);
 
 			int tries = 0;
 			const int maxTries = 5;
@@ -74,7 +74,7 @@ namespace ClubberDatabaseUpdateCron
 					await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{response.Message}");
 
 					for (int i = 0; i < response.RoleUpdateEmbeds.Length; i++)
-						await modsChannel.SendMessageAsync(null, false, response.RoleUpdateEmbeds[i]);
+						await cronUpdateChannel.SendMessageAsync(null, false, response.RoleUpdateEmbeds[i]);
 
 					success = true;
 				}
@@ -84,7 +84,7 @@ namespace ClubberDatabaseUpdateCron
 					tries++;
 					if (tries > maxTries)
 					{
-						await modsChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
+						await cronUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 
 						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannelId) as SocketTextChannel;
 						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
@@ -94,7 +94,7 @@ namespace ClubberDatabaseUpdateCron
 					}
 					else
 					{
-						await modsChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
+						await cronUpdateChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
 						Thread.Sleep(10000); // Sleep 10s
 					}
 				}

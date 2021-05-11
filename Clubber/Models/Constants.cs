@@ -14,6 +14,6 @@ To speed this up, you can manually update your own or someone else's roles by us
 		public const ulong TestingChannelId = 447487662891466752;
 		public const ulong RegisterChannelId = 794272915842662430;
 		public const ulong DdPalsId = 399568958669455364;
-		public const ulong ModsChannelId = 701124439990993036;
+		public const ulong CronUpdateChannelId = 794218054724091915;
 	}
 }
