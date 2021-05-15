@@ -1,4 +1,5 @@
 ﻿using Clubber.Models;
+using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
@@ -186,7 +187,4 @@ namespace Clubber.Helpers
 			return new(topRoleToAdd, userRolesIds.Intersect(filteredTopRoles).ToArray());
 		}
 	}
-
-	public record UpdateRolesResponse(bool Success, SocketGuildUser? User, IEnumerable<SocketRole>? RolesAdded, IEnumerable<SocketRole>? RolesRemoved);
-	public record DatabaseUpdateResponse(string Message, Embed[] RoleUpdateEmbeds);
 }
