@@ -17,9 +17,9 @@ namespace Clubber.Services
 
 		public UserValidationResponse IsValidForRegistration(SocketGuildUser guildUser, ICommandContext context)
 		{
-			UserValidationResponse isBotOrCheaterResponse = IsBotOrCheater(guildUser, context);
-			if (isBotOrCheaterResponse.IsError)
-				return new(IsError: true, Message: isBotOrCheaterResponse.Message);
+			(bool responseIsError, string? responseMessage) = IsBotOrCheater(guildUser, context);
+			if (responseIsError)
+				return new(IsError: true, Message: responseMessage);
 
 			if (_databaseHelper.GetDdUserByDiscordId(guildUser.Id) is not null)
 				return new(IsError: true, Message: $"User `{guildUser.Username}` is already registered.");
@@ -29,23 +29,21 @@ namespace Clubber.Services
 
 		public UserValidationResponse IsValid(SocketGuildUser guildUser, ICommandContext context)
 		{
-			UserValidationResponse isBotOrCheaterResponse = IsBotOrCheater(guildUser, context);
-			if (isBotOrCheaterResponse.IsError)
-				return new(IsError: true, Message: isBotOrCheaterResponse.Message);
+			(bool reponseIsError, string? responseMessage) = IsBotOrCheater(guildUser, context);
+			if (reponseIsError)
+				return new(IsError: true, Message: responseMessage);
 
-			if (_databaseHelper.GetDdUserByDiscordId(guildUser.Id) is null)
-			{
-				if (guildUser.GuildPermissions.ManageRoles)
-					return new(IsError: true, $"`{guildUser.Username}` is not registered.");
+			if (_databaseHelper.GetDdUserByDiscordId(guildUser.Id) is not null)
+				return new(IsError: false, Message: null);
 
-				string message = guildUser.Id == context.User.Id
-					? $"You're not registered, {guildUser.Username}. Only a <@&{Constants.RoleAssignerRoleId}> can register you, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info."
-					: $"`{guildUser.Username}` is not registered. Only a <@&{Constants.RoleAssignerRoleId}> can register them, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info.";
+			if (guildUser.GuildPermissions.ManageRoles)
+				return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
-				return new(IsError: true, Message: message);
-			}
+			string message = guildUser.Id == context.User.Id
+				? $"You're not registered, {guildUser.Username}. Only a <@&{Constants.RoleAssignerRoleId}> can register you, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info."
+				: $"`{guildUser.Username}` is not registered. Only a <@&{Constants.RoleAssignerRoleId}> can register them, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info.";
 
-			return new(IsError: false, Message: null);
+			return new(IsError: true, Message: message);
 		}
 
 		private static UserValidationResponse IsBotOrCheater(SocketGuildUser guildUser, ICommandContext context)

@@ -19,7 +19,7 @@ namespace Clubber
 
 		private static void Main() => RunBotAsync().GetAwaiter().GetResult();
 
-		public static async Task RunBotAsync()
+		private static async Task RunBotAsync()
 		{
 			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
