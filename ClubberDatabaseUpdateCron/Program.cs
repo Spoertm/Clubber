@@ -1,6 +1,5 @@
 ﻿using Clubber.Helpers;
 using Clubber.Models;
-using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
@@ -70,12 +69,12 @@ namespace ClubberDatabaseUpdateCron
 			{
 				try
 				{
-					DatabaseUpdateResponse response = await services.GetRequiredService<UpdateRolesHelper>().UpdateRolesAndDb(ddPals.Users);
+					(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await services.GetRequiredService<UpdateRolesHelper>().UpdateRolesAndDb(ddPals.Users);
 
-					await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{response.Message}");
+					await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{repsonseMessage}");
 
-					for (int i = 0; i < response.RoleUpdateEmbeds.Length; i++)
-						await cronUpdateChannel.SendMessageAsync(null, false, response.RoleUpdateEmbeds[i]);
+					for (int i = 0; i < responseRoleUpdateEmbeds.Length; i++)
+						await cronUpdateChannel.SendMessageAsync(null, false, responseRoleUpdateEmbeds[i]);
 
 					success = true;
 				}
