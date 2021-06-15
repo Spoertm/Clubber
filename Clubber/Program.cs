@@ -68,12 +68,12 @@ namespace Clubber
 
 			services.GetRequiredService<MessageHandlerService>();
 			services.GetRequiredService<LoggingService>();
-			services.GetRequiredService<WelcomeMessage>();
 
 			IOService iOService = services.GetRequiredService<IOService>();
 			await iOService.GetDatabaseFileIntoFolder();
 
 			services.GetRequiredService<DatabaseHelper>();
+			services.GetRequiredService<WelcomeMessage>();
 
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
 		}
