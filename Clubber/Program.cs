@@ -55,10 +55,12 @@ namespace Clubber
 				.AddSingleton<UpdateRolesHelper>()
 				.AddSingleton<WebService>()
 				.AddSingleton<UserService>()
+				.AddSingleton<WelcomeMessage>()
 				.BuildServiceProvider();
 
 			services.GetRequiredService<MessageHandlerService>();
 			services.GetRequiredService<LoggingService>();
+			services.GetRequiredService<WelcomeMessage>();
 
 			IOService iOService = services.GetRequiredService<IOService>();
 			await iOService.GetDatabaseFileIntoFolder();
