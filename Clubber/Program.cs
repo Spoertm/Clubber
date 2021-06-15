@@ -8,6 +8,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Clubber
@@ -23,8 +24,15 @@ namespace Clubber
 		{
 			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
-			_client = new DiscordSocketClient(new DiscordSocketConfig() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
-			_commands = new CommandService(new CommandServiceConfig() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
+			_client = new(new()
+			{
+				AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error,
+			});
+
+			_commands = new(new()
+			{
+				IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async,
+			});
 
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
@@ -73,7 +81,7 @@ namespace Clubber
 		public static async Task StopBot()
 		{
 			await _client.StopAsync();
-			System.Threading.Thread.Sleep(1000);
+			Thread.Sleep(1000);
 			await _client.LogoutAsync();
 			Environment.Exit(0);
 		}
