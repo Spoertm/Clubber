@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
-	[RequireContext(ContextType.Guild)]
 	public class WelcomeMessage
 	{
 		private readonly DatabaseHelper _databaseHelper;
