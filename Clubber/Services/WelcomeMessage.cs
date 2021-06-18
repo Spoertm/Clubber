@@ -21,7 +21,7 @@ namespace Clubber.Services
 
 		private async Task OnUserJoined(SocketGuildUser joiningUser)
 		{
-			if (joiningUser.Guild.Id != Constants.DdPalsId)
+			if (joiningUser.Guild.Id != Constants.DdPalsId || joiningUser.IsBot)
 				return;
 
 			// User is registered
