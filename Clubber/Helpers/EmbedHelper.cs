@@ -101,7 +101,7 @@ namespace Clubber.Helpers
 
 			while (exception is not null)
 			{
-				exceptionEmbed.AddField(exception.GetType().Name, string.IsNullOrEmpty(exception.Message) ? exception.Message : "No message.");
+				exceptionEmbed.AddField(exception.GetType().Name, string.IsNullOrEmpty(exception.Message) ? "No message." : exception.Message);
 				exception = exception.InnerException;
 			}
 		}
