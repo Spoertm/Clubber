@@ -26,7 +26,7 @@ namespace Clubber.Modules
 		public async Task Help()
 		{
 			Embed embed = EmbedHelper.GenericHelp(Context, _commands);
-			await ReplyAsync(null, false, embed, null, AllowedMentions.None, new(Context.Message.Id));
+			await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 		}
 
 		[Command("help")]
@@ -44,8 +44,7 @@ namespace Clubber.Modules
 				return;
 
 			Embed embed = EmbedHelper.CommandHelp(Context, searchResult);
-
-			await ReplyAsync(null, false, embed, null, AllowedMentions.None, new(Context.Message.Id));
+			await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 		}
 	}
 }

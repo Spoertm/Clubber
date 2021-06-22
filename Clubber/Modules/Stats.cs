@@ -92,7 +92,7 @@ namespace Clubber.Modules
 			else
 				statsEmbed = EmbedHelper.Stats(lbPlayers[0], user);
 
-			await ReplyAsync(null, false, statsEmbed, null, AllowedMentions.None, new(Context.Message.Id));
+			await ReplyAsync(embed: statsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 		}
 	}
 }

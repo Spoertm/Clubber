@@ -21,7 +21,7 @@ namespace Clubber.Modules
 		}
 
 		protected async Task InlineReplyAsync(string message, bool ping = false)
-			=> await ReplyAsync(message, isTTS: false, embed: null, options: null, allowedMentions: ping ? null : AllowedMentions.None, messageReference: new(Context.Message.Id));
+			=> await ReplyAsync(message, allowedMentions: ping ? null : AllowedMentions.None, messageReference: new(Context.Message.Id));
 
 		protected async Task<(bool Success, SocketGuildUser? User)> FoundUserFromDiscordId(ulong discordId)
 		{
@@ -53,7 +53,7 @@ namespace Clubber.Modules
 			if (userMatches.Length == 1)
 				return (true, userMatches.FirstOrDefault());
 
-			await ReplyAsync(message: null, isTTS: false, embed: EmbedHelper.MultipleMatches(userMatches, name), options: null, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+			await ReplyAsync(embed: EmbedHelper.MultipleMatches(userMatches, name), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 			return (false, null);
 		}
 	}

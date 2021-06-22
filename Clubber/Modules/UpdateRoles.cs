@@ -51,10 +51,10 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
 		{
-			UserValidationResponse userIsValidResponse = _userService.IsValid(user, Context);
-			if (userIsValidResponse.IsError)
+			(bool isError, string? message) = _userService.IsValid(user, Context);
+			if (isError && message is not null)
 			{
-				await InlineReplyAsync(userIsValidResponse.Message!);
+				await InlineReplyAsync(message);
 				return;
 			}
 
@@ -63,7 +63,7 @@ namespace Clubber.Modules
 			if (!response.Success)
 				await InlineReplyAsync("No updates were needed.");
 			else
-				await ReplyAsync(null, false, EmbedHelper.UpdateRoles(response), null, AllowedMentions.None, new(Context.Message.Id));
+				await ReplyAsync(embed: EmbedHelper.UpdateRoles(response), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 		}
 	}
 }

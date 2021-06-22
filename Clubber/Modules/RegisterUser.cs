@@ -1,5 +1,4 @@
 ﻿using Clubber.Helpers;
-using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.Commands;
@@ -46,10 +45,10 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 		{
-			UserValidationResponse userServiceResponse = _userService.IsValidForRegistration(user, Context);
-			if (userServiceResponse.IsError && userServiceResponse.Message is not null)
+			(bool isError, string? message) = _userService.IsValidForRegistration(user, Context);
+			if (isError && message is not null)
 			{
-				await InlineReplyAsync(userServiceResponse.Message);
+				await InlineReplyAsync(message);
 				return;
 			}
 

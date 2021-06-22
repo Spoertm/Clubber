@@ -1,5 +1,4 @@
 ﻿using Clubber.Helpers;
-using Clubber.Models.Responses;
 using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
@@ -30,11 +29,11 @@ namespace Clubber.Modules
 			const string checkingString = "Checking for role updates...";
 			IUserMessage msg = await ReplyAsync(checkingString);
 
-			DatabaseUpdateResponse response = await _updateRolesHelper.UpdateRolesAndDb(Context.Guild.Users);
-			await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{response.Message}");
+			(string message, Embed[] roleUpdateEmbeds) = await _updateRolesHelper.UpdateRolesAndDb(Context.Guild.Users);
+			await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{message}");
 
-			for (int i = 0; i < response.RoleUpdateEmbeds.Length; i++)
-				await ReplyAsync(null, false, response.RoleUpdateEmbeds[i]);
+			for (int i = 0; i < roleUpdateEmbeds.Length; i++)
+				await ReplyAsync(null, false, roleUpdateEmbeds[i]);
 		}
 	}
 }
