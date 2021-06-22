@@ -45,7 +45,7 @@ namespace Clubber.Helpers
 			{
 				embed.AddField(new EmbedFieldBuilder()
 					.WithName("Removed:")
-					.WithValue(string.Join('\n', response.RolesRemoved!.Select(rr => rr.Mention)))
+					.WithValue(string.Join('\n', response.RolesRemoved!.Select(rr => $"<@&{rr}>")))
 					.WithIsInline(true));
 			}
 
@@ -53,7 +53,7 @@ namespace Clubber.Helpers
 			{
 				embed.AddField(new EmbedFieldBuilder()
 					.WithName("Added:")
-					.WithValue(string.Join('\n', response.RolesAdded!.Select(ar => ar.Mention)))
+					.WithValue(string.Join('\n', response.RolesAdded!.Select(ar => $"<@&{ar}>")))
 					.WithIsInline(true));
 			}
 

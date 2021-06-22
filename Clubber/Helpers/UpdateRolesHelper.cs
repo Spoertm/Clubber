@@ -140,24 +140,23 @@ namespace Clubber.Helpers
 			if (scoreRoleToAdd == 0 && scoreRolesToRemove.Length == 0 && topRoleToAdd == 0 && topRolesToRemove.Length == 0)
 				return new(false, null, null, null);
 
-			List<SocketRole> socketRolesToAdd = new(2);
+			List<ulong> roleIdsToAdd = new(2);
 			if (scoreRoleToAdd != 0)
-				socketRolesToAdd.Add(guildUser.Guild.GetRole(scoreRoleToAdd));
+				roleIdsToAdd.Add(scoreRoleToAdd);
 
 			if (topRoleToAdd != 0)
-				socketRolesToAdd.Add(guildUser.Guild.GetRole(topRoleToAdd));
+				roleIdsToAdd.Add(topRoleToAdd);
 
-			SocketRole[] socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove)
-				.Select(r => guildUser.Guild.GetRole(r))
+			ulong[] socketRolesToRemove = scoreRolesToRemove.Concat(topRolesToRemove)
 				.ToArray();
 
-			if (socketRolesToAdd.Count > 0)
-				await guildUser.AddRolesAsync(socketRolesToAdd);
+			if (roleIdsToAdd.Count > 0)
+				await guildUser.AddRolesAsync(roleIdsToAdd);
 
 			if (socketRolesToRemove.Length > 0)
 				await guildUser.RemoveRolesAsync(socketRolesToRemove);
 
-			return new(true, guildUser, socketRolesToAdd, socketRolesToRemove);
+			return new(true, guildUser, roleIdsToAdd, socketRolesToRemove);
 		}
 
 		private static (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(ulong[] userRolesIds, int playerTime)
