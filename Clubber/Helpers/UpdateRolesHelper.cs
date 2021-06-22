@@ -39,7 +39,7 @@ namespace Clubber.Helpers
 		};
 		private static readonly List<ulong> _uselessRoles = new()
 		{
-			728663492424499200, 458375331468935178,
+			Constants.UnregisteredRoleId, 458375331468935178,
 		};
 		private static readonly Dictionary<int, ulong> _rankRoles = new()
 		{

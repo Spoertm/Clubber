@@ -8,6 +8,7 @@ To speed this up, you can manually update your own or someone else's roles by us
 
 		public const string Prefix = "+";
 		public const ulong CheaterRoleId = 693432614727581727;
+		public const ulong UnregisteredRoleId = 728663492424499200;
 		public const ulong RoleAssignerRoleId = 611855024653336606;
 		public const ulong ClubberExceptionsChannelId = 800012212532936714;
 		public const ulong DatabaseBackupChannelId = 801407839590547497;

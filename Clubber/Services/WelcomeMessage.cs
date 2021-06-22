@@ -27,7 +27,7 @@ namespace Clubber.Services
 			if (_databaseHelper.GetDdUserByDiscordId(joiningUser.Id) is not null)
 				await UpdateRolesForRegisteredUser(joiningUser);
 			else
-				await PostWelcomeMessage(joiningUser);
+				await PostWelcomeMessageAndGiveUnregRole(joiningUser);
 		}
 
 		private async Task UpdateRolesForRegisteredUser(SocketGuildUser joiningUser)
@@ -40,8 +40,9 @@ namespace Clubber.Services
 				await registerChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
 		}
 
-		private async Task PostWelcomeMessage(SocketGuildUser joiningUser)
+		private async Task PostWelcomeMessageAndGiveUnregRole(SocketGuildUser joiningUser)
 		{
+			await joiningUser.AddRoleAsync(Constants.UnregisteredRoleId);
 			string message =
 				@$"Welcome {joiningUser.Mention}!
 
