@@ -82,7 +82,7 @@ namespace Clubber.Helpers
 		public static Embed Exception(Exception? exception)
 		{
 			EmbedBuilder exceptionEmbed = new EmbedBuilder()
-				.WithTitle("Cron project - " + exception?.GetType().Name ?? "Exception thrown")
+				.WithTitle("Cron project - " + (exception?.GetType().Name ?? "Exception thrown"))
 				.WithCurrentTimestamp();
 
 			FillExceptionEmbedBuilder(exception, exceptionEmbed);
