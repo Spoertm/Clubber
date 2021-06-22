@@ -41,8 +41,8 @@ namespace Clubber.Services
 				return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
 			string message = guildUser.Id == context.User.Id
-				? $"You're not registered, {guildUser.Username}. Only a <@&{Constants.RoleAssignerRoleId}> can register you, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info."
-				: $"`{guildUser.Username}` is not registered. Only a <@&{Constants.RoleAssignerRoleId}> can register them, and one should be here soon.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info.";
+				? $"You're not registered, {guildUser.Username}. Only a <@&{Constants.RoleAssignerRoleId}> can register you.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info."
+				: $"`{guildUser.Username}` is not registered. Only a <@&{Constants.RoleAssignerRoleId}> can register them.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info.";
 
 			return new(IsError: true, Message: message);
 		}
