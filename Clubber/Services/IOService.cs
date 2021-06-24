@@ -49,7 +49,7 @@ namespace Clubber.Services
 			catch (Exception ex)
 			{
 				await _loggingService.LogAsync(new(LogSeverity.Critical, "Startup", "Failed to get database file into folder.", ex));
-				await Program.StopBot();
+				Program.StopBot();
 			}
 		}
 	}

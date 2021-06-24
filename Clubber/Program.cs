@@ -17,6 +17,7 @@ namespace Clubber
 	{
 		private static DiscordSocketClient _client = null!;
 		private static CommandService _commands = null!;
+		private static readonly CancellationTokenSource _source = new();
 
 		private static void Main() => RunBotAsync().GetAwaiter().GetResult();
 
@@ -39,8 +40,20 @@ namespace Clubber
 			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
 
 			_client.Ready += OnReadyAsync;
-
-			await Task.Delay(-1);
+			try
+			{
+				await Task.Delay(-1, _source.Token);
+			}
+			catch (TaskCanceledException)
+			{
+				await _client.StopAsync();
+				Thread.Sleep(1000);
+				await _client.LogoutAsync();
+			}
+			finally
+			{
+				_source.Dispose();
+			}
 		}
 
 		private static string GetToken()
@@ -78,12 +91,9 @@ namespace Clubber
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
 		}
 
-		public static async Task StopBot()
+		public static void StopBot()
 		{
-			await _client.StopAsync();
-			Thread.Sleep(1000);
-			await _client.LogoutAsync();
-			Environment.Exit(0);
+			_source.Cancel();
 		}
 	}
 }

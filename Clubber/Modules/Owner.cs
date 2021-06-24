@@ -19,7 +19,7 @@ namespace Clubber.Modules
 		public async Task StopBot()
 		{
 			await ReplyAsync("Exiting...");
-			await Program.StopBot();
+			Program.StopBot();
 		}
 
 		[Command("update database")]
