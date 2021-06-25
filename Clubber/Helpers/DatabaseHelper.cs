@@ -1,7 +1,10 @@
 ﻿using Clubber.Models;
 using Clubber.Services;
 using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Clubber.Helpers
@@ -21,12 +24,31 @@ namespace Clubber.Helpers
 
 		public List<DdUser> Database { get; }
 
-		public async Task RegisterUser(uint lbId, SocketGuildUser user)
+		public async Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user)
 		{
-			LeaderboardUser lbPlayer = _webService.GetLbPlayers(new[] { lbId }).Result[0];
-			DdUser newDdUser = new(user.Id, lbPlayer.Id);
-			Database.Add(newDdUser);
-			await _iOService.UpdateAndBackupDbFile(Database, $"Add {user.Username}\n{newDdUser}\nTotal users: {Database.Count}");
+			try
+			{
+				uint[] playerRequest =
+				{
+					lbId,
+				};
+
+				LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
+				DdUser newDdUser = new(user.Id, lbPlayer.Id);
+				Database.Add(newDdUser);
+				await _iOService.UpdateAndBackupDbFile(Database, $"Add {user.Username}\n{newDdUser}\nTotal users: {Database.Count}");
+				return (true, string.Empty);
+			}
+			catch (Exception ex)
+			{
+				return ex switch
+				{
+					CustomException => (false, ex.Message),
+					HttpRequestException => (false, "DD servers are most likely down."),
+					IOException => (false, "IO error."),
+					_ => (false, "No reason specified."),
+				};
+			}
 		}
 
 		public async Task<bool> RemoveUser(SocketGuildUser user)

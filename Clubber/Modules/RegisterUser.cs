@@ -52,8 +52,11 @@ namespace Clubber.Modules
 				return;
 			}
 
-			await _databaseHelper.RegisterUser(lbId, user);
-			await InlineReplyAsync("✅ Successfully registered.");
+			(bool success, string registerResponseMessage) = await _databaseHelper.RegisterUser(lbId, user);
+			if (success)
+				await InlineReplyAsync("✅ Successfully registered.");
+			else
+				await InlineReplyAsync($"Failed to execute command: {registerResponseMessage}");
 		}
 	}
 }
