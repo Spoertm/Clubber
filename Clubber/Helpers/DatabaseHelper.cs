@@ -28,10 +28,7 @@ namespace Clubber.Helpers
 		{
 			try
 			{
-				uint[] playerRequest =
-				{
-					lbId,
-				};
+				uint[] playerRequest = { lbId };
 
 				LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 				DdUser newDdUser = new(user.Id, lbPlayer.Id);
@@ -43,10 +40,10 @@ namespace Clubber.Helpers
 			{
 				return ex switch
 				{
-					CustomException => (false, ex.Message),
+					CustomException      => (false, ex.Message),
 					HttpRequestException => (false, "DD servers are most likely down."),
-					IOException => (false, "IO error."),
-					_ => (false, "No reason specified."),
+					IOException          => (false, "IO error."),
+					_                    => (false, "No reason specified."),
 				};
 			}
 		}

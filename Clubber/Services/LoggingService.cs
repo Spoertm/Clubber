@@ -24,7 +24,7 @@ namespace Clubber.Services
 		}
 
 		/// <summary>
-		///     This ctor exists for the cron project as it uses no CommandService.
+		/// This ctor exists for the cron project as it uses no CommandService.
 		/// </summary>
 		public LoggingService(DiscordSocketClient client)
 		{

@@ -25,15 +25,8 @@ namespace Clubber
 		{
 			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
-			_client = new(new()
-			{
-				AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error,
-			});
-
-			_commands = new(new()
-			{
-				IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async,
-			});
+			_client = new(new() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
+			_commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
