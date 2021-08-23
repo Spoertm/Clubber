@@ -1,9 +1,11 @@
-﻿using Clubber.Helpers;
+﻿using Clubber.BackgroundTasks;
+using Clubber.Helpers;
 using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Globalization;
 using System.IO;
@@ -59,29 +61,32 @@ namespace Clubber
 		{
 			_client.Ready -= OnReadyAsync;
 
-			IServiceProvider services = new ServiceCollection()
-				.AddSingleton(_client)
-				.AddSingleton(_commands)
-				.AddSingleton<LoggingService>()
-				.AddSingleton<MessageHandlerService>()
-				.AddSingleton<IOService>()
-				.AddSingleton<DatabaseHelper>()
-				.AddSingleton<UpdateRolesHelper>()
-				.AddSingleton<WebService>()
-				.AddSingleton<UserService>()
-				.AddSingleton<WelcomeMessage>()
-				.BuildServiceProvider();
+			IHost host = Host.CreateDefaultBuilder()
+				.ConfigureServices(services =>
+					services.AddSingleton(_client)
+						.AddSingleton(_commands)
+						.AddSingleton<LoggingService>()
+						.AddSingleton<MessageHandlerService>()
+						.AddSingleton<IOService>()
+						.AddSingleton<DatabaseHelper>()
+						.AddSingleton<UpdateRolesHelper>()
+						.AddSingleton<WebService>()
+						.AddSingleton<UserService>()
+						.AddSingleton<WelcomeMessage>()
+						.AddHostedService<DdNewsPostService>())
+				.Build();
 
-			services.GetRequiredService<MessageHandlerService>();
-			services.GetRequiredService<LoggingService>();
+			host.Services.GetRequiredService<MessageHandlerService>();
+			host.Services.GetRequiredService<LoggingService>();
 
-			IOService iOService = services.GetRequiredService<IOService>();
+			IOService iOService = host.Services.GetRequiredService<IOService>();
 			await iOService.GetDatabaseFileIntoFolder();
 
-			services.GetRequiredService<DatabaseHelper>();
-			services.GetRequiredService<WelcomeMessage>();
+			host.Services.GetRequiredService<DatabaseHelper>();
+			host.Services.GetRequiredService<WelcomeMessage>();
 
-			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), host.Services);
+			Task.Run(async () => await host.RunAsync(_source.Token), _source.Token);
 		}
 
 		public static void StopBot()
