@@ -1,8 +1,10 @@
 ﻿using Clubber.Models;
+using Clubber.Models.Responses;
 using Discord;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -13,6 +15,7 @@ namespace Clubber.Services
 	public class WebService
 	{
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
+		private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";
 		private readonly SocketTextChannel _backupChannel;
 		private readonly HttpClient _httpClient;
 
@@ -95,6 +98,64 @@ namespace Clubber.Services
 				throw new CustomException("No files in backup channel.");
 
 			return await _httpClient.GetStringAsync(latestAttachment.Url);
+		}
+
+		// Taken from devildaggers.info
+		// Credit goes to Noah Stolk https://github.com/NoahStolk
+		public async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
+		{
+			using FormUrlEncodedContent content = new(new[] { new KeyValuePair<string?, string?>("offset", (rankStart - 1).ToString()) });
+			using HttpResponseMessage response = await _httpClient.PostAsync(_getScoresUrl, content);
+
+			MemoryStream ms = new();
+			await response.Content.CopyToAsync(ms);
+			using BinaryReader br = new(ms);
+
+			LeaderboardResponse leaderboard = new()
+			{
+				DateTime = DateTime.UtcNow,
+			};
+
+			br.BaseStream.Seek(11, SeekOrigin.Begin);
+			leaderboard.DeathsGlobal = br.ReadUInt64();
+			leaderboard.KillsGlobal = br.ReadUInt64();
+			leaderboard.DaggersFiredGlobal = br.ReadUInt64();
+			leaderboard.TimeGlobal = br.ReadUInt64();
+			leaderboard.GemsGlobal = br.ReadUInt64();
+			leaderboard.DaggersHitGlobal = br.ReadUInt64();
+			leaderboard.TotalEntries = br.ReadUInt16();
+
+			br.BaseStream.Seek(14, SeekOrigin.Current);
+			leaderboard.TotalPlayers = br.ReadInt32();
+
+			br.BaseStream.Seek(4, SeekOrigin.Current);
+			for (int i = 0; i < leaderboard.TotalEntries; i++)
+			{
+				EntryResponse entry = new();
+
+				short usernameLength = br.ReadInt16();
+				entry.Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength));
+				entry.Rank = br.ReadInt32();
+				entry.Id = br.ReadInt32();
+				entry.Time = br.ReadInt32();
+				entry.Kills = br.ReadInt32();
+				entry.DaggersFired = br.ReadInt32();
+				entry.DaggersHit = br.ReadInt32();
+				entry.Gems = br.ReadInt32();
+				entry.DeathType = br.ReadInt32();
+				entry.DeathsTotal = br.ReadUInt64();
+				entry.KillsTotal = br.ReadUInt64();
+				entry.DaggersFiredTotal = br.ReadUInt64();
+				entry.TimeTotal = br.ReadUInt64();
+				entry.GemsTotal = br.ReadUInt64();
+				entry.DaggersHitTotal = br.ReadUInt64();
+
+				br.BaseStream.Seek(4, SeekOrigin.Current);
+
+				leaderboard.Entries.Add(entry);
+			}
+
+			return leaderboard;
 		}
 	}
 }
