@@ -42,7 +42,7 @@ namespace Clubber.Services
 			{
 				Directory.CreateDirectory(Path.GetDirectoryName(_databaseFilePath)!);
 
-				string dbString = await _webService.GetLatestDatabaseString();
+				string dbString = await _webService.GetLatestFileContentsFromChannel(Constants.DatabaseBackupChannelId);
 
 				await File.WriteAllTextAsync(_databaseFilePath, dbString);
 			}

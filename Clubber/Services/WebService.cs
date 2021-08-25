@@ -16,12 +16,18 @@ namespace Clubber.Services
 	{
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
 		private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";
-		private readonly SocketTextChannel _backupChannel;
+		private readonly SocketTextChannel _databaseBackupChannel;
+		private readonly SocketTextChannel _lbEntriesCacheChannel;
 		private readonly HttpClient _httpClient;
 
 		public WebService(DiscordSocketClient client)
 		{
-			_backupChannel = (client.GetChannel(Constants.DatabaseBackupChannelId) as SocketTextChannel)!;
+			_databaseBackupChannel = (client.GetChannel(Constants.DatabaseBackupChannelId) as SocketTextChannel)!;
+			_lbEntriesCacheChannel = (client.GetChannel(Constants.LbEntriesCacheChannelId) as SocketTextChannel)!;
+
+			if (_databaseBackupChannel is null || _lbEntriesCacheChannel is null)
+				throw new("Database backup- and/or LB entries channels are null.");
+
 			_httpClient = new();
 		}
 
@@ -84,18 +90,25 @@ namespace Clubber.Services
 
 		public async Task BackupDbFile(string filePath, string? text)
 		{
-			await _backupChannel.SendFileAsync(filePath, text);
+			await _databaseBackupChannel.SendFileAsync(filePath, text);
 		}
 
-		public async Task<string> GetLatestDatabaseString()
+		public async Task<string> GetLatestFileContentsFromChannel(ulong channelId)
 		{
-			IAttachment? latestAttachment = (await _backupChannel.GetMessagesAsync(1).FlattenAsync())
+			SocketTextChannel channelOfChoice = channelId switch
+			{
+				Constants.DatabaseBackupChannelId => _databaseBackupChannel,
+				Constants.LbEntriesCacheChannelId => _lbEntriesCacheChannel,
+				_                                 => throw new CustomException($"Faulty argument. Channel ID \"{channelId}\" unsupported."),
+			};
+
+			IAttachment? latestAttachment = (await channelOfChoice.GetMessagesAsync(1).FlattenAsync())
 				.FirstOrDefault()?
 				.Attachments
 				.FirstOrDefault();
 
 			if (latestAttachment is null)
-				throw new CustomException("No files in backup channel.");
+				throw new CustomException($"No files in {channelOfChoice.Name} channel.");
 
 			return await _httpClient.GetStringAsync(latestAttachment.Url);
 		}
