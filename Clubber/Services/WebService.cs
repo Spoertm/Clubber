@@ -171,5 +171,8 @@ namespace Clubber.Services
 
 			return leaderboard;
 		}
+
+		public async Task<string> GetCountryCodeForplayer(int lbId)
+			=> await _httpClient.GetStringAsync($"https://devildaggers.info/api/players/{lbId}/flag");
 	}
 }
