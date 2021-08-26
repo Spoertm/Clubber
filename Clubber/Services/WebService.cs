@@ -89,9 +89,10 @@ namespace Clubber.Services
 		}
 
 		public async Task BackupDbFile(string filePath, string? text)
-		{
-			await _databaseBackupChannel.SendFileAsync(filePath, text);
-		}
+			=> await _databaseBackupChannel.SendFileAsync(filePath, text);
+
+		public async Task BackupLbEntriesCache(string filePath, string? text)
+			=> await _lbEntriesCacheChannel.SendFileAsync(filePath, text);
 
 		public async Task<string> GetLatestFileContentsFromChannel(ulong channelId)
 		{
