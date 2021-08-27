@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Clubber.Configuration;
+using Discord;
 using Discord.WebSocket;
 using System.Threading.Tasks;
 
@@ -10,7 +11,7 @@ namespace Clubber.Helpers
 
 		protected DiscordHelper(DiscordSocketClient client)
 		{
-			_clubberExceptionsChannel = client.GetChannel(1123123) as SocketTextChannel;
+			_clubberExceptionsChannel = client.GetChannel(Config.ClubberExceptionsChannelId) as SocketTextChannel;
 		}
 
 		public static async Task LogExceptionEmbed(Embed embed)
