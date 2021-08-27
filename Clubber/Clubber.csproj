@@ -5,10 +5,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CoreHtmlToImage" Version="1.0.6"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2"/>
-    <PackageReference Include="Discord.Net" Version="2.4.0"/>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0"/>
+    <PackageReference Include="CoreHtmlToImage" Version="1.0.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+    <PackageReference Include="Discord.Net" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Roslynator.Analyzers" Version="3.2.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,17 +21,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0"/>
-    <PackageReference Include="Utf8Json" Version="1.3.7"/>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+    <PackageReference Include="Utf8Json" Version="1.3.7" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Models\Flags\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\DdinfoStyleCss.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Token.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
