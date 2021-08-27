@@ -1,4 +1,5 @@
-﻿using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord;
 using Discord.Commands;
@@ -161,7 +162,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		{
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle("List of commands")
-				.WithDescription($"To check for role updates do `{Constants.Prefix}pb`\nTo get stats do `{Constants.Prefix}me`\n\n")
+				.WithDescription($"To check for role updates do `{Config.Prefix}pb`\nTo get stats do `{Config.Prefix}me`\n\n")
 				.WithThumbnailUrl(context.Client.CurrentUser.GetAvatarUrl())
 				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
 

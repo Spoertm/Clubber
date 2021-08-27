@@ -55,7 +55,7 @@ namespace Clubber
 
 		private static string GetToken()
 		{
-			string tokenPath = Path.Combine(AppContext.BaseDirectory, "Models", "Token.txt");
+			string tokenPath = Path.Combine(AppContext.BaseDirectory, "Data", "Token.txt");
 			return File.ReadAllText(tokenPath);
 		}
 
