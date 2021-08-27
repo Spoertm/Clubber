@@ -82,5 +82,16 @@ namespace Clubber.Helpers
 
 			return null;
 		}
+
+		public DdUser? GetDdUserByLbId(int lbId)
+		{
+			for (int i = 0; i < Database.Count; i++)
+			{
+				if (Database[i].LeaderboardId == lbId)
+					return Database[i];
+			}
+
+			return null;
+		}
 	}
 }
