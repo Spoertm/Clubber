@@ -51,7 +51,7 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
 		{
-			(bool isError, string? message) = _userService.IsValid(user, Context);
+			(bool isError, string? message) = _userService.IsValid(user, user.Id == Context.User.Id);
 			if (isError && message is not null)
 			{
 				await InlineReplyAsync(message);

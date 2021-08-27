@@ -45,7 +45,7 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 		{
-			(bool isError, string? message) = _userService.IsValidForRegistration(user, Context);
+			(bool isError, string? message) = _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
 			if (isError && message is not null)
 			{
 				await InlineReplyAsync(message);

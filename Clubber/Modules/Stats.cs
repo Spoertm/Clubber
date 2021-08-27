@@ -55,7 +55,7 @@ namespace Clubber.Modules
 				if (user is null)
 					await InlineReplyAsync("User not found.");
 				else
-					await InlineReplyAsync(_userService.IsValid(user, Context).Message!);
+					await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).Message!);
 
 				return;
 			}
@@ -69,7 +69,7 @@ namespace Clubber.Modules
 
 			if (ddUser is null)
 			{
-				await InlineReplyAsync(_userService.IsValid(user, Context).Message!);
+				await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).Message!);
 				return;
 			}
 
