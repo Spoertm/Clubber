@@ -29,6 +29,7 @@ namespace ClubberDatabaseUpdateCron
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
 			_client.Ready += OnReady;
+			_client.Log += LoggingService.LogAsync;
 
 			await Task.Delay(-1);
 		}
@@ -43,14 +44,11 @@ namespace ClubberDatabaseUpdateCron
 		{
 			IServiceProvider services = new ServiceCollection()
 				.AddSingleton(_client)
-				.AddSingleton<LoggingService>()
 				.AddSingleton<IOService>()
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
 				.AddSingleton<WebService>()
 				.BuildServiceProvider();
-
-			services.GetRequiredService<LoggingService>();
 
 			List<Exception> exceptionList = new();
 			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();

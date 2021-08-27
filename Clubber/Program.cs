@@ -35,6 +35,8 @@ namespace Clubber
 			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
 
 			_client.Ready += OnReadyAsync;
+			_client.Log += LoggingService.LogAsync;
+			_commands.Log += LoggingService.LogAsync;
 			try
 			{
 				await Task.Delay(-1, _source.Token);
@@ -65,7 +67,6 @@ namespace Clubber
 				.ConfigureServices(services =>
 					services.AddSingleton(_client)
 						.AddSingleton(_commands)
-						.AddSingleton<LoggingService>()
 						.AddSingleton<MessageHandlerService>()
 						.AddSingleton<IOService>()
 						.AddSingleton<DatabaseHelper>()
@@ -77,7 +78,6 @@ namespace Clubber
 				.Build();
 
 			host.Services.GetRequiredService<MessageHandlerService>();
-			host.Services.GetRequiredService<LoggingService>();
 
 			IOService iOService = host.Services.GetRequiredService<IOService>();
 			await iOService.GetDatabaseFileIntoFolder();

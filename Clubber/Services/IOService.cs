@@ -13,16 +13,14 @@ namespace Clubber.Services
 	{
 		private readonly string _databaseFilePath;
 		private readonly string _lbEntriesCachePath;
-		private readonly LoggingService _loggingService;
 		private readonly WebService _webService;
 
-		public IOService(WebService webService, LoggingService loggingService)
+		public IOService(WebService webService)
 		{
 			_databaseFilePath = Path.Combine(AppContext.BaseDirectory, "Database", "Database.json");
 			_lbEntriesCachePath = Path.Combine(AppContext.BaseDirectory, "LeaderboardCache.json");
 
 			_webService = webService;
-			_loggingService = loggingService;
 		}
 
 		public async Task UpdateAndBackupDbFile(List<DdUser> list, string? text = null)
@@ -49,7 +47,7 @@ namespace Clubber.Services
 			}
 			catch (Exception ex)
 			{
-				await _loggingService.LogAsync(new(LogSeverity.Critical, "Startup", "Failed to get database file into folder.", ex));
+				await LoggingService.LogAsync(new(LogSeverity.Critical, "Startup", "Failed to get database file into folder.", ex));
 				Program.StopBot();
 			}
 		}

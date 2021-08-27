@@ -28,8 +28,7 @@ namespace Clubber.BackgroundTasks
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(DiscordSocketClient client, LoggingService loggingService, WebService webService, IOService ioService, DatabaseHelper databaseHelper)
-			: base(loggingService)
+		public DdNewsPostService(DiscordSocketClient client, WebService webService, IOService ioService, DatabaseHelper databaseHelper)
 		{
 			_ddNewsChannel = client.GetChannel(Constants.DdNewsChannelId) as SocketTextChannel;
 			if (_ddNewsChannel is null)
@@ -147,7 +146,7 @@ namespace Clubber.BackgroundTasks
 			<body style=""background-color:black;"">
 				<div class=""goethe imagePadded"" style=""font-size: 50px; float: left;"">
 					<div class=""rank"" style=""color:#dddddd; width: 25px; float: left;"">{entry.Rank}</div>
-					{(countryCode?.Length == 0 ? string.Empty : $"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"Models/Flags/{countryCode}.png\"></div>")}
+					{(countryCode.Length == 0 ? string.Empty : $"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"Models/Flags/{countryCode}.png\"></div>")}
 					<div class=""leviathan"" style=""width: 700px; float: left;"">axe</div>
 					<div class=""leviathan"" style=""width: 185px; float: right;"">1163.3855</div>
 				</div>
