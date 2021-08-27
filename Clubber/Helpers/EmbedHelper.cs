@@ -138,7 +138,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 				.WithDescription(
-$@"✏️ Leaderboard name: {lbPlayer.Username}
+					$@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
 ⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
 🥇 Rank: {lbPlayer.Rank}
