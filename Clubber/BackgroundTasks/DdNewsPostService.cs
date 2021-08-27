@@ -6,7 +6,6 @@ using Clubber.Services;
 using CoreHtmlToImage;
 using Discord;
 using Discord.WebSocket;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,35 +20,34 @@ namespace Clubber.BackgroundTasks
 	public class DdNewsPostService : AbstractBackgroundService
 	{
 		private const int _minimumScore = 930;
-		private const string _cachePath = "LeaderboardCache.json";
-		private readonly SocketTextChannel? _ddNewsChannel;
+		private const string _lbCachePath = "LeaderboardCache.json";
+		private SocketTextChannel? _ddNewsChannel;
 		private readonly DiscordSocketClient _client;
 		private readonly WebService _webService;
-		private readonly IOService _ioService;
 		private readonly DatabaseHelper _databaseHelper;
+		private readonly DiscordHelper _discordHelper;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(DiscordSocketClient client, WebService webService, IOService ioService, DatabaseHelper databaseHelper)
+		public DdNewsPostService(
+			DiscordSocketClient client,
+			WebService webService,
+			DatabaseHelper databaseHelper,
+			DiscordHelper discordHelper)
 		{
-			_ddNewsChannel = client.GetChannel(Config.DdNewsChannelId) as SocketTextChannel;
-			if (_ddNewsChannel is null)
-				throw new CustomException("DD news channel doesn't exist.");
-
 			_client = client;
 			_webService = webService;
-			_ioService = ioService;
 			_databaseHelper = databaseHelper;
-			_ioService.GetLbEntriesCacheFromDiscordAndSaveToFile();
+			_discordHelper = discordHelper;
+
+
 		}
 
 		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
-			if (_ddNewsChannel is null)
-				return;
-
-			List<EntryResponse> oldEntries = await _ioService.GetLbEntriesCacheFromFile();
+			_ddNewsChannel ??= _discordHelper.GetTextChannel(Config.DdNewsChannelId);
+			List<EntryResponse> oldEntries = (await IOService.ReadObjectFromFile<List<EntryResponse>>(_lbCachePath))!;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries();
 			(EntryResponse OldEntry, EntryResponse NewEntry)[] entryTuples = oldEntries.Join(
 					inner: newEntries,
@@ -69,7 +67,10 @@ namespace Clubber.BackgroundTasks
 			}
 
 			if (cacheIsToBeRefreshed)
-				await _ioService.UpdateLbEntriesCache(_cachePath, JsonConvert.SerializeObject(newEntries));
+			{
+				await IOService.WriteObjectToFile(newEntries, _lbCachePath);
+				await _discordHelper.SendFileToChannel(_lbCachePath, Config.LbEntriesCacheChannelId);
+			}
 		}
 
 		private async Task<List<EntryResponse>> GetSufficientLeaderboardEntries()
@@ -137,7 +138,7 @@ namespace Clubber.BackgroundTasks
 
 		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
 		{
-			string ddinfoStyleCss = await File.ReadAllTextAsync("Data/DdinfoStyleCss.txt");
+			string ddinfoStyleCss = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdInfoStyleCss.txt"));
 			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
 			string flagPath = Path.Combine("Data", "Flags", $"{countryCode}.png");
 			if (countryCode.Length == 0 || !File.Exists(flagPath))

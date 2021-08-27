@@ -1,4 +1,5 @@
-﻿using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Models;
 using Clubber.Services;
 using Discord.WebSocket;
 using System;
@@ -11,18 +12,23 @@ namespace Clubber.Helpers
 {
 	public class DatabaseHelper
 	{
-		private readonly IOService _iOService;
 		private readonly WebService _webService;
+		private readonly DiscordHelper _discordHelper;
 
-		public DatabaseHelper(IOService iOService, WebService webService)
+		public DatabaseHelper(WebService webService, DiscordHelper discordHelper)
 		{
-			_iOService = iOService;
 			_webService = webService;
+			_discordHelper = discordHelper;
 
-			Database = _iOService.GetDatabase();
+			Directory.CreateDirectory(Path.GetDirectoryName(DatabaseFilePath)!);
+			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
+			string databaseJson = _webService.RequestStringAsync(latestAttachmentUrl).Result;
+			File.WriteAllText(databaseJson, DatabaseFilePath);
+			Database = IOService.DeserializeObject<List<DdUser>>(databaseJson);
 		}
 
 		public List<DdUser> Database { get; }
+		public string DatabaseFilePath => Path.Combine(AppContext.BaseDirectory, "Database", "Database.json");
 
 		public async Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user)
 		{
@@ -33,7 +39,7 @@ namespace Clubber.Helpers
 				LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 				DdUser newDdUser = new(user.Id, lbPlayer.Id);
 				Database.Add(newDdUser);
-				await _iOService.UpdateAndBackupDbFile(Database, $"Add {user.Username}\n{newDdUser}\nTotal users: {Database.Count}");
+				await UpdateAndBackupDbFile($"Add {user.Username}\n{newDdUser}\nTotal users: {Database.Count}");
 				return (true, string.Empty);
 			}
 			catch (Exception ex)
@@ -55,8 +61,7 @@ namespace Clubber.Helpers
 				return false;
 
 			Database.Remove(toRemove);
-			await _iOService.UpdateAndBackupDbFile(Database, $"Remove {user.Username}\n{toRemove}\nTotal users: {Database.Count}");
-
+			await UpdateAndBackupDbFile($"Remove {user.Username}\n{toRemove}\nTotal users: {Database.Count}");
 			return true;
 		}
 
@@ -67,9 +72,14 @@ namespace Clubber.Helpers
 				return false;
 
 			Database.Remove(toRemove);
-			await _iOService.UpdateAndBackupDbFile(Database, $"Remove {toRemove}\nTotal users: {Database.Count}");
-
+			await UpdateAndBackupDbFile($"Remove {toRemove}\nTotal users: {Database.Count}");
 			return true;
+		}
+
+		private async Task UpdateAndBackupDbFile(string? text = null)
+		{
+			await IOService.WriteObjectToFile(Database, DatabaseFilePath);
+			await _discordHelper.SendFileToChannel(DatabaseFilePath, Config.DatabaseBackupChannelId, text);
 		}
 
 		public DdUser? GetDdUserByDiscordId(ulong discordId)

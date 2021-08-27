@@ -68,9 +68,9 @@ namespace Clubber
 					services.AddSingleton(_client)
 						.AddSingleton(_commands)
 						.AddSingleton<MessageHandlerService>()
-						.AddSingleton<IOService>()
 						.AddSingleton<DatabaseHelper>()
 						.AddSingleton<UpdateRolesHelper>()
+						.AddSingleton<DiscordHelper>()
 						.AddSingleton<WebService>()
 						.AddSingleton<UserService>()
 						.AddSingleton<WelcomeMessage>()
@@ -78,10 +78,6 @@ namespace Clubber
 				.Build();
 
 			host.Services.GetRequiredService<MessageHandlerService>();
-
-			IOService iOService = host.Services.GetRequiredService<IOService>();
-			await iOService.GetDatabaseFileIntoFolder();
-
 			host.Services.GetRequiredService<DatabaseHelper>();
 			host.Services.GetRequiredService<WelcomeMessage>();
 

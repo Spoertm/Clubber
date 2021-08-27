@@ -1,12 +1,8 @@
-﻿using Clubber.Configuration;
-using Clubber.Models;
+﻿using Clubber.Models;
 using Clubber.Models.Responses;
-using Discord;
-using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,20 +13,15 @@ namespace Clubber.Services
 	{
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
 		private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";
-		private readonly SocketTextChannel _databaseBackupChannel;
-		private readonly SocketTextChannel _lbEntriesCacheChannel;
 		private readonly HttpClient _httpClient;
 
-		public WebService(DiscordSocketClient client)
+		public WebService()
 		{
-			_databaseBackupChannel = (client.GetChannel(Config.DatabaseBackupChannelId) as SocketTextChannel)!;
-			_lbEntriesCacheChannel = (client.GetChannel(Config.LbEntriesCacheChannelId) as SocketTextChannel)!;
-
-			if (_databaseBackupChannel is null || _lbEntriesCacheChannel is null)
-				throw new("Database backup- and/or LB entries channels are null.");
-
 			_httpClient = new();
 		}
+
+		public async Task<string> RequestStringAsync(string url)
+			=> await _httpClient.GetStringAsync(url);
 
 		public async Task<List<LeaderboardUser>> GetLbPlayers(IEnumerable<uint> ids)
 		{
@@ -87,32 +78,6 @@ namespace Clubber.Services
 
 			bytePos += usernameLength;
 			return Encoding.UTF8.GetString(usernameBytes);
-		}
-
-		public async Task BackupDbFile(string filePath, string? text)
-			=> await _databaseBackupChannel.SendFileAsync(filePath, text);
-
-		public async Task BackupLbEntriesCache(string filePath, string? text)
-			=> await _lbEntriesCacheChannel.SendFileAsync(filePath, text);
-
-		public async Task<string> GetLatestFileContentsFromChannel(ulong channelId)
-		{
-			SocketTextChannel channelOfChoice = channelId switch
-			{
-				Config.DatabaseBackupChannelId => _databaseBackupChannel,
-				Config.LbEntriesCacheChannelId => _lbEntriesCacheChannel,
-				_                                 => throw new CustomException($"Faulty argument. Channel ID \"{channelId}\" unsupported."),
-			};
-
-			IAttachment? latestAttachment = (await channelOfChoice.GetMessagesAsync(1).FlattenAsync())
-				.FirstOrDefault()?
-				.Attachments
-				.FirstOrDefault();
-
-			if (latestAttachment is null)
-				throw new CustomException($"No files in {channelOfChoice.Name} channel.");
-
-			return await _httpClient.GetStringAsync(latestAttachment.Url);
 		}
 
 		// Taken from devildaggers.info

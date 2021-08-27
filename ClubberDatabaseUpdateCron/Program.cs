@@ -41,14 +41,21 @@ namespace ClubberDatabaseUpdateCron
 		{
 			IServiceProvider services = new ServiceCollection()
 				.AddSingleton(_client)
-				.AddSingleton<IOService>()
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
+				.AddSingleton<DiscordHelper>()
 				.AddSingleton<WebService>()
 				.BuildServiceProvider();
 
+			string databaseFilePath = services.GetRequiredService<DatabaseHelper>().DatabaseFilePath;
+			DiscordHelper discordHelper = services.GetRequiredService<DiscordHelper>();
+			WebService webService = services.GetRequiredService<WebService>();
+
 			List<Exception> exceptionList = new();
-			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();
+			Directory.CreateDirectory(Path.GetDirectoryName(databaseFilePath)!);
+			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
+			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
+			await File.WriteAllTextAsync(databaseJson, databaseFilePath);
 
 			SocketGuild? ddPals = _client.GetGuild(Config.DdPalsId);
 			IMessageChannel? cronUpdateChannel = _client.GetChannel(Config.CronUpdateChannelId) as IMessageChannel;
