@@ -19,7 +19,6 @@ namespace Clubber.BackgroundTasks
 {
 	public class DdNewsPostService : AbstractBackgroundService
 	{
-		// TODO: TEST ALL THESE SYSTEMS IN TESTING PROJECT
 		private const int _minimumScore = 930;
 		private const string _cachePath = "LeaderboardCache.json";
 		private readonly SocketTextChannel? _ddNewsChannel;
