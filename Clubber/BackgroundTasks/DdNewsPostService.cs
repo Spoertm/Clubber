@@ -1,4 +1,4 @@
-﻿using Clubber.Helpers;
+using Clubber.Helpers;
 using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
@@ -136,9 +136,10 @@ namespace Clubber.BackgroundTasks
 
 		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
 		{
-			string ddinfoStyleCss = await File.ReadAllTextAsync("Models/DdinfoStyleCss.txt");
+			string ddinfoStyleCss = await File.ReadAllTextAsync("Data/DdinfoStyleCss.txt");
 			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
-			if (countryCode.Length == 0 || !File.Exists($"Models/Flags/{countryCode}.png"))
+			string flagPath = Path.Combine("Data", "Flags", $"{countryCode}.png");
+			if (countryCode.Length == 0 || !File.Exists(flagPath))
 				countryCode = string.Empty;
 
 			string html = $@"
@@ -146,7 +147,7 @@ namespace Clubber.BackgroundTasks
 			<body style=""background-color:black;"">
 				<div class=""goethe imagePadded"" style=""font-size: 50px; float: left;"">
 					<div class=""rank"" style=""color:#dddddd; width: 25px; float: left;"">{entry.Rank}</div>
-					{(countryCode.Length == 0 ? string.Empty : $"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"Models/Flags/{countryCode}.png\"></div>")}
+					{(countryCode.Length == 0 ? string.Empty : $"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"{flagPath}\"></div>")}
 					<div class=""leviathan"" style=""width: 700px; float: left;"">axe</div>
 					<div class=""leviathan"" style=""width: 185px; float: right;"">1163.3855</div>
 				</div>
