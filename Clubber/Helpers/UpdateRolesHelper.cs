@@ -51,12 +51,10 @@ namespace Clubber.Helpers
 			[1] = 446688666325090310, [3] = 472451008342261820, [10] = 556255819323277312,
 		};
 		private readonly DatabaseHelper _databaseHelper;
-		private readonly WebService _webService;
 
-		public UpdateRolesHelper(DatabaseHelper databaseHelper, WebService webService)
+		public UpdateRolesHelper(DatabaseHelper databaseHelper)
 		{
 			_databaseHelper = databaseHelper;
-			_webService = webService;
 		}
 
 		public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)
@@ -97,7 +95,7 @@ namespace Clubber.Helpers
 				.ToList();
 
 			IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
-			IEnumerable<LeaderboardUser> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
+			IEnumerable<LeaderboardUser> lbPlayers = await WebService.GetLbPlayers(lbIdsToRequest);
 
 			(SocketGuildUser GuildUser, LeaderboardUser LbUser)[] updatedUsers = registeredUsers.Join(
 					inner: lbPlayers,
@@ -119,7 +117,7 @@ namespace Clubber.Helpers
 			try
 			{
 				int lbId = _databaseHelper.GetDdUserByDiscordId(user.Id)!.LeaderboardId;
-				List<LeaderboardUser> lbPlayerList = await _webService.GetLbPlayers(new[] { (uint)lbId });
+				List<LeaderboardUser> lbPlayerList = await WebService.GetLbPlayers(new[] { (uint)lbId });
 
 				return await ExecuteRoleUpdate(user, lbPlayerList[0]);
 			}
