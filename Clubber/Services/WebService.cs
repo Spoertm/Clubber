@@ -9,21 +9,16 @@ using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
-	public class WebService
+	public static class WebService
 	{
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
 		private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";
-		private readonly HttpClient _httpClient;
+		private static readonly HttpClient _httpClient = new();
 
-		public WebService()
-		{
-			_httpClient = new();
-		}
-
-		public async Task<string> RequestStringAsync(string url)
+		public static async Task<string> RequestStringAsync(string url)
 			=> await _httpClient.GetStringAsync(url);
 
-		public async Task<List<LeaderboardUser>> GetLbPlayers(IEnumerable<uint> ids)
+		public static async Task<List<LeaderboardUser>> GetLbPlayers(IEnumerable<uint> ids)
 		{
 			try
 			{
@@ -82,7 +77,7 @@ namespace Clubber.Services
 
 		// Taken from devildaggers.info
 		// Credit goes to Noah Stolk https://github.com/NoahStolk
-		public async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
+		public static async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 		{
 			using FormUrlEncodedContent content = new(new[] { new KeyValuePair<string?, string?>("offset", (rankStart - 1).ToString()) });
 			using HttpResponseMessage response = await _httpClient.PostAsync(_getScoresUrl, content);
@@ -138,7 +133,7 @@ namespace Clubber.Services
 			return leaderboard;
 		}
 
-		public async Task<string> GetCountryCodeForplayer(int lbId)
+		public static async Task<string> GetCountryCodeForplayer(int lbId)
 			=> await _httpClient.GetStringAsync($"https://devildaggers.info/api/players/{lbId}/flag");
 	}
 }

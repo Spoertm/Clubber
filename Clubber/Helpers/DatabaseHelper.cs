@@ -12,17 +12,15 @@ namespace Clubber.Helpers
 {
 	public class DatabaseHelper
 	{
-		private readonly WebService _webService;
 		private readonly DiscordHelper _discordHelper;
 
-		public DatabaseHelper(WebService webService, DiscordHelper discordHelper)
+		public DatabaseHelper(DiscordHelper discordHelper)
 		{
-			_webService = webService;
 			_discordHelper = discordHelper;
 
 			Directory.CreateDirectory(Path.GetDirectoryName(DatabaseFilePath)!);
 			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
-			string databaseJson = _webService.RequestStringAsync(latestAttachmentUrl).Result;
+			string databaseJson = WebService.RequestStringAsync(latestAttachmentUrl).Result;
 			File.WriteAllText(databaseJson, DatabaseFilePath);
 			Database = IOService.DeserializeObject<List<DdUser>>(databaseJson);
 		}
@@ -36,7 +34,7 @@ namespace Clubber.Helpers
 			{
 				uint[] playerRequest = { lbId };
 
-				LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
+				LeaderboardUser lbPlayer = (await WebService.GetLbPlayers(playerRequest))[0];
 				DdUser newDdUser = new(user.Id, lbPlayer.Id);
 				Database.Add(newDdUser);
 				await UpdateAndBackupDbFile($"Add {user.Username}\n{newDdUser}\nTotal users: {Database.Count}");

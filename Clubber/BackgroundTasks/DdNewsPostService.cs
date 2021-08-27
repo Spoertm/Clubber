@@ -23,23 +23,15 @@ namespace Clubber.BackgroundTasks
 		private const string _lbCachePath = "LeaderboardCache.json";
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly DiscordSocketClient _client;
-		private readonly WebService _webService;
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly DiscordHelper _discordHelper;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(
-			DiscordSocketClient client,
-			WebService webService,
-			DatabaseHelper databaseHelper,
-			DiscordHelper discordHelper)
+		public DdNewsPostService(DiscordSocketClient client, DatabaseHelper databaseHelper, DiscordHelper discordHelper)
 		{
 			_client = client;
-			_webService = webService;
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
-
-
 		}
 
 		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
@@ -79,7 +71,7 @@ namespace Clubber.BackgroundTasks
 			int rank = 1;
 			do
 			{
-				entries.AddRange((await _webService.GetLeaderboardEntries(rank)).Entries);
+				entries.AddRange((await WebService.GetLeaderboardEntries(rank)).Entries);
 				rank += 100;
 				await Task.Delay(50);
 			}
@@ -139,7 +131,7 @@ namespace Clubber.BackgroundTasks
 		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
 		{
 			string ddinfoStyleCss = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdInfoStyleCss.txt"));
-			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
+			string countryCode = await WebService.GetCountryCodeForplayer(entry.Id);
 			string flagPath = Path.Combine("Data", "Flags", $"{countryCode}.png");
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
 				countryCode = string.Empty;
