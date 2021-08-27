@@ -1,4 +1,5 @@
-﻿using Clubber.Helpers;
+﻿using Clubber.Configuration;
+using Clubber.Helpers;
 using Clubber.Models;
 using Discord;
 using Discord.Commands;
@@ -18,7 +19,7 @@ namespace Clubber.Modules
 
 		[Command("whyareyou")]
 		[Summary("Describes what the bot does.")]
-		public async Task WhyAreYou() => await InlineReplyAsync(Constants.WhyAreYou);
+		public async Task WhyAreYou() => await InlineReplyAsync(Config.WhyAreYou);
 
 		[Command("help")]
 		[Summary("Get a list of commands, or info regarding a specific command.")]

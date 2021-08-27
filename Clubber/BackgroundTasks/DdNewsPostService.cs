@@ -1,3 +1,4 @@
+﻿using Clubber.Configuration;
 using Clubber.Helpers;
 using Clubber.Models;
 using Clubber.Models.Responses;
@@ -30,7 +31,7 @@ namespace Clubber.BackgroundTasks
 
 		public DdNewsPostService(DiscordSocketClient client, WebService webService, IOService ioService, DatabaseHelper databaseHelper)
 		{
-			_ddNewsChannel = client.GetChannel(Constants.DdNewsChannelId) as SocketTextChannel;
+			_ddNewsChannel = client.GetChannel(Config.DdNewsChannelId) as SocketTextChannel;
 			if (_ddNewsChannel is null)
 				throw new CustomException("DD news channel doesn't exist.");
 
@@ -93,7 +94,7 @@ namespace Clubber.BackgroundTasks
 			DdUser? dbUser = _databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id);
 			if (dbUser is not null)
 			{
-				SocketGuildUser? guildUser = _client.GetGuild(Constants.DdPalsId).GetUser(dbUser.DiscordId);
+				SocketGuildUser? guildUser = _client.GetGuild(Config.DdPalsId).GetUser(dbUser.DiscordId);
 				if (guildUser is not null)
 					userName = guildUser.Mention;
 			}

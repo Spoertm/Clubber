@@ -1,4 +1,5 @@
-﻿using Clubber.Helpers;
+﻿using Clubber.Configuration;
+using Clubber.Helpers;
 using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord.Commands;
@@ -41,8 +42,8 @@ namespace Clubber.Services
 				return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
 			string message = guildUser.Id == context.User.Id
-				? $"You're not registered, {guildUser.Username}. Only a <@&{Constants.RoleAssignerRoleId}> can register you.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info."
-				: $"`{guildUser.Username}` is not registered. Only a <@&{Constants.RoleAssignerRoleId}> can register them.\nPlease refer to the message in <#{Constants.RegisterChannelId}> for more info.";
+				? $"You're not registered, {guildUser.Username}. Only a <@&{Config.RoleAssignerRoleId}> can register you.\nPlease refer to the message in <#{Config.RegisterChannelId}> for more info."
+				: $"`{guildUser.Username}` is not registered. Only a <@&{Config.RoleAssignerRoleId}> can register them.\nPlease refer to the message in <#{Config.RegisterChannelId}> for more info.";
 
 			return new(IsError: true, Message: message);
 		}
@@ -52,7 +53,7 @@ namespace Clubber.Services
 			if (guildUser.IsBot)
 				return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 
-			if (guildUser.Roles.All(r => r.Id != Constants.CheaterRoleId))
+			if (guildUser.Roles.All(r => r.Id != Config.CheaterRoleId))
 				return new(IsError: false, Message: null);
 
 			string message = guildUser.Id == context.User.Id

@@ -1,4 +1,5 @@
-﻿using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Models;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -28,7 +29,7 @@ namespace Clubber.Services
 				return;
 
 			int argumentPos = 0;
-			if (message.HasStringPrefix(Constants.Prefix, ref argumentPos) || message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
+			if (message.HasStringPrefix(Config.Prefix, ref argumentPos) || message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
 			{
 				SocketCommandContext context = new(_client, message);
 				IResult result = await _commands.ExecuteAsync(context, argumentPos, _services);

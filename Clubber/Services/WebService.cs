@@ -1,4 +1,5 @@
-﻿using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord;
 using Discord.WebSocket;
@@ -22,8 +23,8 @@ namespace Clubber.Services
 
 		public WebService(DiscordSocketClient client)
 		{
-			_databaseBackupChannel = (client.GetChannel(Constants.DatabaseBackupChannelId) as SocketTextChannel)!;
-			_lbEntriesCacheChannel = (client.GetChannel(Constants.LbEntriesCacheChannelId) as SocketTextChannel)!;
+			_databaseBackupChannel = (client.GetChannel(Config.DatabaseBackupChannelId) as SocketTextChannel)!;
+			_lbEntriesCacheChannel = (client.GetChannel(Config.LbEntriesCacheChannelId) as SocketTextChannel)!;
 
 			if (_databaseBackupChannel is null || _lbEntriesCacheChannel is null)
 				throw new("Database backup- and/or LB entries channels are null.");
@@ -98,8 +99,8 @@ namespace Clubber.Services
 		{
 			SocketTextChannel channelOfChoice = channelId switch
 			{
-				Constants.DatabaseBackupChannelId => _databaseBackupChannel,
-				Constants.LbEntriesCacheChannelId => _lbEntriesCacheChannel,
+				Config.DatabaseBackupChannelId => _databaseBackupChannel,
+				Config.LbEntriesCacheChannelId => _lbEntriesCacheChannel,
 				_                                 => throw new CustomException($"Faulty argument. Channel ID \"{channelId}\" unsupported."),
 			};
 

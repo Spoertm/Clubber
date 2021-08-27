@@ -1,4 +1,5 @@
-﻿using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord;
 using Newtonsoft.Json;
@@ -42,7 +43,7 @@ namespace Clubber.Services
 			try
 			{
 				Directory.CreateDirectory(Path.GetDirectoryName(_databaseFilePath)!);
-				string dbString = await _webService.GetLatestFileContentsFromChannel(Constants.DatabaseBackupChannelId);
+				string dbString = await _webService.GetLatestFileContentsFromChannel(Config.DatabaseBackupChannelId);
 				await File.WriteAllTextAsync(_databaseFilePath, dbString);
 			}
 			catch (Exception ex)
@@ -55,7 +56,7 @@ namespace Clubber.Services
 		public void GetLbEntriesCacheFromDiscordAndSaveToFile()
 		{
 			Directory.CreateDirectory(Path.GetDirectoryName(_lbEntriesCachePath)!);
-			string dbString = _webService.GetLatestFileContentsFromChannel(Constants.LbEntriesCacheChannelId).Result;
+			string dbString = _webService.GetLatestFileContentsFromChannel(Config.LbEntriesCacheChannelId).Result;
 			File.WriteAllText(_lbEntriesCachePath, dbString);
 		}
 
