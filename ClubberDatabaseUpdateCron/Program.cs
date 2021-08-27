@@ -1,6 +1,5 @@
 ﻿using Clubber.Configuration;
 using Clubber.Helpers;
-using Clubber.Models;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
@@ -22,10 +21,7 @@ namespace ClubberDatabaseUpdateCron
 
 		private static async Task RunAsync()
 		{
-			_client = new(new()
-			{
-				AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error,
-			});
+			_client = new(new() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error });
 
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
