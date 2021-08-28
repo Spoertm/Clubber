@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
-	public static class IOService
+	public class IOService
 	{
-		public static T DeserializeObject<T>(string s)
+		public T DeserializeObject<T>(string s)
 			=> JsonConvert.DeserializeObject<T>(s);
 
-		public static async Task<T?> ReadObjectFromFile<T>(string filePath)
+		public async Task<T?> ReadObjectFromFile<T>(string filePath)
 		{
 			if (!File.Exists(filePath))
 				return default;
@@ -18,7 +18,7 @@ namespace Clubber.Services
 			return JsonConvert.DeserializeObject<T>(dbString);
 		}
 
-		public static async Task WriteObjectToFile<T>(T tObject, string filePath)
+		public async Task WriteObjectToFile<T>(T tObject, string filePath)
 		{
 			string fileContents = JsonConvert.SerializeObject(tObject, Formatting.Indented);
 			await File.WriteAllTextAsync(filePath, fileContents);

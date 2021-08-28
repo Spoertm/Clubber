@@ -44,15 +44,17 @@ namespace ClubberDatabaseUpdateCron
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
 				.AddSingleton<DiscordHelper>()
+				.AddSingleton<WebService>()
 				.BuildServiceProvider();
 
 			string databaseFilePath = services.GetRequiredService<DatabaseHelper>().DatabaseFilePath;
 			DiscordHelper discordHelper = services.GetRequiredService<DiscordHelper>();
+			WebService webService = services.GetRequiredService<WebService>();
 
 			List<Exception> exceptionList = new();
 			Directory.CreateDirectory(Path.GetDirectoryName(databaseFilePath)!);
 			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
-			string databaseJson = WebService.RequestStringAsync(latestAttachmentUrl).Result;
+			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
 			await File.WriteAllTextAsync(databaseJson, databaseFilePath);
 
 			SocketGuild? ddPals = _client.GetGuild(Config.DdPalsId);

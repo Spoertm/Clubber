@@ -24,12 +24,16 @@ namespace Clubber.BackgroundTasks
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly DiscordHelper _discordHelper;
+		private readonly IOService _ioService;
+		private readonly WebService _webService;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(DatabaseHelper databaseHelper, DiscordHelper discordHelper)
+		public DdNewsPostService(DatabaseHelper databaseHelper, DiscordHelper discordHelper, IOService ioService, WebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
+			_ioService = ioService;
+			_webService = webService;
 		}
 
 		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
@@ -38,7 +42,7 @@ namespace Clubber.BackgroundTasks
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
 			_ddNewsChannel ??= _discordHelper.GetTextChannel(Config.DdNewsChannelId);
-			List<EntryResponse> oldEntries = (await IOService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
+			List<EntryResponse> oldEntries = (await _ioService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries();
 			(EntryResponse OldEntry, EntryResponse NewEntry)[] entryTuples = oldEntries.Join(
 					inner: newEntries,
@@ -56,12 +60,12 @@ namespace Clubber.BackgroundTasks
 				cacheIsToBeRefreshed = true;
 				string message = GetDdNewsMessage(newEntries, (oldEntry, newEntry));
 				Stream screenshot = await GetDdinfoPlayerScreenshot(newEntry);
-				await _ddNewsChannel!.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
+				await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
 			}
 
 			if (cacheIsToBeRefreshed)
 			{
-				await IOService.WriteObjectToFile(newEntries, LbCachePath);
+				await _ioService.WriteObjectToFile(newEntries, LbCachePath);
 				await _discordHelper.SendFileToChannel(LbCachePath, Config.LbEntriesCacheChannelId);
 			}
 		}
@@ -72,7 +76,7 @@ namespace Clubber.BackgroundTasks
 			int rank = 1;
 			do
 			{
-				entries.AddRange((await WebService.GetLeaderboardEntries(rank)).Entries);
+				entries.AddRange((await _webService.GetLeaderboardEntries(rank)).Entries);
 				rank += 100;
 				await Task.Delay(50);
 			}
@@ -123,7 +127,7 @@ namespace Clubber.BackgroundTasks
 		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
 		{
 			string ddinfoStyleCss = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdInfoStyleCss.txt"));
-			string countryCode = await WebService.GetCountryCodeForplayer(entry.Id);
+			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
 			string flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", $"{countryCode}.png");
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
 				countryCode = string.Empty;

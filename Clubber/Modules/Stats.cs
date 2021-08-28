@@ -19,11 +19,13 @@ namespace Clubber.Modules
 	{
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly UserService _userService;
+		private readonly WebService _webService;
 
-		public Stats(DatabaseHelper databaseHelper, UserService userService)
+		public Stats(DatabaseHelper databaseHelper, UserService userService, WebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_userService = userService;
+			_webService = webService;
 		}
 
 		[Command]
@@ -79,7 +81,7 @@ namespace Clubber.Modules
 		private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
 		{
 			uint lbPlayerId = (uint)ddUser.LeaderboardId;
-			List<LeaderboardUser> lbPlayers = await WebService.GetLbPlayers(new[] { lbPlayerId });
+			List<LeaderboardUser> lbPlayers = await _webService.GetLbPlayers(new[] { lbPlayerId });
 
 			Embed statsEmbed;
 			if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) || Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase))
