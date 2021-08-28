@@ -1,4 +1,5 @@
 ﻿using Clubber.Configuration;
+using Clubber.Extensions;
 using Clubber.Helpers;
 using Clubber.Models;
 using Clubber.Models.Responses;
@@ -105,17 +106,9 @@ namespace Clubber.BackgroundTasks
 			if (new1000Entry || oldScore < 1100 && newScore >= 1100)
 			{
 				int position = newEntries.Count(entry => entry.Time / 10000 >= (new1000Entry ? 1000 : 1100));
-				string positionPostfix = (position % 10) switch
-				{
-					1 => "st",
-					2 => "nd",
-					3 => "rd",
-					_ => "th",
-				};
-
 				_sb.Append(" They are the ")
 					.Append(position)
-					.Append(positionPostfix)
+					.Append(position.OrdinalIndicator())
 					.Append(new1000Entry ? " player to unlock the leviathan dagger!" : " 1100 player!");
 			}
 
