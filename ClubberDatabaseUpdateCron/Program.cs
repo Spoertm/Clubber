@@ -1,5 +1,5 @@
-﻿using Clubber.Helpers;
-using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Helpers;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
@@ -21,10 +21,7 @@ namespace ClubberDatabaseUpdateCron
 
 		private static async Task RunAsync()
 		{
-			_client = new(new()
-			{
-				AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error,
-			});
+			_client = new(new() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error });
 
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
@@ -43,20 +40,27 @@ namespace ClubberDatabaseUpdateCron
 		{
 			IServiceProvider services = new ServiceCollection()
 				.AddSingleton(_client)
-				.AddSingleton<LoggingService>()
-				.AddSingleton<IOService>()
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
-				.AddSingleton<WebService>()
+				.AddSingleton<DiscordHelper>()
+				.AddSingleton<IWebService>()
+				.AddSingleton<LoggingService>()
 				.BuildServiceProvider();
 
-			services.GetRequiredService<LoggingService>();
+			LoggingService loggingService = services.GetRequiredService<LoggingService>();
+			_client.Log += loggingService.LogAsync;
+			string databaseFilePath = services.GetRequiredService<DatabaseHelper>().DatabaseFilePath;
+			DiscordHelper discordHelper = services.GetRequiredService<DiscordHelper>();
+			IWebService webService = services.GetRequiredService<IWebService>();
 
 			List<Exception> exceptionList = new();
-			await services.GetRequiredService<IOService>().GetDatabaseFileIntoFolder();
+			Directory.CreateDirectory(Path.GetDirectoryName(databaseFilePath)!);
+			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
+			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
+			await File.WriteAllTextAsync(databaseJson, databaseFilePath);
 
-			SocketGuild? ddPals = _client.GetGuild(Constants.DdPalsId);
-			IMessageChannel? cronUpdateChannel = _client.GetChannel(Constants.CronUpdateChannelId) as IMessageChannel;
+			SocketGuild? ddPals = _client.GetGuild(Config.DdPalsId);
+			IMessageChannel? cronUpdateChannel = _client.GetChannel(Config.CronUpdateChannelId) as IMessageChannel;
 
 			const string checkingString = "Checking for role updates...";
 			IUserMessage msg = await cronUpdateChannel!.SendMessageAsync(checkingString);
@@ -86,7 +90,7 @@ namespace ClubberDatabaseUpdateCron
 					{
 						await cronUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 
-						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Constants.ClubberExceptionsChannelId) as SocketTextChannel;
+						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Config.ClubberExceptionsChannelId) as SocketTextChannel;
 						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
 							await clubberExceptionsChannel!.SendMessageAsync(null, false, EmbedHelper.Exception(exc));
 

@@ -14,10 +14,10 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UserService _userService;
 
-		public RegisterUser(DatabaseHelper databaseHelper, UserService userService)
+		public RegisterUser(IDatabaseHelper databaseHelper, UserService userService)
 		{
 			_databaseHelper = databaseHelper;
 			_userService = userService;
@@ -45,7 +45,7 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 		{
-			(bool isError, string? message) = _userService.IsValidForRegistration(user, Context);
+			(bool isError, string? message) = _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
 			if (isError && message is not null)
 			{
 				await InlineReplyAsync(message);

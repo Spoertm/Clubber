@@ -1,5 +1,6 @@
 ﻿// Taken from devildaggers.info
 // Credit goes to Noah Stolk https://github.com/NoahStolk
+
 using System;
 using System.Collections.Generic;
 

@@ -1,5 +1,5 @@
-﻿using Clubber.Helpers;
-using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Discord.WebSocket;
 using System.Threading.Tasks;
@@ -8,10 +8,10 @@ namespace Clubber.Services
 {
 	public class WelcomeMessage
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UpdateRolesHelper _updateRolesHelper;
 
-		public WelcomeMessage(DatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
+		public WelcomeMessage(IDatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
 		{
 			_databaseHelper = databaseHelper;
 			_updateRolesHelper = updateRolesHelper;
@@ -20,7 +20,7 @@ namespace Clubber.Services
 
 		private async Task OnUserJoined(SocketGuildUser joiningUser)
 		{
-			if (joiningUser.Guild.Id != Constants.DdPalsId || joiningUser.IsBot)
+			if (joiningUser.Guild.Id != Config.DdPalsId || joiningUser.IsBot)
 				return;
 
 			// User is registered
@@ -36,13 +36,13 @@ namespace Clubber.Services
 			if (!response.Success)
 				return;
 
-			if (joiningUser.Guild.GetChannel(Constants.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
+			if (joiningUser.Guild.GetChannel(Config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
 				await registerChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
 		}
 
 		private async Task PostWelcomeMessageAndGiveUnregRole(SocketGuildUser joiningUser)
 		{
-			await joiningUser.AddRoleAsync(Constants.UnregisteredRoleId);
+			await joiningUser.AddRoleAsync(Config.UnregisteredRoleId);
 			string message =
 				@$"Welcome {joiningUser.Mention}!
 
@@ -54,7 +54,7 @@ A moderator will then soon register you.
 Use this website if you don't know your ID: https://devildaggers.info/Leaderboard
 Simply hover over your rank and it should appear.";
 
-			if (joiningUser.Guild.GetChannel(Constants.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
+			if (joiningUser.Guild.GetChannel(Config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
 				await registerChannel.SendMessageAsync(message);
 		}
 	}

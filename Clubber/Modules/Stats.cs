@@ -17,15 +17,15 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class Stats : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UserService _userService;
-		private readonly WebService _webService;
+		private readonly IWebService _webService;
 
-		public Stats(DatabaseHelper databaseHelper, WebService webService, UserService userService)
+		public Stats(IDatabaseHelper databaseHelper, UserService userService, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
-			_webService = webService;
 			_userService = userService;
+			_webService = webService;
 		}
 
 		[Command]
@@ -57,7 +57,7 @@ namespace Clubber.Modules
 				if (user is null)
 					await InlineReplyAsync("User not found.");
 				else
-					await InlineReplyAsync(_userService.IsValid(user, Context).Message!);
+					await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).Message!);
 
 				return;
 			}
@@ -71,7 +71,7 @@ namespace Clubber.Modules
 
 			if (ddUser is null)
 			{
-				await InlineReplyAsync(_userService.IsValid(user, Context).Message!);
+				await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).Message!);
 				return;
 			}
 

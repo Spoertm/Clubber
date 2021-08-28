@@ -1,4 +1,5 @@
-﻿using Clubber.Models;
+﻿using Clubber.Configuration;
+using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
@@ -43,16 +44,16 @@ namespace Clubber.Helpers
 		};
 		private static readonly List<ulong> _uselessRoles = new()
 		{
-			Constants.UnregisteredRoleId, 458375331468935178,
+			Config.UnregisteredRoleId, 458375331468935178,
 		};
 		private static readonly Dictionary<int, ulong> _rankRoles = new()
 		{
 			[1] = 446688666325090310, [3] = 472451008342261820, [10] = 556255819323277312,
 		};
-		private readonly DatabaseHelper _databaseHelper;
-		private readonly WebService _webService;
+		private readonly IDatabaseHelper _databaseHelper;
+		private readonly IWebService _webService;
 
-		public UpdateRolesHelper(DatabaseHelper databaseHelper, WebService webService)
+		public UpdateRolesHelper(IDatabaseHelper databaseHelper, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_webService = webService;

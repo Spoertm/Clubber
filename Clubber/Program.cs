@@ -33,8 +33,8 @@ namespace Clubber
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
 			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
-
 			_client.Ready += OnReadyAsync;
+
 			try
 			{
 				await Task.Delay(-1, _source.Token);
@@ -53,7 +53,7 @@ namespace Clubber
 
 		private static string GetToken()
 		{
-			string tokenPath = Path.Combine(AppContext.BaseDirectory, "Models", "Token.txt");
+			string tokenPath = Path.Combine(AppContext.BaseDirectory, "Data", "Token.txt");
 			return File.ReadAllText(tokenPath);
 		}
 
@@ -65,25 +65,24 @@ namespace Clubber
 				.ConfigureServices(services =>
 					services.AddSingleton(_client)
 						.AddSingleton(_commands)
-						.AddSingleton<LoggingService>()
 						.AddSingleton<MessageHandlerService>()
-						.AddSingleton<IOService>()
-						.AddSingleton<DatabaseHelper>()
+						.AddSingleton<IDatabaseHelper, DatabaseHelper>()
 						.AddSingleton<UpdateRolesHelper>()
-						.AddSingleton<WebService>()
+						.AddSingleton<DiscordHelper>()
 						.AddSingleton<UserService>()
+						.AddSingleton<IIOService, IOService>()
+						.AddSingleton<IWebService, WebService>()
+						.AddSingleton<LoggingService>()
 						.AddSingleton<WelcomeMessage>()
 						.AddHostedService<DdNewsPostService>())
 				.Build();
 
 			host.Services.GetRequiredService<MessageHandlerService>();
-			host.Services.GetRequiredService<LoggingService>();
-
-			IOService iOService = host.Services.GetRequiredService<IOService>();
-			await iOService.GetDatabaseFileIntoFolder();
-
-			host.Services.GetRequiredService<DatabaseHelper>();
+			host.Services.GetRequiredService<IDatabaseHelper>();
 			host.Services.GetRequiredService<WelcomeMessage>();
+			LoggingService loggingService = host.Services.GetRequiredService<LoggingService>();
+			_client.Log += loggingService.LogAsync;
+			_commands.Log += loggingService.LogAsync;
 
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), host.Services);
 			Task.Run(async () => await host.RunAsync(_source.Token), _source.Token);

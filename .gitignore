@@ -363,3 +363,4 @@ MigrationBackup/
 Clubber/.vscode/launch.json
 Clubber/.vscode/tasks.json
 Clubber/Models/Token.txt
+Clubber/Data/Token.txt

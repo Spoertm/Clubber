@@ -1,5 +1,6 @@
 ﻿// Taken from devildaggers.info
 // Credit goes to Noah Stolk https://github.com/NoahStolk
+
 namespace Clubber.Models.Responses
 {
 	public class EntryResponse
