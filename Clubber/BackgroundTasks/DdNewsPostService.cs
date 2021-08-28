@@ -54,7 +54,9 @@ namespace Clubber.BackgroundTasks
 					continue;
 
 				cacheIsToBeRefreshed = true;
-				await PostDdNews(newEntries, (oldEntry, newEntry));
+				string message = GetDdNewsMessage(newEntries, (oldEntry, newEntry));
+				Stream screenshot = await GetDdinfoPlayerScreenshot(newEntry);
+				await _ddNewsChannel!.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
 			}
 
 			if (cacheIsToBeRefreshed)
@@ -79,7 +81,7 @@ namespace Clubber.BackgroundTasks
 			return entries;
 		}
 
-		private async Task PostDdNews(List<EntryResponse> newEntries, (EntryResponse OldEntry, EntryResponse NewEntry) entryTuple)
+		private string GetDdNewsMessage(List<EntryResponse> newEntries, (EntryResponse OldEntry, EntryResponse NewEntry) entryTuple)
 		{
 			_sb.Clear().Append("Congratulations to ");
 			string userName = entryTuple.NewEntry.Username;
@@ -115,8 +117,7 @@ namespace Clubber.BackgroundTasks
 			if (entryTuple.NewEntry.Rank == 1)
 				_sb.Append(Format.Bold(" It's a new WR! 👑 🎉"));
 
-			await using Stream screenshot = await GetDdinfoPlayerScreenshot(entryTuple.NewEntry);
-			await _ddNewsChannel!.SendFileAsync(screenshot, $"{entryTuple.NewEntry.Username}_{newScore:0}.png", _sb.ToString());
+			return _sb.ToString();
 		}
 
 		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
