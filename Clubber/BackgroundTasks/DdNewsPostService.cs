@@ -132,7 +132,7 @@ namespace Clubber.BackgroundTasks
 		{
 			string ddinfoStyleCss = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdInfoStyleCss.txt"));
 			string countryCode = await WebService.GetCountryCodeForplayer(entry.Id);
-			string flagPath = Path.Combine("Data", "Flags", $"{countryCode}.png");
+			string flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", $"{countryCode}.png");
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
 				countryCode = string.Empty;
 
