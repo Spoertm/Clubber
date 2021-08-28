@@ -92,7 +92,7 @@ namespace Clubber.BackgroundTasks
 			DdUser? dbUser = _databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id);
 			if (dbUser is not null)
 			{
-				SocketGuildUser? guildUser = _discordHelper.GetGuildUser(Config.DdPalsId, dbUser.DiscordId);
+				IGuildUser? guildUser = _discordHelper.GetGuildUser(Config.DdPalsId, dbUser.DiscordId);
 				if (guildUser is not null)
 					userName = guildUser.Mention;
 			}
