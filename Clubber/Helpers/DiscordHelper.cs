@@ -39,5 +39,8 @@ namespace Clubber.Helpers
 
 			return latestAttachment.Url;
 		}
+
+		public SocketGuildUser? GetGuildUser(ulong guildId, ulong userId)
+			=> _client.GetGuild(guildId)?.GetUser(userId);
 	}
 }

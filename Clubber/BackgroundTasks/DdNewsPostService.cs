@@ -21,14 +21,12 @@ namespace Clubber.BackgroundTasks
 	{
 		private const int _minimumScore = 930;
 		private SocketTextChannel? _ddNewsChannel;
-		private readonly DiscordSocketClient _client;
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly DiscordHelper _discordHelper;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(DiscordSocketClient client, DatabaseHelper databaseHelper, DiscordHelper discordHelper)
+		public DdNewsPostService(DatabaseHelper databaseHelper, DiscordHelper discordHelper)
 		{
-			_client = client;
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
 		}
@@ -87,7 +85,7 @@ namespace Clubber.BackgroundTasks
 			DdUser? dbUser = _databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id);
 			if (dbUser is not null)
 			{
-				SocketGuildUser? guildUser = _client.GetGuild(Config.DdPalsId).GetUser(dbUser.DiscordId);
+				SocketGuildUser? guildUser = _discordHelper.GetGuildUser(Config.DdPalsId, dbUser.DiscordId);
 				if (guildUser is not null)
 					userName = guildUser.Mention;
 			}
