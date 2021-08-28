@@ -25,7 +25,7 @@ namespace Clubber.Helpers
 			Directory.CreateDirectory(Path.GetDirectoryName(DatabaseFilePath)!);
 			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
 			string databaseJson = _webService.RequestStringAsync(latestAttachmentUrl).Result;
-			File.WriteAllText(databaseJson, DatabaseFilePath);
+			File.WriteAllText(DatabaseFilePath, databaseJson);
 			Database = _ioService.DeserializeObject<List<DdUser>>(databaseJson);
 		}
 
