@@ -9,12 +9,12 @@ namespace Clubber.Services
 {
 	public class MessageHandlerService
 	{
-		private readonly Config _config;
+		private readonly IConfig _config;
 		private readonly DiscordSocketClient _client;
 		private readonly CommandService _commands;
 		private readonly IServiceProvider _services;
 
-		public MessageHandlerService(Config config, DiscordSocketClient client, CommandService commands, IServiceProvider services)
+		public MessageHandlerService(IConfig config, DiscordSocketClient client, CommandService commands, IServiceProvider services)
 		{
 			_config = config;
 			_client = client;

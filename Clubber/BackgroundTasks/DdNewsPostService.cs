@@ -21,7 +21,7 @@ namespace Clubber.BackgroundTasks
 	public class DdNewsPostService : AbstractBackgroundService
 	{
 		private const int _minimumScore = 930;
-		private readonly Config _config;
+		private readonly IConfig _config;
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly DiscordHelper _discordHelper;
@@ -29,7 +29,7 @@ namespace Clubber.BackgroundTasks
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(Config config, IDatabaseHelper databaseHelper, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
+		public DdNewsPostService(IConfig config, IDatabaseHelper databaseHelper, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
 		{
 			_config = config;
 			_databaseHelper = databaseHelper;

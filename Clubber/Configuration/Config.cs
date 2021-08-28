@@ -4,7 +4,7 @@
 
 namespace Clubber.Configuration
 {
-	public class Config
+	public class Config : IConfig
 	{
 		public string WhyAreYou => ConfigurationManager.AppSettings["WhyAreYou"];
 		public string Prefix => ConfigurationManager.AppSettings["Prefix"];

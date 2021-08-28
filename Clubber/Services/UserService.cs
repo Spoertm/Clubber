@@ -9,9 +9,9 @@ namespace Clubber.Services
 	public class UserService
 	{
 		private readonly IDatabaseHelper _databaseHelper;
-		private readonly Config _config;
+		private readonly IConfig _config;
 
-		public UserService(Config config, IDatabaseHelper databaseHelper)
+		public UserService(IConfig config, IDatabaseHelper databaseHelper)
 		{
 			_config = config;
 			_databaseHelper = databaseHelper;

@@ -40,7 +40,7 @@ namespace ClubberDatabaseUpdateCron
 		{
 			IServiceProvider services = new ServiceCollection()
 				.AddSingleton(_client)
-				.AddSingleton<Config>()
+				.AddSingleton<IConfig, Config>()
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
 				.AddSingleton<DiscordHelper>()

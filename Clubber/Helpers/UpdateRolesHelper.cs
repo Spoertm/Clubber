@@ -50,7 +50,7 @@ namespace Clubber.Helpers
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IWebService _webService;
 
-		public UpdateRolesHelper(Config config, IDatabaseHelper databaseHelper, IWebService webService)
+		public UpdateRolesHelper(IConfig config, IDatabaseHelper databaseHelper, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_webService = webService;

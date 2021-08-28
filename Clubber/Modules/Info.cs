@@ -9,10 +9,10 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class Info : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly Config _config;
+		private readonly IConfig _config;
 		private readonly CommandService _commands;
 
-		public Info(Config config, CommandService commands)
+		public Info(IConfig config, CommandService commands)
 		{
 			_config = config;
 			_commands = commands;

@@ -66,7 +66,7 @@ namespace Clubber
 				.ConfigureServices(services =>
 					services.AddSingleton(_client)
 						.AddSingleton(_commands)
-						.AddSingleton<Config>()
+						.AddSingleton<IConfig, Config>()
 						.AddSingleton<MessageHandlerService>()
 						.AddSingleton<IDatabaseHelper, DatabaseHelper>()
 						.AddSingleton<UpdateRolesHelper>()
