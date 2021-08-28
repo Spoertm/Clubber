@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Clubber.Configuration;
-using Clubber.Helpers;
-using Clubber.Models;
+﻿using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
