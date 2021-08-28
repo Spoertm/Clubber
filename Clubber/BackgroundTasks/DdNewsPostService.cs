@@ -20,7 +20,6 @@ namespace Clubber.BackgroundTasks
 	public class DdNewsPostService : AbstractBackgroundService
 	{
 		private const int _minimumScore = 930;
-		private const string _lbCachePath = "LeaderboardCache.json";
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly DiscordSocketClient _client;
 		private readonly DatabaseHelper _databaseHelper;
@@ -35,11 +34,12 @@ namespace Clubber.BackgroundTasks
 		}
 
 		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
+		private static string LbCachePath => Path.Combine(AppContext.BaseDirectory, "LeaderboardCache.json");
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
 			_ddNewsChannel ??= _discordHelper.GetTextChannel(Config.DdNewsChannelId);
-			List<EntryResponse> oldEntries = (await IOService.ReadObjectFromFile<List<EntryResponse>>(_lbCachePath))!;
+			List<EntryResponse> oldEntries = (await IOService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries();
 			(EntryResponse OldEntry, EntryResponse NewEntry)[] entryTuples = oldEntries.Join(
 					inner: newEntries,
@@ -60,8 +60,8 @@ namespace Clubber.BackgroundTasks
 
 			if (cacheIsToBeRefreshed)
 			{
-				await IOService.WriteObjectToFile(newEntries, _lbCachePath);
-				await _discordHelper.SendFileToChannel(_lbCachePath, Config.LbEntriesCacheChannelId);
+				await IOService.WriteObjectToFile(newEntries, LbCachePath);
+				await _discordHelper.SendFileToChannel(LbCachePath, Config.LbEntriesCacheChannelId);
 			}
 		}
 
