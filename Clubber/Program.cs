@@ -33,8 +33,8 @@ namespace Clubber
 			await _client.LoginAsync(TokenType.Bot, GetToken());
 			await _client.StartAsync();
 			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
-
 			_client.Ready += OnReadyAsync;
+
 			try
 			{
 				await Task.Delay(-1, _source.Token);
@@ -78,7 +78,7 @@ namespace Clubber
 				.Build();
 
 			host.Services.GetRequiredService<MessageHandlerService>();
-			host.Services.GetRequiredService<DatabaseHelper>();
+			host.Services.GetRequiredService<IDatabaseHelper>();
 			host.Services.GetRequiredService<WelcomeMessage>();
 			LoggingService loggingService = host.Services.GetRequiredService<LoggingService>();
 			_client.Log += loggingService.LogAsync;
