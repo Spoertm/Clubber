@@ -8,11 +8,13 @@ namespace Clubber.Services
 {
 	public class WelcomeMessage
 	{
+		private readonly Config _config;
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UpdateRolesHelper _updateRolesHelper;
 
-		public WelcomeMessage(IDatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
+		public WelcomeMessage(Config config, IDatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
 		{
+			_config = config;
 			_databaseHelper = databaseHelper;
 			_updateRolesHelper = updateRolesHelper;
 			client.UserJoined += OnUserJoined;
@@ -20,7 +22,7 @@ namespace Clubber.Services
 
 		private async Task OnUserJoined(SocketGuildUser joiningUser)
 		{
-			if (joiningUser.Guild.Id != Config.DdPalsId || joiningUser.IsBot)
+			if (joiningUser.Guild.Id != _config.DdPalsId || joiningUser.IsBot)
 				return;
 
 			// User is registered
@@ -36,13 +38,13 @@ namespace Clubber.Services
 			if (!response.Success)
 				return;
 
-			if (joiningUser.Guild.GetChannel(Config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
+			if (joiningUser.Guild.GetChannel(_config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
 				await registerChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
 		}
 
 		private async Task PostWelcomeMessageAndGiveUnregRole(SocketGuildUser joiningUser)
 		{
-			await joiningUser.AddRoleAsync(Config.UnregisteredRoleId);
+			await joiningUser.AddRoleAsync(_config.UnregisteredRoleId);
 			string message =
 				@$"Welcome {joiningUser.Mention}!
 
@@ -54,7 +56,7 @@ A moderator will then soon register you.
 Use this website if you don't know your ID: https://devildaggers.info/Leaderboard
 Simply hover over your rank and it should appear.";
 
-			if (joiningUser.Guild.GetChannel(Config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
+			if (joiningUser.Guild.GetChannel(_config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
 				await registerChannel.SendMessageAsync(message);
 		}
 	}

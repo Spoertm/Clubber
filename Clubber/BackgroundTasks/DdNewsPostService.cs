@@ -21,6 +21,7 @@ namespace Clubber.BackgroundTasks
 	public class DdNewsPostService : AbstractBackgroundService
 	{
 		private const int _minimumScore = 930;
+		private readonly Config _config;
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly DiscordHelper _discordHelper;
@@ -28,8 +29,9 @@ namespace Clubber.BackgroundTasks
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(IDatabaseHelper databaseHelper, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
+		public DdNewsPostService(Config config, IDatabaseHelper databaseHelper, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
 		{
+			_config = config;
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
 			_ioService = ioService;
@@ -41,7 +43,7 @@ namespace Clubber.BackgroundTasks
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
-			_ddNewsChannel ??= _discordHelper.GetTextChannel(Config.DdNewsChannelId);
+			_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.DdNewsChannelId);
 			List<EntryResponse> oldEntries = (await _ioService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries();
 			(EntryResponse OldEntry, EntryResponse NewEntry)[] entryTuples = oldEntries.Join(
@@ -66,7 +68,7 @@ namespace Clubber.BackgroundTasks
 			if (cacheIsToBeRefreshed)
 			{
 				await _ioService.WriteObjectToFile(newEntries, LbCachePath);
-				await _discordHelper.SendFileToChannel(LbCachePath, Config.LbEntriesCacheChannelId);
+				await _discordHelper.SendFileToChannel(LbCachePath, _config.LbEntriesCacheChannelId);
 			}
 		}
 
@@ -92,7 +94,7 @@ namespace Clubber.BackgroundTasks
 			DdUser? dbUser = _databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id);
 			if (dbUser is not null)
 			{
-				IGuildUser? guildUser = _discordHelper.GetGuildUser(Config.DdPalsId, dbUser.DiscordId);
+				IGuildUser? guildUser = _discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId);
 				if (guildUser is not null)
 					userName = guildUser.Mention;
 			}

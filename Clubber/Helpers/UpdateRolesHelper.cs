@@ -42,10 +42,7 @@ namespace Clubber.Helpers
 			[100] = 399569183966363648,
 			[0] = 461203024128376832,
 		};
-		private static readonly List<ulong> _uselessRoles = new()
-		{
-			Config.UnregisteredRoleId, 458375331468935178,
-		};
+		private readonly List<ulong> _uselessRoles;
 		private static readonly Dictionary<int, ulong> _rankRoles = new()
 		{
 			[1] = 446688666325090310, [3] = 472451008342261820, [10] = 556255819323277312,
@@ -53,10 +50,12 @@ namespace Clubber.Helpers
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IWebService _webService;
 
-		public UpdateRolesHelper(IDatabaseHelper databaseHelper, IWebService webService)
+		public UpdateRolesHelper(Config config, IDatabaseHelper databaseHelper, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_webService = webService;
+
+			_uselessRoles = new() { config.UnregisteredRoleId, 458375331468935178 };
 		}
 
 		public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)
@@ -133,7 +132,7 @@ namespace Clubber.Helpers
 			}
 		}
 
-		private static async Task<UpdateRolesResponse> ExecuteRoleUpdate(SocketGuildUser guildUser, LeaderboardUser lbUser)
+		private async Task<UpdateRolesResponse> ExecuteRoleUpdate(SocketGuildUser guildUser, LeaderboardUser lbUser)
 		{
 			ulong[] userRolesIds = guildUser.Roles.Select(r => r.Id).ToArray();
 			(ulong scoreRoleToAdd, ulong[] scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbUser.Time);
@@ -161,7 +160,7 @@ namespace Clubber.Helpers
 			return new(true, guildUser, roleIdsToAdd, socketRolesToRemove);
 		}
 
-		private static (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(ulong[] userRolesIds, int playerTime)
+		private (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(ulong[] userRolesIds, int playerTime)
 		{
 			(_, ulong scoreRoleId) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
 

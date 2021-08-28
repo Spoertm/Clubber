@@ -11,9 +11,9 @@ namespace Clubber.Helpers
 		private static SocketTextChannel? _clubberExceptionsChannel;
 		private readonly DiscordSocketClient _client;
 
-		public DiscordHelper(DiscordSocketClient client)
+		public DiscordHelper(Config config, DiscordSocketClient client)
 		{
-			_clubberExceptionsChannel = client.GetChannel(Config.ClubberExceptionsChannelId) as SocketTextChannel;
+			_clubberExceptionsChannel = client.GetChannel(config.ClubberExceptionsChannelId) as SocketTextChannel;
 			_client = client;
 		}
 

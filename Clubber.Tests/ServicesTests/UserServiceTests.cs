@@ -1,4 +1,5 @@
-﻿using Clubber.Helpers;
+﻿using Clubber.Configuration;
+using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
@@ -10,12 +11,14 @@ namespace Clubber.Tests.ServicesTests
 	public class UserServiceTests
 	{
 		private readonly UserService _sut;
+		private readonly Mock<Config> _configMock;
 		private readonly Mock<IDatabaseHelper> _databaseHelperMock;
 
 		public UserServiceTests()
 		{
+			_configMock = new();
 			_databaseHelperMock = new();
-			_sut = new(_databaseHelperMock.Object);
+			_sut = new(_configMock.Object, _databaseHelperMock.Object);
 		}
 
 		[Fact]
