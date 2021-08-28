@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
-	public static class LoggingService
+	public class LoggingService
 	{
-		static LoggingService()
+		public LoggingService()
 		{
 			Directory.CreateDirectory(LogDirectory);
 		}
 
-		private static string LogDirectory => Path.Combine(AppContext.BaseDirectory, "Logs");
-		private static string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.txt");
+		private string LogDirectory => Path.Combine(AppContext.BaseDirectory, "Logs");
+		private string LogFile => Path.Combine(LogDirectory, $"{DateTime.UtcNow:yyyy-MM-dd}.txt");
 
-		public static async Task LogAsync(LogMessage logMessage)
+		public async Task LogAsync(LogMessage logMessage)
 		{
 			ICommandContext? context = (logMessage.Exception as CommandException)?.Context;
 			if (logMessage.Exception?.InnerException is CustomException customException && context is not null)
