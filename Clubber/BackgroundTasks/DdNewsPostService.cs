@@ -22,13 +22,13 @@ namespace Clubber.BackgroundTasks
 	{
 		private const int _minimumScore = 930;
 		private SocketTextChannel? _ddNewsChannel;
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 		private readonly DiscordHelper _discordHelper;
 		private readonly IIOService _ioService;
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(DatabaseHelper databaseHelper, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
+		public DdNewsPostService(IDatabaseHelper databaseHelper, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;

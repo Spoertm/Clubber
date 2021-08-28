@@ -8,10 +8,10 @@ namespace Clubber.Services
 {
 	public class WelcomeMessage
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UpdateRolesHelper _updateRolesHelper;
 
-		public WelcomeMessage(DatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
+		public WelcomeMessage(IDatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
 		{
 			_databaseHelper = databaseHelper;
 			_updateRolesHelper = updateRolesHelper;

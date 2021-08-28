@@ -14,10 +14,10 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UserService _userService;
 
-		public RegisterUser(DatabaseHelper databaseHelper, UserService userService)
+		public RegisterUser(IDatabaseHelper databaseHelper, UserService userService)
 		{
 			_databaseHelper = databaseHelper;
 			_userService = userService;

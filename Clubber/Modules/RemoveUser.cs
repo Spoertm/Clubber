@@ -13,9 +13,9 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class RemoveUser : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 
-		public RemoveUser(DatabaseHelper databaseHelper)
+		public RemoveUser(IDatabaseHelper databaseHelper)
 		{
 			_databaseHelper = databaseHelper;
 		}

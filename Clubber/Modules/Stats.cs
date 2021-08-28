@@ -17,11 +17,11 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class Stats : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly DatabaseHelper _databaseHelper;
+		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UserService _userService;
 		private readonly IWebService _webService;
 
-		public Stats(DatabaseHelper databaseHelper, UserService userService, IWebService webService)
+		public Stats(IDatabaseHelper databaseHelper, UserService userService, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_userService = userService;

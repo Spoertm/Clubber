@@ -66,7 +66,7 @@ namespace Clubber
 					services.AddSingleton(_client)
 						.AddSingleton(_commands)
 						.AddSingleton<MessageHandlerService>()
-						.AddSingleton<DatabaseHelper>()
+						.AddSingleton<IDatabaseHelper>()
 						.AddSingleton<UpdateRolesHelper>()
 						.AddSingleton<DiscordHelper>()
 						.AddSingleton<UserService>()

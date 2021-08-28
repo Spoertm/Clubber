@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {
-	public class DatabaseHelper
+	public class DatabaseHelper : IDatabaseHelper
 	{
 		private readonly DiscordHelper _discordHelper;
 		private readonly IIOService _ioService;
