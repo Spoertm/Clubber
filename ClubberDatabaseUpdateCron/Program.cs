@@ -43,7 +43,7 @@ namespace ClubberDatabaseUpdateCron
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
 				.AddSingleton<DiscordHelper>()
-				.AddSingleton<WebService>()
+				.AddSingleton<IWebService>()
 				.AddSingleton<LoggingService>()
 				.BuildServiceProvider();
 
@@ -51,7 +51,7 @@ namespace ClubberDatabaseUpdateCron
 			_client.Log += loggingService.LogAsync;
 			string databaseFilePath = services.GetRequiredService<DatabaseHelper>().DatabaseFilePath;
 			DiscordHelper discordHelper = services.GetRequiredService<DiscordHelper>();
-			WebService webService = services.GetRequiredService<WebService>();
+			IWebService webService = services.GetRequiredService<IWebService>();
 
 			List<Exception> exceptionList = new();
 			Directory.CreateDirectory(Path.GetDirectoryName(databaseFilePath)!);

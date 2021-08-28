@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
-	public class IOService
+	public class IOService : IIOService
 	{
 		public T DeserializeObject<T>(string s)
 			=> JsonConvert.DeserializeObject<T>(s);

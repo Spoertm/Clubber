@@ -51,9 +51,9 @@ namespace Clubber.Helpers
 			[1] = 446688666325090310, [3] = 472451008342261820, [10] = 556255819323277312,
 		};
 		private readonly DatabaseHelper _databaseHelper;
-		private readonly WebService _webService;
+		private readonly IWebService _webService;
 
-		public UpdateRolesHelper(DatabaseHelper databaseHelper, WebService webService)
+		public UpdateRolesHelper(DatabaseHelper databaseHelper, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_webService = webService;

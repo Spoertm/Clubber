@@ -19,9 +19,9 @@ namespace Clubber.Modules
 	{
 		private readonly DatabaseHelper _databaseHelper;
 		private readonly UserService _userService;
-		private readonly WebService _webService;
+		private readonly IWebService _webService;
 
-		public Stats(DatabaseHelper databaseHelper, UserService userService, WebService webService)
+		public Stats(DatabaseHelper databaseHelper, UserService userService, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_userService = userService;

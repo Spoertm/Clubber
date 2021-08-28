@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
-	public class WebService
+	public class WebService : IWebService
 	{
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
 		private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";

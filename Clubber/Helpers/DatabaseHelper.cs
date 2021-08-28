@@ -13,10 +13,10 @@ namespace Clubber.Helpers
 	public class DatabaseHelper
 	{
 		private readonly DiscordHelper _discordHelper;
-		private readonly IOService _ioService;
-		private readonly WebService _webService;
+		private readonly IIOService _ioService;
+		private readonly IWebService _webService;
 
-		public DatabaseHelper(DiscordHelper discordHelper, IOService ioService, WebService webService)
+		public DatabaseHelper(DiscordHelper discordHelper, IIOService ioService, IWebService webService)
 		{
 			_discordHelper = discordHelper;
 			_ioService = ioService;
