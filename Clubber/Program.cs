@@ -72,6 +72,8 @@ namespace Clubber
 						.AddSingleton<UpdateRolesHelper>()
 						.AddSingleton<DiscordHelper>()
 						.AddSingleton<UserService>()
+						.AddSingleton<IOService>()
+						.AddSingleton<WebService>()
 						.AddSingleton<WelcomeMessage>()
 						.AddHostedService<DdNewsPostService>())
 				.Build();
