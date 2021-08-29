@@ -144,17 +144,23 @@ namespace Clubber.BackgroundTasks
 			string html = $@"
 			<html>
 			<body style=""background-color:black;"">
-				<div class=""goethe imagePadded"" style=""font-size: 50px; float: left;"">
-					<div class=""rank"" style=""color:#dddddd; width: 25px; float: left;"">{entry.Rank}</div>
-					{$"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"{flagPath}\"></div>"}
-					<div class=""leviathan"" style=""width: 700px; float: left;"">{entry.Username}</div>
-					<div class=""leviathan"" style=""width: 185px; float: right;"">{entry.Time / 10000d}</div>
+				<div class=""goethe imagepadded"">
+					<table>
+						<thead>
+						<tr style=""font-size: 50px;"">
+						    <td><div class=""rank"" style=""color:#dddddd;"">{entry.Rank}</div></td>
+						    <td><div class=""flag""><img class=""flag"" src=""{flagPath}""></div></td>
+						    <td><div class=""leviathan name"" style=""width: 700px"">{entry.Username}</div></td>
+						    <td><div class=""leviathan"">{entry.Time / 10000d:0.0000}</div></td>
+						</tr>
+						</thead>
+					</table>
 				</div>
 			</body>
 			</html>
 			{ddinfoStyleCss}";
 
-			byte[] bytes = new HtmlConverter().FromHtmlString(html, 1040, ImageFormat.Png);
+			byte[] bytes = new HtmlConverter().FromHtmlString(html, 1100, ImageFormat.Png);
 			return new MemoryStream(bytes);
 		}
 	}

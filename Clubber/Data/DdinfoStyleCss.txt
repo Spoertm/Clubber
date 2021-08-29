@@ -11,7 +11,12 @@
 
 .flag {
 	padding-right: 15px;
-	width: 50px;
+	padding-bottom: 4px;
+	width: 62px;
+}
+
+.name {
+	padding-right: 15px;
 }
 
 .goethe {
@@ -19,13 +24,11 @@
 }
 
 .rank {
-	padding-right: 15px;
+	padding-right: 10px;
 }
 
 .imagepadded {
 	padding-left: 10px;
-	padding-top: 10px;
-	padding-bottom: 10px;
 }
 
 @font-face {
