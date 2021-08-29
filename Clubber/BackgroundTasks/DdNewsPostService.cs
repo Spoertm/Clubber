@@ -101,13 +101,9 @@ namespace Clubber.BackgroundTasks
 		{
 			_sb.Clear().Append("Congratulations to ");
 			string userName = entryTuple.NewEntry.Username;
-			DdUser? dbUser = _databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id);
-			if (dbUser is not null)
-			{
-				IGuildUser? guildUser = _discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId);
 				if (guildUser is not null)
-					userName = guildUser.Mention;
-			}
+			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
+				userName = guildUser.Mention;
 
 			double oldScore = entryTuple.OldEntry.Time / 10000d;
 			double newScore = entryTuple.NewEntry.Time / 10000d;
