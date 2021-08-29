@@ -1,4 +1,5 @@
 ﻿using Clubber.Configuration;
+using Clubber.Models;
 using Discord;
 using Discord.WebSocket;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace Clubber.Helpers
 		}
 
 		public SocketTextChannel GetTextChannel(ulong channelId)
-			=> _client.GetChannel(channelId) as SocketTextChannel ?? throw new($"No channel with ID {channelId} exists.");
+			=> _client.GetChannel(channelId) as SocketTextChannel ?? throw new CustomException($"No channel with ID {channelId} exists.");
 
 		public async Task SendFileToChannel(string filePath, ulong channelId, string? text = null)
 			=> await GetTextChannel(channelId).SendFileAsync(filePath, text);
