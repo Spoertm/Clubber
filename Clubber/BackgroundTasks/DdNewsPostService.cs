@@ -50,7 +50,7 @@ namespace Clubber.BackgroundTasks
 		{
 			_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.DdNewsChannelId);
 			List<EntryResponse> oldEntries = (await _ioService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
-			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries();
+			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries(_minimumScore);
 			(EntryResponse OldEntry, EntryResponse NewEntry)[] entryTuples = oldEntries.Join(
 					inner: newEntries,
 					outerKeySelector: oldEntry => oldEntry.Id,
@@ -77,7 +77,7 @@ namespace Clubber.BackgroundTasks
 			}
 		}
 
-		private async Task<List<EntryResponse>> GetSufficientLeaderboardEntries()
+		private async Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
 		{
 			List<EntryResponse> entries = new();
 			int rank = 1;
@@ -87,7 +87,7 @@ namespace Clubber.BackgroundTasks
 				rank += 100;
 				await Task.Delay(50);
 			}
-			while (entries[^1].Time / 10000 > _minimumScore);
+			while (entries[^1].Time / 10000 > minimumScore);
 
 			return entries;
 		}
