@@ -109,13 +109,13 @@ namespace Clubber.BackgroundTasks
 					userName = guildUser.Mention;
 			}
 
-			float oldScore = entryTuple.OldEntry.Time / 10000f;
-			float newScore = entryTuple.NewEntry.Time / 10000f;
+			double oldScore = entryTuple.OldEntry.Time / 10000d;
+			double newScore = entryTuple.NewEntry.Time / 10000d;
 			_sb.Append(userName)
 				.Append(" for getting a new PB of ")
 				.AppendFormat("{0:0.0000}", newScore)
-				.Append("seconds! They beat their old PB of ")
-				.AppendFormat("{0:0}", oldScore)
+				.Append(" seconds! They beat their old PB of ")
+				.Append(Math.Truncate(oldScore))
 				.Append("s, gaining ")
 				.Append(entryTuple.OldEntry.Rank - entryTuple.NewEntry.Rank)
 				.Append(" ranks.");
@@ -151,7 +151,7 @@ namespace Clubber.BackgroundTasks
 					<div class=""rank"" style=""color:#dddddd; width: 25px; float: left;"">{entry.Rank}</div>
 					{$"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"{flagPath}\"></div>"}
 					<div class=""leviathan"" style=""width: 700px; float: left;"">{entry.Username}</div>
-					<div class=""leviathan"" style=""width: 185px; float: right;"">{entry.Time / 10000f:0.0000}</div>
+					<div class=""leviathan"" style=""width: 185px; float: right;"">{entry.Time / 10000d}</div>
 				</div>
 			</body>
 			</html>
