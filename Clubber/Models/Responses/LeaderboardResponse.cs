@@ -26,6 +26,6 @@ namespace Clubber.Models.Responses
 
 		public ushort TotalEntries { get; set; }
 
-		public List<EntryResponse> Entries { get; } = new();
+		public List<EntryResponse> Entries { get; init; } = new();
 	}
 }
