@@ -28,7 +28,7 @@ namespace Clubber.Tests.ServicesTests
 		[InlineData(true, new ulong[] { 1, 2, 3 })]
 		[InlineData(true, new ulong[] { 1, 2, 3, CheaterRoleId })]
 		[InlineData(false, new ulong[] { 1, 2, 3, CheaterRoleId })]
-		public void IsValidForRegistrationDetectsTypeOfUser(bool isBot, IReadOnlyCollection<ulong> roleIds)
+		public void IsValidForRegistration_DetectsBotAndOrCheater_ReturnsError(bool isBot, IReadOnlyCollection<ulong> roleIds)
 		{
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(isBot);
@@ -42,7 +42,7 @@ namespace Clubber.Tests.ServicesTests
 		[InlineData(true, new ulong[] { 1, 2, 3 })]
 		[InlineData(true, new ulong[] { 1, 2, 3, CheaterRoleId })]
 		[InlineData(false, new ulong[] { 1, 2, 3, CheaterRoleId })]
-		public void IsValidDetectsTypeOfUser(bool isBot, IReadOnlyCollection<ulong> roleIds)
+		public void IsValid_DetectsBotAndOrCheater_ReturnsError(bool isBot, IReadOnlyCollection<ulong> roleIds)
 		{
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(isBot);
@@ -53,7 +53,7 @@ namespace Clubber.Tests.ServicesTests
 		}
 
 		[Fact]
-		public void IsValidForRegistrationDetectsValidUser()
+		public void IsValidForRegistration_DetectsValidUser_ReturnsNoError()
 		{
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
@@ -66,7 +66,7 @@ namespace Clubber.Tests.ServicesTests
 		}
 
 		[Fact]
-		public void IsValidForRegistrationDetectsAlreadyRegisteredUser()
+		public void IsValidForRegistration_DetectsAlreadyRegisteredUser_ReturnsError()
 		{
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
@@ -80,7 +80,7 @@ namespace Clubber.Tests.ServicesTests
 		}
 
 		[Fact]
-		public void IsValidDetectsRegisteredUser()
+		public void IsValid_DetectsRegisteredUser_ReturnsNoError()
 		{
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
@@ -94,7 +94,7 @@ namespace Clubber.Tests.ServicesTests
 		}
 
 		[Fact]
-		public void IsValidDetectsUnregisteredNormalUser()
+		public void IsValid_DetectsUnregisteredNormalUser_ReturnsError()
 		{
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
