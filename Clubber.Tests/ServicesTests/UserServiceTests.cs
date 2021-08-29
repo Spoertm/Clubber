@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Clubber.Configuration;
 using Clubber.Helpers;
 using Clubber.Models;
@@ -58,9 +59,9 @@ namespace Clubber.Tests.ServicesTests
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(false);
-			guildUser.SetupGet(user => user.RoleIds).Returns(new ulong[] { 1, 2, 3 });
+			guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(123)).Returns(default(DdUser));
+			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(0)).Returns(default(DdUser));
 			UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
 			Assert.False(isValidForRegistrationResponse.IsError);
 		}
@@ -71,10 +72,10 @@ namespace Clubber.Tests.ServicesTests
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(false);
-			guildUser.SetupGet(user => user.Id).Returns(123);
-			guildUser.SetupGet(user => user.RoleIds).Returns(new ulong[] { 1, 2, 3 });
+			guildUser.SetupGet(user => user.Id).Returns(0);
+			guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(123)).Returns(new DdUser(123, 123));
+			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(0)).Returns(new DdUser(0, 0));
 			UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
 			Assert.True(isValidForRegistrationResponse.IsError);
 		}
@@ -85,10 +86,10 @@ namespace Clubber.Tests.ServicesTests
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(false);
-			guildUser.SetupGet(user => user.Id).Returns(123);
-			guildUser.SetupGet(user => user.RoleIds).Returns(new ulong[] { 1, 2, 3 });
+			guildUser.SetupGet(user => user.Id).Returns(0);
+			guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(123)).Returns(new DdUser(123, 123));
+			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(0)).Returns(new DdUser(0, 0));
 			UserValidationResponse isValid = _sut.IsValid(guildUser.Object, true);
 			Assert.False(isValid.IsError);
 		}
@@ -99,10 +100,10 @@ namespace Clubber.Tests.ServicesTests
 			// Normal user (neither bot nor has cheaterRoleId)
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(false);
-			guildUser.SetupGet(user => user.Id).Returns(123);
-			guildUser.SetupGet(user => user.RoleIds).Returns(new ulong[] { 1, 2, 3 });
+			guildUser.SetupGet(user => user.Id).Returns(0);
+			guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(123)).Returns(default(DdUser));
+			_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserByDiscordId(0)).Returns(default(DdUser));
 			UserValidationResponse isValid = _sut.IsValid(guildUser.Object, true);
 			Assert.True(isValid.IsError);
 		}
