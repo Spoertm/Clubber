@@ -111,13 +111,15 @@ namespace Clubber.BackgroundTasks
 
 			double oldScore = entryTuple.OldEntry.Time / 10000d;
 			double newScore = entryTuple.NewEntry.Time / 10000d;
+			int ranksChanged = entryTuple.OldEntry.Rank - entryTuple.NewEntry.Rank;
 			_sb.Append(userName)
 				.Append(" for getting a new PB of ")
 				.AppendFormat("{0:0.0000}", newScore)
 				.Append(" seconds! They beat their old PB of ")
 				.Append(Math.Truncate(oldScore))
-				.Append("s, gaining ")
-				.Append(entryTuple.OldEntry.Rank - entryTuple.NewEntry.Rank)
+				.Append("s, ")
+				.Append(ranksChanged > 0 ? "gaining " : "but lost ")
+				.Append(Math.Abs(ranksChanged))
 				.Append(" ranks.");
 
 			bool new1000Entry = oldScore < 1000 && newScore >= 1000;
