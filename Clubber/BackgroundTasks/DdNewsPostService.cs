@@ -117,7 +117,7 @@ namespace Clubber.BackgroundTasks
 				.Append("seconds! They beat their old PB of ")
 				.AppendFormat("{0:0}", oldScore)
 				.Append("s, gaining ")
-				.Append(entryTuple.NewEntry.Rank - entryTuple.OldEntry.Rank)
+				.Append(entryTuple.OldEntry.Rank - entryTuple.NewEntry.Rank)
 				.Append(" ranks.");
 
 			bool new1000Entry = oldScore < 1000 && newScore >= 1000;
@@ -142,14 +142,12 @@ namespace Clubber.BackgroundTasks
 			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
 			string flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", $"{countryCode}.png");
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
-				countryCode = string.Empty;
 
 			string html = $@"
 			<html>
 			<body style=""background-color:black;"">
 				<div class=""goethe imagePadded"" style=""font-size: 50px; float: left;"">
 					<div class=""rank"" style=""color:#dddddd; width: 25px; float: left;"">{entry.Rank}</div>
-					{(countryCode.Length == 0 ? string.Empty : $"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"{flagPath}\"></div>")}
 					<div class=""leviathan"" style=""width: 700px; float: left;"">{entry.Username}</div>
 					<div class=""leviathan"" style=""width: 185px; float: right;"">{entry.Time / 10000f:0.0000}</div>
 				</div>
