@@ -1,5 +1,4 @@
-﻿using Clubber.Configuration;
-using Clubber.Models;
+﻿using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord;
 using Discord.Commands;
@@ -108,7 +107,7 @@ namespace Clubber.Helpers
 		}
 
 		/// <summary>
-		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?)"/>.
+		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?)" />.
 		/// </summary>
 		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
 		{
@@ -116,20 +115,20 @@ namespace Clubber.Helpers
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 				.WithDescription(
-$@"✏️ Leaderboard name: {lbPlayer.Username}
-🛂 Leaderboard ID: {lbPlayer.Id}
-⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
-🥇 Rank: {lbPlayer.Rank}
-💀 Kills: {lbPlayer.Kills}
-♦️ Gems: {lbPlayer.Gems}
-🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+					$@"✏️ Leaderboard name: {lbPlayer.Username}
+					🛂 Leaderboard ID: {lbPlayer.Id}
+					⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
+					🥇 Rank: {lbPlayer.Rank}
+					💀 Kills: {lbPlayer.Kills}
+					♦️ Gems: {lbPlayer.Gems}
+					🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 
-• For full stats, use `statsf`.")
+					• For full stats, use `statsf`.")
 				.Build();
 		}
 
 		/// <summary>
-		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?)"/>.
+		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?)" />.
 		/// </summary>
 		public static Embed FullStats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
 		{
@@ -139,22 +138,22 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 				.WithDescription(
 					$@"✏️ Leaderboard name: {lbPlayer.Username}
-🛂 Leaderboard ID: {lbPlayer.Id}
-⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
-🥇 Rank: {lbPlayer.Rank}
-💀 Kills: {lbPlayer.Kills}
-💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
-♦️ Gems: {lbPlayer.Gems}
-♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
-⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
-🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
-🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
-🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
-🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
-🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
-🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
-😵 Total deaths: {lbPlayer.DeathsTotal}
-😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}")
+					🛂 Leaderboard ID: {lbPlayer.Id}
+					⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
+					🥇 Rank: {lbPlayer.Rank}
+					💀 Kills: {lbPlayer.Kills}
+					💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
+					♦️ Gems: {lbPlayer.Gems}
+					♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
+					⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
+					🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
+					🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
+					🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+					🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
+					🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
+					🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
+					😵 Total deaths: {lbPlayer.DeathsTotal}
+					😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}")
 				.Build();
 		}
 
@@ -162,7 +161,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		{
 			EmbedBuilder embed = new EmbedBuilder()
 				.WithTitle("List of commands")
-				.WithDescription($"To check for role updates do `{Config.Prefix}pb`\nTo get stats do `{Config.Prefix}me`\n\n")
+				.WithDescription("To check for role updates do `+pb`\nTo get stats do `+me`\n\n")
 				.WithThumbnailUrl(context.Client.CurrentUser.GetAvatarUrl())
 				.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
 

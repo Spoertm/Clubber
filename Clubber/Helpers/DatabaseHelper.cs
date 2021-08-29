@@ -12,18 +12,20 @@ namespace Clubber.Helpers
 {
 	public class DatabaseHelper : IDatabaseHelper
 	{
-		private readonly DiscordHelper _discordHelper;
+		private readonly IConfig _config;
+		private readonly IDiscordHelper _discordHelper;
 		private readonly IIOService _ioService;
 		private readonly IWebService _webService;
 
-		public DatabaseHelper(DiscordHelper discordHelper, IIOService ioService, IWebService webService)
+		public DatabaseHelper(IConfig config, IDiscordHelper discordHelper, IIOService ioService, IWebService webService)
 		{
+			_config = config;
 			_discordHelper = discordHelper;
 			_ioService = ioService;
 			_webService = webService;
 
 			Directory.CreateDirectory(Path.GetDirectoryName(DatabaseFilePath)!);
-			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
+			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(_config.DatabaseBackupChannelId).Result;
 			string databaseJson = _webService.RequestStringAsync(latestAttachmentUrl).Result;
 			File.WriteAllText(DatabaseFilePath, databaseJson);
 			Database = _ioService.DeserializeObject<List<DdUser>>(databaseJson);
@@ -81,7 +83,7 @@ namespace Clubber.Helpers
 		private async Task UpdateAndBackupDbFile(string? text = null)
 		{
 			await _ioService.WriteObjectToFile(Database, DatabaseFilePath);
-			await _discordHelper.SendFileToChannel(DatabaseFilePath, Config.DatabaseBackupChannelId, text);
+			await _discordHelper.SendFileToChannel(DatabaseFilePath, _config.DatabaseBackupChannelId, text);
 		}
 
 		public DdUser? GetDdUserByDiscordId(ulong discordId)

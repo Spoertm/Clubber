@@ -1,4 +1,5 @@
 ﻿using Clubber.BackgroundTasks;
+using Clubber.Configuration;
 using Clubber.Helpers;
 using Clubber.Services;
 using Discord;
@@ -65,10 +66,11 @@ namespace Clubber
 				.ConfigureServices(services =>
 					services.AddSingleton(_client)
 						.AddSingleton(_commands)
+						.AddSingleton<IConfig, Config>()
 						.AddSingleton<MessageHandlerService>()
 						.AddSingleton<IDatabaseHelper, DatabaseHelper>()
 						.AddSingleton<UpdateRolesHelper>()
-						.AddSingleton<DiscordHelper>()
+						.AddSingleton<IDiscordHelper, DiscordHelper>()
 						.AddSingleton<UserService>()
 						.AddSingleton<IIOService, IOService>()
 						.AddSingleton<IWebService, WebService>()

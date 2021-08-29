@@ -40,27 +40,29 @@ namespace ClubberDatabaseUpdateCron
 		{
 			IServiceProvider services = new ServiceCollection()
 				.AddSingleton(_client)
+				.AddSingleton<IConfig, Config>()
 				.AddSingleton<DatabaseHelper>()
 				.AddSingleton<UpdateRolesHelper>()
-				.AddSingleton<DiscordHelper>()
+				.AddSingleton<IDiscordHelper, DiscordHelper>()
 				.AddSingleton<IWebService>()
 				.AddSingleton<LoggingService>()
 				.BuildServiceProvider();
 
+			Config config = services.GetRequiredService<Config>();
 			LoggingService loggingService = services.GetRequiredService<LoggingService>();
 			_client.Log += loggingService.LogAsync;
 			string databaseFilePath = services.GetRequiredService<DatabaseHelper>().DatabaseFilePath;
-			DiscordHelper discordHelper = services.GetRequiredService<DiscordHelper>();
+			IDiscordHelper discordHelper = services.GetRequiredService<IDiscordHelper>();
 			IWebService webService = services.GetRequiredService<IWebService>();
 
 			List<Exception> exceptionList = new();
 			Directory.CreateDirectory(Path.GetDirectoryName(databaseFilePath)!);
-			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(Config.DatabaseBackupChannelId).Result;
+			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(config.DatabaseBackupChannelId).Result;
 			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
 			await File.WriteAllTextAsync(databaseJson, databaseFilePath);
 
-			SocketGuild? ddPals = _client.GetGuild(Config.DdPalsId);
-			IMessageChannel? cronUpdateChannel = _client.GetChannel(Config.CronUpdateChannelId) as IMessageChannel;
+			SocketGuild? ddPals = _client.GetGuild(config.DdPalsId);
+			IMessageChannel? cronUpdateChannel = _client.GetChannel(config.CronUpdateChannelId) as IMessageChannel;
 
 			const string checkingString = "Checking for role updates...";
 			IUserMessage msg = await cronUpdateChannel!.SendMessageAsync(checkingString);
@@ -90,7 +92,7 @@ namespace ClubberDatabaseUpdateCron
 					{
 						await cronUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 
-						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(Config.ClubberExceptionsChannelId) as SocketTextChannel;
+						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(config.ClubberExceptionsChannelId) as SocketTextChannel;
 						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
 							await clubberExceptionsChannel!.SendMessageAsync(null, false, EmbedHelper.Exception(exc));
 

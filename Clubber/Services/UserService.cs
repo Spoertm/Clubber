@@ -9,9 +9,11 @@ namespace Clubber.Services
 	public class UserService
 	{
 		private readonly IDatabaseHelper _databaseHelper;
+		private readonly IConfig _config;
 
-		public UserService(IDatabaseHelper databaseHelper)
+		public UserService(IConfig config, IDatabaseHelper databaseHelper)
 		{
+			_config = config;
 			_databaseHelper = databaseHelper;
 		}
 
@@ -40,18 +42,18 @@ namespace Clubber.Services
 				return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
 			string message = userUsedCommandForThemselves
-				? $"You're not registered, {guildUser.Username}. Only a <@&{Config.RoleAssignerRoleId}> can register you.\nPlease refer to the message in <#{Config.RegisterChannelId}> for more info."
-				: $"`{guildUser.Username}` is not registered. Only a <@&{Config.RoleAssignerRoleId}> can register them.\nPlease refer to the message in <#{Config.RegisterChannelId}> for more info.";
+				? $"You're not registered, {guildUser.Username}. Only a <@&{_config.RoleAssignerRoleId}> can register you.\nPlease refer to the message in <#{_config.RegisterChannelId}> for more info."
+				: $"`{guildUser.Username}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.\nPlease refer to the message in <#{_config.RegisterChannelId}> for more info.";
 
 			return new(IsError: true, Message: message);
 		}
 
-		private static UserValidationResponse IsBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
+		private UserValidationResponse IsBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
 		{
 			if (guildUser.IsBot)
 				return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 
-			if (guildUser.RoleIds.All(rId => rId != Config.CheaterRoleId))
+			if (guildUser.RoleIds.All(rId => rId != _config.CheaterRoleId))
 				return new(IsError: false, Message: null);
 
 			string message = userUsedCommandForThemselves

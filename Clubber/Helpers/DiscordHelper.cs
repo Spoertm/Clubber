@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {
-	public class DiscordHelper
+	public class DiscordHelper : IDiscordHelper
 	{
 		private static SocketTextChannel? _clubberExceptionsChannel;
 		private readonly DiscordSocketClient _client;
 
-		public DiscordHelper(DiscordSocketClient client)
+		public DiscordHelper(IConfig config, DiscordSocketClient client)
 		{
-			_clubberExceptionsChannel = client.GetChannel(Config.ClubberExceptionsChannelId) as SocketTextChannel;
+			_clubberExceptionsChannel = client.GetChannel(config.ClubberExceptionsChannelId) as SocketTextChannel;
 			_client = client;
 		}
 
