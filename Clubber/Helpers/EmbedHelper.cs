@@ -117,7 +117,7 @@ namespace Clubber.Helpers
 				.WithDescription(
 					$@"✏️ Leaderboard name: {lbPlayer.Username}
 					🛂 Leaderboard ID: {lbPlayer.Id}
-					⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
+					⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
 					🥇 Rank: {lbPlayer.Rank}
 					💀 Kills: {lbPlayer.Kills}
 					♦️ Gems: {lbPlayer.Gems}
@@ -139,7 +139,7 @@ namespace Clubber.Helpers
 				.WithDescription(
 					$@"✏️ Leaderboard name: {lbPlayer.Username}
 					🛂 Leaderboard ID: {lbPlayer.Id}
-					⏱ Score: {lbPlayer.Time / 10000f:0.0000}s
+					⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
 					🥇 Rank: {lbPlayer.Rank}
 					💀 Kills: {lbPlayer.Kills}
 					💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
