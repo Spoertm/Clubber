@@ -87,7 +87,7 @@ namespace Clubber.BackgroundTasks
 				rank += 100;
 				await Task.Delay(50);
 			}
-			while (entries[^1].Time / 10000 > minimumScore);
+			while (entries[^1].Time / 10000 >= minimumScore);
 
 			return entries;
 		}
