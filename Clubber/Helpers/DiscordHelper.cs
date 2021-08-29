@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {
-	public class DiscordHelper
+	public class DiscordHelper : IDiscordHelper
 	{
 		private static SocketTextChannel? _clubberExceptionsChannel;
 		private readonly DiscordSocketClient _client;

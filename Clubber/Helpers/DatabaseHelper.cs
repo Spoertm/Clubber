@@ -13,11 +13,11 @@ namespace Clubber.Helpers
 	public class DatabaseHelper : IDatabaseHelper
 	{
 		private readonly IConfig _config;
-		private readonly DiscordHelper _discordHelper;
+		private readonly IDiscordHelper _discordHelper;
 		private readonly IIOService _ioService;
 		private readonly IWebService _webService;
 
-		public DatabaseHelper(IConfig config, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
+		public DatabaseHelper(IConfig config, IDiscordHelper discordHelper, IIOService ioService, IWebService webService)
 		{
 			_config = config;
 			_discordHelper = discordHelper;

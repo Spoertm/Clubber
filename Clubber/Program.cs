@@ -70,7 +70,7 @@ namespace Clubber
 						.AddSingleton<MessageHandlerService>()
 						.AddSingleton<IDatabaseHelper, DatabaseHelper>()
 						.AddSingleton<UpdateRolesHelper>()
-						.AddSingleton<DiscordHelper>()
+						.AddSingleton<IDiscordHelper, DiscordHelper>()
 						.AddSingleton<UserService>()
 						.AddSingleton<IIOService, IOService>()
 						.AddSingleton<IWebService, WebService>()

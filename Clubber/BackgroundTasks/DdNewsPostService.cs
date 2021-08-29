@@ -24,12 +24,17 @@ namespace Clubber.BackgroundTasks
 		private readonly IConfig _config;
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly IDatabaseHelper _databaseHelper;
-		private readonly DiscordHelper _discordHelper;
+		private readonly IDiscordHelper _discordHelper;
 		private readonly IIOService _ioService;
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
 
-		public DdNewsPostService(IConfig config, IDatabaseHelper databaseHelper, DiscordHelper discordHelper, IIOService ioService, IWebService webService)
+		public DdNewsPostService(
+			IConfig config,
+			IDatabaseHelper databaseHelper,
+			IDiscordHelper discordHelper,
+			IIOService ioService,
+			IWebService webService)
 		{
 			_config = config;
 			_databaseHelper = databaseHelper;
