@@ -41,6 +41,11 @@ namespace Clubber.BackgroundTasks
 			_discordHelper = discordHelper;
 			_ioService = ioService;
 			_webService = webService;
+
+			Directory.CreateDirectory(Path.GetDirectoryName(LbCachePath)!);
+			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(_config.LbEntriesCacheChannelId).Result;
+			string databaseJson = _webService.RequestStringAsync(latestAttachmentUrl).Result;
+			File.WriteAllText(LbCachePath, databaseJson);
 		}
 
 		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
