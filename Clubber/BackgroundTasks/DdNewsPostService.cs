@@ -113,8 +113,8 @@ namespace Clubber.BackgroundTasks
 			float newScore = entryTuple.NewEntry.Time / 10000f;
 			_sb.Append(userName)
 				.Append(" for getting a new PB of ")
-				.Append(newScore)
-				.Append("s! They beat their old PB of ")
+				.AppendFormat("{0:0.0000}", newScore)
+				.Append("seconds! They beat their old PB of ")
 				.AppendFormat("{0:0}", oldScore)
 				.Append("s, gaining ")
 				.Append(entryTuple.NewEntry.Rank - entryTuple.OldEntry.Rank)
@@ -150,8 +150,8 @@ namespace Clubber.BackgroundTasks
 				<div class=""goethe imagePadded"" style=""font-size: 50px; float: left;"">
 					<div class=""rank"" style=""color:#dddddd; width: 25px; float: left;"">{entry.Rank}</div>
 					{(countryCode.Length == 0 ? string.Empty : $"<div class=\"flag\" style=\"color:#dddddd; width: 55px; float: left;\"><img class=\"flag\" src=\"{flagPath}\"></div>")}
-					<div class=""leviathan"" style=""width: 700px; float: left;"">axe</div>
-					<div class=""leviathan"" style=""width: 185px; float: right;"">1163.3855</div>
+					<div class=""leviathan"" style=""width: 700px; float: left;"">{entry.Username}</div>
+					<div class=""leviathan"" style=""width: 185px; float: right;"">{entry.Time / 10000f:0.0000}</div>
 				</div>
 			</body>
 			</html>
