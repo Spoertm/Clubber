@@ -101,7 +101,6 @@ namespace Clubber.BackgroundTasks
 		{
 			_sb.Clear().Append("Congratulations to ");
 			string userName = entryTuple.NewEntry.Username;
-				if (guildUser is not null)
 			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
 				userName = guildUser.Mention;
 
