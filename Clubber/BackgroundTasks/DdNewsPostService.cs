@@ -1,7 +1,6 @@
 ﻿using Clubber.Configuration;
 using Clubber.Extensions;
 using Clubber.Helpers;
-using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using CoreHtmlToImage;
@@ -113,9 +112,9 @@ namespace Clubber.BackgroundTasks
 				.Append(" seconds! They beat their old PB of ")
 				.Append(Math.Truncate(oldScore))
 				.Append("s, ")
-				.Append(ranksChanged > 0 ? "gaining " : "but lost ")
+				.Append(ranksChanged >= 0 ? "gaining " : "but lost ")
 				.Append(Math.Abs(ranksChanged))
-				.Append(" ranks.");
+				.Append(Math.Abs(ranksChanged) == 1 ? " rank." : " ranks.");
 
 			bool new1000Entry = oldScore < 1000 && newScore >= 1000;
 			if (new1000Entry || oldScore < 1100 && newScore >= 1100)
