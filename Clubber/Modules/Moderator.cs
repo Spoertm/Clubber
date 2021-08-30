@@ -26,7 +26,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("editnewspost")]
-		[Summary("Allows you to edit a DD news post made by the bot. If not message ID is given, then the latest post will be edited.")]
+		[Summary("Allows you to edit a DD news post made by the bot. If no message ID is given, then the latest post will be edited.")]
 		[Remarks("editnewspost 123456789 This is the new text!")]
 		[Priority(1)]
 		public async Task EditDdNewsPost([Name("message ID")] ulong messageId, [Name("text")][Remainder] string newMessage)
@@ -49,7 +49,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("editnewspost")]
-		[Summary("Allows you to edit a DD news post made by the bot. If not message ID is given, then the latest post will be edited.")]
+		[Summary("Allows you to edit a DD news post made by the bot. If no message ID is given, then the latest post will be edited.")]
 		[Remarks("editnewspost This is the new text!")]
 		[Priority(0)]
 		public async Task EditDdNewsPost([Name("text")][Remainder] string newMessage)
