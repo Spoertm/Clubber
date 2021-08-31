@@ -3,7 +3,6 @@ using Clubber.Helpers;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,28 +37,20 @@ namespace ClubberDatabaseUpdateCron
 
 		private static async Task OnReady()
 		{
-			IServiceProvider services = new ServiceCollection()
-				.AddSingleton(_client)
-				.AddSingleton<IConfig, Config>()
-				.AddSingleton<DatabaseHelper>()
-				.AddSingleton<UpdateRolesHelper>()
-				.AddSingleton<IDiscordHelper, DiscordHelper>()
-				.AddSingleton<IWebService>()
-				.AddSingleton<LoggingService>()
-				.BuildServiceProvider();
+			IConfig config = new Config();
+			IWebService webService = new WebService();
+			LoggingService loggingService = new();
+			IDiscordHelper discordHelper = new DiscordHelper(config, _client);
+			IDatabaseHelper databaseHelper = new DatabaseHelper(config, discordHelper, new IOService(), webService);
+			UpdateRolesHelper updateRolesHelper = new(config, databaseHelper, webService);
 
-			Config config = services.GetRequiredService<Config>();
-			LoggingService loggingService = services.GetRequiredService<LoggingService>();
 			_client.Log += loggingService.LogAsync;
-			string databaseFilePath = services.GetRequiredService<DatabaseHelper>().DatabaseFilePath;
-			IDiscordHelper discordHelper = services.GetRequiredService<IDiscordHelper>();
-			IWebService webService = services.GetRequiredService<IWebService>();
 
 			List<Exception> exceptionList = new();
-			Directory.CreateDirectory(Path.GetDirectoryName(databaseFilePath)!);
+			Directory.CreateDirectory(Path.GetDirectoryName(databaseHelper.DatabaseFilePath)!);
 			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(config.DatabaseBackupChannelId).Result;
 			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
-			await File.WriteAllTextAsync(databaseJson, databaseFilePath);
+			await File.WriteAllTextAsync(databaseJson, databaseHelper.DatabaseFilePath);
 
 			SocketGuild? ddPals = _client.GetGuild(config.DdPalsId);
 			IMessageChannel? cronUpdateChannel = _client.GetChannel(config.CronUpdateChannelId) as IMessageChannel;
@@ -75,7 +66,7 @@ namespace ClubberDatabaseUpdateCron
 			{
 				try
 				{
-					(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await services.GetRequiredService<UpdateRolesHelper>().UpdateRolesAndDb(ddPals.Users);
+					(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
 
 					await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{repsonseMessage}");
 
