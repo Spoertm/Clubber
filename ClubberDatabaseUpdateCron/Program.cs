@@ -46,21 +46,18 @@ namespace ClubberDatabaseUpdateCron
 
 			_client.Log += loggingService.LogAsync;
 
-			List<Exception> exceptionList = new();
 			Directory.CreateDirectory(Path.GetDirectoryName(databaseHelper.DatabaseFilePath)!);
 			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(config.DatabaseBackupChannelId).Result;
 			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
 			await File.WriteAllTextAsync(databaseJson, databaseHelper.DatabaseFilePath);
 
-			SocketGuild? ddPals = _client.GetGuild(config.DdPalsId);
-			IMessageChannel? cronUpdateChannel = _client.GetChannel(config.CronUpdateChannelId) as IMessageChannel;
+			SocketGuild ddPals = _client.GetGuild(config.DdPalsId)!;
+			SocketTextChannel cronUpdateChannel = discordHelper.GetTextChannel(config.CronUpdateChannelId);
+			IUserMessage msg = await cronUpdateChannel.SendMessageAsync("Checking for role updates...");
 
-			const string checkingString = "Checking for role updates...";
-			IUserMessage msg = await cronUpdateChannel!.SendMessageAsync(checkingString);
-
+			List<Exception> exceptionList = new();
 			int tries = 0;
 			const int maxTries = 5;
-
 			bool success = false;
 			do
 			{
@@ -68,7 +65,7 @@ namespace ClubberDatabaseUpdateCron
 				{
 					(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
 
-					await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{repsonseMessage}");
+					await msg.ModifyAsync(m => m.Content = $"{m.Content}\n{repsonseMessage}");
 
 					for (int i = 0; i < responseRoleUpdateEmbeds.Length; i++)
 						await cronUpdateChannel.SendMessageAsync(null, false, responseRoleUpdateEmbeds[i]);
