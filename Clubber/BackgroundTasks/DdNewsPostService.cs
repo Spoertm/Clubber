@@ -47,7 +47,7 @@ namespace Clubber.BackgroundTasks
 			File.WriteAllText(LbCachePath, databaseJson);
 		}
 
-		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
+		protected override TimeSpan Interval => TimeSpan.FromMinutes(1);
 		private static string LbCachePath => Path.Combine(AppContext.BaseDirectory, "LeaderboardCache.json");
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
