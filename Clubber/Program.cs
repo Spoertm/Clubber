@@ -87,7 +87,9 @@ namespace Clubber
 			_commands.Log += loggingService.LogAsync;
 
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), host.Services);
+#pragma warning disable 4014
 			Task.Run(async () => await host.RunAsync(_source.Token), _source.Token);
+#pragma warning restore 4014
 		}
 
 		public static void StopBot()
