@@ -33,7 +33,7 @@ namespace Clubber.Helpers
 		public async Task<string> GetLatestAttachmentUrlFromChannel(ulong channelId)
 		{
 			SocketTextChannel channel = GetTextChannel(channelId);
-			IAttachment? latestAttachment = (await channel.GetMessagesAsync(1).FlattenAsync())
+			IAttachment latestAttachment = (await channel.GetMessagesAsync(1).FlattenAsync())
 				.FirstOrDefault()?
 				.Attachments
 				.FirstOrDefault() ?? throw new($"No files in {channel.Name} channel.");
