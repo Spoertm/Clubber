@@ -49,7 +49,7 @@ namespace ClubberDatabaseUpdateCron
 			Directory.CreateDirectory(Path.GetDirectoryName(databaseHelper.DatabaseFilePath)!);
 			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(config.DatabaseBackupChannelId).Result;
 			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
-			await File.WriteAllTextAsync(databaseJson, databaseHelper.DatabaseFilePath);
+			await File.WriteAllTextAsync(databaseHelper.DatabaseFilePath, databaseJson);
 
 			SocketGuild ddPals = _client.GetGuild(config.DdPalsId)!;
 			SocketTextChannel cronUpdateChannel = discordHelper.GetTextChannel(config.CronUpdateChannelId);
