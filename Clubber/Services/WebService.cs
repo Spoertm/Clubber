@@ -11,8 +11,10 @@ namespace Clubber.Services
 {
 	public class WebService : IWebService
 	{
+#pragma warning disable S1075
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
 		private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";
+#pragma warning restore S1075
 		private readonly HttpClient _httpClient = new();
 
 		public async Task<string> RequestStringAsync(string url)
