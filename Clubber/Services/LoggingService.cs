@@ -24,8 +24,12 @@ namespace Clubber.Services
 			await File.AppendAllTextAsync(LogFile, $"{logText}\n\n");
 
 			CommandException? commandException = logMessage.Exception as CommandException;
-			if (commandException?.InnerException is CustomException customException)
-				await commandException.Context.Channel.SendMessageAsync(customException.Message);
+			if (commandException is not null)
+			{
+				await commandException.Context.Channel.SendMessageAsync("Catastrophic error occured.");
+				if (commandException.InnerException is CustomException customException)
+					await commandException.Context.Channel.SendMessageAsync(customException.Message);
+			}
 
 			Embed exceptionEmbed = EmbedHelper.Exception(logMessage, commandException?.Context?.Message);
 			await DiscordHelper.LogExceptionEmbed(exceptionEmbed);
