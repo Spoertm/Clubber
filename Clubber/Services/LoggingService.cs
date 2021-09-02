@@ -20,14 +20,14 @@ namespace Clubber.Services
 
 		public async Task LogAsync(LogMessage logMessage)
 		{
-			ICommandContext? context = (logMessage.Exception as CommandException)?.Context;
-			if (logMessage.Exception?.InnerException is CustomException customException && context is not null)
-				await context.Channel.SendMessageAsync(customException.Message);
-
 			string logText = $"{DateTime.Now:hh:mm:ss} [{logMessage.Severity}] {logMessage.Source}: {logMessage.Exception?.ToString() ?? logMessage.Message}";
 			await File.AppendAllTextAsync(LogFile, $"{logText}\n\n");
 
-			Embed exceptionEmbed = EmbedHelper.Exception(logMessage, context?.Message);
+			CommandException? commandException = logMessage.Exception as CommandException;
+			if (commandException?.InnerException is CustomException customException)
+				await commandException.Context.Channel.SendMessageAsync(customException.Message);
+
+			Embed exceptionEmbed = EmbedHelper.Exception(logMessage, commandException?.Context?.Message);
 			await DiscordHelper.LogExceptionEmbed(exceptionEmbed);
 		}
 	}
