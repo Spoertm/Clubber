@@ -47,15 +47,16 @@ namespace ClubberDatabaseUpdateCron
 			_client.Log += loggingService.LogAsync;
 
 			Directory.CreateDirectory(Path.GetDirectoryName(databaseHelper.DatabaseFilePath)!);
-			string latestAttachmentUrl = discordHelper.GetLatestAttachmentUrlFromChannel(config.DatabaseBackupChannelId).Result;
-			string databaseJson = webService.RequestStringAsync(latestAttachmentUrl).Result;
+			string latestAttachmentUrl = await discordHelper.GetLatestAttachmentUrlFromChannel(config.DatabaseBackupChannelId);
+			string databaseJson = await webService.RequestStringAsync(latestAttachmentUrl);
 			await File.WriteAllTextAsync(databaseHelper.DatabaseFilePath, databaseJson);
 
-			SocketGuild ddPals = _client.GetGuild(config.DdPalsId)!;
+			SocketGuild ddPals = _client.GetGuild(config.DdPalsId) ?? throw new($"DD Pals server not found with ID {config.DdPalsId}");
 			SocketTextChannel cronUpdateChannel = discordHelper.GetTextChannel(config.CronUpdateChannelId);
 			IUserMessage msg = await cronUpdateChannel.SendMessageAsync("Checking for role updates...");
 
 			List<Exception> exceptionList = new();
+			SocketTextChannel clubberExceptionsChannel = discordHelper.GetTextChannel(config.ClubberExceptionsChannelId);
 			int tries = 0;
 			const int maxTries = 5;
 			bool success = false;
@@ -64,25 +65,20 @@ namespace ClubberDatabaseUpdateCron
 				try
 				{
 					(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
-
-					await msg.ModifyAsync(m => m.Content = $"{m.Content}\n{repsonseMessage}");
-
+					await msg.ModifyAsync(m => m.Content = repsonseMessage);
 					for (int i = 0; i < responseRoleUpdateEmbeds.Length; i++)
-						await cronUpdateChannel.SendMessageAsync(null, false, responseRoleUpdateEmbeds[i]);
+						await cronUpdateChannel.SendMessageAsync(embed: responseRoleUpdateEmbeds[i]);
 
 					success = true;
 				}
 				catch (Exception ex)
 				{
 					exceptionList.Add(ex);
-					tries++;
-					if (tries > maxTries)
+					if (tries++ > maxTries)
 					{
 						await cronUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
-
-						SocketTextChannel? clubberExceptionsChannel = _client.GetChannel(config.ClubberExceptionsChannelId) as SocketTextChannel;
 						foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
-							await clubberExceptionsChannel!.SendMessageAsync(null, false, EmbedHelper.Exception(exc));
+							await clubberExceptionsChannel.SendMessageAsync(embed: EmbedHelper.Exception(exc));
 
 						break;
 					}
