@@ -143,6 +143,7 @@ namespace Clubber.BackgroundTasks
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
 				flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", "00.png");
 
+			string flagBase64 = Convert.ToBase64String(await File.ReadAllBytesAsync(flagPath));
 			string html = $@"
 			<html>
 			<body style=""background-color:black;"">
@@ -151,7 +152,7 @@ namespace Clubber.BackgroundTasks
 						<thead>
 						<tr style=""font-size: 50px;"">
 						    <td><div class=""rank"" style=""color:#dddddd;"">{entry.Rank}</div></td>
-						    <td><div class=""flag""><img class=""flag"" src=""{flagPath}""></div></td>
+						    <td><div class=""flag""><img class=""flag"" src=""data:image/png;base64,{flagBase64}""></div></td>
 						    <td><div class=""leviathan name"" style=""width: 700px"">{entry.Username}</div></td>
 						    <td><div class=""leviathan"">{entry.Time / 10000d:0.0000}</div></td>
 						</tr>
