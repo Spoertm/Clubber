@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Clubber.Services;
+using Discord;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +9,10 @@ namespace Clubber.BackgroundTasks
 {
 	public abstract class AbstractBackgroundService : BackgroundService
 	{
+		private readonly LoggingService _loggingService;
+
+		protected AbstractBackgroundService(LoggingService loggingService) => _loggingService = loggingService;
+
 		protected abstract TimeSpan Interval { get; }
 
 		protected abstract Task ExecuteTaskAsync(CancellationToken stoppingToken);
@@ -15,7 +21,14 @@ namespace Clubber.BackgroundTasks
 		{
 			while (!stoppingToken.IsCancellationRequested)
 			{
-				await ExecuteTaskAsync(stoppingToken);
+				try
+				{
+					await ExecuteTaskAsync(stoppingToken);
+				}
+				catch (Exception exception)
+				{
+					await _loggingService.LogAsync(new(LogSeverity.Error, "AbstractBackgroundService", string.Empty, exception));
+				}
 
 				if (Interval.TotalMilliseconds > 0)
 					await Task.Delay(Interval, stoppingToken);

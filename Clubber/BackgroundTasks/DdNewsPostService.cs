@@ -33,7 +33,9 @@ namespace Clubber.BackgroundTasks
 			IDatabaseHelper databaseHelper,
 			IDiscordHelper discordHelper,
 			IIOService ioService,
-			IWebService webService)
+			IWebService webService,
+			LoggingService loggingService)
+			: base(loggingService)
 		{
 			_config = config;
 			_databaseHelper = databaseHelper;
