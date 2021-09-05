@@ -27,6 +27,7 @@ namespace Clubber.BackgroundTasks
 		private readonly IIOService _ioService;
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
+		private readonly HtmlConverter _htmlConverter = new();
 
 		public DdNewsPostService(
 			IConfig config,
@@ -161,7 +162,7 @@ namespace Clubber.BackgroundTasks
 			</html>
 			{ddinfoStyleCss}";
 
-			byte[] bytes = new HtmlConverter().FromHtmlString(html, 1100, ImageFormat.Png);
+			byte[] bytes = _htmlConverter.FromHtmlString(html, 1100, ImageFormat.Png);
 			return new MemoryStream(bytes);
 		}
 	}
