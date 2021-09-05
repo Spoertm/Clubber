@@ -136,7 +136,7 @@ namespace Clubber.BackgroundTasks
 
 		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
 		{
-			string ddinfoStyleCss = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdInfoStyleCss.txt"));
+			string ddinfoStyleCss = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyleCss.txt"));
 			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
 			string flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", $"{countryCode}.png");
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
