@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using ImageFormat = CoreHtmlToImage.ImageFormat;
 
 namespace Clubber.BackgroundTasks
@@ -153,7 +154,7 @@ namespace Clubber.BackgroundTasks
 						<tr style=""font-size: 50px;"">
 						    <td><div class=""rank"" style=""color:#dddddd;"">{entry.Rank}</div></td>
 						    <td><div class=""flag""><img class=""flag"" src=""data:image/png;base64,{flagBase64}""></div></td>
-						    <td><div class=""leviathan name"" style=""width: 700px"">{entry.Username}</div></td>
+						    <td><div class=""leviathan name"" style=""width: 700px"">{HttpUtility.HtmlEncode(entry.Username)}</div></td>
 						    <td><div class=""leviathan"">{entry.Time / 10000d:0.0000}</div></td>
 						</tr>
 						</thead>
