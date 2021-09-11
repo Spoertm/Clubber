@@ -83,6 +83,8 @@ namespace Clubber.BackgroundTasks
 				await _ioService.WriteObjectToFile(newEntries, LbCachePath);
 				await _discordHelper.SendFileToChannel(LbCachePath, _config.LbEntriesCacheChannelId);
 			}
+
+			_sb.Clear();
 		}
 
 		private async Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
@@ -102,7 +104,6 @@ namespace Clubber.BackgroundTasks
 
 		private string GetDdNewsMessage(List<EntryResponse> newEntries, (EntryResponse OldEntry, EntryResponse NewEntry) entryTuple)
 		{
-			_sb.Clear().Append("Congratulations to ");
 			string userName = entryTuple.NewEntry.Username;
 			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
 				userName = guildUser.Mention;
@@ -110,7 +111,9 @@ namespace Clubber.BackgroundTasks
 			double oldScore = entryTuple.OldEntry.Time / 10000d;
 			double newScore = entryTuple.NewEntry.Time / 10000d;
 			int ranksChanged = entryTuple.OldEntry.Rank - entryTuple.NewEntry.Rank;
-			_sb.Append(userName)
+			_sb.Clear()
+				.Append("Congratulations to ")
+				.Append(userName)
 				.Append(" for getting a new PB of ")
 				.AppendFormat("{0:0.0000}", newScore)
 				.Append(" seconds! They beat their old PB of ")
