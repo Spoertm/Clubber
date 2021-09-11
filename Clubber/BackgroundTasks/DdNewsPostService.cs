@@ -138,33 +138,21 @@ namespace Clubber.BackgroundTasks
 
 		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
 		{
-			string ddinfoStyleCss = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyleCss.txt"));
 			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
 			string flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", $"{countryCode}.png");
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
 				flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", "00.png");
 
+			string ddinfoStyleHtml = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyle.html"));
 			string flagBase64 = Convert.ToBase64String(await File.ReadAllBytesAsync(flagPath));
-			string html = $@"
-			<html>
-			<body style=""background-color:black;"">
-				<div class=""goethe imagepadded"">
-					<table>
-						<thead>
-						<tr style=""font-size: 50px;"">
-						    <td><div class=""rank"" style=""color:#dddddd;"">{entry.Rank}</div></td>
-						    <td><div class=""flag""><img class=""flag"" src=""data:image/png;base64,{flagBase64}""></div></td>
-						    <td><div class=""leviathan name"" style=""width: 700px"">{HttpUtility.HtmlEncode(entry.Username)}</div></td>
-						    <td><div class=""leviathan"">{entry.Time / 10000d:0.0000}</div></td>
-						</tr>
-						</thead>
-					</table>
-				</div>
-			</body>
-			</html>
-			{ddinfoStyleCss}";
+			string formattedHtml = string.Format(
+				ddinfoStyleHtml,
+				entry.Rank,
+				flagBase64,
+				HttpUtility.HtmlEncode(entry.Username),
+				$"{entry.Time / 10000d:0.0000}");
 
-			byte[] bytes = _htmlConverter.FromHtmlString(html, 1100, ImageFormat.Png);
+			byte[] bytes = _htmlConverter.FromHtmlString(formattedHtml, 1100, ImageFormat.Png);
 			return new MemoryStream(bytes);
 		}
 	}

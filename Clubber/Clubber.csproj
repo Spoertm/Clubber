@@ -27,7 +27,7 @@
     <None Update="Data\Flags\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\DdinfoStyleCss.txt">
+    <None Update="Data\DdinfoStyle.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\Token.txt">
