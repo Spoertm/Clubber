@@ -66,8 +66,10 @@ namespace Clubber.Helpers
 				.WithTitle(msg.Exception?.GetType().Name ?? "Exception thrown")
 				.AddField("Severity", msg.Severity, true)
 				.AddField("Source", msg.Source, true)
-				.AddField("User message", Format.Code(userMessage?.Content ?? "null"))
 				.WithCurrentTimestamp();
+
+			if (userMessage is not null)
+				exceptionEmbed.AddField("User message", Format.Code(userMessage.Content));
 
 			Exception? ex = msg.Exception;
 
