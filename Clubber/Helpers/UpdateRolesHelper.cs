@@ -64,8 +64,6 @@ namespace Clubber.Helpers
 			(int nonMemberCount, List<UpdateRolesResponse> updateRolesResponses) = await ExecuteRolesAndDbUpdate(guildUsers);
 			sw.Stop();
 
-			string message = string.Empty;
-
 			int updatedUsers = 0;
 			List<Embed> embedList = new();
 			foreach (UpdateRolesResponse updateResponse in updateRolesResponses.Where(ur => ur.Success))
@@ -74,13 +72,14 @@ namespace Clubber.Helpers
 				updatedUsers++;
 			}
 
+			string message;
 			if (updatedUsers > 0)
-				message += $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms.\n";
+				message = $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms.";
 			else
-				message += $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.\n";
+				message = $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
 
 			if (nonMemberCount > 0)
-				message += $"ℹ️ {nonMemberCount} user(s) are registered but aren't in the server.";
+				message += $"\nℹ️ {nonMemberCount} user(s) are registered but aren't in the server.";
 
 			return new(message, embedList.ToArray());
 		}
