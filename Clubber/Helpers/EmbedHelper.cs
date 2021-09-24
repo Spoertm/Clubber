@@ -117,15 +117,15 @@ namespace Clubber.Helpers
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 				.WithDescription(
-					$@"✏️ Leaderboard name: {lbPlayer.Username}
-					🛂 Leaderboard ID: {lbPlayer.Id}
-					⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
-					🥇 Rank: {lbPlayer.Rank}
-					💀 Kills: {lbPlayer.Kills}
-					♦️ Gems: {lbPlayer.Gems}
-					🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+$@"✏️ Leaderboard name: {lbPlayer.Username}
+🛂 Leaderboard ID: {lbPlayer.Id}
+⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
+🥇 Rank: {lbPlayer.Rank}
+💀 Kills: {lbPlayer.Kills}
+♦️ Gems: {lbPlayer.Gems}
+🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 
-					• For full stats, use `statsf`.")
+• For full stats, use `statsf`.")
 				.Build();
 		}
 
@@ -139,23 +139,23 @@ namespace Clubber.Helpers
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 				.WithDescription(
-					$@"✏️ Leaderboard name: {lbPlayer.Username}
-					🛂 Leaderboard ID: {lbPlayer.Id}
-					⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
-					🥇 Rank: {lbPlayer.Rank}
-					💀 Kills: {lbPlayer.Kills}
-					💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
-					♦️ Gems: {lbPlayer.Gems}
-					♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
-					⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
-					🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
-					🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
-					🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
-					🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
-					🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
-					🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
-					😵 Total deaths: {lbPlayer.DeathsTotal}
-					😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}")
+$@"✏️ Leaderboard name: {lbPlayer.Username}
+🛂 Leaderboard ID: {lbPlayer.Id}
+⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
+🥇 Rank: {lbPlayer.Rank}
+💀 Kills: {lbPlayer.Kills}
+💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
+♦️ Gems: {lbPlayer.Gems}
+♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
+⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
+🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
+🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
+🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
+🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
+🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
+😵 Total deaths: {lbPlayer.DeathsTotal}
+😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}")
 				.Build();
 		}
 
