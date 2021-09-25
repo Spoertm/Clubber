@@ -117,8 +117,10 @@ namespace Clubber.BackgroundTasks
 				.Append(" for getting a new PB of ")
 				.AppendFormat("{0:0.0000}", newScore)
 				.Append(" seconds! They beat their old PB of ")
-				.Append(Math.Truncate(oldScore))
-				.Append("s, ")
+				.AppendFormat("{0:0.0000}", oldScore)
+				.Append("s (**+")
+				.AppendFormat("{0:0.0000}", newScore - oldScore)
+				.Append("s**), ")
 				.Append(ranksChanged >= 0 ? "gaining " : "but lost ")
 				.Append(Math.Abs(ranksChanged))
 				.Append(Math.Abs(ranksChanged) == 1 ? " rank." : " ranks.");
