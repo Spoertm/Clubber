@@ -89,9 +89,8 @@ namespace ClubberDatabaseUpdateCron
 			}
 			while (!success);
 
-			await _client.StopAsync();
-			Thread.Sleep(1000);
 			await _client.LogoutAsync();
+			await _client.StopAsync();
 			Environment.Exit(0);
 		}
 	}
