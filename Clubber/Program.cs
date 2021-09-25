@@ -42,9 +42,8 @@ namespace Clubber
 			}
 			catch (TaskCanceledException)
 			{
-				await _client.StopAsync();
-				Thread.Sleep(1000);
 				await _client.LogoutAsync();
+				await _client.StopAsync();
 			}
 			finally
 			{
