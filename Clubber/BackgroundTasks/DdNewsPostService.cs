@@ -69,6 +69,9 @@ namespace Clubber.BackgroundTasks
 			bool cacheIsToBeRefreshed = newEntries.Count > oldEntries.Count;
 			foreach ((EntryResponse oldEntry, EntryResponse newEntry) in entryTuples)
 			{
+				if (oldEntry.Time != newEntry.Time)
+					cacheIsToBeRefreshed = true;
+
 				if (oldEntry.Time == newEntry.Time || newEntry.Time / 10000 < 1000)
 					continue;
 
