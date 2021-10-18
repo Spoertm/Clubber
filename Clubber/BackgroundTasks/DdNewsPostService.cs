@@ -59,6 +59,9 @@ namespace Clubber.BackgroundTasks
 			_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.DdNewsChannelId);
 			List<EntryResponse> oldEntries = (await _ioService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries(_minimumScore);
+			if (newEntries.Count == 0)
+				return;
+
 			(EntryResponse OldEntry, EntryResponse NewEntry)[] entryTuples = oldEntries.Join(
 					inner: newEntries,
 					outerKeySelector: oldEntry => oldEntry.Id,
@@ -96,7 +99,15 @@ namespace Clubber.BackgroundTasks
 			int rank = 1;
 			do
 			{
-				entries.AddRange((await _webService.GetLeaderboardEntries(rank)).Entries);
+				try
+				{
+					entries.AddRange((await _webService.GetLeaderboardEntries(rank)).Entries);
+				}
+				catch
+				{
+					return new();
+				}
+
 				rank += 100;
 				await Task.Delay(50);
 			}
