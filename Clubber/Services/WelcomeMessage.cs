@@ -38,8 +38,8 @@ namespace Clubber.Services
 			if (!response.Success)
 				return;
 
-			if (joiningUser.Guild.GetChannel(_config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
-				await registerChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
+			if (joiningUser.Guild.GetChannel(_config.CronUpdateChannelId) is SocketTextChannel logsChannel)
+				await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
 		}
 
 		private async Task PostWelcomeMessageAndGiveUnregRole(SocketGuildUser joiningUser)
