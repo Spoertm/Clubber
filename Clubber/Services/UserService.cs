@@ -1,4 +1,4 @@
-﻿using Clubber.Configuration;
+using Clubber.Configuration;
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Discord;
@@ -41,9 +41,13 @@ namespace Clubber.Services
 			if (guildUser.GuildPermissions.ManageRoles)
 				return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
+			bool userHasUnregRole = guildUser.RoleIds.Contains(_config.UnregisteredRoleId);
 			string message = userUsedCommandForThemselves
-				? $"You're not registered, {guildUser.Username}. Only a <@&{_config.RoleAssignerRoleId}> can register you.\nPlease refer to the message in <#{_config.RegisterChannelId}> for more info."
-				: $"`{guildUser.Username}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.\nPlease refer to the message in <#{_config.RegisterChannelId}> for more info.";
+				? $"You're not registered, {guildUser.Username}. Only a <@&{_config.RoleAssignerRoleId}> can register you."
+				: $"`{guildUser.Username}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.";
+
+			if (userHasUnregRole)
+				message += $"\nPlease refer to the message in <#{_config.RegisterChannelId}> for more info.";
 
 			return new(IsError: true, Message: message);
 		}
