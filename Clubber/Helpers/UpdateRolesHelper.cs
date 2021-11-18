@@ -1,4 +1,4 @@
-﻿using Clubber.Configuration;
+using Clubber.Configuration;
 using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
@@ -16,6 +16,9 @@ namespace Clubber.Helpers
 	{
 		private static readonly Dictionary<int, ulong> _scoreRoles = new()
 		{
+			[1230] = 903024433315323915,
+			[1220] = 903024200049102948,
+			[1210] = 903023707121926195,
 			[1200] = 626477161825697803,
 			[1190] = 860585008394010634,
 			[1180] = 728017461911355454,
