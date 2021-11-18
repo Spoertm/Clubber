@@ -1,4 +1,4 @@
-﻿using Clubber.Helpers;
+using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
@@ -35,5 +35,9 @@ namespace Clubber.Modules
 			for (int i = 0; i < roleUpdateEmbeds.Length; i++)
 				await ReplyAsync(null, false, roleUpdateEmbeds[i]);
 		}
+
+		[Command("welcome")]
+		[RequireContext(ContextType.Guild)]
+		public async Task PostWelcome() => await Context.Channel.SendMessageAsync(embed: EmbedHelper.WelcomeMessage());
 	}
 }
