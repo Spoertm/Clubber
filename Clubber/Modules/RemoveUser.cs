@@ -1,4 +1,4 @@
-﻿using Clubber.Helpers;
+using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace Clubber.Modules
 {
 	[Name("Database")]
-	[Group("remove")]
+	[Group("unregister")]
+	[Alias("remove")]
 	[Summary("Removes a user from the database.")]
 	[RequireUserPermission(GuildPermission.ManageRoles)]
 	[RequireContext(ContextType.Guild)]
@@ -21,7 +22,7 @@ namespace Clubber.Modules
 		}
 
 		[Command]
-		[Remarks("remove clubber\nremove <@743431502842298368>")]
+		[Remarks("+unregister clubber\nunregister <@743431502842298368>")]
 		[Priority(1)]
 		public async Task RemoveByName([Name("name | tag")][Remainder] string name)
 		{
@@ -36,7 +37,7 @@ namespace Clubber.Modules
 		}
 
 		[Command("id")]
-		[Remarks("remove id 743431502842298368")]
+		[Remarks("unregister id 743431502842298368")]
 		[Priority(2)]
 		public async Task RemoveByDiscordId([Name("Discord ID")] ulong discordId)
 		{
