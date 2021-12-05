@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Globalization;
 using System.IO;
@@ -18,32 +19,36 @@ namespace Clubber
 {
 	public static class Program
 	{
-		private static DiscordSocketClient _client = null!;
-		private static CommandService _commands = null!;
 		private static readonly CancellationTokenSource _source = new();
 
-		private static void Main() => RunBotAsync().GetAwaiter().GetResult();
-
-		private static async Task RunBotAsync()
+		private static async Task Main()
 		{
 			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+			AppDomain.CurrentDomain.ProcessExit += (_, _) => StopBot();
 
-			_client = new(new() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
-			_commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
+			DiscordSocketClient client = new(new() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
+			CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 
-			await _client.LoginAsync(TokenType.Bot, GetToken());
-			await _client.StartAsync();
-			await _client.SetGameAsync("your roles", null, ActivityType.Watching);
-			_client.Ready += OnReadyAsync;
+			IHost host = ConfigureServices(client, commands).Build();
+
+			await client.LoginAsync(TokenType.Bot, GetToken());
+			await client.StartAsync();
+			await client.SetGameAsync("your roles", null, ActivityType.Watching);
+			await commands.AddModulesAsync(Assembly.GetEntryAssembly(), host.Services);
+
+			host.Services.GetRequiredService<MessageHandlerService>();
+			host.Services.GetRequiredService<IDatabaseHelper>();
+			host.Services.GetRequiredService<WelcomeMessage>();
+			host.Services.GetRequiredService<LoggingService>();
 
 			try
 			{
-				await Task.Delay(-1, _source.Token);
+				await host.RunAsync(_source.Token);
 			}
 			catch (TaskCanceledException)
 			{
-				await _client.LogoutAsync();
-				await _client.StopAsync();
+				await client.LogoutAsync();
+				await client.StopAsync();
 			}
 			finally
 			{
@@ -57,14 +62,11 @@ namespace Clubber
 			return File.ReadAllText(tokenPath);
 		}
 
-		private static async Task OnReadyAsync()
-		{
-			_client.Ready -= OnReadyAsync;
-
-			IHost host = Host.CreateDefaultBuilder()
+		private static IHostBuilder ConfigureServices(DiscordSocketClient client, CommandService commands)
+			=> Host.CreateDefaultBuilder()
 				.ConfigureServices(services =>
-					services.AddSingleton(_client)
-						.AddSingleton(_commands)
+					services.AddSingleton(client)
+						.AddSingleton(commands)
 						.AddSingleton<IConfig, Config>()
 						.AddSingleton<MessageHandlerService>()
 						.AddSingleton<IDatabaseHelper, DatabaseHelper>()
@@ -76,24 +78,9 @@ namespace Clubber
 						.AddSingleton<LoggingService>()
 						.AddSingleton<WelcomeMessage>()
 						.AddHostedService<DdNewsPostService>())
-				.Build();
-
-			host.Services.GetRequiredService<MessageHandlerService>();
-			host.Services.GetRequiredService<IDatabaseHelper>();
-			host.Services.GetRequiredService<WelcomeMessage>();
-			LoggingService loggingService = host.Services.GetRequiredService<LoggingService>();
-			_client.Log += loggingService.LogAsync;
-			_commands.Log += loggingService.LogAsync;
-
-			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), host.Services);
-#pragma warning disable 4014
-			Task.Run(async () => await host.RunAsync(_source.Token), _source.Token);
-#pragma warning restore 4014
-		}
+				.ConfigureLogging(logging => logging.ClearProviders());
 
 		public static void StopBot()
-		{
-			_source.Cancel();
-		}
+			=> _source.Cancel();
 	}
 }

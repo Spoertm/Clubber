@@ -2,6 +2,7 @@
 using Clubber.Models;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -10,8 +11,10 @@ namespace Clubber.Services
 {
 	public class LoggingService
 	{
-		public LoggingService()
+		public LoggingService(DiscordSocketClient client, CommandService commands)
 		{
+			client.Log += LogAsync;
+			commands.Log += LogAsync;
 			Directory.CreateDirectory(LogDirectory);
 		}
 
