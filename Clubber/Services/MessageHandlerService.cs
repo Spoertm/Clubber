@@ -30,17 +30,17 @@ namespace Clubber.Services
 				return;
 
 			int argumentPos = 0;
-			if (message.HasStringPrefix(_config.Prefix, ref argumentPos) || message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
+			if (!message.HasStringPrefix(_config.Prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
+				return;
+
+			SocketCommandContext context = new(_client, message);
+			IResult result = await _commands.ExecuteAsync(context, argumentPos, _services);
+			if (!result.IsSuccess && result.Error.HasValue)
 			{
-				SocketCommandContext context = new(_client, message);
-				IResult result = await _commands.ExecuteAsync(context, argumentPos, _services);
-				if (!result.IsSuccess && result.Error.HasValue)
-				{
-					if (result.Error.Value == CommandError.UnknownCommand)
-						await message.AddReactionAsync(new Emoji("❔"));
-					else
-						await context.Channel.SendMessageAsync(result.ErrorReason);
-				}
+				if (result.Error.Value == CommandError.UnknownCommand)
+					await message.AddReactionAsync(new Emoji("❔"));
+				else
+					await context.Channel.SendMessageAsync(result.ErrorReason);
 			}
 		}
 	}
