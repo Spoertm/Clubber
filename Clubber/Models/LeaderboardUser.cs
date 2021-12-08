@@ -1,6 +1,6 @@
 ﻿namespace Clubber.Models
 {
-	public sealed record LeaderboardUser(
+	public record struct LeaderboardUser(
 		string Username,
 		int Rank,
 		int Id,

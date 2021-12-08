@@ -119,7 +119,7 @@ namespace Clubber.Helpers
 		{
 			try
 			{
-				int lbId = _databaseHelper.GetDdUserByDiscordId(user.Id)!.LeaderboardId;
+				int lbId = _databaseHelper.GetDdUserByDiscordId(user.Id)!.Value.LeaderboardId;
 				List<LeaderboardUser> lbPlayerList = await _webService.GetLbPlayers(new[] { (uint)lbId });
 
 				return await ExecuteRoleUpdate(user, lbPlayerList[0]);

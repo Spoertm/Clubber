@@ -64,7 +64,7 @@ namespace Clubber.Helpers
 			if (toRemove is null)
 				return false;
 
-			Database.Remove(toRemove);
+			Database.Remove(toRemove.Value);
 			await UpdateAndBackupDbFile($"Remove {user.Username}\n{toRemove}\nTotal users: {Database.Count}");
 			return true;
 		}
@@ -75,7 +75,7 @@ namespace Clubber.Helpers
 			if (toRemove is null)
 				return false;
 
-			Database.Remove(toRemove);
+			Database.Remove(toRemove.Value);
 			await UpdateAndBackupDbFile($"Remove {toRemove}\nTotal users: {Database.Count}");
 			return true;
 		}

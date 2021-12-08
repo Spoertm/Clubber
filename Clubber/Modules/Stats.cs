@@ -62,7 +62,7 @@ namespace Clubber.Modules
 				return;
 			}
 
-			await ShowStats(ddUser, user);
+			await ShowStats(ddUser.Value, user);
 		}
 
 		private async Task CheckUserAndShowStats(SocketGuildUser user)
@@ -75,7 +75,7 @@ namespace Clubber.Modules
 				return;
 			}
 
-			await ShowStats(ddUser, user);
+			await ShowStats(ddUser.Value, user);
 		}
 
 		private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)

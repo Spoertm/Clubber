@@ -1,38 +1,24 @@
-﻿// Taken from devildaggers.info
+﻿// Taken from devildaggers.info and modified
 // Credit goes to Noah Stolk https://github.com/NoahStolk
 
 namespace Clubber.Models.Responses
 {
-	public class EntryResponse
-	{
-		public int Rank { get; set; }
-
-		public int Id { get; set; }
-
-		public string Username { get; set; } = null!;
-
-		public int Time { get; set; }
-
-		public int Kills { get; set; }
-
-		public int Gems { get; set; }
-
-		public int DeathType { get; set; }
-
-		public int DaggersHit { get; set; }
-
-		public int DaggersFired { get; set; }
-
-		public ulong TimeTotal { get; set; }
-
-		public ulong KillsTotal { get; set; }
-
-		public ulong GemsTotal { get; set; }
-
-		public ulong DeathsTotal { get; set; }
-
-		public ulong DaggersHitTotal { get; set; }
-
-		public ulong DaggersFiredTotal { get; set; }
-	}
+	public record struct EntryResponse
+	(
+		int Rank,
+		int Id,
+		string Username,
+		int Time,
+		int Kills,
+		int Gems,
+		int DeathType,
+		int DaggersHit,
+		int DaggersFired,
+		ulong TimeTotal,
+		ulong KillsTotal,
+		ulong GemsTotal,
+		ulong DeathsTotal,
+		ulong DaggersHitTotal,
+		ulong DaggersFiredTotal
+	);
 }

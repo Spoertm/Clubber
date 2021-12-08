@@ -1,4 +1,4 @@
-﻿// Taken from devildaggers.info
+﻿// Taken from devildaggers.info and modified
 // Credit goes to Noah Stolk https://github.com/NoahStolk
 
 using System;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Clubber.Models.Responses
 {
-	public class LeaderboardResponse
+	public record struct LeaderboardResponse
 	{
 		public DateTime DateTime { get; init; }
 

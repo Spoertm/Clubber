@@ -1,4 +1,4 @@
 ﻿namespace Clubber.Models.Responses
 {
-	public sealed record UserValidationResponse(bool IsError, string? Message);
+	public record struct UserValidationResponse(bool IsError, string? Message);
 }
