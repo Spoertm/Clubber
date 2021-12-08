@@ -162,7 +162,7 @@ namespace Clubber.BackgroundTasks
 			if (countryCode.Length == 0 || !File.Exists(flagPath))
 				flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", "00.png");
 
-			string ddinfoStyleHtml = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyle.html"));
+			string ddinfoStyleHtml = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyle.txt"));
 			string flagBase64 = Convert.ToBase64String(await File.ReadAllBytesAsync(flagPath));
 			string formattedHtml = string.Format(
 				ddinfoStyleHtml,
