@@ -1,11 +1,11 @@
-﻿using Clubber.Configuration;
-using Clubber.Extensions;
+﻿using Clubber.Extensions;
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using CoreHtmlToImage;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +21,7 @@ namespace Clubber.BackgroundTasks
 	public class DdNewsPostService : AbstractBackgroundService
 	{
 		private const int _minimumScore = 930;
-		private readonly IConfig _config;
+		private readonly IConfiguration _config;
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IDiscordHelper _discordHelper;
@@ -31,7 +31,7 @@ namespace Clubber.BackgroundTasks
 		private readonly HtmlConverter _htmlConverter = new();
 
 		public DdNewsPostService(
-			IConfig config,
+			IConfiguration config,
 			IDatabaseHelper databaseHelper,
 			IDiscordHelper discordHelper,
 			IIOService ioService,
@@ -46,7 +46,7 @@ namespace Clubber.BackgroundTasks
 			_webService = webService;
 
 			Directory.CreateDirectory(Path.GetDirectoryName(LbCachePath)!);
-			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(_config.LbEntriesCacheChannelId).Result;
+			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(_config.GetValue<ulong>("LbEntriesCacheChannelId")).Result;
 			string databaseJson = _webService.RequestStringAsync(latestAttachmentUrl).Result;
 			File.WriteAllText(LbCachePath, databaseJson);
 		}
@@ -56,7 +56,7 @@ namespace Clubber.BackgroundTasks
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
-			_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.DdNewsChannelId);
+			_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
 			List<EntryResponse> oldEntries = (await _ioService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries(_minimumScore);
 			if (newEntries.Count == 0)
@@ -87,7 +87,7 @@ namespace Clubber.BackgroundTasks
 			if (cacheIsToBeRefreshed)
 			{
 				await _ioService.WriteObjectToFile(newEntries, LbCachePath);
-				await _discordHelper.SendFileToChannel(LbCachePath, _config.LbEntriesCacheChannelId);
+				await _discordHelper.SendFileToChannel(LbCachePath, _config.GetValue<ulong>("LbEntriesCacheChannelId"));
 			}
 
 			_sb.Clear();
@@ -119,7 +119,7 @@ namespace Clubber.BackgroundTasks
 		private string GetDdNewsMessage(List<EntryResponse> newEntries, (EntryResponse OldEntry, EntryResponse NewEntry) entryTuple)
 		{
 			string userName = entryTuple.NewEntry.Username;
-			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
+			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(_config.GetValue<ulong>("DdPalsId"), dbUser.DiscordId) is { } guildUser)
 				userName = guildUser.Mention;
 
 			double oldScore = entryTuple.OldEntry.Time / 10000d;

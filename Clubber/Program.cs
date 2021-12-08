@@ -1,10 +1,10 @@
 ﻿using Clubber.BackgroundTasks;
-using Clubber.Configuration;
 using Clubber.Helpers;
 using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,8 +30,9 @@ namespace Clubber
 			CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 
 			IHost host = ConfigureServices(client, commands).Build();
+			IConfiguration config = host.Services.GetRequiredService<IConfiguration>();
 
-			await client.LoginAsync(TokenType.Bot, GetToken());
+			await client.LoginAsync(TokenType.Bot, config["BotToken"]);
 			await client.StartAsync();
 			await client.SetGameAsync("your roles", null, ActivityType.Watching);
 			await commands.AddModulesAsync(Assembly.GetEntryAssembly(), host.Services);
@@ -56,18 +57,12 @@ namespace Clubber
 			}
 		}
 
-		private static string GetToken()
-		{
-			string tokenPath = Path.Combine(AppContext.BaseDirectory, "Data", "Token.txt");
-			return File.ReadAllText(tokenPath);
-		}
-
 		private static IHostBuilder ConfigureServices(DiscordSocketClient client, CommandService commands)
 			=> Host.CreateDefaultBuilder()
+				.ConfigureAppConfiguration((_, config) => config.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json")))
 				.ConfigureServices(services =>
 					services.AddSingleton(client)
 						.AddSingleton(commands)
-						.AddSingleton<IConfig, Config>()
 						.AddSingleton<MessageHandlerService>()
 						.AddSingleton<IDatabaseHelper, DatabaseHelper>()
 						.AddSingleton<UpdateRolesHelper>()

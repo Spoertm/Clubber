@@ -116,8 +116,7 @@ namespace Clubber.Helpers
 			return new EmbedBuilder()
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-				.WithDescription(
-$@"✏️ Leaderboard name: {lbPlayer.Username}
+				.WithDescription($@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
 ⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
 🥇 Rank: {lbPlayer.Rank}
@@ -138,8 +137,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 			return new EmbedBuilder()
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-				.WithDescription(
-$@"✏️ Leaderboard name: {lbPlayer.Username}
+				.WithDescription($@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
 ⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
 🥇 Rank: {lbPlayer.Rank}
@@ -256,6 +254,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 If you'd like to have a role, and be able to do stuff like in the image below, feel free to register by posting your in-game name or ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
 
 If you don't play the game or simply don't want to be registered, post ""`no score`"". A moderator will then register you.";
+
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 				.WithAuthor("Clubber", "https://cdn.discordapp.com/avatars/743431502842298368/04b822b2748acfe2ebaa843522eaba09.webp?size=128")
 				.WithTitle("Welcome!")

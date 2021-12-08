@@ -1,7 +1,7 @@
-﻿using Clubber.Configuration;
-using Clubber.Models;
+﻿using Clubber.Models;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,9 +12,9 @@ namespace Clubber.Helpers
 		private static SocketTextChannel? _clubberExceptionsChannel;
 		private readonly DiscordSocketClient _client;
 
-		public DiscordHelper(IConfig config, DiscordSocketClient client)
+		public DiscordHelper(IConfiguration config, DiscordSocketClient client)
 		{
-			_clubberExceptionsChannel = client.GetChannel(config.ClubberExceptionsChannelId) as SocketTextChannel;
+			_clubberExceptionsChannel = client.GetChannel(config.GetValue<ulong>("ClubberExceptionsChannelId")) as SocketTextChannel;
 			_client = client;
 		}
 
