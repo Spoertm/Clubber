@@ -47,7 +47,7 @@ namespace Clubber.Services
 				: $"`{guildUser.Username}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.";
 
 			if (userHasUnregRole)
-				message += $"\nPlease refer to the message in <#{_config.RegisterChannelId}> for more info.";
+				message += $"\nPlease refer to the first message in <#{_config.RegisterChannelId}> for more info.";
 
 			return new(IsError: true, Message: message);
 		}
