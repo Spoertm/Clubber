@@ -43,5 +43,8 @@ namespace Clubber.Helpers
 
 		public SocketGuildUser? GetGuildUser(ulong guildId, ulong userId)
 			=> _client.GetGuild(guildId)?.GetUser(userId);
+
+		public SocketGuild? GetGuild(ulong guildId)
+			=> _client.GetGuild(guildId);
 	}
 }

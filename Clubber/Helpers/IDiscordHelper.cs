@@ -12,5 +12,7 @@ namespace Clubber.Helpers
 		Task<string> GetLatestAttachmentUrlFromChannel(ulong channelId);
 
 		SocketGuildUser? GetGuildUser(ulong guildId, ulong userId);
+
+		SocketGuild? GetGuild(ulong guildId);
 	}
 }
