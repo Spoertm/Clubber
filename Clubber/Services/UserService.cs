@@ -1,7 +1,7 @@
+using Clubber.Configuration;
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Discord;
-using Microsoft.Extensions.Configuration;
 using System.Linq;
 
 namespace Clubber.Services
@@ -9,9 +9,9 @@ namespace Clubber.Services
 	public class UserService
 	{
 		private readonly IDatabaseHelper _databaseHelper;
-		private readonly IConfiguration _config;
+		private readonly IConfig _config;
 
-		public UserService(IConfiguration config, IDatabaseHelper databaseHelper)
+		public UserService(IConfig config, IDatabaseHelper databaseHelper)
 		{
 			_config = config;
 			_databaseHelper = databaseHelper;
@@ -41,13 +41,13 @@ namespace Clubber.Services
 			if (guildUser.GuildPermissions.ManageRoles)
 				return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
-			bool userHasUnregRole = guildUser.RoleIds.Contains(_config.GetValue<ulong>("UnregisteredRoleId"));
+			bool userHasUnregRole = guildUser.RoleIds.Contains(_config.UnregisteredRoleId);
 			string message = userUsedCommandForThemselves
-				? $"You're not registered, {guildUser.Username}. Only a <@&{_config.GetValue<ulong>("RoleAssignerRoleId")}> can register you."
-				: $"`{guildUser.Username}` is not registered. Only a <@&{_config.GetValue<ulong>("RoleAssignerRoleId")}> can register them.";
+				? $"You're not registered, {guildUser.Username}. Only a <@&{_config.RoleAssignerRoleId}> can register you."
+				: $"`{guildUser.Username}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.";
 
 			if (userHasUnregRole)
-				message += $"\nPlease refer to the message in <#{_config.GetValue<ulong>("RegisterChannelId")}> for more info.";
+				message += $"\nPlease refer to the first message in <#{_config.RegisterChannelId}> for more info.";
 
 			return new(IsError: true, Message: message);
 		}
@@ -57,7 +57,7 @@ namespace Clubber.Services
 			if (guildUser.IsBot)
 				return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 
-			if (guildUser.RoleIds.All(rId => rId != _config.GetValue<ulong>("CheaterRoleId")))
+			if (guildUser.RoleIds.All(rId => rId != _config.CheaterRoleId))
 				return new(IsError: false, Message: null);
 
 			string message = userUsedCommandForThemselves
