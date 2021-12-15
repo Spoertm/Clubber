@@ -46,8 +46,8 @@ public class DatabaseUpdateService : AbstractBackgroundService
 		await File.WriteAllTextAsync(_databaseHelper.DatabaseFilePath, databaseJson, stoppingToken);
 
 		SocketGuild ddPals = _discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new($"DD Pals server not found with ID {_config["DdPalsId"]}");
-		SocketTextChannel cronUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("CronUpdateChannelId"));
-		IUserMessage msg = await cronUpdateChannel.SendMessageAsync("Checking for role updates...");
+		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
+		IUserMessage msg = await dailyUpdateChannel.SendMessageAsync("Checking for role updates...");
 
 		List<Exception> exceptionList = new();
 		SocketTextChannel clubberExceptionsChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("ClubberExceptionsChannelId"));
@@ -61,7 +61,7 @@ public class DatabaseUpdateService : AbstractBackgroundService
 				(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await _updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
 				await msg.ModifyAsync(m => m.Content = repsonseMessage);
 				for (int i = 0; i < responseRoleUpdateEmbeds.Length; i++)
-					await cronUpdateChannel.SendMessageAsync(embed: responseRoleUpdateEmbeds[i]);
+					await dailyUpdateChannel.SendMessageAsync(embed: responseRoleUpdateEmbeds[i]);
 
 				success = true;
 			}
@@ -70,14 +70,14 @@ public class DatabaseUpdateService : AbstractBackgroundService
 				exceptionList.Add(ex);
 				if (tries++ > maxTries)
 				{
-					await cronUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
+					await dailyUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 					foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
 						await clubberExceptionsChannel.SendMessageAsync(embed: EmbedHelper.Exception(exc));
 
 					break;
 				}
 
-				await cronUpdateChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
+				await dailyUpdateChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
 				Thread.Sleep(10000); // Sleep 10s
 			}
 		}
