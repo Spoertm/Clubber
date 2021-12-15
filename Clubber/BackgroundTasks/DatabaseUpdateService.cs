@@ -1,8 +1,8 @@
-﻿using Clubber.Configuration;
-using Clubber.Helpers;
+﻿using Clubber.Helpers;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,14 +14,14 @@ namespace Clubber.BackgroundTasks;
 
 public class DatabaseUpdateService : AbstractBackgroundService
 {
-	private readonly IConfig _config;
+	private readonly IConfiguration _config;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;
 	private readonly UpdateRolesHelper _updateRolesHelper;
 
 	public DatabaseUpdateService(
-		IConfig config,
+		IConfiguration config,
 		IDiscordHelper discordHelper,
 		IDatabaseHelper databaseHelper,
 		IWebService webService,
@@ -41,16 +41,16 @@ public class DatabaseUpdateService : AbstractBackgroundService
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
 		Directory.CreateDirectory(Path.GetDirectoryName(_databaseHelper.DatabaseFilePath)!);
-		string latestAttachmentUrl = await _discordHelper.GetLatestAttachmentUrlFromChannel(_config.DatabaseBackupChannelId);
+		string latestAttachmentUrl = await _discordHelper.GetLatestAttachmentUrlFromChannel(_config.GetValue<ulong>("DatabaseBackupChannelId"));
 		string databaseJson = await _webService.RequestStringAsync(latestAttachmentUrl);
 		await File.WriteAllTextAsync(_databaseHelper.DatabaseFilePath, databaseJson, stoppingToken);
 
-		SocketGuild ddPals = _discordHelper.GetGuild(_config.DdPalsId) ?? throw new($"DD Pals server not found with ID {_config.DdPalsId}");
-		SocketTextChannel cronUpdateChannel = _discordHelper.GetTextChannel(_config.CronUpdateChannelId);
+		SocketGuild ddPals = _discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new($"DD Pals server not found with ID {_config["DdPalsId"]}");
+		SocketTextChannel cronUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("CronUpdateChannelId"));
 		IUserMessage msg = await cronUpdateChannel.SendMessageAsync("Checking for role updates...");
 
 		List<Exception> exceptionList = new();
-		SocketTextChannel clubberExceptionsChannel = _discordHelper.GetTextChannel(_config.ClubberExceptionsChannelId);
+		SocketTextChannel clubberExceptionsChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("ClubberExceptionsChannelId"));
 		int tries = 0;
 		const int maxTries = 5;
 		bool success = false;
