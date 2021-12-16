@@ -29,7 +29,7 @@ namespace Clubber.Services
 			if (_databaseHelper.GetDdUserByDiscordId(joiningUser.Id) is not null)
 				await UpdateRolesForRegisteredUser(joiningUser);
 			else
-				await PostWelcomeMessageAndGiveUnregRole(joiningUser);
+				await joiningUser.AddRoleAsync(_config.UnregisteredRoleId);
 		}
 
 		private async Task UpdateRolesForRegisteredUser(SocketGuildUser joiningUser)
@@ -40,13 +40,6 @@ namespace Clubber.Services
 
 			if (joiningUser.Guild.GetChannel(_config.CronUpdateChannelId) is SocketTextChannel logsChannel)
 				await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
-		}
-
-		private async Task PostWelcomeMessageAndGiveUnregRole(SocketGuildUser joiningUser)
-		{
-			await joiningUser.AddRoleAsync(_config.UnregisteredRoleId);
-			if (joiningUser.Guild.GetChannel(_config.DdPalsRegisterChannelId) is SocketTextChannel registerChannel)
-				await registerChannel.SendMessageAsync($"Welcome {joiningUser.Mention}! Please refer to the first message in this channel for info about registration.");
 		}
 	}
 }
