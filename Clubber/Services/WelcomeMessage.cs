@@ -39,7 +39,7 @@ namespace Clubber.Services
 				return;
 
 			if (joiningUser.Guild.GetChannel(_config.CronUpdateChannelId) is SocketTextChannel logsChannel)
-				await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
+				await logsChannel.SendMessageAsync(embed: EmbedHelper.UpdateRoles(response));
 		}
 	}
 }
