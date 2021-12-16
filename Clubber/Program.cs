@@ -72,7 +72,8 @@ namespace Clubber
 						.AddSingleton<IWebService, WebService>()
 						.AddSingleton<LoggingService>()
 						.AddSingleton<WelcomeMessage>()
-						.AddHostedService<DdNewsPostService>())
+						.AddHostedService<DdNewsPostService>()
+						.AddDbContext<DatabaseService>())
 				.ConfigureLogging(logging => logging.ClearProviders());
 
 		public static void StopBot()

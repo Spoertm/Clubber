@@ -1,4 +1,4 @@
 ﻿namespace Clubber.Models
 {
-	public record struct DdUser(ulong DiscordId, int LeaderboardId);
+	public record DdUser(ulong DiscordId, int LeaderboardId);
 }
