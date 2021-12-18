@@ -76,7 +76,8 @@ namespace Clubber
 						.AddSingleton<LoggingService>()
 						.AddSingleton<WelcomeMessage>()
 						.AddSingleton<ImageGenerator>()
-						.AddHostedService<DdNewsPostService>())
+						.AddHostedService<DdNewsPostService>()
+						.AddHostedService<DatabaseUpdateService>())
 				.Build();
 
 			host.Services.GetRequiredService<MessageHandlerService>();
