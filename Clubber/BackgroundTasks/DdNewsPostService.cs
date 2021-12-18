@@ -3,7 +3,6 @@ using Clubber.Extensions;
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Clubber.Services;
-using CoreHtmlToImage;
 using Discord;
 using Discord.WebSocket;
 using System;
@@ -13,8 +12,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using ImageFormat = CoreHtmlToImage.ImageFormat;
 
 namespace Clubber.BackgroundTasks
 {
@@ -28,7 +25,7 @@ namespace Clubber.BackgroundTasks
 		private readonly IIOService _ioService;
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
-		private readonly HtmlConverter _htmlConverter = new();
+		private readonly ImageGenerator _imageGenerator;
 
 		public DdNewsPostService(
 			IConfig config,
@@ -36,7 +33,8 @@ namespace Clubber.BackgroundTasks
 			IDiscordHelper discordHelper,
 			IIOService ioService,
 			IWebService webService,
-			LoggingService loggingService)
+			LoggingService loggingService,
+			ImageGenerator imageGenerator)
 			: base(loggingService)
 		{
 			_config = config;
@@ -44,6 +42,7 @@ namespace Clubber.BackgroundTasks
 			_discordHelper = discordHelper;
 			_ioService = ioService;
 			_webService = webService;
+			_imageGenerator = imageGenerator;
 
 			Directory.CreateDirectory(Path.GetDirectoryName(LbCachePath)!);
 			string latestAttachmentUrl = _discordHelper.GetLatestAttachmentUrlFromChannel(_config.LbEntriesCacheChannelId).Result;
@@ -80,7 +79,7 @@ namespace Clubber.BackgroundTasks
 
 				cacheIsToBeRefreshed = true;
 				string message = GetDdNewsMessage(newEntries, (oldEntry, newEntry));
-				Stream screenshot = await GetDdinfoPlayerScreenshot(newEntry);
+				await using MemoryStream screenshot = await _imageGenerator.FromEntryResponse(newEntry);
 				await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
 			}
 
@@ -153,26 +152,6 @@ namespace Clubber.BackgroundTasks
 				_sb.Append(Format.Bold(" It's a new WR! 👑 🎉"));
 
 			return _sb.ToString();
-		}
-
-		private async Task<Stream> GetDdinfoPlayerScreenshot(EntryResponse entry)
-		{
-			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
-			string flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", $"{countryCode}.png");
-			if (countryCode.Length == 0 || !File.Exists(flagPath))
-				flagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags", "00.png");
-
-			string ddinfoStyleHtml = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyle.html"));
-			string flagBase64 = Convert.ToBase64String(await File.ReadAllBytesAsync(flagPath));
-			string formattedHtml = string.Format(
-				ddinfoStyleHtml,
-				entry.Rank,
-				flagBase64,
-				HttpUtility.HtmlEncode(entry.Username),
-				$"{entry.Time / 10000d:0.0000}");
-
-			byte[] bytes = _htmlConverter.FromHtmlString(formattedHtml, 1100, ImageFormat.Png);
-			return new MemoryStream(bytes);
 		}
 	}
 }
