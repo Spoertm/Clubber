@@ -2,7 +2,6 @@
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clubber.Helpers
@@ -29,17 +28,6 @@ namespace Clubber.Helpers
 
 		public async Task SendFileToChannel(string filePath, ulong channelId, string? text = null)
 			=> await GetTextChannel(channelId).SendFileAsync(filePath, text);
-
-		public async Task<string> GetLatestAttachmentUrlFromChannel(ulong channelId)
-		{
-			SocketTextChannel channel = GetTextChannel(channelId);
-			IAttachment latestAttachment = (await channel.GetMessagesAsync(1).FlattenAsync())
-				.FirstOrDefault()?
-				.Attachments
-				.FirstOrDefault() ?? throw new($"No files in {channel.Name} channel.");
-
-			return latestAttachment.Url;
-		}
 
 		public SocketGuildUser? GetGuildUser(ulong guildId, ulong userId)
 			=> _client.GetGuild(guildId)?.GetUser(userId);

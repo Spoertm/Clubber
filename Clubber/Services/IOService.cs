@@ -6,9 +6,6 @@ namespace Clubber.Services
 {
 	public class IOService : IIOService
 	{
-		public T DeserializeObject<T>(string s)
-			=> JsonConvert.DeserializeObject<T>(s);
-
 		public async Task<T?> ReadObjectFromFile<T>(string filePath)
 		{
 			if (!File.Exists(filePath))

@@ -9,8 +9,6 @@ namespace Clubber.Helpers
 
 		Task SendFileToChannel(string filePath, ulong channelId, string? text = null);
 
-		Task<string> GetLatestAttachmentUrlFromChannel(ulong channelId);
-
 		SocketGuildUser? GetGuildUser(ulong guildId, ulong userId);
 
 		SocketGuild? GetGuild(ulong guildId);

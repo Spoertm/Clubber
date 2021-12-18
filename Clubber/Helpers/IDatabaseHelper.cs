@@ -8,7 +8,6 @@ namespace Clubber.Helpers
 	public interface IDatabaseHelper
 	{
 		List<DdUser> Database { get; }
-		string DatabaseFilePath { get; }
 
 		Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user);
 

@@ -5,7 +5,6 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +18,7 @@ public class DatabaseUpdateService : AbstractBackgroundService
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;
 	private readonly UpdateRolesHelper _updateRolesHelper;
+	private readonly DatabaseService _dbContext;
 
 	public DatabaseUpdateService(
 		IConfiguration config,
@@ -26,7 +26,8 @@ public class DatabaseUpdateService : AbstractBackgroundService
 		IDatabaseHelper databaseHelper,
 		IWebService webService,
 		UpdateRolesHelper updateRolesHelper,
-		LoggingService loggingService)
+		LoggingService loggingService,
+		DatabaseService dbContext)
 		: base(loggingService)
 	{
 		_config = config;
@@ -34,17 +35,13 @@ public class DatabaseUpdateService : AbstractBackgroundService
 		_databaseHelper = databaseHelper;
 		_webService = webService;
 		_updateRolesHelper = updateRolesHelper;
+		_dbContext = dbContext;
 	}
 
 	protected override TimeSpan Interval => TimeSpan.FromDays(1);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		Directory.CreateDirectory(Path.GetDirectoryName(_databaseHelper.DatabaseFilePath)!);
-		string latestAttachmentUrl = await _discordHelper.GetLatestAttachmentUrlFromChannel(_config.GetValue<ulong>("DatabaseBackupChannelId"));
-		string databaseJson = await _webService.RequestStringAsync(latestAttachmentUrl);
-		await File.WriteAllTextAsync(_databaseHelper.DatabaseFilePath, databaseJson, stoppingToken);
-
 		SocketGuild ddPals = _discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new($"DD Pals server not found with ID {_config["DdPalsId"]}");
 		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
 		IUserMessage msg = await dailyUpdateChannel.SendMessageAsync("Checking for role updates...");
