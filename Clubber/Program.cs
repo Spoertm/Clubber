@@ -24,7 +24,7 @@ namespace Clubber
 		private static async Task Main()
 		{
 			CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-			AppDomain.CurrentDomain.ProcessExit += (_, _) => StopBot();
+			AppDomain.CurrentDomain.ProcessExit += StopBot;
 
 			DiscordSocketClient client = new(new() { AlwaysDownloadUsers = true, ExclusiveBulkDelete = true, LogLevel = LogSeverity.Error });
 			CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
@@ -49,11 +49,12 @@ namespace Clubber
 			catch (TaskCanceledException)
 			{
 				await client.LogoutAsync();
-				await client.StopAsync();
+				client.Dispose();
 			}
 			finally
 			{
 				_source.Dispose();
+				AppDomain.CurrentDomain.ProcessExit -= StopBot;
 			}
 		}
 
@@ -76,7 +77,8 @@ namespace Clubber
 						.AddDbContext<DatabaseService>())
 				.ConfigureLogging(logging => logging.ClearProviders());
 
-		public static void StopBot()
-			=> _source.Cancel();
+		private static void StopBot(object? sender, EventArgs e) => StopBot();
+
+		public static void StopBot() => _source.Cancel();
 	}
 }
