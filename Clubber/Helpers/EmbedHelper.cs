@@ -246,7 +246,7 @@ namespace Clubber.Helpers
 			return $"{user.Username} ({user.Nickname})";
 		}
 
-		public static Embed WelcomeMessage()
+		public static Embed WelcomeMessage(IUser botUser)
 		{
 			const string description = @"This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&903024433315323915>.
 
@@ -255,7 +255,7 @@ If you'd like to have a role, and be able to do stuff like in the image below, f
 If you don't play the game or simply don't want to be registered, post ""`no score`"". A moderator will then register you.";
 
 			EmbedBuilder embedBuilder = new EmbedBuilder()
-				.WithAuthor("Clubber", "https://cdn.discordapp.com/avatars/743431502842298368/04b822b2748acfe2ebaa843522eaba09.webp?size=128")
+				.WithAuthor(botUser)
 				.WithTitle("Welcome!")
 				.WithDescription(description)
 				.WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/910859022427652096/PB.png");

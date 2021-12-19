@@ -38,6 +38,6 @@ namespace Clubber.Modules
 
 		[Command("welcome")]
 		[RequireContext(ContextType.Guild)]
-		public async Task PostWelcome() => await Context.Channel.SendMessageAsync(embed: EmbedHelper.WelcomeMessage());
+		public async Task PostWelcome() => await Context.Channel.SendMessageAsync(embed: EmbedHelper.WelcomeMessage(Context.Client.CurrentUser));
 	}
 }
