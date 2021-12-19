@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Clubber.Configuration;
 using Clubber.Helpers;
 using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
@@ -14,7 +14,7 @@ namespace Clubber.Tests.ServicesTests
 	public class UserServiceTests
 	{
 		private readonly UserService _sut;
-		private readonly Mock<IConfig> _configMock;
+		private readonly Mock<IConfiguration> _configMock;
 		private readonly Mock<IDatabaseHelper> _databaseHelperMock;
 		private const ulong CheaterRoleId = 666;
 
@@ -34,7 +34,7 @@ namespace Clubber.Tests.ServicesTests
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(isBot);
 			guildUser.SetupGet(user => user.RoleIds).Returns(roleIds);
-			_configMock.SetupGet(cm => cm.CheaterRoleId).Returns(CheaterRoleId);
+			_configMock.SetupGet(cm => cm.GetValue<ulong>("CheaterRoleId")).Returns(CheaterRoleId);
 			UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
 			Assert.True(isValidForRegistrationResponse.IsError);
 		}
@@ -48,7 +48,7 @@ namespace Clubber.Tests.ServicesTests
 			Mock<IGuildUser> guildUser = new();
 			guildUser.SetupGet(user => user.IsBot).Returns(isBot);
 			guildUser.SetupGet(user => user.RoleIds).Returns(roleIds);
-			_configMock.SetupGet(cm => cm.CheaterRoleId).Returns(CheaterRoleId);
+			_configMock.SetupGet(cm => cm.GetValue<ulong>("CheaterRoleId")).Returns(CheaterRoleId);
 			UserValidationResponse isValidResponse = _sut.IsValid(guildUser.Object, true);
 			Assert.True(isValidResponse.IsError);
 		}

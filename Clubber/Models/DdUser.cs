@@ -1,4 +1,4 @@
 ﻿namespace Clubber.Models
 {
-	public sealed record DdUser(ulong DiscordId, int LeaderboardId);
+	public record DdUser(ulong DiscordId, int LeaderboardId);
 }

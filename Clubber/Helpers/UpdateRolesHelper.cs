@@ -1,9 +1,9 @@
-using Clubber.Configuration;
 using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,12 +53,12 @@ namespace Clubber.Helpers
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IWebService _webService;
 
-		public UpdateRolesHelper(IConfig config, IDatabaseHelper databaseHelper, IWebService webService)
+		public UpdateRolesHelper(IConfiguration config, IDatabaseHelper databaseHelper, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_webService = webService;
 
-			_uselessRoles = new() { config.UnregisteredRoleId, 458375331468935178 };
+			_uselessRoles = new() { config.GetValue<ulong>("UnregisteredRoleId"), 458375331468935178 };
 		}
 
 		public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)
@@ -89,7 +89,7 @@ namespace Clubber.Helpers
 
 		private async Task<(int NonMemberCount, List<UpdateRolesResponse> UpdateRolesResponses)> ExecuteRolesAndDbUpdate(IEnumerable<SocketGuildUser> guildUsers)
 		{
-			List<DdUser> dbUsers = _databaseHelper.Database;
+			List<DdUser> dbUsers = _databaseHelper.DdUserDatabase;
 			List<(DdUser DdUser, SocketGuildUser GuildUser)> registeredUsers = dbUsers.Join(
 					inner: guildUsers,
 					outerKeySelector: dbu => dbu.DiscordId,
@@ -98,9 +98,9 @@ namespace Clubber.Helpers
 				.ToList();
 
 			IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
-			IEnumerable<LeaderboardUser> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
+			IEnumerable<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
-			(SocketGuildUser GuildUser, LeaderboardUser LbUser)[] updatedUsers = registeredUsers.Join(
+			(SocketGuildUser GuildUser, EntryResponse LbUser)[] updatedUsers = registeredUsers.Join(
 					inner: lbPlayers,
 					outerKeySelector: ru => ru.DdUser.LeaderboardId,
 					innerKeySelector: lbp => lbp.Id,
@@ -120,7 +120,7 @@ namespace Clubber.Helpers
 			try
 			{
 				int lbId = _databaseHelper.GetDdUserByDiscordId(user.Id)!.LeaderboardId;
-				List<LeaderboardUser> lbPlayerList = await _webService.GetLbPlayers(new[] { (uint)lbId });
+				List<EntryResponse> lbPlayerList = await _webService.GetLbPlayers(new[] { (uint)lbId });
 
 				return await ExecuteRoleUpdate(user, lbPlayerList[0]);
 			}
@@ -134,7 +134,7 @@ namespace Clubber.Helpers
 			}
 		}
 
-		private async Task<UpdateRolesResponse> ExecuteRoleUpdate(SocketGuildUser guildUser, LeaderboardUser lbUser)
+		private async Task<UpdateRolesResponse> ExecuteRoleUpdate(SocketGuildUser guildUser, EntryResponse lbUser)
 		{
 			ulong[] userRolesIds = guildUser.Roles.Select(r => r.Id).ToArray();
 			(ulong scoreRoleToAdd, ulong[] scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbUser.Time);

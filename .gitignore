@@ -358,9 +358,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-.vscode/launch.json
-.vscode/tasks.json
-Clubber/.vscode/launch.json
-Clubber/.vscode/tasks.json
-Clubber/Models/Token.txt
-Clubber/Data/Token.txt
+
+# Appsettings
+Clubber/appsettings.json

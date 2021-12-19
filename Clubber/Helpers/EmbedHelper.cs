@@ -1,4 +1,3 @@
-using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord;
 using Discord.Commands;
@@ -12,7 +11,7 @@ namespace Clubber.Helpers
 {
 	public static class EmbedHelper
 	{
-		private static readonly Dictionary<short, string> _deathtypeDict = new()
+		private static readonly Dictionary<int, string> _deathtypeDict = new()
 		{
 			[0] = "FALLEN",
 			[1] = "SWARMED",
@@ -111,13 +110,12 @@ namespace Clubber.Helpers
 		/// <summary>
 		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?)" />.
 		/// </summary>
-		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
+		public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
 		{
 			return new EmbedBuilder()
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-				.WithDescription(
-$@"✏️ Leaderboard name: {lbPlayer.Username}
+				.WithDescription($@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
 ⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
 🥇 Rank: {lbPlayer.Rank}
@@ -132,14 +130,13 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 		/// <summary>
 		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?)" />.
 		/// </summary>
-		public static Embed FullStats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
+		public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
 		{
 			TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 			return new EmbedBuilder()
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 				.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-				.WithDescription(
-$@"✏️ Leaderboard name: {lbPlayer.Username}
+				.WithDescription($@"✏️ Leaderboard name: {lbPlayer.Username}
 🛂 Leaderboard ID: {lbPlayer.Id}
 ⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
 🥇 Rank: {lbPlayer.Rank}
@@ -256,6 +253,7 @@ $@"✏️ Leaderboard name: {lbPlayer.Username}
 If you'd like to have a role, and be able to do stuff like in the image below, feel free to register by posting your in-game name or ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
 
 If you don't play the game or simply don't want to be registered, post ""`no score`"". A moderator will then register you.";
+
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 				.WithAuthor("Clubber", "https://cdn.discordapp.com/avatars/743431502842298368/04b822b2748acfe2ebaa843522eaba09.webp?size=128")
 				.WithTitle("Welcome!")

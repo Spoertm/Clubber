@@ -2,5 +2,5 @@
 
 namespace Clubber.Models.Responses
 {
-	public sealed record DatabaseUpdateResponse(string Message, Embed[] RoleUpdateEmbeds);
+	public record struct DatabaseUpdateResponse(string Message, Embed[] RoleUpdateEmbeds);
 }
