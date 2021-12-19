@@ -2,7 +2,6 @@
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,41 +12,29 @@ namespace Clubber.BackgroundTasks;
 
 public class DatabaseUpdateService : AbstractBackgroundService
 {
-	private readonly IConfiguration _config;
 	private readonly IDiscordHelper _discordHelper;
-	private readonly IDatabaseHelper _databaseHelper;
-	private readonly IWebService _webService;
 	private readonly UpdateRolesHelper _updateRolesHelper;
-	private readonly DatabaseService _dbContext;
 
 	public DatabaseUpdateService(
-		IConfiguration config,
 		IDiscordHelper discordHelper,
-		IDatabaseHelper databaseHelper,
-		IWebService webService,
 		UpdateRolesHelper updateRolesHelper,
-		LoggingService loggingService,
-		DatabaseService dbContext)
+		LoggingService loggingService)
 		: base(loggingService)
 	{
-		_config = config;
 		_discordHelper = discordHelper;
-		_databaseHelper = databaseHelper;
-		_webService = webService;
 		_updateRolesHelper = updateRolesHelper;
-		_dbContext = dbContext;
 	}
 
 	protected override TimeSpan Interval => TimeSpan.FromDays(1);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		SocketGuild ddPals = _discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new($"DD Pals server not found with ID {_config["DdPalsId"]}");
-		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
+		SocketGuild ddPals = _discordHelper.GetGuild(ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!)) ?? throw new("DD Pals server not found with the provided ID.");
+		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DailyUpdateChannelId")!));
 		IUserMessage msg = await dailyUpdateChannel.SendMessageAsync("Checking for role updates...");
 
 		List<Exception> exceptionList = new();
-		SocketTextChannel clubberExceptionsChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("ClubberExceptionsChannelId"));
+		SocketTextChannel clubberExceptionsChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("ClubberExceptionsChannelId")!));
 		int tries = 0;
 		const int maxTries = 5;
 		bool success = false;

@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 
@@ -9,14 +8,13 @@ namespace Clubber.Services
 {
 	public class MessageHandlerService
 	{
-		private readonly IConfiguration _config;
 		private readonly DiscordSocketClient _client;
 		private readonly CommandService _commands;
 		private readonly IServiceProvider _services;
+		private readonly string _prefix = Environment.GetEnvironmentVariable("Prefix")!;
 
-		public MessageHandlerService(IConfiguration config, DiscordSocketClient client, CommandService commands, IServiceProvider services)
+		public MessageHandlerService(DiscordSocketClient client, CommandService commands, IServiceProvider services)
 		{
-			_config = config;
 			_client = client;
 			_commands = commands;
 			_services = services;
@@ -30,7 +28,7 @@ namespace Clubber.Services
 				return;
 
 			int argumentPos = 0;
-			if (!message.HasStringPrefix(_config["Prefix"], ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
+			if (!message.HasStringPrefix(_prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
 				return;
 
 			SocketCommandContext context = new(_client, message);
