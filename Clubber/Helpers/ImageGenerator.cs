@@ -39,7 +39,7 @@ namespace Clubber.Helpers
 			if (OperatingSystem.IsWindows())
 				flagPath = "file:///" + flagPath;
 
-			string ddinfoStyleHtml = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyle.html"));
+			string ddinfoStyleHtml = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Data", "DdinfoStyle.txt"));
 			string formattedHtml = string.Format(
 				ddinfoStyleHtml,
 				entry.Rank,
