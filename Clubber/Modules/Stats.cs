@@ -1,5 +1,6 @@
 ﻿using Clubber.Helpers;
 using Clubber.Models;
+using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.Commands;
@@ -81,7 +82,7 @@ namespace Clubber.Modules
 		private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
 		{
 			uint lbPlayerId = (uint)ddUser.LeaderboardId;
-			List<LeaderboardUser> lbPlayers = await _webService.GetLbPlayers(new[] { lbPlayerId });
+			List<EntryResponse> lbPlayers = await _webService.GetLbPlayers(new[] { lbPlayerId });
 
 			Embed statsEmbed;
 			if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) || Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase))

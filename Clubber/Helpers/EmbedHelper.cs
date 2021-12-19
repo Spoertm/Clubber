@@ -1,4 +1,3 @@
-using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord;
 using Discord.Commands;
@@ -12,7 +11,7 @@ namespace Clubber.Helpers
 {
 	public static class EmbedHelper
 	{
-		private static readonly Dictionary<short, string> _deathtypeDict = new()
+		private static readonly Dictionary<int, string> _deathtypeDict = new()
 		{
 			[0] = "FALLEN",
 			[1] = "SWARMED",
@@ -111,7 +110,7 @@ namespace Clubber.Helpers
 		/// <summary>
 		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?)" />.
 		/// </summary>
-		public static Embed Stats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
+		public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
 		{
 			return new EmbedBuilder()
 				.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
@@ -131,7 +130,7 @@ namespace Clubber.Helpers
 		/// <summary>
 		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?)" />.
 		/// </summary>
-		public static Embed FullStats(LeaderboardUser lbPlayer, SocketGuildUser? guildUser)
+		public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
 		{
 			TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 			return new EmbedBuilder()

@@ -1,6 +1,8 @@
 ﻿using Clubber.Models;
+using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,10 +22,12 @@ namespace Clubber.Helpers
 			_webService = webService;
 			_dbContext = dbContext;
 
-			Database = dbContext.DdPlayers.ToList();
+			DdUserDatabase = dbContext.DdPlayers.ToList();
+			LeaderboardCache = dbContext.LeaderboardCache.ToList();
 		}
 
-		public List<DdUser> Database { get; }
+		public List<DdUser> DdUserDatabase { get; }
+		public List<EntryResponse> LeaderboardCache { get; }
 
 		public async Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user)
 		{
@@ -31,11 +35,11 @@ namespace Clubber.Helpers
 			{
 				uint[] playerRequest = { lbId };
 
-				LeaderboardUser lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
+				EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 				DdUser newDdUser = new(user.Id, lbPlayer.Id);
 				await _dbContext.AddAsync(newDdUser);
 				await _dbContext.SaveChangesAsync();
-				Database.Add(newDdUser);
+				DdUserDatabase.Add(newDdUser);
 				return (true, string.Empty);
 			}
 			catch (Exception ex)
@@ -58,7 +62,7 @@ namespace Clubber.Helpers
 
 			_dbContext.Remove(toRemove);
 			await _dbContext.SaveChangesAsync();
-			Database.Remove(toRemove);
+			DdUserDatabase.Remove(toRemove);
 			return true;
 		}
 
@@ -70,16 +74,16 @@ namespace Clubber.Helpers
 
 			_dbContext.Remove(toRemove);
 			await _dbContext.SaveChangesAsync();
-			Database.Remove(toRemove);
+			DdUserDatabase.Remove(toRemove);
 			return true;
 		}
 
 		public DdUser? GetDdUserByDiscordId(ulong discordId)
 		{
-			for (int i = 0; i < Database.Count; i++)
+			for (int i = 0; i < DdUserDatabase.Count; i++)
 			{
-				if (Database[i].DiscordId == discordId)
-					return Database[i];
+				if (DdUserDatabase[i].DiscordId == discordId)
+					return DdUserDatabase[i];
 			}
 
 			return null;
@@ -87,13 +91,22 @@ namespace Clubber.Helpers
 
 		public DdUser? GetDdUserByLbId(int lbId)
 		{
-			for (int i = 0; i < Database.Count; i++)
+			for (int i = 0; i < DdUserDatabase.Count; i++)
 			{
-				if (Database[i].LeaderboardId == lbId)
-					return Database[i];
+				if (DdUserDatabase[i].LeaderboardId == lbId)
+					return DdUserDatabase[i];
 			}
 
 			return null;
+		}
+
+		public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
+		{
+			await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE leaderboard_cache");
+			await _dbContext.LeaderboardCache.AddRangeAsync(newEntries);
+			await _dbContext.SaveChangesAsync();
+			LeaderboardCache.Clear();
+			LeaderboardCache.AddRange(newEntries);
 		}
 	}
 }

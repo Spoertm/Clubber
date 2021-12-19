@@ -3,7 +3,7 @@
 
 namespace Clubber.Models.Responses
 {
-	public record struct EntryResponse
+	public record EntryResponse
 	(
 		int Rank,
 		int Id,

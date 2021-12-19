@@ -25,7 +25,6 @@ namespace Clubber.BackgroundTasks
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IDiscordHelper _discordHelper;
-		private readonly IIOService _ioService;
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
 		private readonly HtmlConverter _htmlConverter = new();
@@ -34,7 +33,6 @@ namespace Clubber.BackgroundTasks
 			IConfiguration config,
 			IDatabaseHelper databaseHelper,
 			IDiscordHelper discordHelper,
-			IIOService ioService,
 			IWebService webService,
 			LoggingService loggingService)
 			: base(loggingService)
@@ -42,22 +40,20 @@ namespace Clubber.BackgroundTasks
 			_config = config;
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
-			_ioService = ioService;
 			_webService = webService;
 		}
 
 		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
-		private static string LbCachePath => Path.Combine(AppContext.BaseDirectory, "LeaderboardCache.json");
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
 			_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
-			List<EntryResponse> oldEntries = (await _ioService.ReadObjectFromFile<List<EntryResponse>>(LbCachePath))!;
+			List<EntryResponse> oldEntries = _databaseHelper.LeaderboardCache;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries(_minimumScore);
 			if (newEntries.Count == 0)
 				return;
 
-			(EntryResponse OldEntry, EntryResponse NewEntry)[] entryTuples = oldEntries.Join(
+			(EntryResponse, EntryResponse)[] entryTuples = oldEntries.Join(
 					inner: newEntries,
 					outerKeySelector: oldEntry => oldEntry.Id,
 					innerKeySelector: newEntry => newEntry.Id,
@@ -80,10 +76,7 @@ namespace Clubber.BackgroundTasks
 			}
 
 			if (cacheIsToBeRefreshed)
-			{
-				await _ioService.WriteObjectToFile(newEntries, LbCachePath);
-				await _discordHelper.SendFileToChannel(LbCachePath, _config.GetValue<ulong>("LbEntriesCacheChannelId"));
-			}
+				await _databaseHelper.UpdateLeaderboardCache(newEntries);
 
 			_sb.Clear();
 		}

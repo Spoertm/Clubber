@@ -1,4 +1,5 @@
 using Clubber.Models;
+using Clubber.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -10,7 +11,7 @@ public class DatabaseService : DbContext
 
 	public DatabaseService(IConfiguration config) => _config = config;
 
-	public DbSet<LeaderboardUser> LeaderboardCache { get; set; } = null!;
+	public DbSet<EntryResponse> LeaderboardCache { get; set; } = null!;
 	public DbSet<DdUser> DdPlayers { get; set; } = null!;
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -20,7 +21,7 @@ public class DatabaseService : DbContext
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
-		modelBuilder.Entity<LeaderboardUser>().HasKey(lbu => lbu.Id);
+		modelBuilder.Entity<EntryResponse>().HasKey(lbu => lbu.Id);
 		modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
 	}
 }
