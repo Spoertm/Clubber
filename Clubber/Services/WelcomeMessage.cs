@@ -1,20 +1,18 @@
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
+using System;
 using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
 	public class WelcomeMessage
 	{
-		private readonly IConfiguration _config;
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly UpdateRolesHelper _updateRolesHelper;
 
-		public WelcomeMessage(IConfiguration config, IDatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
+		public WelcomeMessage(IDatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
 		{
-			_config = config;
 			_databaseHelper = databaseHelper;
 			_updateRolesHelper = updateRolesHelper;
 			client.UserJoined += OnUserJoined;
@@ -22,14 +20,16 @@ namespace Clubber.Services
 
 		private async Task OnUserJoined(SocketGuildUser joiningUser)
 		{
-			if (joiningUser.Guild.Id != _config.GetValue<ulong>("DdPalsId") || joiningUser.IsBot)
+			ulong ddpalsId = ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!);
+			if (joiningUser.Guild.Id != ddpalsId || joiningUser.IsBot)
 				return;
 
 			// User is registered
+			ulong unregRoleId = ulong.Parse(Environment.GetEnvironmentVariable("UnregisteredRoleId")!);
 			if (_databaseHelper.GetDdUserByDiscordId(joiningUser.Id) is not null)
 				await UpdateRolesForRegisteredUser(joiningUser);
 			else
-				await joiningUser.AddRoleAsync(_config.GetValue<ulong>("UnregisteredRoleId"));
+				await joiningUser.AddRoleAsync(unregRoleId);
 		}
 
 		private async Task UpdateRolesForRegisteredUser(SocketGuildUser joiningUser)
@@ -38,7 +38,8 @@ namespace Clubber.Services
 			if (!response.Success)
 				return;
 
-			if (joiningUser.Guild.GetChannel(_config.GetValue<ulong>("CronUpdateChannelId")) is SocketTextChannel logsChannel)
+			ulong dailyUpdateChannelId = ulong.Parse(Environment.GetEnvironmentVariable("DailyUpdateChannelId")!);
+			if (joiningUser.Guild.GetChannel(dailyUpdateChannelId) is SocketTextChannel logsChannel)
 				await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
 		}
 	}

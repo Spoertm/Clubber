@@ -3,7 +3,7 @@ using Clubber.Preconditions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,14 +16,9 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class Moderator : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly IConfiguration _config;
 		private readonly IDiscordHelper _discordHelper;
 
-		public Moderator(IConfiguration config, IDiscordHelper discordHelper)
-		{
-			_config = config;
-			_discordHelper = discordHelper;
-		}
+		public Moderator(IDiscordHelper discordHelper) => _discordHelper = discordHelper;
 
 		[Command("editnewspost")]
 		[Summary("Allows you to edit a DD news post made by the bot. If no message ID is given, then the latest post will be edited.")]
@@ -34,7 +29,7 @@ namespace Clubber.Modules
 			if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 				return;
 
-			SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
+			SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
 			if (await ddnewsPostChannel.GetMessageAsync(messageId) is not IUserMessage messageToEdit)
 			{
 				await InlineReplyAsync("Could not find message.");
@@ -57,7 +52,7 @@ namespace Clubber.Modules
 			if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 				return;
 
-			SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
+			SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
 			IEnumerable<IMessage> messages = await ddnewsPostChannel.GetMessagesAsync(5).FlattenAsync();
 			IUserMessage? messageToEdit = messages.Where(m => m.Author.Id == Context.Client.CurrentUser.Id)
 				.OrderBy(m => m.CreatedAt.Date)

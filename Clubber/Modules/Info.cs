@@ -1,7 +1,7 @@
 ﻿using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
-using Microsoft.Extensions.Configuration;
+using System;
 using System.Threading.Tasks;
 
 namespace Clubber.Modules
@@ -9,18 +9,13 @@ namespace Clubber.Modules
 	[RequireContext(ContextType.Guild)]
 	public class Info : ExtendedModulebase<SocketCommandContext>
 	{
-		private readonly IConfiguration _config;
 		private readonly CommandService _commands;
 
-		public Info(IConfiguration config, CommandService commands)
-		{
-			_config = config;
-			_commands = commands;
-		}
+		public Info(CommandService commands) => _commands = commands;
 
 		[Command("whyareyou")]
 		[Summary("Describes what the bot does.")]
-		public async Task WhyAreYou() => await InlineReplyAsync(_config["WhyAreYou"]);
+		public async Task WhyAreYou() => await InlineReplyAsync(Environment.GetEnvironmentVariable("WhyAreYou")!);
 
 		[Command("help")]
 		[Summary("Get a list of commands, or info regarding a specific command.")]

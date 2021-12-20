@@ -18,7 +18,6 @@ namespace Clubber.BackgroundTasks
 	public class DdNewsPostService : AbstractBackgroundService
 	{
 		private const int _minimumScore = 930;
-		private readonly IConfiguration _config;
 		private SocketTextChannel? _ddNewsChannel;
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IDiscordHelper _discordHelper;
@@ -27,7 +26,6 @@ namespace Clubber.BackgroundTasks
 		private readonly ImageGenerator _imageGenerator;
 
 		public DdNewsPostService(
-			IConfiguration config,
 			IDatabaseHelper databaseHelper,
 			IDiscordHelper discordHelper,
 			IWebService webService,
@@ -35,7 +33,6 @@ namespace Clubber.BackgroundTasks
 			ImageGenerator imageGenerator)
 			: base(loggingService)
 		{
-			_config = config;
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
 			_webService = webService;
@@ -46,7 +43,7 @@ namespace Clubber.BackgroundTasks
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
-			_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
+			_ddNewsChannel ??= _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
 			List<EntryResponse> oldEntries = _databaseHelper.LeaderboardCache;
 			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries(_minimumScore);
 			if (newEntries.Count == 0)
@@ -106,7 +103,8 @@ namespace Clubber.BackgroundTasks
 		private string GetDdNewsMessage(List<EntryResponse> newEntries, (EntryResponse OldEntry, EntryResponse NewEntry) entryTuple)
 		{
 			string userName = entryTuple.NewEntry.Username;
-			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(_config.GetValue<ulong>("DdPalsId"), dbUser.DiscordId) is { } guildUser)
+			ulong ddPalsId = ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!);
+			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 				userName = guildUser.Mention;
 
 			double oldScore = entryTuple.OldEntry.Time / 10000d;
