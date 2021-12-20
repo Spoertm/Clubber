@@ -3,6 +3,7 @@ using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -52,13 +53,12 @@ namespace Clubber.Helpers
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IWebService _webService;
 
-		public UpdateRolesHelper(IDatabaseHelper databaseHelper, IWebService webService)
+		public UpdateRolesHelper(IConfiguration config, IDatabaseHelper databaseHelper, IWebService webService)
 		{
 			_databaseHelper = databaseHelper;
 			_webService = webService;
 
-			ulong unregRoleId = ulong.Parse(Environment.GetEnvironmentVariable("UnregisteredRoleId")!);
-			_uselessRoles = new() { unregRoleId, 458375331468935178 };
+			_uselessRoles = new() { config.GetValue<ulong>("UnregisteredRoleId"), 458375331468935178 };
 		}
 
 		public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)

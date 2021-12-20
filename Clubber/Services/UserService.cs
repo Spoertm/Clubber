@@ -1,7 +1,7 @@
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Discord;
-using System;
+using Microsoft.Extensions.Configuration;
 using System.Linq;
 
 namespace Clubber.Services
@@ -9,8 +9,13 @@ namespace Clubber.Services
 	public class UserService
 	{
 		private readonly IDatabaseHelper _databaseHelper;
+		private readonly IConfiguration _config;
 
-		public UserService(IDatabaseHelper databaseHelper) => _databaseHelper = databaseHelper;
+		public UserService(IConfiguration config, IDatabaseHelper databaseHelper)
+		{
+			_config = config;
+			_databaseHelper = databaseHelper;
+		}
 
 		public UserValidationResponse IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
 		{
@@ -36,17 +41,13 @@ namespace Clubber.Services
 			if (guildUser.GuildPermissions.ManageRoles)
 				return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
-			ulong unregRoleId = ulong.Parse(Environment.GetEnvironmentVariable("UnregisteredRoleId")!);
-			bool userHasUnregRole = guildUser.RoleIds.Contains(unregRoleId);
-
-			string roleAssignerRoleId = Environment.GetEnvironmentVariable("RoleAssignerRoleId")!;
+			bool userHasUnregRole = guildUser.RoleIds.Contains(_config.GetValue<ulong>("UnregisteredRoleId"));
 			string message = userUsedCommandForThemselves
-				? $"You're not registered, {guildUser.Username}. Only a <@&{roleAssignerRoleId}> can register you."
-				: $"`{guildUser.Username}` is not registered. Only a <@&{roleAssignerRoleId}> can register them.";
+				? $"You're not registered, {guildUser.Username}. Only a <@&{_config["RoleAssignerRoleId"]}> can register you."
+				: $"`{guildUser.Username}` is not registered. Only a <@&{_config["RoleAssignerRoleIdRoleAssignerRoleId"]}> can register them.";
 
-			string registerChannelId = Environment.GetEnvironmentVariable("RegisterChannelId")!;
 			if (userHasUnregRole)
-				message += $"\nPlease refer to the first message in <#{registerChannelId}> for more info.";
+				message += $"\nPlease refer to the first message in <#{_config["RegisterChannelId"]}> for more info.";
 
 			return new(IsError: true, Message: message);
 		}
@@ -56,8 +57,7 @@ namespace Clubber.Services
 			if (guildUser.IsBot)
 				return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 
-			ulong cheaterRoleId = ulong.Parse(Environment.GetEnvironmentVariable("CheaterRoleId")!);
-			if (guildUser.RoleIds.All(rId => rId != cheaterRoleId))
+			if (guildUser.RoleIds.All(rId => rId != _config.GetValue<ulong>("CheaterRoleId")))
 				return new(IsError: false, Message: null);
 
 			string message = userUsedCommandForThemselves
