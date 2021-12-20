@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Clubber.BackgroundTasks;
 
-public class DatabaseUpdateService : AbstractBackgroundService
+public class DatabaseUpdateService : ExactBackgroundService
 {
 	private readonly IDiscordHelper _discordHelper;
 	private readonly UpdateRolesHelper _updateRolesHelper;
@@ -25,7 +25,7 @@ public class DatabaseUpdateService : AbstractBackgroundService
 		_updateRolesHelper = updateRolesHelper;
 	}
 
-	protected override TimeSpan Interval => TimeSpan.FromDays(1);
+	protected override TimeOnly UtcTriggerTime => new(16, 00);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
