@@ -35,6 +35,8 @@ namespace Clubber.BackgroundTasks
 				{
 					await _loggingService.LogAsync(new(LogSeverity.Error, "AbstractBackgroundService", string.Empty, exception));
 				}
+
+				await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
 			}
 		}
 	}
