@@ -3,6 +3,7 @@ using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,13 +16,14 @@ namespace Clubber.Helpers
 	public class DatabaseHelper : IDatabaseHelper
 	{
 		private readonly IWebService _webService;
-		private readonly DatabaseService _dbContext;
+		private readonly IServiceProvider _services;
 
-		public DatabaseHelper(IWebService webService, DatabaseService dbContext)
+		public DatabaseHelper(IWebService webService, IServiceProvider services)
 		{
 			_webService = webService;
-			_dbContext = dbContext;
+			_services = services;
 
+			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
 			DdUserDatabase = dbContext.DdPlayers.ToList();
 			LeaderboardCache = dbContext.LeaderboardCache.ToList();
 		}
@@ -37,8 +39,9 @@ namespace Clubber.Helpers
 
 				EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 				DdUser newDdUser = new(user.Id, lbPlayer.Id);
-				await _dbContext.AddAsync(newDdUser);
-				await _dbContext.SaveChangesAsync();
+				DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+				await dbContext.AddAsync(newDdUser);
+				await dbContext.SaveChangesAsync();
 				DdUserDatabase.Add(newDdUser);
 				return (true, string.Empty);
 			}
@@ -60,8 +63,9 @@ namespace Clubber.Helpers
 			if (toRemove is null)
 				return false;
 
-			_dbContext.Remove(toRemove);
-			await _dbContext.SaveChangesAsync();
+			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			dbContext.Remove(toRemove);
+			await dbContext.SaveChangesAsync();
 			DdUserDatabase.Remove(toRemove);
 			return true;
 		}
@@ -72,8 +76,9 @@ namespace Clubber.Helpers
 			if (toRemove is null)
 				return false;
 
-			_dbContext.Remove(toRemove);
-			await _dbContext.SaveChangesAsync();
+			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			dbContext.Remove(toRemove);
+			await dbContext.SaveChangesAsync();
 			DdUserDatabase.Remove(toRemove);
 			return true;
 		}
@@ -102,9 +107,10 @@ namespace Clubber.Helpers
 
 		public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
 		{
-			await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE leaderboard_cache");
-			await _dbContext.LeaderboardCache.AddRangeAsync(newEntries);
-			await _dbContext.SaveChangesAsync();
+			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			await dbContext.Database.ExecuteSqlRawAsync("TRUNCATE leaderboard_cache");
+			await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
+			await dbContext.SaveChangesAsync();
 			LeaderboardCache.Clear();
 			LeaderboardCache.AddRange(newEntries);
 		}
