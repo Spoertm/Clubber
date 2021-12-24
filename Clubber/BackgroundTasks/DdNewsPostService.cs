@@ -4,6 +4,8 @@ using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,19 +25,22 @@ namespace Clubber.BackgroundTasks
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
 		private readonly ImageGenerator _imageGenerator;
+		private readonly IServiceProvider _services;
 
 		public DdNewsPostService(
 			IDatabaseHelper databaseHelper,
 			IDiscordHelper discordHelper,
 			IWebService webService,
 			LoggingService loggingService,
-			ImageGenerator imageGenerator)
+			ImageGenerator imageGenerator,
+			IServiceProvider services)
 			: base(loggingService)
 		{
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
 			_webService = webService;
 			_imageGenerator = imageGenerator;
+			_services = services;
 		}
 
 		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
@@ -43,8 +48,9 @@ namespace Clubber.BackgroundTasks
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
 			_ddNewsChannel ??= _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
-			List<EntryResponse> oldEntries = _databaseHelper.LeaderboardCache;
-			List<EntryResponse> newEntries = await GetSufficientLeaderboardEntries(_minimumScore);
+			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			List<EntryResponse> oldEntries = dbContext.LeaderboardCache.AsNoTracking().ToList();
+			List<EntryResponse> newEntries = await _webService.GetSufficientLeaderboardEntries(_minimumScore);
 			if (newEntries.Count == 0)
 				return;
 
@@ -74,29 +80,6 @@ namespace Clubber.BackgroundTasks
 				await _databaseHelper.UpdateLeaderboardCache(newEntries);
 
 			_sb.Clear();
-		}
-
-		private async Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
-		{
-			List<EntryResponse> entries = new();
-			int rank = 1;
-			do
-			{
-				try
-				{
-					entries.AddRange((await _webService.GetLeaderboardEntries(rank)).Entries);
-				}
-				catch
-				{
-					return new();
-				}
-
-				rank += 100;
-				await Task.Delay(50);
-			}
-			while (entries[^1].Time / 10000 >= minimumScore);
-
-			return entries;
 		}
 
 		private string GetDdNewsMessage(List<EntryResponse> newEntries, (EntryResponse OldEntry, EntryResponse NewEntry) entryTuple)

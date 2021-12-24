@@ -10,7 +10,6 @@ namespace Clubber.Helpers
 	public interface IDatabaseHelper
 	{
 		List<DdUser> DdUserDatabase { get; }
-		List<EntryResponse> LeaderboardCache { get; }
 
 		Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user);
 

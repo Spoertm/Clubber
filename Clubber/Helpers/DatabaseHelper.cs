@@ -25,11 +25,9 @@ namespace Clubber.Helpers
 
 			using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
 			DdUserDatabase = dbContext.DdPlayers.AsNoTracking().ToList();
-			LeaderboardCache = dbContext.LeaderboardCache.AsNoTracking().ToList();
 		}
 
 		public List<DdUser> DdUserDatabase { get; }
-		public List<EntryResponse> LeaderboardCache { get; }
 
 		public async Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user)
 		{
@@ -90,8 +88,6 @@ namespace Clubber.Helpers
 			await dbContext.Database.ExecuteSqlRawAsync("TRUNCATE leaderboard_cache");
 			await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
 			await dbContext.SaveChangesAsync();
-			LeaderboardCache.Clear();
-			LeaderboardCache.AddRange(newEntries);
 		}
 	}
 }

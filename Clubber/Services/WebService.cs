@@ -74,9 +74,32 @@ namespace Clubber.Services
 			return Encoding.UTF8.GetString(usernameBytes);
 		}
 
+		public async Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
+		{
+			List<EntryResponse> entries = new();
+			int rank = 1;
+			do
+			{
+				try
+				{
+					entries.AddRange((await GetLeaderboardEntries(rank)).Entries);
+				}
+				catch
+				{
+					return new();
+				}
+
+				rank += 100;
+				await Task.Delay(50);
+			}
+			while (entries[^1].Time / 10000 >= minimumScore);
+
+			return entries;
+		}
+
 		// Taken from devildaggers.info then modified
 		// Credit goes to Noah Stolk https://github.com/NoahStolk
-		public async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
+		private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 		{
 			using FormUrlEncodedContent content = new(new[] { new KeyValuePair<string?, string?>("offset", (rankStart - 1).ToString()) });
 			using HttpResponseMessage response = await _httpClient.PostAsync(_getScoresUrl, content);

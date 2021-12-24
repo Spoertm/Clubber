@@ -8,7 +8,7 @@ namespace Clubber.Services
 	{
 		Task<List<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
 
-		Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart);
+		Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
 
 		Task<string> GetCountryCodeForplayer(int lbId);
 	}
