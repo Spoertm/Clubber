@@ -7,8 +7,8 @@ namespace Clubber.Services;
 
 public class DatabaseService : DbContext
 {
-	public DbSet<EntryResponse> LeaderboardCache { get; set; } = null!;
-	public DbSet<DdUser> DdPlayers { get; set; } = null!;
+	public DbSet<EntryResponse> LeaderboardCache => Set<EntryResponse>();
+	public DbSet<DdUser> DdPlayers => Set<DdUser>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		=> optionsBuilder

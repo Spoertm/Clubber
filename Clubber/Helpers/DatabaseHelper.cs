@@ -23,7 +23,7 @@ namespace Clubber.Helpers
 			_webService = webService;
 			_services = services;
 
-			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
 			DdUserDatabase = dbContext.DdPlayers.AsNoTracking().ToList();
 			LeaderboardCache = dbContext.LeaderboardCache.AsNoTracking().ToList();
 		}
@@ -39,7 +39,7 @@ namespace Clubber.Helpers
 
 				EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 				DdUser newDdUser = new(user.Id, lbPlayer.Id);
-				DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+				await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
 				await dbContext.AddAsync(newDdUser);
 				await dbContext.SaveChangesAsync();
 				DdUserDatabase.Add(newDdUser);
@@ -63,7 +63,7 @@ namespace Clubber.Helpers
 			if (toRemove is null)
 				return false;
 
-			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
 			dbContext.Remove(toRemove);
 			await dbContext.SaveChangesAsync();
 			DdUserDatabase.Remove(toRemove);
@@ -76,7 +76,7 @@ namespace Clubber.Helpers
 			if (toRemove is null)
 				return false;
 
-			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
 			dbContext.Remove(toRemove);
 			await dbContext.SaveChangesAsync();
 			DdUserDatabase.Remove(toRemove);
@@ -107,7 +107,7 @@ namespace Clubber.Helpers
 
 		public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
 		{
-			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
 			await dbContext.Database.ExecuteSqlRawAsync("TRUNCATE leaderboard_cache");
 			await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
 			await dbContext.SaveChangesAsync();
