@@ -3,11 +3,7 @@ using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {

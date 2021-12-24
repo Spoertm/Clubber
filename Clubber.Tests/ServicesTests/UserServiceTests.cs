@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Clubber.Helpers;
+﻿using Clubber.Helpers;
 using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;

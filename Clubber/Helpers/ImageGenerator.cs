@@ -1,9 +1,6 @@
 ﻿using Clubber.Models.Responses;
 using Clubber.Services;
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace Clubber.Helpers

@@ -1,5 +1,4 @@
 ﻿using Discord;
-using System.Collections.Generic;
 
 namespace Clubber.Models.Responses
 {

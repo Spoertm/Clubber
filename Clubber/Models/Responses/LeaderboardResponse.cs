@@ -1,9 +1,6 @@
 ﻿// Taken from devildaggers.info and modified
 // Credit goes to Noah Stolk https://github.com/NoahStolk
 
-using System;
-using System.Collections.Generic;
-
 namespace Clubber.Models.Responses
 {
 	public record struct LeaderboardResponse

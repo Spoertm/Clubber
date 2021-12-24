@@ -1,8 +1,6 @@
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Discord;
-using System;
-using System.Linq;
 
 namespace Clubber.Services
 {

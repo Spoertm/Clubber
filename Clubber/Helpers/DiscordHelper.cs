@@ -1,8 +1,6 @@
 ﻿using Clubber.Models;
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {

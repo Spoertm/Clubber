@@ -3,13 +3,6 @@ using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Clubber.Helpers
 {

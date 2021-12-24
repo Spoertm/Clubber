@@ -1,6 +1,4 @@
 ﻿using Clubber.Models.Responses;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Clubber.Services
 {

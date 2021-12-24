@@ -5,14 +5,7 @@ using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Clubber.BackgroundTasks
 {

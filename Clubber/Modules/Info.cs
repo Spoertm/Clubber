@@ -1,8 +1,6 @@
 ﻿using Clubber.Helpers;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Threading.Tasks;
 
 namespace Clubber.Modules
 {

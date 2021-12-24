@@ -1,7 +1,6 @@
 using Clubber.Models;
 using Clubber.Models.Responses;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Clubber.Services;
 

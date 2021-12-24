@@ -1,8 +1,6 @@
 using Clubber.Helpers;
 using Clubber.Models.Responses;
 using Discord.WebSocket;
-using System;
-using System.Threading.Tasks;
 
 namespace Clubber.Services
 {
