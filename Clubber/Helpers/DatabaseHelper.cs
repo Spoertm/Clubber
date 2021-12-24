@@ -9,14 +9,15 @@ namespace Clubber.Helpers
 	public class DatabaseHelper : IDatabaseHelper
 	{
 		private readonly IWebService _webService;
-		private readonly IServiceProvider _services;
+		private readonly IServiceScopeFactory _scopeFactory;
 
-		public DatabaseHelper(IWebService webService, IServiceProvider services)
+		public DatabaseHelper(IWebService webService, IServiceScopeFactory scopeFactory)
 		{
 			_webService = webService;
-			_services = services;
+			_scopeFactory = scopeFactory;
 
-			using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			using IServiceScope scope = _scopeFactory.CreateScope();
+			using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 			DdUserDatabase = dbContext.DdPlayers.AsNoTracking().ToList();
 		}
 
@@ -30,7 +31,8 @@ namespace Clubber.Helpers
 
 				EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 				DdUser newDdUser = new(user.Id, lbPlayer.Id);
-				await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+				using IServiceScope scope = _scopeFactory.CreateScope();
+				await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 				await dbContext.AddAsync(newDdUser);
 				await dbContext.SaveChangesAsync();
 				DdUserDatabase.Add(newDdUser);
@@ -57,7 +59,8 @@ namespace Clubber.Helpers
 			if (toRemove is null)
 				return false;
 
-			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			using IServiceScope scope = _scopeFactory.CreateScope();
+			await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 			dbContext.Remove(toRemove);
 			await dbContext.SaveChangesAsync();
 			DdUserDatabase.Remove(toRemove);
@@ -77,7 +80,8 @@ namespace Clubber.Helpers
 
 		public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
 		{
-			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			using IServiceScope scope = _scopeFactory.CreateScope();
+			await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 			await dbContext.Database.ExecuteSqlRawAsync("TRUNCATE leaderboard_cache");
 			await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
 			await dbContext.SaveChangesAsync();

@@ -18,7 +18,7 @@ namespace Clubber.BackgroundTasks
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
 		private readonly ImageGenerator _imageGenerator;
-		private readonly IServiceProvider _services;
+		private readonly IServiceScopeFactory _services;
 
 		public DdNewsPostService(
 			IDatabaseHelper databaseHelper,
@@ -26,7 +26,7 @@ namespace Clubber.BackgroundTasks
 			IWebService webService,
 			LoggingService loggingService,
 			ImageGenerator imageGenerator,
-			IServiceProvider services)
+			IServiceScopeFactory services)
 			: base(loggingService)
 		{
 			_databaseHelper = databaseHelper;
@@ -41,7 +41,8 @@ namespace Clubber.BackgroundTasks
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
 			_ddNewsChannel ??= _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
-			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
+			using IServiceScope scope = _services.CreateScope();
+			await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 			List<EntryResponse> oldEntries = dbContext.LeaderboardCache.AsNoTracking().ToList();
 			List<EntryResponse> newEntries = await _webService.GetSufficientLeaderboardEntries(_minimumScore);
 			if (newEntries.Count == 0)
