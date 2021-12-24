@@ -58,21 +58,11 @@ namespace Clubber.Helpers
 		}
 
 		public async Task<bool> RemoveUser(SocketGuildUser user)
-		{
-			DdUser? toRemove = GetDdUserByDiscordId(user.Id);
-			if (toRemove is null)
-				return false;
-
-			await using DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
-			dbContext.Remove(toRemove);
-			await dbContext.SaveChangesAsync();
-			DdUserDatabase.Remove(toRemove);
-			return true;
-		}
+			=> await RemoveUser(user.Id);
 
 		public async Task<bool> RemoveUser(ulong discordId)
 		{
-			DdUser? toRemove = GetDdUserByDiscordId(discordId);
+			DdUser? toRemove = GetDdUserBy(ddu => ddu.DiscordId, discordId);
 			if (toRemove is null)
 				return false;
 
@@ -83,22 +73,11 @@ namespace Clubber.Helpers
 			return true;
 		}
 
-		public DdUser? GetDdUserByDiscordId(ulong discordId)
+		public DdUser? GetDdUserBy<T>(Func<DdUser, T> selector, T soughtValue) where T : struct
 		{
 			for (int i = 0; i < DdUserDatabase.Count; i++)
 			{
-				if (DdUserDatabase[i].DiscordId == discordId)
-					return DdUserDatabase[i];
-			}
-
-			return null;
-		}
-
-		public DdUser? GetDdUserByLbId(int lbId)
-		{
-			for (int i = 0; i < DdUserDatabase.Count; i++)
-			{
-				if (DdUserDatabase[i].LeaderboardId == lbId)
+				if (selector(DdUserDatabase[i]).Equals(soughtValue))
 					return DdUserDatabase[i];
 			}
 

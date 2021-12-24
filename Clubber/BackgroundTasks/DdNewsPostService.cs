@@ -103,7 +103,7 @@ namespace Clubber.BackgroundTasks
 		{
 			string userName = entryTuple.NewEntry.Username;
 			ulong ddPalsId = ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!);
-			if (_databaseHelper.GetDdUserByLbId(entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
+			if (_databaseHelper.GetDdUserBy(ddu => ddu.LeaderboardId, entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 				userName = guildUser.Mention;
 
 			double oldScore = entryTuple.OldEntry.Time / 10000d;

@@ -51,7 +51,7 @@ namespace Clubber.Modules
 		public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
 		{
 			SocketGuildUser? user = Context.Guild.GetUser(discordId);
-			DdUser? ddUser = _databaseHelper.GetDdUserByDiscordId(discordId);
+			DdUser? ddUser = _databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, discordId);
 
 			if (ddUser is null)
 			{
@@ -68,7 +68,7 @@ namespace Clubber.Modules
 
 		private async Task CheckUserAndShowStats(SocketGuildUser user)
 		{
-			DdUser? ddUser = _databaseHelper.GetDdUserByDiscordId(user.Id);
+			DdUser? ddUser = _databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, user.Id);
 
 			if (ddUser is null)
 			{

@@ -18,7 +18,7 @@ namespace Clubber.Services
 			if (responseIsError)
 				return new(IsError: true, Message: responseMessage);
 
-			if (_databaseHelper.GetDdUserByDiscordId(guildUser.Id) is not null)
+			if (_databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, guildUser.Id) is not null)
 				return new(IsError: true, Message: $"User `{guildUser.Username}` is already registered.");
 
 			return new(IsError: false, Message: null);
@@ -30,7 +30,7 @@ namespace Clubber.Services
 			if (reponseIsError)
 				return new(IsError: true, Message: responseMessage);
 
-			if (_databaseHelper.GetDdUserByDiscordId(guildUser.Id) is not null)
+			if (_databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, guildUser.Id) is not null)
 				return new(IsError: false, Message: null);
 
 			if (guildUser.GuildPermissions.ManageRoles)

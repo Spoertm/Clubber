@@ -1,6 +1,7 @@
 ﻿using Clubber.Models;
 using Clubber.Models.Responses;
 using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,9 +18,7 @@ namespace Clubber.Helpers
 
 		Task<bool> RemoveUser(ulong discordId);
 
-		DdUser? GetDdUserByDiscordId(ulong discordId);
-
-		DdUser? GetDdUserByLbId(int lbId);
+		DdUser? GetDdUserBy<T>(Func<DdUser, T> selector, T soughtValue) where T : struct;
 
 		Task UpdateLeaderboardCache(List<EntryResponse> newEntries);
 	}
