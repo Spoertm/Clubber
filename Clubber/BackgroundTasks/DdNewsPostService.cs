@@ -95,9 +95,9 @@ namespace Clubber.BackgroundTasks
 				.Append("s (**+")
 				.AppendFormat("{0:0.0000}", newScore - oldScore)
 				.Append("s**), ")
-				.Append(ranksChanged >= 0 ? "gaining " : "but lost ")
-				.Append(Math.Abs(ranksChanged))
-				.Append(Math.Abs(ranksChanged) == 1 ? " rank." : " ranks.");
+				.Append(ranksChanged > 0 ? "gaining " : ranksChanged == 0 ? "but didn't change" : "but lost ")
+				.Append(ranksChanged == 0 ? "" : Math.Abs(ranksChanged))
+				.Append(Math.Abs(ranksChanged) is 1 or 0 ? " rank." : " ranks.");
 
 			int oldHundredth = entryTuple.OldEntry.Time / 1000000;
 			int newHundredth = entryTuple.NewEntry.Time / 1000000;
