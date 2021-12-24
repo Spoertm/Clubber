@@ -24,8 +24,8 @@ namespace Clubber.Helpers
 			_services = services;
 
 			DatabaseService dbContext = _services.GetRequiredService<DatabaseService>();
-			DdUserDatabase = dbContext.DdPlayers.ToList();
-			LeaderboardCache = dbContext.LeaderboardCache.ToList();
+			DdUserDatabase = dbContext.DdPlayers.AsNoTracking().ToList();
+			LeaderboardCache = dbContext.LeaderboardCache.AsNoTracking().ToList();
 		}
 
 		public List<DdUser> DdUserDatabase { get; }
