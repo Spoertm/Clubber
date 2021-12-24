@@ -123,14 +123,19 @@ namespace Clubber.BackgroundTasks
 				.Append(Math.Abs(ranksChanged))
 				.Append(Math.Abs(ranksChanged) == 1 ? " rank." : " ranks.");
 
-			bool new1000Entry = oldScore < 1000 && newScore >= 1000;
-			if (new1000Entry || oldScore < 1100 && newScore >= 1100)
+			int oldHundredth = entryTuple.OldEntry.Time / 1000000;
+			int newHundredth = entryTuple.NewEntry.Time / 1000000;
+			if (newHundredth > oldHundredth)
 			{
-				int position = newEntries.Count(entry => entry.Time / 10000 >= (new1000Entry ? 1000 : 1100));
+				int position = newEntries.Count(entry => entry.Time / 1000000 >= newHundredth);
 				_sb.Append(" They are the ")
 					.Append(position)
-					.Append(position.OrdinalIndicator())
-					.Append(new1000Entry ? " player to unlock the leviathan dagger!" : " 1100 player!");
+					.Append(position.OrdinalIndicator());
+
+				if (oldHundredth == 9 && newHundredth == 10)
+					_sb.Append(" player to unlock the leviathan dagger!");
+				else
+					_sb.Append($" {newHundredth * 100} player!");
 			}
 
 			if (entryTuple.NewEntry.Rank == 1)
