@@ -94,6 +94,7 @@ namespace Clubber
 				.AddSingleton<ImageGenerator>()
 				.AddHostedService<DdNewsPostService>()
 				.AddHostedService<DatabaseUpdateService>()
+				.AddHttpClient()
 				.AddDbContext<DatabaseService>();
 
 			return builder;

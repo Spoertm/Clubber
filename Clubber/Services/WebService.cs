@@ -10,7 +10,9 @@ namespace Clubber.Services
 		private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
 		private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";
 #pragma warning restore S1075
-		private readonly HttpClient _httpClient = new();
+		private readonly IHttpClientFactory _httpClientFactory;
+
+		public WebService(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
 		public async Task<List<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
 		{
@@ -22,7 +24,7 @@ namespace Clubber.Services
 				};
 
 				using FormUrlEncodedContent content = new(postValues);
-				HttpResponseMessage response = await _httpClient.PostAsync(_getMultipleUsersByIdUrl, content);
+				HttpResponseMessage response = await _httpClientFactory.CreateClient().PostAsync(_getMultipleUsersByIdUrl, content);
 				byte[] data = await response.Content.ReadAsByteArrayAsync();
 
 				int bytePosition = 19;
@@ -97,7 +99,7 @@ namespace Clubber.Services
 		private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 		{
 			using FormUrlEncodedContent content = new(new[] { new KeyValuePair<string?, string?>("offset", (rankStart - 1).ToString()) });
-			using HttpResponseMessage response = await _httpClient.PostAsync(_getScoresUrl, content);
+			using HttpResponseMessage response = await _httpClientFactory.CreateClient().PostAsync(_getScoresUrl, content);
 
 			MemoryStream ms = new();
 			await response.Content.CopyToAsync(ms);
@@ -150,6 +152,6 @@ namespace Clubber.Services
 		}
 
 		public async Task<string> GetCountryCodeForplayer(int lbId)
-			=> await _httpClient.GetStringAsync($"https://devildaggers.info/api/players/{lbId}/flag");
+			=> await _httpClientFactory.CreateClient().GetStringAsync($"https://devildaggers.info/api/players/{lbId}/flag");
 	}
 }
