@@ -1,5 +1,4 @@
 ﻿using Clubber.Models.Responses;
-using Clubber.Services;
 using System.Diagnostics;
 using System.Web;
 
@@ -10,11 +9,9 @@ namespace Clubber.Helpers
 		private const string _toolFilename = "wkhtmltoimage";
 		private readonly string _baseDirectory = AppContext.BaseDirectory;
 		private readonly string _toolFilepath;
-		private readonly IWebService _webService;
 
-		public ImageGenerator(IWebService webService)
+		public ImageGenerator()
 		{
-			_webService = webService;
 			if (OperatingSystem.IsWindows())
 				_toolFilepath = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltoimage.exe";
 			else if (OperatingSystem.IsLinux())
@@ -24,13 +21,12 @@ namespace Clubber.Helpers
 		}
 
 		/// <returns>A MemoryStream of the newly generated image file.</returns>
-		public async Task<MemoryStream> FromEntryResponse(EntryResponse entry, int width = 1100)
+		public async Task<MemoryStream> FromEntryResponse(EntryResponse entry, string playerCountryCode, int width = 1100)
 		{
-			string countryCode = await _webService.GetCountryCodeForplayer(entry.Id);
 			string baseFlagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags");
-			string flagPath = Path.Combine(baseFlagPath, $"{countryCode}.png");
+			string flagPath = Path.Combine(baseFlagPath, $"{playerCountryCode}.png");
 
-			if (countryCode.Length == 0 || !File.Exists(flagPath))
+			if (playerCountryCode.Length == 0 || !File.Exists(flagPath))
 				flagPath = Path.Combine(baseFlagPath, "00.png");
 
 			if (OperatingSystem.IsWindows())

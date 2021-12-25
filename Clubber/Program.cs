@@ -91,7 +91,6 @@ namespace Clubber
 				.AddSingleton<IWebService, WebService>()
 				.AddSingleton<LoggingService>()
 				.AddSingleton<WelcomeMessage>()
-				.AddSingleton<ImageGenerator>()
 				.AddHostedService<DdNewsPostService>()
 				.AddHostedService<DatabaseUpdateService>()
 				.AddHttpClient()

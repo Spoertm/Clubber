@@ -17,22 +17,20 @@ namespace Clubber.BackgroundTasks
 		private readonly IDiscordHelper _discordHelper;
 		private readonly IWebService _webService;
 		private readonly StringBuilder _sb = new();
-		private readonly ImageGenerator _imageGenerator;
 		private readonly IServiceScopeFactory _services;
+		private readonly ImageGenerator _imageGenerator = new();
 
 		public DdNewsPostService(
 			IDatabaseHelper databaseHelper,
 			IDiscordHelper discordHelper,
 			IWebService webService,
 			LoggingService loggingService,
-			ImageGenerator imageGenerator,
 			IServiceScopeFactory services)
 			: base(loggingService)
 		{
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
 			_webService = webService;
-			_imageGenerator = imageGenerator;
 			_services = services;
 		}
 
@@ -66,7 +64,8 @@ namespace Clubber.BackgroundTasks
 
 				cacheIsToBeRefreshed = true;
 				string message = GetDdNewsMessage(newEntries, (oldEntry, newEntry));
-				await using MemoryStream screenshot = await _imageGenerator.FromEntryResponse(newEntry);
+				string countryCode = await _webService.GetCountryCodeForplayer(newEntry.Id);
+				await using MemoryStream screenshot = await _imageGenerator.FromEntryResponse(newEntry, countryCode);
 				await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
 			}
 
