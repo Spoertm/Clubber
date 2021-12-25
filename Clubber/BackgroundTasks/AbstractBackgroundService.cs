@@ -23,7 +23,7 @@ namespace Clubber.BackgroundTasks
 				}
 				catch (Exception exception)
 				{
-					await _loggingService.LogAsync(new(LogSeverity.Error, "AbstractBackgroundService", string.Empty, exception));
+					await _loggingService.LogAsync(new(LogSeverity.Error, nameof(AbstractBackgroundService), string.Empty, exception));
 				}
 
 				if (Interval.TotalMilliseconds > 0)
