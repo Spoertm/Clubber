@@ -36,7 +36,7 @@ namespace Clubber.BackgroundTasks
 			_services = services;
 		}
 
-		protected override TimeSpan Interval => TimeSpan.FromMinutes(2);
+		protected override TimeSpan Interval => TimeSpan.FromMinutes(1);
 
 		protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 		{
