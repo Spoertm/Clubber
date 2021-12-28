@@ -23,8 +23,11 @@ namespace Clubber.Services
 				return;
 
 			// User is registered
+			ulong unregRoleId = ulong.Parse(Environment.GetEnvironmentVariable("UnregisteredRoleId")!);
 			if (_databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, joiningUser.Id) is not null)
 				await UpdateRolesForRegisteredUser(joiningUser);
+			else
+				await joiningUser.AddRoleAsync(unregRoleId);
 		}
 
 		private async Task UpdateRolesForRegisteredUser(SocketGuildUser joiningUser)
