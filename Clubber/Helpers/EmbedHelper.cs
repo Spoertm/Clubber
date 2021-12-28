@@ -105,7 +105,7 @@ namespace Clubber.Helpers
 		}
 
 		/// <summary>
-		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(LeaderboardUser, SocketGuildUser?)" />.
+		/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(EntryResponse, SocketGuildUser)" />.
 		/// </summary>
 		public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
 		{
@@ -125,7 +125,7 @@ namespace Clubber.Helpers
 		}
 
 		/// <summary>
-		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(LeaderboardUser, SocketGuildUser?)" />.
+		/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(EntryResponse, SocketGuildUser)" />.
 		/// </summary>
 		public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
 		{
