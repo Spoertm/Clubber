@@ -16,6 +16,7 @@ namespace Clubber.BackgroundTasks
 		private readonly IDatabaseHelper _databaseHelper;
 		private readonly IDiscordHelper _discordHelper;
 		private readonly IWebService _webService;
+		private readonly LoggingService _loggingService;
 		private readonly StringBuilder _sb = new();
 		private readonly IServiceScopeFactory _services;
 		private readonly ImageGenerator _imageGenerator = new();
@@ -31,6 +32,7 @@ namespace Clubber.BackgroundTasks
 			_databaseHelper = databaseHelper;
 			_discordHelper = discordHelper;
 			_webService = webService;
+			_loggingService = loggingService;
 			_services = services;
 		}
 
@@ -70,7 +72,10 @@ namespace Clubber.BackgroundTasks
 			}
 
 			if (cacheIsToBeRefreshed)
+			{
+				await _loggingService.LogAsync(new(LogSeverity.Info, nameof(DdNewsPostService), "Updating leaderboard cache"));
 				await _databaseHelper.UpdateLeaderboardCache(newEntries);
+			}
 
 			_sb.Clear();
 		}
