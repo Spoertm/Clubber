@@ -1,6 +1,4 @@
-﻿using Clubber.Models.Responses;
-
-namespace Clubber.Models;
+﻿namespace Clubber.Models.Responses;
 
 public record DdNewsItem(
 	int Id,
