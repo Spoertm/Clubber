@@ -40,7 +40,7 @@ public class ImageGenerator
 			HttpUtility.HtmlEncode(entry.Username),
 			$"{entry.Time / 10000d:0.0000}");
 
-		return await FromHtml(formattedHtml);
+		return await FromHtml(formattedHtml, width);
 	}
 
 	/// <returns>A MemoryStream of the newly generated image file.</returns>
