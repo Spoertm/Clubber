@@ -4,6 +4,7 @@ using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Reflection;
 
@@ -76,6 +77,13 @@ public static class Program
 
 		app.MapGet("/users/by-discordId", (ulong discordId, IDatabaseHelper databaseHelper)
 			=> databaseHelper.DdUserDatabase.Find(user => user.DiscordId == discordId));
+
+		app.MapGet("/dailynews", async (IServiceScopeFactory scopeFactory) =>
+		{
+			using IServiceScope scope = scopeFactory.CreateScope();
+			await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+			return await dbContext.DdNews.AsNoTracking().ToListAsync();
+		});
 	}
 
 	private static WebApplicationBuilder ConfigureServices(DiscordSocketClient client, CommandService commands)

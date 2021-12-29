@@ -86,4 +86,27 @@ public class DatabaseHelper : IDatabaseHelper
 		await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
 		await dbContext.SaveChangesAsync();
 	}
+
+	public async Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth)
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+
+		DdNewsItem newItem = new(oldEntry.Id, oldEntry, newEntry, DateTime.UtcNow, nth);
+		await dbContext.DdNews.AddAsync(newItem);
+		await dbContext.SaveChangesAsync();
+	}
+
+	public async Task CleanUpNewsItems()
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		DateTime utcNow = DateTime.UtcNow;
+		IQueryable<DdNewsItem> toRemove = dbContext.DdNews.Where(ddn => utcNow.Date > ddn.TimeOfOccurenceUtc.Date);
+		if (!toRemove.Any())
+			return;
+
+		dbContext.DdNews.RemoveRange(toRemove);
+		await dbContext.SaveChangesAsync();
+	}
 }

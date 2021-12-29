@@ -17,4 +17,8 @@ public interface IDatabaseHelper
 	DdUser? GetDdUserBy<T>(Func<DdUser, T> selector, T soughtValue) where T : struct;
 
 	Task UpdateLeaderboardCache(List<EntryResponse> newEntries);
+
+	Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth);
+
+	Task CleanUpNewsItems();
 }

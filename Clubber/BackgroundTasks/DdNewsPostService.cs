@@ -40,6 +40,7 @@ public class DdNewsPostService : AbstractBackgroundService
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
+		await _databaseHelper.CleanUpNewsItems();
 		_ddNewsChannel ??= _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
 		using IServiceScope scope = _services.CreateScope();
 		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
@@ -65,7 +66,10 @@ public class DdNewsPostService : AbstractBackgroundService
 				continue;
 
 			cacheIsToBeRefreshed = true;
-			string message = GetDdNewsMessage(newEntries, (oldEntry, newEntry));
+
+			int nth = newEntries.Count(entry => entry.Time >= newEntry.Time);
+			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
+			string message = GetDdNewsMessage(oldEntry, newEntry, nth);
 			string countryCode = await _webService.GetCountryCodeForplayer(newEntry.Id);
 			await using MemoryStream screenshot = await _imageGenerator.FromEntryResponse(newEntry, countryCode);
 			await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
@@ -80,16 +84,16 @@ public class DdNewsPostService : AbstractBackgroundService
 		_sb.Clear();
 	}
 
-	private string GetDdNewsMessage(List<EntryResponse> newEntries, (EntryResponse OldEntry, EntryResponse NewEntry) entryTuple)
+	private string GetDdNewsMessage(EntryResponse oldEntry, EntryResponse newEntry, int nth)
 	{
-		string userName = entryTuple.NewEntry.Username;
+		string userName = newEntry.Username;
 		ulong ddPalsId = ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!);
-		if (_databaseHelper.GetDdUserBy(ddu => ddu.LeaderboardId, entryTuple.NewEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
+		if (_databaseHelper.GetDdUserBy(ddu => ddu.LeaderboardId, newEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 
-		double oldScore = entryTuple.OldEntry.Time / 10000d;
-		double newScore = entryTuple.NewEntry.Time / 10000d;
-		int ranksChanged = entryTuple.OldEntry.Rank - entryTuple.NewEntry.Rank;
+		double oldScore = oldEntry.Time / 10000d;
+		double newScore = newEntry.Time / 10000d;
+		int ranksChanged = oldEntry.Rank - newEntry.Rank;
 		_sb.Clear()
 			.Append("Congratulations to ")
 			.Append(userName)
@@ -104,14 +108,13 @@ public class DdNewsPostService : AbstractBackgroundService
 			.Append(ranksChanged == 0 ? "" : Math.Abs(ranksChanged))
 			.Append(Math.Abs(ranksChanged) is 1 or 0 ? " rank." : " ranks.");
 
-		int oldHundredth = entryTuple.OldEntry.Time / 1000000;
-		int newHundredth = entryTuple.NewEntry.Time / 1000000;
+		int oldHundredth = oldEntry.Time / 1000000;
+		int newHundredth = newEntry.Time / 1000000;
 		if (newHundredth > oldHundredth)
 		{
-			int position = newEntries.Count(entry => entry.Time / 1000000 >= newHundredth);
 			_sb.Append(" They are the ")
-				.Append(position)
-				.Append(position.OrdinalIndicator());
+				.Append(nth)
+				.Append(nth.OrdinalIndicator());
 
 			if (oldHundredth == 9 && newHundredth == 10)
 				_sb.Append(" player to unlock the leviathan dagger!");
@@ -119,7 +122,7 @@ public class DdNewsPostService : AbstractBackgroundService
 				_sb.Append($" {newHundredth * 100} player!");
 		}
 
-		if (entryTuple.NewEntry.Rank == 1)
+		if (newEntry.Rank == 1)
 			_sb.Append(Format.Bold(" It's a new WR! 👑 🎉"));
 
 		return _sb.ToString();
