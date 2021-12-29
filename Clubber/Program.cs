@@ -18,7 +18,7 @@ public static class Program
 		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 		AppDomain.CurrentDomain.ProcessExit += StopBot;
 
-		DiscordSocketClient client = new(new() { AlwaysDownloadUsers = true, LogLevel = LogSeverity.Error, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers });
+		DiscordSocketClient client = new(new() { AlwaysDownloadUsers = true, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers });
 		CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 
 		WebApplication app = ConfigureServices(client, commands).Build();
