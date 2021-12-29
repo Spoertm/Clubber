@@ -1,13 +1,12 @@
 ﻿using Clubber.Models.Responses;
 
-namespace Clubber.Services
+namespace Clubber.Services;
+
+public interface IWebService
 {
-	public interface IWebService
-	{
-		Task<List<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
+	Task<List<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
 
-		Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
+	Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
 
-		Task<string> GetCountryCodeForplayer(int lbId);
-	}
+	Task<string> GetCountryCodeForplayer(int lbId);
 }

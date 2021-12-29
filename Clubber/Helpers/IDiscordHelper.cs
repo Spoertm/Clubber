@@ -1,13 +1,12 @@
 ﻿using Discord.WebSocket;
 
-namespace Clubber.Helpers
+namespace Clubber.Helpers;
+
+public interface IDiscordHelper
 {
-	public interface IDiscordHelper
-	{
-		SocketTextChannel GetTextChannel(ulong channelId);
+	SocketTextChannel GetTextChannel(ulong channelId);
 
-		SocketGuildUser? GetGuildUser(ulong guildId, ulong userId);
+	SocketGuildUser? GetGuildUser(ulong guildId, ulong userId);
 
-		SocketGuild? GetGuild(ulong guildId);
-	}
+	SocketGuild? GetGuild(ulong guildId);
 }

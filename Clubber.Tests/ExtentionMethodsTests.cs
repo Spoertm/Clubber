@@ -1,19 +1,18 @@
 using Clubber.Extensions;
 using Xunit;
 
-namespace Clubber.Tests
+namespace Clubber.Tests;
+
+public class ExtentionMethodsTests
 {
-	public class ExtentionMethodsTests
+	[Theory]
+	[InlineData(1, "st")]
+	[InlineData(2, "nd")]
+	[InlineData(3, "rd")]
+	[InlineData(4, "th")]
+	[InlineData(128, "th")]
+	public void OrdinalIndicator_GetsNumber_ReturnsCorrectOrdinalIndicator(int number, string expectedOrdinalIndicator)
 	{
-		[Theory]
-		[InlineData(1, "st")]
-		[InlineData(2, "nd")]
-		[InlineData(3, "rd")]
-		[InlineData(4, "th")]
-		[InlineData(128, "th")]
-		public void OrdinalIndicator_GetsNumber_ReturnsCorrectOrdinalIndicator(int number, string expectedOrdinalIndicator)
-		{
-			Assert.Equal(number.OrdinalIndicator(), expectedOrdinalIndicator);
-		}
+		Assert.Equal(number.OrdinalIndicator(), expectedOrdinalIndicator);
 	}
 }
