@@ -46,6 +46,10 @@ public static class Program
 		{
 			await app.RunAsync(_source.Token);
 		}
+		catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
+		{
+
+		}
 		finally
 		{
 			await client.LogoutAsync();
