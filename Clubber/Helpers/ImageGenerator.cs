@@ -26,7 +26,7 @@ public class ImageGenerator
 		string baseFlagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags");
 		string flagPath = Path.Combine(baseFlagPath, $"{playerCountryCode}.png");
 
-		if (playerCountryCode.Length == 0 || !File.Exists(flagPath))
+		if (string.IsNullOrEmpty(playerCountryCode) || !File.Exists(flagPath))
 			flagPath = Path.Combine(baseFlagPath, "00.png");
 
 		if (OperatingSystem.IsWindows())
