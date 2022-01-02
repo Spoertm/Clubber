@@ -20,6 +20,7 @@ public class DdNewsPostService : AbstractBackgroundService
 	private readonly StringBuilder _sb = new();
 	private readonly IServiceScopeFactory _services;
 	private readonly ImageGenerator _imageGenerator = new();
+	private static readonly int[] _exceptionPlayerIds = { 1 };
 
 	public DdNewsPostService(
 		IDatabaseHelper databaseHelper,
@@ -62,7 +63,7 @@ public class DdNewsPostService : AbstractBackgroundService
 			if (oldEntry.Time != newEntry.Time)
 				cacheIsToBeRefreshed = true;
 
-			if (oldEntry.Time == newEntry.Time || newEntry.Time / 10000 < 1000)
+			if (!_exceptionPlayerIds.Contains(oldEntry.Id) && (oldEntry.Time == newEntry.Time || newEntry.Time / 10000 < 1000))
 				continue;
 
 			cacheIsToBeRefreshed = true;
