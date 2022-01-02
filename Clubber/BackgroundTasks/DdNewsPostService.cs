@@ -60,13 +60,12 @@ public class DdNewsPostService : AbstractBackgroundService
 		bool cacheIsToBeRefreshed = newEntries.Count > oldEntries.Count;
 		foreach ((EntryResponse oldEntry, EntryResponse newEntry) in entryTuples)
 		{
-			if (oldEntry.Time != newEntry.Time)
-				cacheIsToBeRefreshed = true;
-
-			if (!_exceptionPlayerIds.Contains(oldEntry.Id) && (oldEntry.Time == newEntry.Time || newEntry.Time / 10000 < 1000))
+			if (oldEntry.Time == newEntry.Time)
 				continue;
 
 			cacheIsToBeRefreshed = true;
+			if (!_exceptionPlayerIds.Contains(oldEntry.Id) && newEntry.Time / 10000 < 1000)
+				continue;
 
 			int nth = newEntries.Count(entry => entry.Time >= newEntry.Time);
 			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
