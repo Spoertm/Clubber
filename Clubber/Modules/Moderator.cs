@@ -49,11 +49,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 
 		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
 		IEnumerable<IMessage> messages = await ddnewsPostChannel.GetMessagesAsync(5).FlattenAsync();
-		IUserMessage? messageToEdit = messages.Where(m => m.Author.Id == Context.Client.CurrentUser.Id)
-			.OrderBy(m => m.CreatedAt.Date)
-			.FirstOrDefault() as IUserMessage;
-
-		if (messageToEdit is null)
+		if (messages.Where(m => m.Author.Id == Context.Client.CurrentUser.Id).MaxBy(m => m.CreatedAt) is not IUserMessage messageToEdit)
 		{
 			await InlineReplyAsync("Could not find message.");
 			return;
