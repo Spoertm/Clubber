@@ -67,7 +67,7 @@ public class DdNewsPostService : AbstractBackgroundService
 			if (!_exceptionPlayerIds.Contains(oldEntry.Id) && newEntry.Time / 10000 < 1000)
 				continue;
 
-			int nth = newEntries.Count(entry => entry.Time >= newEntry.Time);
+			int nth = newEntries.Count(entry => entry.Time / 1000000 >= newEntry.Time / 1000000);
 			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
 			string message = GetDdNewsMessage(oldEntry, newEntry, nth);
 			string countryCode = await _webService.GetCountryCodeForplayer(newEntry.Id);
