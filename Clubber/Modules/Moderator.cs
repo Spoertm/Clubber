@@ -7,7 +7,6 @@ using Discord.WebSocket;
 namespace Clubber.Modules;
 
 [Name("Moderator")]
-[Summary("Obtains user from their leaderboard ID and adds them to the database.")]
 [RequireRole(697777821954736179, ErrorMessage = "Only moderators can use this command.")]
 [RequireContext(ContextType.Guild)]
 public class Moderator : ExtendedModulebase<SocketCommandContext>
