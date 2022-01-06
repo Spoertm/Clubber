@@ -48,7 +48,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
 	{
 		SocketGuildUser? user = Context.Guild.GetUser(discordId);
-		DdUser? ddUser = _databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, discordId);
+		DdUser? ddUser = _databaseHelper.GetDdUserBy(discordId);
 
 		if (ddUser is null)
 		{
@@ -65,7 +65,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 
 	private async Task CheckUserAndShowStats(SocketGuildUser user)
 	{
-		DdUser? ddUser = _databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, user.Id);
+		DdUser? ddUser = _databaseHelper.GetDdUserBy(user.Id);
 
 		if (ddUser is null)
 		{

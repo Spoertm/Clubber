@@ -88,7 +88,7 @@ public class DdNewsPostService : AbstractBackgroundService
 	{
 		string userName = newEntry.Username;
 		ulong ddPalsId = ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!);
-		if (_databaseHelper.GetDdUserBy(ddu => ddu.LeaderboardId, newEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
+		if (_databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 
 		double oldScore = oldEntry.Time / 10000d;

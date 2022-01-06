@@ -85,7 +85,7 @@ public class UpdateRolesHelper
 
 	private async Task<(int NonMemberCount, List<UpdateRolesResponse> UpdateRolesResponses)> ExecuteRolesAndDbUpdate(IEnumerable<SocketGuildUser> guildUsers)
 	{
-		List<DdUser> dbUsers = _databaseHelper.DdUserDatabase;
+		List<DdUser> dbUsers = await _databaseHelper.GetEntireDatabase();
 		List<(DdUser DdUser, SocketGuildUser GuildUser)> registeredUsers = dbUsers.Join(
 				inner: guildUsers,
 				outerKeySelector: dbu => dbu.DiscordId,
@@ -115,7 +115,7 @@ public class UpdateRolesHelper
 	{
 		try
 		{
-			int lbId = _databaseHelper.GetDdUserBy(ddu => ddu.DiscordId, user.Id)!.LeaderboardId;
+			int lbId = _databaseHelper.GetDdUserBy(user.Id)!.LeaderboardId;
 			List<EntryResponse> lbPlayerList = await _webService.GetLbPlayers(new[] { (uint)lbId });
 
 			return await ExecuteRoleUpdate(user, lbPlayerList[0]);

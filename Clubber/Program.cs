@@ -49,7 +49,6 @@ public static class Program
 		}
 		catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
 		{
-
 		}
 		finally
 		{
@@ -69,14 +68,21 @@ public static class Program
 			await context.Response.WriteAsync(indexHtml);
 		});
 
-		app.MapGet("/users", (IDatabaseHelper databaseHelper)
-			=> databaseHelper.DdUserDatabase);
+		app.MapGet("/users", async (IDatabaseHelper dbhelper) => await dbhelper.GetEntireDatabase());
 
-		app.MapGet("/users/by-leaderboardId", (int leaderboardId, IDatabaseHelper databaseHelper)
-			=> databaseHelper.DdUserDatabase.Find(user => user.LeaderboardId == leaderboardId));
+		app.MapGet("/users/by-leaderboardId", (int leaderboardId, IServiceScopeFactory scopeFactory) =>
+		{
+			using IServiceScope scope = scopeFactory.CreateScope();
+			using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.LeaderboardId == leaderboardId);
+		});
 
-		app.MapGet("/users/by-discordId", (ulong discordId, IDatabaseHelper databaseHelper)
-			=> databaseHelper.DdUserDatabase.Find(user => user.DiscordId == discordId));
+		app.MapGet("/users/by-discordId", (ulong discordId, IServiceScopeFactory scopeFactory) =>
+		{
+			using IServiceScope scope = scopeFactory.CreateScope();
+			using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.DiscordId == discordId);
+		});
 
 		app.MapGet("/dailynews", async (IServiceScopeFactory scopeFactory) =>
 		{

@@ -18,10 +18,14 @@ public class DatabaseHelper : IDatabaseHelper
 
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
-		DdUserDatabase = dbContext.DdPlayers.AsNoTracking().ToList();
 	}
 
-	public List<DdUser> DdUserDatabase { get; }
+	public async Task<List<DdUser>> GetEntireDatabase()
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		return dbContext.DdPlayers.AsNoTracking().ToList();
+	}
 
 	public async Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user)
 	{
@@ -35,7 +39,6 @@ public class DatabaseHelper : IDatabaseHelper
 			await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 			await dbContext.AddAsync(newDdUser);
 			await dbContext.SaveChangesAsync();
-			DdUserDatabase.Add(newDdUser);
 			return (true, string.Empty);
 		}
 		catch (Exception ex)
@@ -54,7 +57,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
-		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not {} ddUser)
+		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not { } ddUser)
 			return (false, "Couldn't find user in database.");
 
 		ddUser.TwitchUsername = twitchUsername;
@@ -67,7 +70,7 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public async Task<bool> RemoveUser(ulong discordId)
 	{
-		DdUser? toRemove = GetDdUserBy(ddu => ddu.DiscordId, discordId);
+		DdUser? toRemove = GetDdUserBy(discordId);
 		if (toRemove is null)
 			return false;
 
@@ -75,19 +78,21 @@ public class DatabaseHelper : IDatabaseHelper
 		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 		dbContext.Remove(toRemove);
 		await dbContext.SaveChangesAsync();
-		DdUserDatabase.Remove(toRemove);
 		return true;
 	}
 
-	public DdUser? GetDdUserBy<T>(Func<DdUser, T> selector, T soughtValue) where T : struct
+	public DdUser? GetDdUserBy(int lbId)
 	{
-		for (int i = 0; i < DdUserDatabase.Count; i++)
-		{
-			if (selector(DdUserDatabase[i]).Equals(soughtValue))
-				return DdUserDatabase[i];
-		}
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		return dbContext.DdPlayers.FirstOrDefault(ddp => ddp.LeaderboardId == lbId);
+	}
 
-		return null;
+	public DdUser? GetDdUserBy(ulong discordId)
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		return dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == discordId);
 	}
 
 	public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
