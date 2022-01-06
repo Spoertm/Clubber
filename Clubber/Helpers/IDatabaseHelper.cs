@@ -10,6 +10,8 @@ public interface IDatabaseHelper
 
 	Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user);
 
+	Task<(bool Success, string Message)> RegisterTwitch(ulong userId, string twitchUsername);
+
 	Task<bool> RemoveUser(SocketGuildUser user);
 
 	Task<bool> RemoveUser(ulong discordId);

@@ -49,7 +49,7 @@ public class UserService
 		return new(IsError: true, Message: message);
 	}
 
-	private UserValidationResponse IsBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
+	public UserValidationResponse IsBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
 		if (guildUser.IsBot)
 			return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");

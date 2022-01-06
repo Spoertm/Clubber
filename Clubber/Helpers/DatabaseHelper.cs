@@ -50,6 +50,18 @@ public class DatabaseHelper : IDatabaseHelper
 		}
 	}
 
+	public async Task<(bool Success, string Message)> RegisterTwitch(ulong userId, string twitchUsername)
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not {} ddUser)
+			return (false, "Couldn't find user in database.");
+
+		ddUser.TwitchUsername = twitchUsername;
+		await dbContext.SaveChangesAsync();
+		return (true, string.Empty);
+	}
+
 	public async Task<bool> RemoveUser(SocketGuildUser user)
 		=> await RemoveUser(user.Id);
 
