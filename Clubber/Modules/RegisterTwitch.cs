@@ -59,6 +59,12 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
+		if (await _databaseHelper.TwitchUsernameIsRegistered(twitchUsername))
+		{
+			await InlineReplyAsync("That Twitch username is already registered.");
+			return;
+		}
+
 		(bool success, string registerResponseMessage) = await _databaseHelper.RegisterTwitch(user.Id, twitchUsername);
 		if (success)
 			await InlineReplyAsync("✅ Successfully linked Twitch.");

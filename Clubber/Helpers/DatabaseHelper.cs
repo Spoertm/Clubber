@@ -126,4 +126,11 @@ public class DatabaseHelper : IDatabaseHelper
 		dbContext.DdNews.RemoveRange(toRemove);
 		await dbContext.SaveChangesAsync();
 	}
+
+	public async Task<bool> TwitchUsernameIsRegistered(string twitchUsername)
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.TwitchUsername == twitchUsername) is not null;
+	}
 }

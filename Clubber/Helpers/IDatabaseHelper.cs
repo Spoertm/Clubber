@@ -25,4 +25,6 @@ public interface IDatabaseHelper
 	Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth);
 
 	Task CleanUpNewsItems();
+
+	Task<bool> TwitchUsernameIsRegistered(string twitchUsername);
 }
