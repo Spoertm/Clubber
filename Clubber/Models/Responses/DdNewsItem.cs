@@ -1,9 +1,10 @@
 ﻿namespace Clubber.Models.Responses;
 
 public record DdNewsItem(
-	int Id,
+	int LeaderboardId,
 	EntryResponse OldEntry,
 	EntryResponse NewEntry,
 	DateTime TimeOfOccurenceUtc,
-	int Nth
+	int Nth,
+	int ItemId = 0
 );

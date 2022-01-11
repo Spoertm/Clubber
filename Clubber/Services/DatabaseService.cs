@@ -22,6 +22,8 @@ public class DatabaseService : DbContext
 
 		modelBuilder.Entity<EntryResponse>().HasKey(lbu => lbu.Id);
 		modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
-		modelBuilder.Entity<DdNewsItem>().HasKey(dni => dni.Id);
+
+		modelBuilder.Entity<DdNewsItem>().HasKey(dni => dni.ItemId);
+		modelBuilder.Entity<DdNewsItem>().Property(dni => dni.ItemId).UseIdentityAlwaysColumn();
 	}
 }
