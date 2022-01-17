@@ -119,7 +119,7 @@ public class DatabaseHelper : IDatabaseHelper
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
 		DateTime utcNow = DateTime.UtcNow;
-		IQueryable<DdNewsItem> toRemove = dbContext.DdNews.Where(ddn => utcNow.Date > ddn.TimeOfOccurenceUtc.Date);
+		IQueryable<DdNewsItem> toRemove = dbContext.DdNews.Where(ddn => utcNow.Date - ddn.TimeOfOccurenceUtc.Date >= TimeSpan.FromDays(1));
 		if (!toRemove.Any())
 			return;
 
