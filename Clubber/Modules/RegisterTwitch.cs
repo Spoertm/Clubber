@@ -23,13 +23,13 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 	}
 
 	[Command]
-	[Remarks("linktwitch ClubberTTV")]
+	[Remarks("twitch ClubberTTV")]
 	[Priority(1)]
 	public async Task RegisterSelf([Name("Twitch username")] string twitchUsername)
 		=> await CheckUserAndRegisterTwitch((Context.User as SocketGuildUser)!, twitchUsername, true);
 
 	[Command]
-	[Remarks("linktwitch ClubberTTV clubber\nlinktwitch ClubberTTV <@743431502842298368>")]
+	[Remarks("twitch ClubberTTV clubber\nlinktwitch ClubberTTV <@743431502842298368>")]
 	[RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "Only users with higher permissions can use this command. Ask a `Role assigner` or a Moderator/Admin to help you.")]
 	[Priority(2)]
 	public async Task RegisterByName([Name("Twitch username")] string twitchUsername, [Name("name | tag")][Remainder] string name)
@@ -40,7 +40,7 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 	}
 
 	[Command("id")]
-	[Remarks("linktwitch id ClubberTTV 743431502842298368")]
+	[Remarks("twitch id ClubberTTV 743431502842298368")]
 	[RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "Only users with higher permissions can use this command. Ask a `Role assigner` or a Moderator/Admin to help you.")]
 	[Priority(3)]
 	public async Task RegisterByDiscordId([Name("Twitch username")] string twitchUsername, [Name("Discord ID")] ulong discordId)
