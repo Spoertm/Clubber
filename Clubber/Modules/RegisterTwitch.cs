@@ -29,7 +29,7 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 		=> await CheckUserAndRegisterTwitch((Context.User as SocketGuildUser)!, twitchUsername, true);
 
 	[Command]
-	[Remarks("twitch ClubberTTV clubber\nlinktwitch ClubberTTV <@743431502842298368>")]
+	[Remarks("twitch ClubberTTV clubber\ntwitch ClubberTTV <@743431502842298368>")]
 	[RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "Only users with higher permissions can use this command. Ask a `Role assigner` or a Moderator/Admin to help you.")]
 	[Priority(2)]
 	public async Task RegisterByName([Name("Twitch username")] string twitchUsername, [Name("name | tag")][Remainder] string name)
