@@ -245,7 +245,7 @@ public static class EmbedHelper
 
 	public static Embed WelcomeMessage(IUser botUser)
 	{
-		const string description = @"This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&903024433315323915>.
+		const string registerForRolesText = @"This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&903024433315323915>.
 
 If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game name or ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
 
@@ -253,11 +253,14 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 **After posting the message in this channel, a moderator will then soon register you**.";
 
+		const string twitchText = @"You can link your Twitch account to your player page on DDLIVE using ""`+twitch MyTwitchUserName`"", so others can see who you are in-game when you're live on Twitch.";
+
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 			.WithAuthor(botUser)
 			.WithTitle("Welcome!")
-			.WithDescription(description)
-			.WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/910859022427652096/PB.png");
+			.WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/910859022427652096/PB.png")
+			.AddField(":arrow_forward: Registering for roles", registerForRolesText)
+			.AddField(":arrow_forward: Twitch", twitchText);
 
 		return embedBuilder.Build();
 	}
