@@ -12,6 +12,8 @@ public interface IDatabaseHelper
 
 	Task<(bool Success, string Message)> RegisterTwitch(ulong userId, string twitchUsername);
 
+	Task<(bool Success, string Message)> UnregisterTwitch(ulong userId);
+
 	Task<bool> RemoveUser(SocketGuildUser user);
 
 	Task<bool> RemoveUser(ulong discordId);
