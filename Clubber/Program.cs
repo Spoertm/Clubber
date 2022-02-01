@@ -1,10 +1,14 @@
 ﻿using Clubber.BackgroundTasks;
 using Clubber.Helpers;
+using Clubber.Models;
+using Clubber.Models.Logging;
 using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 using System.Globalization;
 using System.Reflection;
 
@@ -18,11 +22,16 @@ public static class Program
 	{
 		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 		AppDomain.CurrentDomain.ProcessExit += StopBot;
+		AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
 		DiscordSocketClient client = new(new() { AlwaysDownloadUsers = true, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers });
 		CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
+		client.Log += OnLog;
+		commands.Log += OnLog;
 
 		WebApplication app = ConfigureServices(client, commands).Build();
+		ConfigureLogging(app.Configuration);
+		Log.Information("Starting");
 
 		app.UseSwagger();
 		app.UseSwaggerUI();
@@ -37,7 +46,6 @@ public static class Program
 		app.Services.GetRequiredService<MessageHandlerService>();
 		app.Services.GetRequiredService<IDatabaseHelper>();
 		app.Services.GetRequiredService<WelcomeMessage>();
-		app.Services.GetRequiredService<LoggingService>();
 
 		app.UseHttpsRedirection();
 		app.UseAuthorization();
@@ -49,15 +57,24 @@ public static class Program
 		}
 		catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
 		{
+			Log.Warning("Program cancellation requested");
 		}
 		finally
 		{
+			Log.Information("Exiting");
 			await client.LogoutAsync();
 			client.Dispose();
 			_source.Dispose();
 			AppDomain.CurrentDomain.ProcessExit -= StopBot;
 		}
 	}
+
+	private static void ConfigureLogging(IConfiguration config) =>
+		Log.Logger = new LoggerConfiguration()
+			.MinimumLevel.Verbose()
+			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}")
+			.WriteTo.Discord(config.GetValue<ulong>("SwarmerLoggerId"), config["SwarmerLoggerToken"])
+			.CreateLogger();
 
 	private static void RegisterEndpoints(WebApplication app)
 	{
@@ -107,7 +124,6 @@ public static class Program
 			.AddSingleton<IDiscordHelper, DiscordHelper>()
 			.AddSingleton<UserService>()
 			.AddSingleton<IWebService, WebService>()
-			.AddSingleton<LoggingService>()
 			.AddSingleton<WelcomeMessage>()
 			.AddHostedService<DdNewsPostService>()
 			.AddHostedService<DatabaseUpdateService>()
@@ -116,6 +132,34 @@ public static class Program
 
 		return builder;
 	}
+
+	private static async Task OnLog(LogMessage logMessage)
+	{
+		if (logMessage.Exception is CommandException commandException)
+		{
+			await commandException.Context.Channel.SendMessageAsync("Catastrophic error occured.");
+			if (commandException.InnerException is CustomException customException)
+				await commandException.Context.Channel.SendMessageAsync(customException.Message);
+		}
+
+		LogEventLevel logLevel = logMessage.Severity switch
+		{
+			LogSeverity.Critical => LogEventLevel.Fatal,
+			LogSeverity.Error    => LogEventLevel.Error,
+			LogSeverity.Warning  => LogEventLevel.Warning,
+			LogSeverity.Info     => LogEventLevel.Information,
+			LogSeverity.Verbose  => LogEventLevel.Verbose,
+			LogSeverity.Debug    => LogEventLevel.Debug,
+			_                    => throw new ArgumentOutOfRangeException(nameof(logMessage.Severity), logMessage.Severity, null),
+		};
+
+		string message = $"Source: {logMessage.Source}\n{logMessage.Message}";
+		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+		Log.Logger.Write(logLevel, logMessage.Exception, message);
+	}
+
+	private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+		=> Log.Fatal(e.ExceptionObject as Exception, "Caught unhandled exception. IsTerminating: {}", e.IsTerminating);
 
 	private static void StopBot(object? sender, EventArgs e) => StopBot();
 

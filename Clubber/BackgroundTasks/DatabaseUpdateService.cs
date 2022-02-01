@@ -1,7 +1,7 @@
 ﻿using Clubber.Helpers;
-using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
+using Serilog;
 
 namespace Clubber.BackgroundTasks;
 
@@ -10,11 +10,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 	private readonly IDiscordHelper _discordHelper;
 	private readonly UpdateRolesHelper _updateRolesHelper;
 
-	public DatabaseUpdateService(
-		IDiscordHelper discordHelper,
-		UpdateRolesHelper updateRolesHelper,
-		LoggingService loggingService)
-		: base(loggingService)
+	public DatabaseUpdateService(IDiscordHelper discordHelper, UpdateRolesHelper updateRolesHelper)
 	{
 		_discordHelper = discordHelper;
 		_updateRolesHelper = updateRolesHelper;
@@ -29,7 +25,6 @@ public class DatabaseUpdateService : ExactBackgroundService
 		IUserMessage msg = await dailyUpdateChannel.SendMessageAsync("Checking for role updates...");
 
 		List<Exception> exceptionList = new();
-		SocketTextChannel clubberExceptionsChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("ClubberExceptionsChannelId")!));
 		int tries = 0;
 		const int maxTries = 5;
 		bool success = false;
@@ -51,7 +46,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 				{
 					await dailyUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
 					foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
-						await clubberExceptionsChannel.SendMessageAsync(embed: EmbedHelper.Exception(exc));
+						Log.Error(exc, "DB update procedure failed");
 
 					break;
 				}

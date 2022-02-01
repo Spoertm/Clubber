@@ -2,7 +2,6 @@ using Clubber.Models.Responses;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System.Text.RegularExpressions;
 
 namespace Clubber.Helpers;
 
@@ -28,7 +27,6 @@ public static class EmbedHelper
 		[15] = "ENTANGLED",
 		[16] = "HAUNTED",
 	};
-	private static readonly Regex _exceptionRegex = new("(?<=   )at.+\n?", RegexOptions.Compiled);
 
 	public static Embed UpdateRoles(UpdateRolesResponse response)
 	{
@@ -54,54 +52,6 @@ public static class EmbedHelper
 		}
 
 		return embed.Build();
-	}
-
-	public static Embed Exception(LogMessage msg, IUserMessage? userMessage)
-	{
-		EmbedBuilder exceptionEmbed = new EmbedBuilder()
-			.WithTitle(msg.Exception?.GetType().Name ?? "Exception thrown")
-			.AddField("Severity", msg.Severity, true)
-			.AddField("Source", msg.Source, true)
-			.WithCurrentTimestamp();
-
-		if (userMessage is not null)
-			exceptionEmbed.AddField("User message", Format.Code(userMessage.Content));
-
-		Exception? ex = msg.Exception;
-
-		if (ex is null)
-			exceptionEmbed.AddField("Message", msg.Message);
-
-		FillExceptionEmbedBuilder(ex, exceptionEmbed);
-
-		return exceptionEmbed.Build();
-	}
-
-	public static Embed Exception(Exception? exception)
-	{
-		EmbedBuilder exceptionEmbed = new EmbedBuilder()
-			.WithTitle("Cron project - " + (exception?.GetType().Name ?? "Exception thrown"))
-			.WithCurrentTimestamp();
-
-		FillExceptionEmbedBuilder(exception, exceptionEmbed);
-
-		return exceptionEmbed.Build();
-	}
-
-	private static void FillExceptionEmbedBuilder(Exception? exception, EmbedBuilder exceptionEmbed)
-	{
-		string? exString = exception?.ToString();
-		if (exString is not null)
-		{
-			Match regexMatch = _exceptionRegex.Match(exString);
-			exceptionEmbed.AddField("Location", regexMatch.Value);
-		}
-
-		while (exception is not null)
-		{
-			exceptionEmbed.AddField(exception.GetType().Name, string.IsNullOrEmpty(exception.Message) ? "No message." : exception.Message);
-			exception = exception.InnerException;
-		}
 	}
 
 	/// <summary>

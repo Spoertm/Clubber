@@ -1,14 +1,9 @@
-﻿using Clubber.Services;
-using Discord;
+﻿using Serilog;
 
 namespace Clubber.BackgroundTasks;
 
 public abstract class ExactBackgroundService : BackgroundService
 {
-	private readonly LoggingService _loggingService;
-
-	protected ExactBackgroundService(LoggingService loggingService) => _loggingService = loggingService;
-
 	protected abstract TimeOnly UtcTriggerTime { get; }
 
 	protected abstract Task ExecuteTaskAsync(CancellationToken stoppingToken);
@@ -29,10 +24,12 @@ public abstract class ExactBackgroundService : BackgroundService
 			}
 			catch (Exception exception)
 			{
-				await _loggingService.LogAsync(new(LogSeverity.Error, nameof(ExactBackgroundService), string.Empty, exception));
+				Log.Error(exception, "Caught exception in {}", nameof(ExactBackgroundService));
 			}
 
 			await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
 		}
+
+		Log.Warning("{} => service cancelled", nameof(ExactBackgroundService));
 	}
 }

@@ -5,6 +5,7 @@ using Clubber.Services;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Text;
 
 namespace Clubber.BackgroundTasks;
@@ -16,7 +17,6 @@ public class DdNewsPostService : AbstractBackgroundService
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IWebService _webService;
-	private readonly LoggingService _loggingService;
 	private readonly StringBuilder _sb = new();
 	private readonly IServiceScopeFactory _services;
 	private readonly ImageGenerator _imageGenerator = new();
@@ -26,14 +26,11 @@ public class DdNewsPostService : AbstractBackgroundService
 		IDatabaseHelper databaseHelper,
 		IDiscordHelper discordHelper,
 		IWebService webService,
-		LoggingService loggingService,
 		IServiceScopeFactory services)
-		: base(loggingService)
 	{
 		_databaseHelper = databaseHelper;
 		_discordHelper = discordHelper;
 		_webService = webService;
-		_loggingService = loggingService;
 		_services = services;
 	}
 
@@ -77,7 +74,7 @@ public class DdNewsPostService : AbstractBackgroundService
 
 		if (cacheIsToBeRefreshed)
 		{
-			await _loggingService.LogAsync(new(LogSeverity.Info, nameof(DdNewsPostService), "Updating leaderboard cache"));
+			Log.Information("Updating leaderboard cache");
 			await _databaseHelper.UpdateLeaderboardCache(newEntries);
 		}
 
