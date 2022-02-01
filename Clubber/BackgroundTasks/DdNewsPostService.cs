@@ -14,6 +14,7 @@ public class DdNewsPostService : AbstractBackgroundService
 {
 	private const int _minimumScore = 930;
 	private SocketTextChannel? _ddNewsChannel;
+	private readonly IConfiguration _config;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IWebService _webService;
@@ -23,11 +24,13 @@ public class DdNewsPostService : AbstractBackgroundService
 	private static readonly int[] _exceptionPlayerIds = { 1 };
 
 	public DdNewsPostService(
+		IConfiguration config,
 		IDatabaseHelper databaseHelper,
 		IDiscordHelper discordHelper,
 		IWebService webService,
 		IServiceScopeFactory services)
 	{
+		_config = config;
 		_databaseHelper = databaseHelper;
 		_discordHelper = discordHelper;
 		_webService = webService;
@@ -39,9 +42,9 @@ public class DdNewsPostService : AbstractBackgroundService
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
 		await _databaseHelper.CleanUpNewsItems();
-		_ddNewsChannel ??= _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
+		_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
 		using IServiceScope scope = _services.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		List<EntryResponse> oldEntries = dbContext.LeaderboardCache.AsNoTracking().ToList();
 		List<EntryResponse> newEntries = await _webService.GetSufficientLeaderboardEntries(_minimumScore);
 		if (newEntries.Count == 0)
@@ -84,7 +87,7 @@ public class DdNewsPostService : AbstractBackgroundService
 	private string GetDdNewsMessage(EntryResponse oldEntry, EntryResponse newEntry, int nth)
 	{
 		string userName = newEntry.Username;
-		ulong ddPalsId = ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!);
+		ulong ddPalsId = _config.GetValue<ulong>("DdPalsId");
 		if (_databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 

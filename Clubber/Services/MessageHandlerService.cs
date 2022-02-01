@@ -10,13 +10,15 @@ public class MessageHandlerService
 	private readonly DiscordSocketClient _client;
 	private readonly CommandService _commands;
 	private readonly IServiceProvider _services;
-	private readonly string _prefix = Environment.GetEnvironmentVariable("Prefix")!;
+	private readonly string _prefix;
 
-	public MessageHandlerService(DiscordSocketClient client, CommandService commands, IServiceProvider services)
+	public MessageHandlerService(IConfiguration config, DiscordSocketClient client, CommandService commands, IServiceProvider services)
 	{
 		_client = client;
 		_commands = commands;
 		_services = services;
+
+		_prefix = config["Prefix"];
 
 		client.MessageReceived += OnMessageRecievedAsync;
 	}

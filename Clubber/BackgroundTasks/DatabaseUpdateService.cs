@@ -7,11 +7,13 @@ namespace Clubber.BackgroundTasks;
 
 public class DatabaseUpdateService : ExactBackgroundService
 {
+	private readonly IConfiguration _config;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly UpdateRolesHelper _updateRolesHelper;
 
-	public DatabaseUpdateService(IDiscordHelper discordHelper, UpdateRolesHelper updateRolesHelper)
+	public DatabaseUpdateService(IConfiguration config, IDiscordHelper discordHelper, UpdateRolesHelper updateRolesHelper)
 	{
+		_config = config;
 		_discordHelper = discordHelper;
 		_updateRolesHelper = updateRolesHelper;
 	}
@@ -20,8 +22,8 @@ public class DatabaseUpdateService : ExactBackgroundService
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		SocketGuild ddPals = _discordHelper.GetGuild(ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!)) ?? throw new("DD Pals server not found with the provided ID.");
-		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DailyUpdateChannelId")!));
+		SocketGuild ddPals = _discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new("DD Pals server not found with the provided ID.");
+		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
 		IUserMessage msg = await dailyUpdateChannel.SendMessageAsync("Checking for role updates...");
 
 		List<Exception> exceptionList = new();
@@ -52,7 +54,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 				}
 
 				await dailyUpdateChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
-				Thread.Sleep(10000); // Sleep 10s
+				await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken); // Sleep 10s
 			}
 		}
 		while (!success);

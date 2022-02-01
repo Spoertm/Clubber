@@ -48,12 +48,12 @@ public class UpdateRolesHelper
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;
 
-	public UpdateRolesHelper(IDatabaseHelper databaseHelper, IWebService webService)
+	public UpdateRolesHelper(IConfiguration config, IDatabaseHelper databaseHelper, IWebService webService)
 	{
 		_databaseHelper = databaseHelper;
 		_webService = webService;
 
-		ulong unregRoleId = ulong.Parse(Environment.GetEnvironmentVariable("UnregisteredRoleId")!);
+		ulong unregRoleId = config.GetValue<ulong>("UnregisteredRoleId");
 		_uselessRoles = new() { unregRoleId, 458375331468935178 };
 	}
 

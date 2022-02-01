@@ -17,13 +17,13 @@ public class DatabaseHelper : IDatabaseHelper
 		_scopeFactory = scopeFactory;
 
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 	}
 
 	public async Task<List<DdUser>> GetEntireDatabase()
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		return dbContext.DdPlayers.AsNoTracking().ToList();
 	}
 
@@ -36,7 +36,7 @@ public class DatabaseHelper : IDatabaseHelper
 			EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 			DdUser newDdUser = new(user.Id, lbPlayer.Id);
 			using IServiceScope scope = _scopeFactory.CreateScope();
-			await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			await dbContext.AddAsync(newDdUser);
 			await dbContext.SaveChangesAsync();
 			return (true, string.Empty);
@@ -56,7 +56,7 @@ public class DatabaseHelper : IDatabaseHelper
 	public async Task<(bool Success, string Message)> RegisterTwitch(ulong userId, string twitchUsername)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not { } ddUser)
 			return (false, "Couldn't find user in database.");
 
@@ -68,7 +68,7 @@ public class DatabaseHelper : IDatabaseHelper
 	public async Task<(bool Success, string Message)> UnregisterTwitch(ulong userId)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not { } ddUser)
 			return (false, "Couldn't find user in database.");
 
@@ -87,7 +87,7 @@ public class DatabaseHelper : IDatabaseHelper
 			return false;
 
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		dbContext.Remove(toRemove);
 		await dbContext.SaveChangesAsync();
 		return true;
@@ -96,21 +96,21 @@ public class DatabaseHelper : IDatabaseHelper
 	public DdUser? GetDdUserBy(int lbId)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		return dbContext.DdPlayers.FirstOrDefault(ddp => ddp.LeaderboardId == lbId);
 	}
 
 	public DdUser? GetDdUserBy(ulong discordId)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		return dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == discordId);
 	}
 
 	public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		await dbContext.Database.ExecuteSqlRawAsync("TRUNCATE leaderboard_cache");
 		await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
 		await dbContext.SaveChangesAsync();
@@ -119,7 +119,7 @@ public class DatabaseHelper : IDatabaseHelper
 	public async Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 
 		DdNewsItem newItem = new(oldEntry.Id, oldEntry, newEntry, DateTime.UtcNow, nth);
 		await dbContext.DdNews.AddAsync(newItem);
@@ -129,7 +129,7 @@ public class DatabaseHelper : IDatabaseHelper
 	public async Task CleanUpNewsItems()
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		DateTime utcNow = DateTime.UtcNow;
 		IQueryable<DdNewsItem> toRemove = dbContext.DdNews.Where(ddn => utcNow - ddn.TimeOfOccurenceUtc >= TimeSpan.FromDays(1));
 		if (!toRemove.Any())
@@ -142,7 +142,7 @@ public class DatabaseHelper : IDatabaseHelper
 	public async Task<bool> TwitchUsernameIsRegistered(string twitchUsername)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.TwitchUsername == twitchUsername) is not null;
 	}
 }

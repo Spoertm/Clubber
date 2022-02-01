@@ -1,19 +1,20 @@
 using Clubber.Models;
+using Clubber.Models.Database;
 using Clubber.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 
 namespace Clubber.Services;
 
-public class DatabaseService : DbContext
+public class DbService : DbContext
 {
+	public DbSet<ClubberDbConfig> ClubberConfig => Set<ClubberDbConfig>();
 	public DbSet<EntryResponse> LeaderboardCache => Set<EntryResponse>();
 	public DbSet<DdUser> DdPlayers => Set<DdUser>();
 	public DbSet<DdNewsItem> DdNews => Set<DdNewsItem>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		=> optionsBuilder
-			.UseNpgsql(Environment.GetEnvironmentVariable("PostgresConnectionString")!)
-			.UseSnakeCaseNamingConvention();
+			.UseNpgsql(Environment.GetEnvironmentVariable("PostgresConnectionString")!);
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
