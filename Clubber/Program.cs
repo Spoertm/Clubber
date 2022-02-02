@@ -43,17 +43,17 @@ public static class Program
 
 		RegisterEndpoints(app);
 
-		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
-		await client.StartAsync();
-		await client.SetGameAsync("your roles", null, ActivityType.Watching);
-		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
-
 		app.Services.GetRequiredService<MessageHandlerService>();
 		app.Services.GetRequiredService<IDatabaseHelper>();
 		app.Services.GetRequiredService<WelcomeMessage>();
 
 		app.UseHttpsRedirection();
 		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
+
+		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
+		await client.StartAsync();
+		await client.SetGameAsync("your roles", null, ActivityType.Watching);
+		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
 
 		try
 		{
