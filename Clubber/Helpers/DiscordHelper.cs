@@ -7,7 +7,7 @@ public class DiscordHelper : IDiscordHelper
 {
 	private readonly DiscordSocketClient _client;
 
-	public DiscordHelper( DiscordSocketClient client)
+	public DiscordHelper(DiscordSocketClient client)
 	{
 		_client = client;
 	}
