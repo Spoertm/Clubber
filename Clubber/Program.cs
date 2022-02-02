@@ -125,9 +125,11 @@ public static class Program
 	private static WebApplicationBuilder ConfigureServices(WebApplicationBuilder builder, DiscordSocketClient client, CommandService commands)
 	{
 		builder.Logging.ClearProviders();
-		builder.Services.AddEndpointsApiExplorer();
-		builder.Services.AddSwaggerGen();
-		builder.Services.AddSingleton(client)
+		builder.Services
+			.AddEndpointsApiExplorer()
+			.AddSwaggerGen()
+			.AddCors()
+			.AddSingleton(client)
 			.AddSingleton(commands)
 			.AddSingleton<MessageHandlerService>()
 			.AddSingleton<IDatabaseHelper, DatabaseHelper>()
