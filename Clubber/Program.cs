@@ -55,22 +55,27 @@ public static class Program
 		await client.SetGameAsync("your roles", null, ActivityType.Watching);
 		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
 
-		try
+		client.Ready += async () =>
 		{
-			await app.RunAsync(_source.Token);
-		}
-		catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
-		{
-			Log.Warning("Program cancellation requested");
-		}
-		finally
-		{
-			Log.Information("Exiting");
-			await client.LogoutAsync();
-			await client.DisposeAsync();
-			_source.Dispose();
-			AppDomain.CurrentDomain.ProcessExit -= StopBot;
-		}
+			try
+			{
+				await app.RunAsync(_source.Token);
+			}
+			catch (Exception ex) when (ex is TaskCanceledException or OperationCanceledException)
+			{
+				Log.Warning("Program cancellation requested");
+			}
+			finally
+			{
+				Log.Information("Exiting");
+				await client.LogoutAsync();
+				await client.DisposeAsync();
+				_source.Dispose();
+				AppDomain.CurrentDomain.ProcessExit -= StopBot;
+			}
+		};
+
+		await Task.Delay(-1);
 	}
 
 	private static void ConfigureLogging(IConfiguration config) =>
