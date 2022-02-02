@@ -53,6 +53,7 @@ public static class Program
 		app.Services.GetRequiredService<WelcomeMessage>();
 
 		app.UseHttpsRedirection();
+		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
 
 		try
 		{
