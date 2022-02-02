@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Appsettings
 Clubber/appsettings.json
+Clubber/appsettings.Development.json

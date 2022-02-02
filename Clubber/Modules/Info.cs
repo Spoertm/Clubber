@@ -13,7 +13,14 @@ public class Info : ExtendedModulebase<SocketCommandContext>
 
 	[Command("whyareyou")]
 	[Summary("Describes what the bot does.")]
-	public async Task WhyAreYou() => await InlineReplyAsync(Environment.GetEnvironmentVariable("WhyAreYou")!);
+	public async Task WhyAreYou()
+	{
+		const string whyAreYouText = @"Every day or so, I automatically update people's DD roles.
+For example, if someone beats their score of 300s and gets 400s, I update their role from `300+ club` to `400+ club`.
+To speed this up, you can manually update your own or someone else's roles by using the `+pb` or `+updateroles` command.";
+
+		await InlineReplyAsync(whyAreYouText);
+	}
 
 	[Command("help")]
 	[Summary("Get a list of commands, or info regarding a specific command.")]

@@ -24,32 +24,36 @@ public static class Program
 		AppDomain.CurrentDomain.ProcessExit += StopBot;
 		AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
+		WebApplicationBuilder builder = WebApplication.CreateBuilder();
+		if (builder.Environment.IsProduction())
+			SetConfigFromDb(builder);
+
+		ConfigureLogging(builder.Configuration);
+		Log.Information("Starting");
+
 		DiscordSocketClient client = new(new() { AlwaysDownloadUsers = true, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers });
 		CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 		client.Log += OnLog;
 		commands.Log += OnLog;
 
-		WebApplication app = ConfigureServices(client, commands).Build();
-		ConfigureLogging(app.Configuration);
-		Log.Information("Starting");
+		WebApplication app = ConfigureServices(builder, client, commands).Build();
 
 		app.UseSwagger();
 		app.UseSwaggerUI();
 
 		RegisterEndpoints(app);
 
-		await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("BotToken"));
-		await client.StartAsync();
-		await client.SetGameAsync("your roles", null, ActivityType.Watching);
-		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
-
 		app.Services.GetRequiredService<MessageHandlerService>();
 		app.Services.GetRequiredService<IDatabaseHelper>();
 		app.Services.GetRequiredService<WelcomeMessage>();
 
 		app.UseHttpsRedirection();
-		app.UseAuthorization();
-		app.MapControllers();
+		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
+
+		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
+		await client.StartAsync();
+		await client.SetGameAsync("your roles", null, ActivityType.Watching);
+		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
 
 		try
 		{
@@ -63,7 +67,7 @@ public static class Program
 		{
 			Log.Information("Exiting");
 			await client.LogoutAsync();
-			client.Dispose();
+			await client.DisposeAsync();
 			_source.Dispose();
 			AppDomain.CurrentDomain.ProcessExit -= StopBot;
 		}
@@ -71,9 +75,9 @@ public static class Program
 
 	private static void ConfigureLogging(IConfiguration config) =>
 		Log.Logger = new LoggerConfiguration()
-			.MinimumLevel.Verbose()
+			.MinimumLevel.Error()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}")
-			.WriteTo.Discord(config.GetValue<ulong>("SwarmerLoggerId"), config["SwarmerLoggerToken"])
+			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"])
 			.CreateLogger();
 
 	private static void RegisterEndpoints(WebApplication app)
@@ -90,33 +94,42 @@ public static class Program
 		app.MapGet("/users/by-leaderboardId", (int leaderboardId, IServiceScopeFactory scopeFactory) =>
 		{
 			using IServiceScope scope = scopeFactory.CreateScope();
-			using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+			using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.LeaderboardId == leaderboardId);
 		});
 
 		app.MapGet("/users/by-discordId", (ulong discordId, IServiceScopeFactory scopeFactory) =>
 		{
 			using IServiceScope scope = scopeFactory.CreateScope();
-			using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+			using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.DiscordId == discordId);
 		});
 
 		app.MapGet("/dailynews", async (IServiceScopeFactory scopeFactory) =>
 		{
 			using IServiceScope scope = scopeFactory.CreateScope();
-			await using DatabaseService dbContext = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return await dbContext.DdNews.AsNoTracking().ToListAsync();
 		});
 	}
 
-	private static WebApplicationBuilder ConfigureServices(DiscordSocketClient client, CommandService commands)
+	private static void SetConfigFromDb(WebApplicationBuilder builder)
 	{
-		WebApplicationBuilder builder = WebApplication.CreateBuilder();
+		using DbService dbService = new();
+		string jsonConfig = dbService.ClubberConfig.AsNoTracking().First().JsonConfig;
+		string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DbConfig.json");
+		File.WriteAllText(configPath, jsonConfig);
+		builder.Configuration.AddJsonFile(configPath);
+	}
+
+	private static WebApplicationBuilder ConfigureServices(WebApplicationBuilder builder, DiscordSocketClient client, CommandService commands)
+	{
 		builder.Logging.ClearProviders();
-		builder.Services.AddControllers();
-		builder.Services.AddEndpointsApiExplorer();
-		builder.Services.AddSwaggerGen();
-		builder.Services.AddSingleton(client)
+		builder.Services
+			.AddEndpointsApiExplorer()
+			.AddSwaggerGen()
+			.AddCors()
+			.AddSingleton(client)
 			.AddSingleton(commands)
 			.AddSingleton<MessageHandlerService>()
 			.AddSingleton<IDatabaseHelper, DatabaseHelper>()
@@ -128,7 +141,7 @@ public static class Program
 			.AddHostedService<DdNewsPostService>()
 			.AddHostedService<DatabaseUpdateService>()
 			.AddHttpClient()
-			.AddDbContext<DatabaseService>();
+			.AddDbContext<DbService>();
 
 		return builder;
 	}

@@ -6,11 +6,17 @@ namespace Clubber.Services;
 
 public class WelcomeMessage
 {
+	private readonly IConfiguration _config;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly UpdateRolesHelper _updateRolesHelper;
 
-	public WelcomeMessage(IDatabaseHelper databaseHelper, UpdateRolesHelper updateRolesHelper, DiscordSocketClient client)
+	public WelcomeMessage(
+		IConfiguration config,
+		IDatabaseHelper databaseHelper,
+		UpdateRolesHelper updateRolesHelper,
+		DiscordSocketClient client)
 	{
+		_config = config;
 		_databaseHelper = databaseHelper;
 		_updateRolesHelper = updateRolesHelper;
 		client.UserJoined += OnUserJoined;
@@ -18,12 +24,12 @@ public class WelcomeMessage
 
 	private async Task OnUserJoined(SocketGuildUser joiningUser)
 	{
-		ulong ddpalsId = ulong.Parse(Environment.GetEnvironmentVariable("DdPalsId")!);
+		ulong ddpalsId = _config.GetValue<ulong>("DdPalsId");
 		if (joiningUser.Guild.Id != ddpalsId || joiningUser.IsBot)
 			return;
 
 		// User is registered
-		ulong unregRoleId = ulong.Parse(Environment.GetEnvironmentVariable("UnregisteredRoleId")!);
+		ulong unregRoleId = _config.GetValue<ulong>("UnregisteredRoleId");
 		if (_databaseHelper.GetDdUserBy(joiningUser.Id) is not null)
 			await UpdateRolesForRegisteredUser(joiningUser);
 		else
@@ -36,7 +42,7 @@ public class WelcomeMessage
 		if (!response.Success)
 			return;
 
-		ulong dailyUpdateChannelId = ulong.Parse(Environment.GetEnvironmentVariable("DailyUpdateChannelId")!);
+		ulong dailyUpdateChannelId = _config.GetValue<ulong>("DailyUpdateChannelId");
 		if (joiningUser.Guild.GetChannel(dailyUpdateChannelId) is SocketTextChannel logsChannel)
 			await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
 	}

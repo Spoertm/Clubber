@@ -21,7 +21,7 @@ public class UserServiceTests
 	{
 		_configMock = new();
 		_databaseHelperMock = new();
-		_sut = new(_databaseHelperMock.Object);
+		_sut = new(_configMock.Object, _databaseHelperMock.Object);
 	}
 
 	[Theory]

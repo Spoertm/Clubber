@@ -6,9 +6,14 @@ namespace Clubber.Services;
 
 public class UserService
 {
+	private readonly IConfiguration _config;
 	private readonly IDatabaseHelper _databaseHelper;
 
-	public UserService(IDatabaseHelper databaseHelper) => _databaseHelper = databaseHelper;
+	public UserService(IConfiguration config, IDatabaseHelper databaseHelper)
+	{
+		_config = config;
+		_databaseHelper = databaseHelper;
+	}
 
 	public UserValidationResponse IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
@@ -34,15 +39,15 @@ public class UserService
 		if (guildUser.GuildPermissions.ManageRoles)
 			return new(IsError: true, $"`{guildUser.Username}` is not registered.");
 
-		ulong unregRoleId = ulong.Parse(Environment.GetEnvironmentVariable("UnregisteredRoleId")!);
+		ulong unregRoleId = _config.GetValue<ulong>("UnregisteredRoleId");
 		bool userHasUnregRole = guildUser.RoleIds.Contains(unregRoleId);
 
-		string roleAssignerRoleId = Environment.GetEnvironmentVariable("RoleAssignerRoleId")!;
+		string roleAssignerRoleId = _config["RoleAssignerRoleId"];
 		string message = userUsedCommandForThemselves
 			? $"You're not registered, {guildUser.Username}. Only a <@&{roleAssignerRoleId}> can register you."
 			: $"`{guildUser.Username}` is not registered. Only a <@&{roleAssignerRoleId}> can register them.";
 
-		string registerChannelId = Environment.GetEnvironmentVariable("RegisterChannelId")!;
+		string registerChannelId = _config["RegisterChannelId"];
 		if (userHasUnregRole)
 			message += $"\nPlease refer to the first message in <#{registerChannelId}> for more info.";
 
@@ -54,7 +59,7 @@ public class UserService
 		if (guildUser.IsBot)
 			return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 
-		ulong cheaterRoleId = ulong.Parse(Environment.GetEnvironmentVariable("CheaterRoleId")!);
+		ulong cheaterRoleId = _config.GetValue<ulong>("CheaterRoleId");
 		if (guildUser.RoleIds.All(rId => rId != cheaterRoleId))
 			return new(IsError: false, Message: null);
 

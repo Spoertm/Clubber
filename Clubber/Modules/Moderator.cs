@@ -11,9 +11,14 @@ namespace Clubber.Modules;
 [RequireContext(ContextType.Guild)]
 public class Moderator : ExtendedModulebase<SocketCommandContext>
 {
+	private readonly IConfiguration _config;
 	private readonly IDiscordHelper _discordHelper;
 
-	public Moderator(IDiscordHelper discordHelper) => _discordHelper = discordHelper;
+	public Moderator(IConfiguration config, IDiscordHelper discordHelper)
+	{
+		_config = config;
+		_discordHelper = discordHelper;
+	}
 
 	[Command("editnewspost")]
 	[Summary("Allows you to edit a DD news post made by the bot. If no message ID is given, then the latest post will be edited.")]
@@ -24,7 +29,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 			return;
 
-		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
+		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
 		if (await ddnewsPostChannel.GetMessageAsync(messageId) is not IUserMessage messageToEdit)
 		{
 			await InlineReplyAsync("Could not find message.");
@@ -47,7 +52,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 			return;
 
-		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(ulong.Parse(Environment.GetEnvironmentVariable("DdNewsChannelId")!));
+		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
 		IEnumerable<IMessage> messages = await ddnewsPostChannel.GetMessagesAsync(5).FlattenAsync();
 		if (messages.Where(m => m.Author.Id == Context.Client.CurrentUser.Id).MaxBy(m => m.CreatedAt) is not IUserMessage messageToEdit)
 		{
