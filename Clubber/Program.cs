@@ -75,7 +75,7 @@ public static class Program
 			}
 		};
 
-		await Task.Delay(-1);
+		await Task.Delay(-1, _source.Token);
 	}
 
 	private static void ConfigureLogging(IConfiguration config) =>
