@@ -31,7 +31,13 @@ public static class Program
 		ConfigureLogging(builder.Configuration);
 		Log.Information("Starting");
 
-		DiscordSocketClient client = new(new() { AlwaysDownloadUsers = true, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers });
+		DiscordSocketClient client = new(new()
+		{
+			LogLevel = LogSeverity.Error,
+			AlwaysDownloadUsers = true,
+			GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
+		});
+
 		CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
 		client.Log += OnLog;
 		commands.Log += OnLog;
