@@ -31,9 +31,10 @@ public class DiscordSink : ILogEventSink
 			if (logEvent.Exception is not null)
 			{
 				embedBuilder.WithTitle(logEvent.Exception.Message.Truncate(256));
+				string? stackTrace = logEvent.Exception.StackTrace;
+				embedBuilder.WithDescription(stackTrace is null ? "NaN" : $"**StackTrace:**\n{stackTrace.Truncate(2030)}");
 				embedBuilder.AddField("Type:", nameof(logEvent.Exception), true);
 				embedBuilder.AddField("Exception message:", logEvent.Exception.Message.Truncate(1024), true);
-				embedBuilder.AddField("StackTrace:", logEvent.Exception.StackTrace?.Truncate(1024) ?? "NaN");
 			}
 
 			_webHook.SendMessageAsync(embeds: new[] { embedBuilder.Build() }).GetAwaiter().GetResult();
