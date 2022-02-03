@@ -31,22 +31,24 @@ public class WebService : IWebService
 			List<EntryResponse> users = new();
 			while (bytePosition < data.Length)
 			{
-				users.Add(new(
-					Username: GetUserName(data, ref bytePosition),
-					Rank: BitConverter.ToInt32(data, bytePosition),
-					Id: BitConverter.ToInt32(data, bytePosition + 4),
-					Time: BitConverter.ToInt32(data, bytePosition + 12),
-					Kills: BitConverter.ToInt32(data, bytePosition + 16),
-					Gems: BitConverter.ToInt32(data, bytePosition + 28),
-					DaggersHit: BitConverter.ToInt32(data, bytePosition + 24),
-					DaggersFired: BitConverter.ToInt32(data, bytePosition + 20),
-					DeathType: BitConverter.ToInt32(data, bytePosition + 32),
-					TimeTotal: BitConverter.ToUInt64(data, bytePosition + 60),
-					KillsTotal: BitConverter.ToUInt64(data, bytePosition + 44),
-					GemsTotal: BitConverter.ToUInt64(data, bytePosition + 68),
-					DeathsTotal: BitConverter.ToUInt64(data, bytePosition + 36),
-					DaggersHitTotal: BitConverter.ToUInt64(data, bytePosition + 76),
-					DaggersFiredTotal: BitConverter.ToUInt64(data, bytePosition + 52)));
+				users.Add(new()
+				{
+					Username = GetUserName(data, ref bytePosition),
+					Rank = BitConverter.ToInt32(data, bytePosition),
+					Id = BitConverter.ToInt32(data, bytePosition + 4),
+					Time = BitConverter.ToInt32(data, bytePosition + 12),
+					Kills = BitConverter.ToInt32(data, bytePosition + 16),
+					Gems = BitConverter.ToInt32(data, bytePosition + 28),
+					DaggersHit = BitConverter.ToInt32(data, bytePosition + 24),
+					DaggersFired = BitConverter.ToInt32(data, bytePosition + 20),
+					DeathType = BitConverter.ToInt32(data, bytePosition + 32),
+					TimeTotal = BitConverter.ToUInt64(data, bytePosition + 60),
+					KillsTotal = BitConverter.ToUInt64(data, bytePosition + 44),
+					GemsTotal = BitConverter.ToUInt64(data, bytePosition + 68),
+					DeathsTotal = BitConverter.ToUInt64(data, bytePosition + 36),
+					DaggersHitTotal = BitConverter.ToUInt64(data, bytePosition + 76),
+					DaggersFiredTotal = BitConverter.ToUInt64(data, bytePosition + 52),
+				});
 
 				bytePosition += 88;
 			}
@@ -126,22 +128,24 @@ public class WebService : IWebService
 		for (int i = 0; i < leaderboard.TotalEntries; i++)
 		{
 			short usernameLength = br.ReadInt16();
-			EntryResponse entry = new(
-				Username: Encoding.UTF8.GetString(br.ReadBytes(usernameLength)),
-				Rank: br.ReadInt32(),
-				Id: br.ReadInt32(),
-				Time: br.ReadInt32(),
-				Kills: br.ReadInt32(),
-				DaggersFired: br.ReadInt32(),
-				DaggersHit: br.ReadInt32(),
-				Gems: br.ReadInt32(),
-				DeathType: br.ReadInt32(),
-				DeathsTotal: br.ReadUInt64(),
-				KillsTotal: br.ReadUInt64(),
-				DaggersFiredTotal: br.ReadUInt64(),
-				TimeTotal: br.ReadUInt64(),
-				GemsTotal: br.ReadUInt64(),
-				DaggersHitTotal: br.ReadUInt64());
+			EntryResponse entry = new()
+			{
+				Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength)),
+				Rank = br.ReadInt32(),
+				Id = br.ReadInt32(),
+				Time = br.ReadInt32(),
+				Kills = br.ReadInt32(),
+				DaggersFired = br.ReadInt32(),
+				DaggersHit = br.ReadInt32(),
+				Gems = br.ReadInt32(),
+				DeathType = br.ReadInt32(),
+				DeathsTotal = br.ReadUInt64(),
+				KillsTotal = br.ReadUInt64(),
+				DaggersFiredTotal = br.ReadUInt64(),
+				TimeTotal = br.ReadUInt64(),
+				GemsTotal = br.ReadUInt64(),
+				DaggersHitTotal = br.ReadUInt64(),
+			};
 
 			br.BaseStream.Seek(4, SeekOrigin.Current);
 
