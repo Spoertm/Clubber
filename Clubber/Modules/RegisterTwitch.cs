@@ -9,7 +9,7 @@ namespace Clubber.Modules;
 [Name("Database")]
 [Group("linktwitch")]
 [Alias("twitch")]
-[Summary("Link your Twitch to get integrated into DDLIVE.")]
+[Summary("Link your Twitch to get integrated into https://ddstats.live/.")]
 [RequireContext(ContextType.Guild)]
 public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 {

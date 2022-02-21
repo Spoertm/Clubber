@@ -203,7 +203,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 **After posting the message in this channel, a moderator will then soon register you**.";
 
-		const string twitchText = @"You can link your Twitch account to your player page on DDLIVE using ""`+twitch MyTwitchUserName`"", so others can see who you are in-game when you're live on Twitch.";
+		const string twitchText = @"You can link your Twitch account to your player page on [DDLIVE](https://ddstats.live/) using ""`+twitch MyTwitchUserName`"", so others can see who you are in-game when you're live on Twitch.";
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 			.WithAuthor(botUser)
