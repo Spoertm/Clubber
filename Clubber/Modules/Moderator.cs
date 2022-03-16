@@ -63,4 +63,24 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		await messageToEdit.ModifyAsync(m => m.Content = newMessage);
 		await ReplyAsync("✅ Done!");
 	}
+
+	[Command("clear")]
+	[Summary("Clears all messages but the first one in #register channel.")]
+	[Remarks("clear")]
+	public async Task Clear()
+	{
+		ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
+		if (Context.Channel is not SocketTextChannel currentTextChannel || currentTextChannel.Id != registerChannelId)
+		{
+			await ReplyAsync($"This command can only be run in <#{registerChannelId}>.");
+			return;
+		}
+
+		IEnumerable<IMessage> lastHundredMessages = await currentTextChannel.GetMessagesAsync().FlattenAsync();
+		IEnumerable<IMessage> messagesToDelete = lastHundredMessages
+			.OrderByDescending(m => m.CreatedAt)
+			.SkipLast(1);
+
+		await currentTextChannel.DeleteMessagesAsync(messagesToDelete);
+	}
 }
