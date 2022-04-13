@@ -4,7 +4,7 @@ using Serilog.Events;
 
 namespace Clubber.Models.Logging;
 
-public static class DiscordSinkExtenstions
+public static class DiscordSinkExtensions
 {
 	public static LoggerConfiguration Discord(
 		this LoggerSinkConfiguration loggerConfiguration,
