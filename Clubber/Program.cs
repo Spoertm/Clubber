@@ -35,7 +35,13 @@ public static class Program
 			GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
 		});
 
-		CommandService commands = new(new() { IgnoreExtraArgs = true, CaseSensitiveCommands = false, DefaultRunMode = RunMode.Async });
+		CommandService commands = new(new()
+		{
+			IgnoreExtraArgs = true,
+			CaseSensitiveCommands = false,
+			DefaultRunMode = RunMode.Async,
+		});
+
 		client.Log += OnLog;
 		commands.Log += OnLog;
 
