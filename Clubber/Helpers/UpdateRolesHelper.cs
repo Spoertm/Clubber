@@ -57,7 +57,7 @@ public class UpdateRolesHelper
 		_uselessRoles = new() { unregRoleId, 458375331468935178 };
 	}
 
-	public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IEnumerable<SocketGuildUser> guildUsers)
+	public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IReadOnlyCollection<SocketGuildUser> guildUsers)
 	{
 		Stopwatch sw = Stopwatch.StartNew();
 		(int nonMemberCount, List<UpdateRolesResponse> updateRolesResponses) = await ExecuteRolesAndDbUpdate(guildUsers);
@@ -111,7 +111,7 @@ public class UpdateRolesHelper
 		return (dbUsers.Count - registeredUsers.Count, responses);
 	}
 
-	public async Task<UpdateRolesResponse> UpdateUserRoles(SocketGuildUser user)
+	public async Task<UpdateRolesResponse> UpdateUserRoles(IGuildUser user)
 	{
 		try
 		{
@@ -130,11 +130,10 @@ public class UpdateRolesHelper
 		}
 	}
 
-	private async Task<UpdateRolesResponse> ExecuteRoleUpdate(SocketGuildUser guildUser, EntryResponse lbUser)
+	private async Task<UpdateRolesResponse> ExecuteRoleUpdate(IGuildUser guildUser, EntryResponse lbUser)
 	{
-		ulong[] userRolesIds = guildUser.Roles.Select(r => r.Id).ToArray();
-		(ulong scoreRoleToAdd, ulong[] scoreRolesToRemove) = HandleScoreRoles(userRolesIds, lbUser.Time);
-		(ulong topRoleToAdd, ulong[] topRolesToRemove) = HandleTopRoles(userRolesIds, lbUser.Rank);
+		(ulong scoreRoleToAdd, ulong[] scoreRolesToRemove) = HandleScoreRoles(guildUser.RoleIds, lbUser.Time);
+		(ulong topRoleToAdd, ulong[] topRolesToRemove) = HandleTopRoles(guildUser.RoleIds, lbUser.Rank);
 
 		if (scoreRoleToAdd == 0 && scoreRolesToRemove.Length == 0 && topRoleToAdd == 0 && topRolesToRemove.Length == 0)
 			return new(false, null, null, null);
@@ -158,7 +157,7 @@ public class UpdateRolesHelper
 		return new(true, guildUser, roleIdsToAdd, socketRolesToRemove);
 	}
 
-	private (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(ulong[] userRolesIds, int playerTime)
+	public (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(IReadOnlyCollection<ulong> userRolesIds, int playerTime)
 	{
 		(_, ulong scoreRoleId) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
 
@@ -170,7 +169,7 @@ public class UpdateRolesHelper
 		return (scoreRoleToAdd, userRolesIds.Intersect(filteredScoreRoles).ToArray());
 	}
 
-	private static (ulong TopRoleToAdd, ulong[] TopRolesToRemove) HandleTopRoles(ulong[] userRolesIds, int rank)
+	public (ulong TopRoleToAdd, ulong[] TopRolesToRemove) HandleTopRoles(IReadOnlyCollection<ulong> userRolesIds, int rank)
 	{
 		KeyValuePair<int, ulong>? rankRole = _rankRoles.FirstOrDefault(rr => rank <= rr.Key);
 
