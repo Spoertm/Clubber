@@ -25,6 +25,9 @@ public static class Program
 		AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
+		if (builder.Environment.IsProduction())
+			SetConfigFromDb(builder);
+
 		ConfigureLogging(builder.Configuration);
 		Log.Information("Starting");
 
@@ -125,6 +128,15 @@ public static class Program
 			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return await dbContext.DdNews.AsNoTracking().ToListAsync();
 		});
+	}
+
+	private static void SetConfigFromDb(WebApplicationBuilder builder)
+	{
+		using DbService dbService = new();
+		string jsonConfig = dbService.ClubberConfig.AsNoTracking().First().JsonConfig;
+		string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DbConfig.json");
+		File.WriteAllText(configPath, jsonConfig);
+		builder.Configuration.AddJsonFile(configPath);
 	}
 
 	private static WebApplicationBuilder ConfigureServices(WebApplicationBuilder builder, DiscordSocketClient client, CommandService commands)
