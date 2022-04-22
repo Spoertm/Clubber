@@ -52,8 +52,9 @@ public class UpdateRolesTests
 	[InlineData(3, new ulong[] { }, Top3RoleId, new ulong[] { })]
 	[InlineData(10, new ulong[] { }, Top10RoleId, new ulong[] { })]
 	[InlineData(50, new ulong[] { }, 0, new ulong[] { })]
-	[InlineData(50, new[] { Top1RoleId }, 0, new[] { Top1RoleId })]
+	[InlineData(50, new[] { Top1RoleId, Top3RoleId }, 0, new[] { Top1RoleId, Top3RoleId })]
 	[InlineData(50, new[] { OneHundredRoleId, Top3RoleId }, 0, new[] { Top3RoleId })]
+	[InlineData(50, new[] { OneHundredRoleId, Top3RoleId, ThreeHundredRoleId }, 0, new[] { Top3RoleId })]
 	public void HandleTopRoles_DetectsRoleInconsistency_ReturnsRolesToBeAddedAndRemoved(
 		int rank,
 		IReadOnlyCollection<ulong> userRoleIds,
