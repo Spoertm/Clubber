@@ -15,9 +15,6 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		_webService = webService;
 		_scopeFactory = scopeFactory;
-
-		using IServiceScope scope = _scopeFactory.CreateScope();
-		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 	}
 
 	public async Task<List<DdUser>> GetEntireDatabase()

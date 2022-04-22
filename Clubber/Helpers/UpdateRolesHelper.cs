@@ -2,7 +2,6 @@ using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
-using Discord.WebSocket;
 using System.Diagnostics;
 
 namespace Clubber.Helpers;
@@ -57,7 +56,7 @@ public class UpdateRolesHelper
 		_uselessRoles = new() { unregRoleId, 458375331468935178 };
 	}
 
-	public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IReadOnlyCollection<SocketGuildUser> guildUsers)
+	public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IReadOnlyCollection<IGuildUser> guildUsers)
 	{
 		Stopwatch sw = Stopwatch.StartNew();
 		(int nonMemberCount, List<UpdateRolesResponse> updateRolesResponses) = await ExecuteRolesAndDbUpdate(guildUsers);
@@ -83,10 +82,10 @@ public class UpdateRolesHelper
 		return new(message, embedList.ToArray());
 	}
 
-	private async Task<(int NonMemberCount, List<UpdateRolesResponse> UpdateRolesResponses)> ExecuteRolesAndDbUpdate(IEnumerable<SocketGuildUser> guildUsers)
+	private async Task<(int NonMemberCount, List<UpdateRolesResponse> UpdateRolesResponses)> ExecuteRolesAndDbUpdate(IReadOnlyCollection<IGuildUser> guildUsers)
 	{
 		List<DdUser> dbUsers = await _databaseHelper.GetEntireDatabase();
-		List<(DdUser DdUser, SocketGuildUser GuildUser)> registeredUsers = dbUsers.Join(
+		List<(DdUser DdUser, IGuildUser GuildUser)> registeredUsers = dbUsers.Join(
 				inner: guildUsers,
 				outerKeySelector: dbu => dbu.DiscordId,
 				innerKeySelector: gu => gu.Id,
@@ -96,7 +95,7 @@ public class UpdateRolesHelper
 		IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
 		IEnumerable<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
-		(SocketGuildUser GuildUser, EntryResponse LbUser)[] updatedUsers = registeredUsers.Join(
+		(IGuildUser GuildUser, EntryResponse LbUser)[] updatedUsers = registeredUsers.Join(
 				inner: lbPlayers,
 				outerKeySelector: ru => ru.DdUser.LeaderboardId,
 				innerKeySelector: lbp => lbp.Id,
