@@ -12,7 +12,7 @@ namespace Clubber.Tests.ServicesTests;
 public class UserServiceTests
 {
 	private readonly UserService _sut;
-	private readonly Mock<IDatabaseHelper> _databaseHelperMock;
+	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
 	private const ulong CheaterRoleId = 666;
 	private const ulong ExampleDiscordId = 0;
 
@@ -22,7 +22,6 @@ public class UserServiceTests
 			.AddJsonFile("appsettings.Testing.json")
 			.Build();
 
-		_databaseHelperMock = new();
 		_sut = new(configMock, _databaseHelperMock.Object);
 	}
 
