@@ -5,6 +5,19 @@ namespace Clubber.Models.Responses;
 
 public record struct LeaderboardResponse
 {
+	public LeaderboardResponse()
+	{
+		DateTime = default;
+		TotalPlayers = 0;
+		TimeGlobal = 0;
+		KillsGlobal = 0;
+		GemsGlobal = 0;
+		DeathsGlobal = 0;
+		DaggersHitGlobal = 0;
+		DaggersFiredGlobal = 0;
+		TotalEntries = 0;
+	}
+
 	public DateTime DateTime { get; init; }
 
 	public int TotalPlayers { get; set; }
