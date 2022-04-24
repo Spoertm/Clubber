@@ -1,4 +1,5 @@
 ﻿using Clubber.Models;
+using Clubber.Models.DdSplits;
 using Clubber.Models.Responses;
 using Discord.WebSocket;
 
@@ -29,4 +30,8 @@ public interface IDatabaseHelper
 	Task CleanUpNewsItems();
 
 	Task<bool> TwitchUsernameIsRegistered(string twitchUsername);
+
+	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(Split[] splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description);
+
+	Task<BestSplit[]> GetBestSplits();
 }

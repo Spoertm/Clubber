@@ -1,4 +1,5 @@
 ﻿using Clubber.Helpers;
+using Clubber.Models.DdSplits;
 using Discord;
 using Discord.Commands;
 
@@ -8,8 +9,13 @@ namespace Clubber.Modules;
 public class Info : ExtendedModulebase<SocketCommandContext>
 {
 	private readonly CommandService _commands;
+	private readonly IDatabaseHelper _databaseHelper;
 
-	public Info(CommandService commands) => _commands = commands;
+	public Info(CommandService commands, IDatabaseHelper databaseHelper)
+	{
+		_commands = commands;
+		_databaseHelper = databaseHelper;
+	}
 
 	[Command("whyareyou")]
 	[Summary("Describes what the bot does.")]
@@ -47,5 +53,15 @@ To speed this up, you can manually update your own or someone else's roles by us
 
 		Embed embed = EmbedHelper.CommandHelp(Context, searchResult);
 		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+	}
+
+	[Command("bestsplits")]
+	[Summary("Get the current best DD splits.")]
+	[Remarks("bestsplits")]
+	public async Task CurrentBestSplits()
+	{
+		BestSplit[] bestSplits = await _databaseHelper.GetBestSplits();
+		Embed bestSplitsEmbed = EmbedHelper.CurrentBestSplits(bestSplits);
+		await ReplyAsync(embed: bestSplitsEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
 	}
 }

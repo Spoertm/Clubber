@@ -1,4 +1,5 @@
 ﻿using Clubber.Models;
+using Clubber.Models.DdSplits;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord.WebSocket;
@@ -141,5 +142,53 @@ public class DatabaseHelper : IDatabaseHelper
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.TwitchUsername == twitchUsername) is not null;
+	}
+
+	public async Task<BestSplit[]> GetBestSplits()
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		return await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
+	}
+
+	/// <summary>
+	/// Updates the current best splits as necessary if the provided splits are superior.
+	/// </summary>
+	/// <returns>Tuple containing all the old best splits and the updated new splits.</returns>
+	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(Split[] splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		BestSplit[] currentBestSplits = await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
+		List<BestSplit> superiorNewSplits = new();
+		foreach (Split newSplit in splitsToBeChecked)
+		{
+			BestSplit? currentBestSplit = currentBestSplits.FirstOrDefault(cbs => cbs.Name == newSplit.Name);
+			BestSplit newBest = new()
+			{
+				Name = newSplit.Name,
+				Time = newSplit.Time,
+				Value = newSplit.Value,
+				Description = description,
+				GameInfo = ddstatsRun.GameInfo,
+			};
+
+			if (currentBestSplit is null)
+			{
+				superiorNewSplits.Add(newBest);
+				await dbContext.BestSplits.AddAsync(newBest);
+			}
+			else if (newSplit.Value > currentBestSplit.Value)
+			{
+				superiorNewSplits.Add(newBest);
+				dbContext.BestSplits.Update(newBest);
+			}
+		}
+
+		if (superiorNewSplits.Count == 0)
+			return (currentBestSplits, superiorNewSplits.ToArray());
+
+		await dbContext.SaveChangesAsync();
+		return (currentBestSplits, superiorNewSplits.ToArray());
 	}
 }

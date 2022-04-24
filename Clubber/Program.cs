@@ -125,6 +125,20 @@ public static class Program
 			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return await dbContext.DdNews.AsNoTracking().ToListAsync();
 		});
+
+		app.MapGet("/bestsplits", async (IServiceScopeFactory scopeFactory) =>
+		{
+			using IServiceScope scope = scopeFactory.CreateScope();
+			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+			return await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
+		});
+
+		app.MapGet("/bestsplits/by-splitnames", async (string splitName, IServiceScopeFactory scopeFactory) =>
+		{
+			using IServiceScope scope = scopeFactory.CreateScope();
+			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+			return await dbContext.BestSplits.AsNoTracking().FirstOrDefaultAsync(bs => bs.Name == splitName);
+		});
 	}
 
 	private static WebApplicationBuilder ConfigureServices(WebApplicationBuilder builder, DiscordSocketClient client, CommandService commands)
