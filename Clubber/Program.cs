@@ -137,7 +137,7 @@ public static class Program
 			return await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
 		}).WithTags("Splits");
 
-		app.MapGet("/bestsplits/by-splitnames", async (string splitName, IServiceScopeFactory scopeFactory) =>
+		app.MapGet("/bestsplits/by-splitname", async (string splitName, IServiceScopeFactory scopeFactory) =>
 		{
 			using IServiceScope scope = scopeFactory.CreateScope();
 			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
