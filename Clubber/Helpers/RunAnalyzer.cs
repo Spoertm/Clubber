@@ -20,7 +20,10 @@ public static class RunAnalyzer
 			if (startOfSplitState is null || endOfSplitState is null)
 				continue;
 
-			int splitValue = endOfSplitState.HomingDaggers - startOfSplitState.HomingDaggers;
+			int splitValue = endOfSplitState.HomingDaggers + startOfSplitState.HomingDaggers;
+			if (nextSplit.Name == "350")
+				splitValue -= 105;
+
 			currentSplit = Split.V3Splits[i];
 			splits.Add(new(currentSplit.Name, currentSplit.Time, splitValue));
 		}
