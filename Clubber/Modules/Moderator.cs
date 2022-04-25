@@ -98,7 +98,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 	[Priority(1)]
 	[Command("checksplits")]
 	[Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
-	[Remarks("checksplits https://ddstats.com/games/123456789")]
+	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 This is a description.")]
 	[RequireRole(552525894321700864)]
 	[RequireRole(701868700365488281)]
 	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
@@ -128,7 +128,9 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 	[Priority(2)]
 	[Command("checksplits")]
 	[Summary("Checks if the provided ddstats run has a better split than the current best one and updates if necessary.")]
-	[Remarks("checksplits https://ddstats.com/games/123456789")]
+	[Remarks(@"checksplits https://ddstats.com/games/123456789
+checksplits https://ddstats.com/games/123456789 350
+checksplits https://ddstats.com/games/123456789 350 description.")]
 	[RequireRole(552525894321700864)]
 	[RequireRole(701868700365488281)]
 	public async Task FromDdstatsUrl(string url, string splitName, [Remainder] string? description = null)
