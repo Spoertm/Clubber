@@ -256,7 +256,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		{
 			BestSplit? currentBestSplit = Array.Find(currentBestSplits, obs => obs.Name == split.Name);
 			string desc = currentBestSplit?.Description ?? currentBestSplit?.Description ?? "N/A";
-			sb.Append($"\n{split.Name,4}  {split.Time,4}  {currentBestSplit?.Value.ToString() ?? "N/A",5}  {desc.PadLeft(descPadding)}");
+			sb.Append($"\n{split.Name,-6}{split.Time,4}  {currentBestSplit?.Value.ToString() ?? "N/A",5}  {desc.PadLeft(descPadding)}");
 		}
 
 		embedBuilder.Description = sb.Append("```").ToString();
