@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 
 namespace Clubber.Modules;
 
+[Group("checksplits")]
+[Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
 public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 {
 	private readonly IDatabaseHelper _databaseHelper;
@@ -19,39 +21,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		_httpClientFactory = httpClientFactory;
 	}
 
-	[Priority(1)]
-	[Command("checksplits")]
-	[Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
-	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 SomeDescription")]
-	[RequireRole(552525894321700864)]
-	[RequireRole(701868700365488281)]
-	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
-	{
-		if (await GetDdstatsResponse(url) is not { } ddStatsRun)
-			return;
-
-		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
-			return;
-
-		Split[] splits = RunAnalyzer.GetData(ddStatsRun);
-		if (await IsError(splits.Any(s => s.Value > 1000), "Invalid run: too many homings gained on some splits."))
-			return;
-
-		string desc = description ?? $"{ddStatsRun.GameInfo.PlayerName} {ddStatsRun.GameInfo.GameTime:0.0000}";
-		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded(splits, ddStatsRun, desc);
-		if (response.UpdatedBestSplits.Length == 0)
-		{
-			await InlineReplyAsync("No updates were needed.");
-			return;
-		}
-
-		Embed updatedRolesEmbed = EmbedHelper.UpdatedSplits(response.OldBestSplits, response.UpdatedBestSplits);
-		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
-	}
-
 	[Priority(2)]
-	[Command("checksplits")]
-	[Summary("Checks if the provided ddstats run has a better split than the current best one and updates if necessary.")]
 	[Remarks("checksplits https://ddstats.com/games/123456789 350\nchecksplits https://ddstats.com/games/123456789 350 SomeDescription.")]
 	[RequireRole(552525894321700864)]
 	[RequireRole(701868700365488281)]
@@ -74,6 +44,34 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 
 		string desc = description ?? $"{ddStatsRun.GameInfo.PlayerName} {ddStatsRun.GameInfo.GameTime:0.0000}";
 		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded(new[] { split }, ddStatsRun, desc);
+		if (response.UpdatedBestSplits.Length == 0)
+		{
+			await InlineReplyAsync("No updates were needed.");
+			return;
+		}
+
+		Embed updatedRolesEmbed = EmbedHelper.UpdatedSplits(response.OldBestSplits, response.UpdatedBestSplits);
+		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+	}
+
+	[Priority(1)]
+	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 SomeDescription")]
+	[RequireRole(552525894321700864)]
+	[RequireRole(701868700365488281)]
+	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
+	{
+		if (await GetDdstatsResponse(url) is not { } ddStatsRun)
+			return;
+
+		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
+			return;
+
+		Split[] splits = RunAnalyzer.GetData(ddStatsRun);
+		if (await IsError(splits.Any(s => s.Value > 1000), "Invalid run: too many homings gained on some splits."))
+			return;
+
+		string desc = description ?? $"{ddStatsRun.GameInfo.PlayerName} {ddStatsRun.GameInfo.GameTime:0.0000}";
+		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded(splits, ddStatsRun, desc);
 		if (response.UpdatedBestSplits.Length == 0)
 		{
 			await InlineReplyAsync("No updates were needed.");
