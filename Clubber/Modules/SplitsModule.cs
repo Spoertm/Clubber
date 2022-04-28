@@ -106,6 +106,8 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 			runIdStr = url[30..];
 		else if (url.StartsWith("https://ddstats.com/api/v2/game/full"))
 			runIdStr = url[40..];
+		else if (url.StartsWith("https://www.ddstats.com/api/v2/game/full"))
+			runIdStr = url[44..];
 
 		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
 		if (await IsError(string.IsNullOrEmpty(runIdStr), "") ||
