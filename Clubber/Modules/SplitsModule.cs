@@ -10,6 +10,8 @@ namespace Clubber.Modules;
 
 [Group("checksplits")]
 [Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
+[RequireRole(552525894321700864)]
+[RequireRole(701868700365488281)]
 public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 {
 	private readonly IDatabaseHelper _databaseHelper;
@@ -21,10 +23,18 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		_httpClientFactory = httpClientFactory;
 	}
 
+	[Priority(4)]
+	[Remarks("checksplits 123456789 350\nchecksplits 123456789 350 SomeDescription.")]
+	public async Task FromRunId(uint runId, string splitname, [Remainder] string? description = null)
+		=> await FromDdstatsUrl($"https://ddstats.com/api/v2/game/full?id={runId}", splitname, description);
+
+	[Priority(3)]
+	[Remarks("checksplits 123456789\nchecksplits 123456789 SomeDescription.")]
+	public async Task FromRunId(uint runId, [Remainder] string? description = null)
+		=> await FromDdstatsUrl($"https://ddstats.com/api/v2/game/full?id={runId}", description);
+
 	[Priority(2)]
 	[Remarks("checksplits https://ddstats.com/games/123456789 350\nchecksplits https://ddstats.com/games/123456789 350 SomeDescription.")]
-	[RequireRole(552525894321700864)]
-	[RequireRole(701868700365488281)]
 	public async Task FromDdstatsUrl(string url, string splitName, [Remainder] string? description = null)
 	{
 		string[] v3SplitNames = Split.V3Splits.Select(s => s.Name).ToArray();
@@ -56,8 +66,6 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 
 	[Priority(1)]
 	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 SomeDescription")]
-	[RequireRole(552525894321700864)]
-	[RequireRole(701868700365488281)]
 	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
 	{
 		if (await GetDdstatsResponse(url) is not { } ddStatsRun)
@@ -100,12 +108,11 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 			await IsError(!successfulParse, "Invalid ddstats URL."))
 			return null;
 
-		DdStatsFullRunResponse ddStatsRun;
 		try
 		{
 			string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
 			string ddstatsResponse = await _httpClientFactory.CreateClient().GetStringAsync(fullRunReqUrl);
-			ddStatsRun = JsonConvert.DeserializeObject<DdStatsFullRunResponse>(ddstatsResponse) ?? throw new JsonSerializationException();
+			return JsonConvert.DeserializeObject<DdStatsFullRunResponse>(ddstatsResponse) ?? throw new JsonSerializationException();
 		}
 		catch (Exception ex)
 		{
@@ -119,7 +126,5 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 			await InlineReplyAsync($"Failed to run command: {errorMsg}");
 			return null;
 		}
-
-		return ddStatsRun;
 	}
 }
