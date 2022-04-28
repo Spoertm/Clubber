@@ -26,7 +26,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 	[Priority(4)]
 	[Command]
 	[Remarks("checksplits 123456789 350\nchecksplits 123456789 350 SomeDescription.")]
-	public async Task FromRunId(uint runId, string splitname, [Remainder] string? description = null)
+	public async Task FromRunId(uint runId, uint splitname, [Remainder] string? description = null)
 		=> await FromDdstatsUrl($"https://ddstats.com/api/v2/game/full?id={runId}", splitname, description);
 
 	[Priority(3)]
@@ -38,7 +38,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 	[Priority(2)]
 	[Command]
 	[Remarks("checksplits https://ddstats.com/games/123456789 350\nchecksplits https://ddstats.com/games/123456789 350 SomeDescription.")]
-	public async Task FromDdstatsUrl(string url, string splitName, [Remainder] string? description = null)
+	public async Task FromDdstatsUrl(string url, uint splitName, [Remainder] string? description = null)
 	{
 		string[] v3SplitNames = Split.V3Splits.Select(s => s.Name).ToArray();
 		if (await IsError(!v3SplitNames.Contains(splitName), "That split doesn't exist."))
