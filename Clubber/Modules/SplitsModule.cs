@@ -41,7 +41,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 	public async Task FromDdstatsUrl(string url, uint splitName, [Remainder] string? description = null)
 	{
 		string[] v3SplitNames = Split.V3Splits.Select(s => s.Name).ToArray();
-		if (await IsError(!v3SplitNames.Contains(splitName), "That split doesn't exist."))
+		if (await IsError(!v3SplitNames.Contains(splitName.ToString()), $"The split `{splitName}` doesn't exist."))
 			return;
 
 		if (await GetDdstatsResponse(url) is not { } ddStatsRun)
@@ -50,8 +50,8 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
 			return;
 
-		Split? split = RunAnalyzer.GetData(ddStatsRun).FirstOrDefault(s => s.Name == splitName);
-		if (await IsError(split is null, "That split isn't in the run.") ||
+		Split? split = RunAnalyzer.GetData(ddStatsRun).FirstOrDefault(s => s.Name == splitName.ToString());
+		if (await IsError(split is null, $"The split `{splitName}` isn't in the run.") ||
 			await IsError(split!.Value > 1000, "Invalid run: too many homings gained on that split."))
 			return;
 
