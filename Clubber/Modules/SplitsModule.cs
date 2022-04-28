@@ -24,16 +24,19 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 	}
 
 	[Priority(4)]
+	[Command]
 	[Remarks("checksplits 123456789 350\nchecksplits 123456789 350 SomeDescription.")]
 	public async Task FromRunId(uint runId, string splitname, [Remainder] string? description = null)
 		=> await FromDdstatsUrl($"https://ddstats.com/api/v2/game/full?id={runId}", splitname, description);
 
 	[Priority(3)]
+	[Command]
 	[Remarks("checksplits 123456789\nchecksplits 123456789 SomeDescription.")]
 	public async Task FromRunId(uint runId, [Remainder] string? description = null)
 		=> await FromDdstatsUrl($"https://ddstats.com/api/v2/game/full?id={runId}", description);
 
 	[Priority(2)]
+	[Command]
 	[Remarks("checksplits https://ddstats.com/games/123456789 350\nchecksplits https://ddstats.com/games/123456789 350 SomeDescription.")]
 	public async Task FromDdstatsUrl(string url, string splitName, [Remainder] string? description = null)
 	{
@@ -65,6 +68,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 	}
 
 	[Priority(1)]
+	[Command]
 	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 SomeDescription")]
 	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
 	{
