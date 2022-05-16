@@ -1,7 +1,9 @@
+using Clubber.Models.DdSplits;
 using Clubber.Models.Responses;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Text;
 
 namespace Clubber.Helpers;
 
@@ -197,7 +199,7 @@ public static class EmbedHelper
 	{
 		const string registerForRolesText = @"This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&903024433315323915>.
 
-If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game name or ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
+If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
 
 If you don't play the game or simply don't want to be registered, post ""`no score`"".
 
@@ -212,6 +214,52 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 			.AddField(":arrow_forward: Registering for roles", registerForRolesText)
 			.AddField(":arrow_forward: Twitch", twitchText);
 
+		return embedBuilder.Build();
+	}
+
+	public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
+	{
+		int oldSplitsDescriptionPadding = oldBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
+		int newSplitsDescriptionPadding = updatedBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
+		int descPadding = Math.Max(oldSplitsDescriptionPadding, newSplitsDescriptionPadding);
+
+		StringBuilder sb = new($"```diff\n{"Name",-8}{"Time",-6}{"Old value",-11}{"New value",-11}{"Description".PadLeft(descPadding)}");
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+			.WithTitle("Updated best splits");
+
+		foreach ((string Name, int Time) split in Split.V3Splits)
+		{
+			BestSplit? oldBestSplit = Array.Find(oldBestSplits, obs => obs.Name == split.Name);
+			BestSplit? newBestSplit = Array.Find(updatedBestSplits, ubs => ubs.Name == split.Name);
+			string desc = newBestSplit?.Description ?? oldBestSplit?.Description ?? "N/A";
+			sb.Append((oldBestSplit, newBestSplit) switch
+			{
+				({ }, { })   => $"\n+ {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {newBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
+				({ }, null)  => $"\n= {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {oldBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
+				(null, { })  => $"\n+ {split.Name,-6}{split.Time,4}  {"N/A",9}  {newBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
+				(null, null) => $"\n= {split.Name,-6}{split.Time,4}  {"N/A",9}  {"N/A",9}  {desc.PadLeft(descPadding)}",
+			});
+		}
+
+		embedBuilder.Description = sb.Append("```").ToString();
+		return embedBuilder.Build();
+	}
+
+	public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
+	{
+		int descPadding = currentBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
+		StringBuilder sb = new($"```{"Name",-6}{"Time",-6}{"Value",-7}{"Description".PadLeft(descPadding)}");
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+			.WithTitle("Current best splits");
+
+		foreach ((string Name, int Time) split in Split.V3Splits)
+		{
+			BestSplit? currentBestSplit = Array.Find(currentBestSplits, obs => obs.Name == split.Name);
+			string desc = currentBestSplit?.Description ?? currentBestSplit?.Description ?? "N/A";
+			sb.Append($"\n{split.Name,-6}{split.Time,4}  {currentBestSplit?.Value.ToString() ?? "N/A",5}  {desc.PadLeft(descPadding)}");
+		}
+
+		embedBuilder.Description = sb.Append("```").ToString();
 		return embedBuilder.Build();
 	}
 }

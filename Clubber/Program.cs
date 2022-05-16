@@ -106,28 +106,52 @@ public static class Program
 			await context.Response.WriteAsync(indexHtml);
 		});
 
-		app.MapGet("/users", async (IDatabaseHelper dbhelper) => await dbhelper.GetEntireDatabase());
+		app.MapGet("/users", async (IDatabaseHelper dbhelper) => await dbhelper.GetEntireDatabase())
+			.WithTags("Users");
 
 		app.MapGet("/users/by-leaderboardId", (int leaderboardId, IServiceScopeFactory scopeFactory) =>
 		{
 			using IServiceScope scope = scopeFactory.CreateScope();
 			using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.LeaderboardId == leaderboardId);
-		});
+		}).WithTags("Users");
 
 		app.MapGet("/users/by-discordId", (ulong discordId, IServiceScopeFactory scopeFactory) =>
 		{
 			using IServiceScope scope = scopeFactory.CreateScope();
 			using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.DiscordId == discordId);
-		});
+		}).WithTags("Users");
 
 		app.MapGet("/dailynews", async (IServiceScopeFactory scopeFactory) =>
 		{
 			using IServiceScope scope = scopeFactory.CreateScope();
 			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			return await dbContext.DdNews.AsNoTracking().ToListAsync();
-		});
+		}).WithTags("News");
+
+		app.MapGet("/bestsplits", async (IServiceScopeFactory scopeFactory) =>
+		{
+			using IServiceScope scope = scopeFactory.CreateScope();
+			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+			return await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
+		}).WithTags("Splits");
+
+		app.MapGet("/bestsplits/by-splitname", async (string splitName, IServiceScopeFactory scopeFactory) =>
+		{
+			using IServiceScope scope = scopeFactory.CreateScope();
+			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+			return await dbContext.BestSplits.AsNoTracking().FirstOrDefaultAsync(bs => bs.Name == splitName);
+		}).WithTags("Splits");
+	}
+
+	private static void SetConfigFromDb(WebApplicationBuilder builder)
+	{
+		using DbService dbService = new();
+		string jsonConfig = dbService.ClubberConfig.AsNoTracking().First().JsonConfig;
+		string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DbConfig.json");
+		File.WriteAllText(configPath, jsonConfig);
+		builder.Configuration.AddJsonFile(configPath);
 	}
 
 	private static void SetConfigFromDb(WebApplicationBuilder builder)

@@ -1,5 +1,6 @@
 using Clubber.Models;
 using Clubber.Models.Database;
+using Clubber.Models.DdSplits;
 using Clubber.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ public class DbService : DbContext
 	public DbSet<EntryResponse> LeaderboardCache => Set<EntryResponse>();
 	public DbSet<DdUser> DdPlayers => Set<DdUser>();
 	public DbSet<DdNewsItem> DdNews => Set<DdNewsItem>();
+	public DbSet<BestSplit> BestSplits => Set<BestSplit>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		=> optionsBuilder
