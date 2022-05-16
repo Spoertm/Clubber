@@ -154,15 +154,6 @@ public static class Program
 		builder.Configuration.AddJsonFile(configPath);
 	}
 
-	private static void SetConfigFromDb(WebApplicationBuilder builder)
-	{
-		using DbService dbService = new();
-		string jsonConfig = dbService.ClubberConfig.AsNoTracking().First().JsonConfig;
-		string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DbConfig.json");
-		File.WriteAllText(configPath, jsonConfig);
-		builder.Configuration.AddJsonFile(configPath);
-	}
-
 	private static WebApplicationBuilder ConfigureServices(WebApplicationBuilder builder, DiscordSocketClient client, CommandService commands)
 	{
 		builder.Logging.ClearProviders();
