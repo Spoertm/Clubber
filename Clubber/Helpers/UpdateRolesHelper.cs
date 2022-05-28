@@ -10,6 +10,8 @@ public class UpdateRolesHelper
 {
 	private static readonly Dictionary<int, ulong> _scoreRoles = new()
 	{
+		[1250] = 980126799075876874,
+		[1240] = 980126039055429655,
 		[1230] = 903024433315323915,
 		[1220] = 903024200049102948,
 		[1210] = 903023707121926195,
