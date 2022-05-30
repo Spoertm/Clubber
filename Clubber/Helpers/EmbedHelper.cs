@@ -248,7 +248,11 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 	public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
 	{
 		int descPadding = currentBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
-		StringBuilder sb = new($"```{"Name",-6}{"Time",-6}{"Value",-7}{"Description".PadLeft(descPadding)}");
+		StringBuilder sb = new();
+		sb.Append("Theoretical best peak: ")
+			.AppendLine(GetTheoreticalBestPeak(currentBestSplits).ToString())
+			.Append($"```{"Name",-6}{"Time",-6}{"Value",-7}{"Description".PadLeft(descPadding)}");
+
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 			.WithTitle("Current best splits");
 
@@ -261,5 +265,24 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 		embedBuilder.Description = sb.Append("```").ToString();
 		return embedBuilder.Build();
+	}
+
+	private static int GetTheoreticalBestPeak(BestSplit[] bestSplits)
+	{
+		int highest = 0;
+		int totalHoming = 0;
+
+		foreach (BestSplit thisSplit in bestSplits)
+		{
+			if (thisSplit.Name == "350")
+				thisSplit.Value += 105;
+
+			totalHoming += thisSplit.Value;
+
+			if (totalHoming > highest)
+				highest = totalHoming;
+		}
+
+		return highest;
 	}
 }
