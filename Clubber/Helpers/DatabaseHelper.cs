@@ -148,7 +148,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
+		return await dbContext.BestSplits.AsNoTracking().OrderBy(s => s.Time).ToArrayAsync();
 	}
 
 	/// <summary>
