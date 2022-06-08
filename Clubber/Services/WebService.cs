@@ -1,5 +1,6 @@
 ﻿using Clubber.Models;
 using Clubber.Models.Responses;
+using Newtonsoft.Json;
 using System.Text;
 
 namespace Clubber.Services;
@@ -155,6 +156,10 @@ public class WebService : IWebService
 		return leaderboard;
 	}
 
-	public async Task<string> GetCountryCodeForplayer(int lbId)
-		=> await _httpClientFactory.CreateClient().GetStringAsync($"https://devildaggers.info/api/players/{lbId}/flag");
+	public async Task<string?> GetCountryCodeForplayer(int lbId)
+	{
+		string url = $"https://devildaggers.info/api/clubber/players/{lbId}/country-code";
+		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
+		return JsonConvert.DeserializeObject<dynamic>(responseStr)?.countryCode;
+	}
 }

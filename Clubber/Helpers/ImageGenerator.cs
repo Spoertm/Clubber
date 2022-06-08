@@ -21,7 +21,7 @@ public class ImageGenerator
 	}
 
 	/// <returns>A MemoryStream of the newly generated image file.</returns>
-	public async Task<MemoryStream> FromEntryResponse(EntryResponse entry, string playerCountryCode, int width = 1100)
+	public async Task<MemoryStream> FromEntryResponse(EntryResponse entry, string? playerCountryCode, int width = 1100)
 	{
 		string baseFlagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags");
 		string flagPath = Path.Combine(baseFlagPath, $"{playerCountryCode}.png");
