@@ -44,7 +44,10 @@ public class UpdateRolesHelper
 	private readonly List<ulong> _uselessRoles;
 	private static readonly Dictionary<int, ulong> _rankRoles = new()
 	{
-		[1] = 446688666325090310, [3] = 472451008342261820, [10] = 556255819323277312,
+		[1] = 446688666325090310,
+		[3] = 472451008342261820,
+		[10] = 556255819323277312,
+		[25] = 992793365684949063,
 	};
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;
