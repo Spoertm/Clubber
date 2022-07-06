@@ -55,7 +55,9 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 		if (success)
 		{
 			const ulong newPalRoleId = 728663492424499200;
+			const ulong pendingPbRoleId = 994354086646399066;
 			await user.RemoveRoleAsync(newPalRoleId);
+			await user.AddRoleAsync(pendingPbRoleId);
 			await InlineReplyAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get roled.");
 		}
 		else
