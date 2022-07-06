@@ -53,8 +53,14 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 
 		(bool success, string registerResponseMessage) = await _databaseHelper.RegisterUser(lbId, user);
 		if (success)
-			await InlineReplyAsync("✅ Successfully registered.");
+		{
+			const ulong newPalRoleId = 728663492424499200;
+			await user.RemoveRoleAsync(newPalRoleId);
+			await InlineReplyAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get roled.");
+		}
 		else
+		{
 			await InlineReplyAsync($"Failed to execute command: {registerResponseMessage}");
+		}
 	}
 }
