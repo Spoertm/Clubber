@@ -58,7 +58,7 @@ public class UpdateRolesHelper
 		_webService = webService;
 
 		ulong unregRoleId = config.GetValue<ulong>("UnregisteredRoleId");
-		_uselessRoles = new() { unregRoleId, 458375331468935178 };
+		_uselessRoles = new() { unregRoleId, 458375331468935178, 994354086646399066 };
 	}
 
 	public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IReadOnlyCollection<IGuildUser> guildUsers)
