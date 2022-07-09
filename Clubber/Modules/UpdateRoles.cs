@@ -10,7 +10,7 @@ namespace Clubber.Modules;
 [Name("Roles")]
 [Group("pb")]
 [Alias("updateroles")]
-[Summary("Updates your own roles if nothing is specified. Otherwise a specific user's roles.")]
+[Summary("Updates your DD score roles if necessary.")]
 [RequireContext(ContextType.Guild)]
 public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 {
@@ -25,31 +25,9 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 
 	[Command]
 	[Remarks("pb")]
-	[Priority(1)]
-	public async Task UpdateRolesFromCurrentUser() => await CheckUserAndUpdateRoles(Context.Guild.GetUser(Context.User.Id));
-
-	[Command]
-	[Remarks("pb clubber\npb <@743431502842298368>")]
-	[Priority(2)]
-	public async Task UpdateRolesFromName([Name("name | tag")][Remainder] string name)
+	public async Task UpdateRolesFromCurrentUser()
 	{
-		(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-		if (success && user is not null)
-			await CheckUserAndUpdateRoles(user);
-	}
-
-	[Command("id")]
-	[Remarks("pb id 743431502842298368")]
-	[Priority(3)]
-	public async Task UpdateRolesFromDiscordId([Name("Discord ID")] ulong discordId)
-	{
-		(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-		if (success && user is not null)
-			await CheckUserAndUpdateRoles(user);
-	}
-
-	private async Task CheckUserAndUpdateRoles(SocketGuildUser user)
-	{
+		SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
 		(bool isError, string? message) = _userService.IsValid(user, user.Id == Context.User.Id);
 		if (isError && message is not null)
 		{
