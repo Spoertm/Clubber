@@ -2,12 +2,13 @@
 
 public static class ExtensionMethods
 {
-	public static string OrdinalIndicator(this int number) => (number % 10) switch
+	public static string OrdinalIndicator(this int number) => (number % 100, number % 10) switch
 	{
-		1 => "st",
-		2 => "nd",
-		3 => "rd",
-		_ => "th",
+		(11 or 12 or 13, _) => "th",
+		(_, 1)              => "st",
+		(_, 2)              => "nd",
+		(_, 3)              => "rd",
+		_                   => "th",
 	};
 
 	public static string Truncate(this string value, int maxChars)
