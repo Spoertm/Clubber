@@ -7,7 +7,7 @@
 		<LangVersion>10</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7"/>
 		<PackageReference Include="Discord.Net" Version="3.7.2"/>
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.5"/>
 		<PackageReference Include="Roslynator.Analyzers" Version="4.1.1">
@@ -16,11 +16,11 @@
 		</PackageReference>
 		<PackageReference Include="Serilog" Version="2.11.0"/>
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1"/>
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="8.41.0.50478">
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="8.42.0.51121">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1"/>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Data\**">
