@@ -172,6 +172,7 @@ public static class Program
 			.AddSingleton<WelcomeMessage>()
 			.AddHostedService<DdNewsPostService>()
 			.AddHostedService<DatabaseUpdateService>()
+			.AddHostedService<KeepDynoAliveService>()
 			.AddHttpClient()
 			.AddDbContext<DbService>();
 
