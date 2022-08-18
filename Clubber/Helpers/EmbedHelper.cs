@@ -351,7 +351,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		for (int i = 0; i < currentTopPeakRuns.Length; i++)
 		{
 			HomingPeakRun currentPeakRun = currentTopPeakRuns[i];
-			sb.Append($"\n{i.ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,4}   {currentPeakRun.Source.PadLeft(descPadding)}");
+			sb.Append($"\n{(i + 1).ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,4}   {currentPeakRun.Source.PadLeft(descPadding)}");
 		}
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
