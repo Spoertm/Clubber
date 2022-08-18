@@ -191,4 +191,44 @@ public class DatabaseHelper : IDatabaseHelper
 		await dbContext.SaveChangesAsync();
 		return (currentBestSplits, superiorNewSplits.ToArray());
 	}
+
+	public async Task<(HomingPeakRun[] OldTopPeaks, HomingPeakRun? NewPeakRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked)
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		HomingPeakRun[] currentTopPeaks = await dbContext.TopHomingPeaks.AsNoTracking().OrderByDescending(thp => thp.HomingPeak).ToArrayAsync();
+
+		bool entriesUpdated = false;
+		HomingPeakRun? oldPlayerRun = Array.Find(currentTopPeaks, hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
+		if (oldPlayerRun != null)
+		{
+			if (runToBeChecked.HomingPeak >= oldPlayerRun.HomingPeak)
+			{
+				runToBeChecked.Id = oldPlayerRun.Id;
+				dbContext.TopHomingPeaks.Update(runToBeChecked);
+				entriesUpdated = true;
+			}
+			else
+			{
+				return (currentTopPeaks, null);
+			}
+		}
+		else
+		{
+			await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
+			entriesUpdated = true;
+		}
+
+		if (entriesUpdated)
+			await dbContext.SaveChangesAsync();
+
+		return (currentTopPeaks, runToBeChecked);
+	}
+
+	public async Task<HomingPeakRun[]> GetTopHomingPeaks()
+	{
+		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		return await dbContext.TopHomingPeaks.AsNoTracking().OrderByDescending(pr => pr.HomingPeak).ToArrayAsync();
+	}
 }

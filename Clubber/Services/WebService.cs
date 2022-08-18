@@ -162,4 +162,28 @@ public class WebService : IWebService
 		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
 		return JsonConvert.DeserializeObject<dynamic>(responseStr)?.countryCode;
 	}
+
+	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(string url)
+	{
+		if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+			throw new CustomException("Invalid URL");
+
+		string runIdStr = string.Empty;
+		if (url.StartsWith("https://ddstats.com/games/"))
+			runIdStr = url[26..];
+		else if (url.StartsWith("https://www.ddstats.com/games/"))
+			runIdStr = url[30..];
+		else if (url.StartsWith("https://ddstats.com/api/v2/game/full"))
+			runIdStr = url[40..];
+		else if (url.StartsWith("https://www.ddstats.com/api/v2/game/full"))
+			runIdStr = url[44..];
+
+		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
+		if (string.IsNullOrEmpty(runIdStr) || !successfulParse)
+			throw new CustomException("Invalid ddstats URL.");
+
+		string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
+		string ddstatsResponseStr = await _httpClientFactory.CreateClient().GetStringAsync(fullRunReqUrl);
+		return JsonConvert.DeserializeObject<DdStatsFullRunResponse>(ddstatsResponseStr) ?? throw new JsonSerializationException();
+	}
 }

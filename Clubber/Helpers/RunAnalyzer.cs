@@ -30,4 +30,9 @@ public static class RunAnalyzer
 
 		return splits.ToArray();
 	}
+
+	public static int? HomingPeak(DdStatsFullRunResponse ddstatsRun)
+	{
+		return ddstatsRun.States.MaxBy(s => s.HomingDaggers)?.HomingDaggers;
+	}
 }

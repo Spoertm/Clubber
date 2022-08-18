@@ -1,7 +1,9 @@
 ﻿using Clubber.Helpers;
+using Clubber.Models;
 using Clubber.Models.DdSplits;
 using Clubber.Models.Responses;
 using Clubber.Preconditions;
+using Clubber.Services;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json;
@@ -15,12 +17,12 @@ namespace Clubber.Modules;
 public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 {
 	private readonly IDatabaseHelper _databaseHelper;
-	private readonly IHttpClientFactory _httpClientFactory;
+	private readonly IWebService _webService;
 
-	public SplitsModule(IDatabaseHelper databaseHelper, IHttpClientFactory httpClientFactory)
+	public SplitsModule(IDatabaseHelper databaseHelper, IWebService webService)
 	{
 		_databaseHelper = databaseHelper;
-		_httpClientFactory = httpClientFactory;
+		_webService = webService;
 	}
 
 	[Priority(4)]
@@ -44,19 +46,19 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(!v3SplitNames.Contains(splitName.ToString()), $"The split `{splitName}` doesn't exist."))
 			return;
 
-		if (await GetDdstatsResponse(url) is not { } ddStatsRun)
+		if (await GetDdstatsResponse(url) is not { } ddstatsRun)
 			return;
 
-		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
+		if (await IsError(!ddstatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
 			return;
 
-		Split? split = RunAnalyzer.GetData(ddStatsRun).FirstOrDefault(s => s.Name == splitName.ToString());
+		Split? split = RunAnalyzer.GetData(ddstatsRun).FirstOrDefault(s => s.Name == splitName.ToString());
 		if (await IsError(split is null, $"The split `{splitName}` isn't in the run.") ||
 			await IsError(split!.Value > 1000, "Invalid run: too many homings gained on that split."))
 			return;
 
-		string desc = description ?? $"{ddStatsRun.GameInfo.PlayerName} {ddStatsRun.GameInfo.GameTime:0.0000}";
-		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded(new[] { split }, ddStatsRun, desc);
+		string desc = description ?? $"{ddstatsRun.GameInfo.PlayerName} {ddstatsRun.GameInfo.GameTime:0.0000}";
+		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded(new[] { split }, ddstatsRun, desc);
 		if (response.UpdatedBestSplits.Length == 0)
 		{
 			await InlineReplyAsync("No updates were needed.");
@@ -96,34 +98,15 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 
 	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(string url)
 	{
-		if (await IsError(!Uri.IsWellFormedUriString(url, UriKind.Absolute), "Invalid URL."))
-			return null;
-
-		string runIdStr = string.Empty;
-		if (url.StartsWith("https://ddstats.com/games/"))
-			runIdStr = url[26..];
-		else if (url.StartsWith("https://www.ddstats.com/games/"))
-			runIdStr = url[30..];
-		else if (url.StartsWith("https://ddstats.com/api/v2/game/full"))
-			runIdStr = url[40..];
-		else if (url.StartsWith("https://www.ddstats.com/api/v2/game/full"))
-			runIdStr = url[44..];
-
-		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
-		if (await IsError(string.IsNullOrEmpty(runIdStr), "") ||
-			await IsError(!successfulParse, "Invalid ddstats URL."))
-			return null;
-
 		try
 		{
-			string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
-			string ddstatsResponse = await _httpClientFactory.CreateClient().GetStringAsync(fullRunReqUrl);
-			return JsonConvert.DeserializeObject<DdStatsFullRunResponse>(ddstatsResponse) ?? throw new JsonSerializationException();
+			return await _webService.GetDdstatsResponse(url);
 		}
 		catch (Exception ex)
 		{
 			string errorMsg = ex switch
 			{
+				CustomException            => ex.Message,
 				HttpRequestException       => "Couldn't fetch run data. Either the provided run ID doesn't exist or ddstats servers are down.",
 				JsonSerializationException => "Couldn't read ddstats run data.",
 				_                          => "Internal error.",

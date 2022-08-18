@@ -65,4 +65,15 @@ To speed this up, you can manually update your own roles by using the `+pb` or `
 		Embed bestSplitsEmbed = EmbedHelper.CurrentBestSplits(bestSplits);
 		await ReplyAsync(embed: bestSplitsEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
 	}
+
+	[Command("toppeaks")]
+	[Alias("bestpeaks")]
+	[Summary("Get the current best homing peaks.")]
+	[Remarks("toppeaks")]
+	public async Task CurrentTopHomingPeaks()
+	{
+		HomingPeakRun[] topHomingPeaks = await _databaseHelper.GetTopHomingPeaks();
+		Embed topPeaksEmbed = EmbedHelper.CurrentTopPeakRuns(topHomingPeaks);
+		await ReplyAsync(embed: topPeaksEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+	}
 }

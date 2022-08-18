@@ -13,6 +13,7 @@ public class DbService : DbContext
 	public DbSet<DdUser> DdPlayers => Set<DdUser>();
 	public DbSet<DdNewsItem> DdNews => Set<DdNewsItem>();
 	public DbSet<BestSplit> BestSplits => Set<BestSplit>();
+	public DbSet<HomingPeakRun> TopHomingPeaks => Set<HomingPeakRun>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		=> optionsBuilder

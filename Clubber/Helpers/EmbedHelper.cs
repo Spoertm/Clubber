@@ -1,3 +1,4 @@
+using Clubber.Extensions;
 using Clubber.Models.DdSplits;
 using Clubber.Models.Responses;
 using Discord;
@@ -9,6 +10,8 @@ namespace Clubber.Helpers;
 
 public static class EmbedHelper
 {
+	private static int _maxNameWidth = 10;
+
 	private static readonly Dictionary<int, string> _deathtypeDict = new()
 	{
 		[0] = "FALLEN",
@@ -290,5 +293,71 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		}
 
 		return highest;
+	}
+
+	public static Embed UpdateTopPeakRuns(HomingPeakRun[] oldTopPeaks, HomingPeakRun updatedTopPeakRun)
+	{
+		int oldSplitsDescriptionPadding = oldTopPeaks.MaxBy(otp => otp.Source.Length)?.Source.Length ?? 11;
+		int descPadding = Math.Max(oldSplitsDescriptionPadding, updatedTopPeakRun.Source.Length);
+		int maxNumberDigits = oldTopPeaks.Length.ToString().Length;
+		int nameWidth = Math.Min(_maxNameWidth, oldTopPeaks.MaxBy(otp => otp.PlayerName.Length)!.PlayerName.Length);
+
+		StringBuilder sb = new();
+		HomingPeakRun? oldPlayerRun = Array.Find(oldTopPeaks, otp => otp.PlayerLeaderboardId == updatedTopPeakRun.PlayerLeaderboardId);
+		if (oldPlayerRun != null)
+		{
+			sb.Append($"```diff\n  {"#".PadLeft(maxNumberDigits)}  {"Player".PadRight(nameWidth)}  Old peak  New peak  {"Source".PadLeft(7)}");
+			for (int i = 0; i < oldTopPeaks.Length; i++)
+			{
+				HomingPeakRun currentPeakRun = oldTopPeaks[i];
+				int nr = i + 1;
+				if (currentPeakRun == oldPlayerRun)
+					sb.Append($"\n+ {nr.ToString().PadLeft(maxNumberDigits)}  {updatedTopPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,8}  {updatedTopPeakRun.HomingPeak,8}  {updatedTopPeakRun.Source.PadLeft(descPadding)}");
+				else
+					sb.Append($"\n= {nr.ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,8}  {currentPeakRun.HomingPeak,8}  {currentPeakRun.Source.PadLeft(descPadding)}");
+			}
+		}
+		else
+		{
+			sb.Append($"```diff\n{"#".PadLeft(maxNumberDigits + 2)}  {"Player".PadRight(nameWidth)}  Peak  {"Source".PadLeft(descPadding)}");
+			HomingPeakRun[] newEntries = oldTopPeaks.Append(updatedTopPeakRun).OrderByDescending(otp => otp.HomingPeak).ToArray();
+			for (int i = 0; i < newEntries.Length; i++)
+			{
+				HomingPeakRun currentPeakRun = newEntries[i];
+				string entry = $"{(i + 1).ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,4}  {currentPeakRun.Source.PadLeft(descPadding)}";
+				if (currentPeakRun == updatedTopPeakRun)
+					sb.Append($"\n+ {entry}");
+				else
+					sb.Append($"\n= {entry}");
+			}
+		}
+
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+			.WithTitle("Updated top homing peaks")
+			.WithDescription(sb.Append("```").ToString());
+
+		return embedBuilder.Build();
+	}
+
+	public static Embed CurrentTopPeakRuns(HomingPeakRun[] currentTopPeakRuns)
+	{
+		int descPadding = currentTopPeakRuns.MaxBy(obs => obs.Source.Length)?.Source.Length ?? 11;
+		int maxNumberDigits = currentTopPeakRuns.Length.ToString().Length;
+		int nameWidth = Math.Max(4, Math.Min(_maxNameWidth, currentTopPeakRuns.MaxBy(otp => otp.PlayerName.Length)!.PlayerName.Length));
+
+		StringBuilder sb = new();
+		sb.Append($"```{"#".PadLeft(maxNumberDigits)}  {"Player".PadRight(nameWidth)}  Peak   {"Source".PadLeft(descPadding)}");
+
+		for (int i = 0; i < currentTopPeakRuns.Length; i++)
+		{
+			HomingPeakRun currentPeakRun = currentTopPeakRuns[i];
+			sb.Append($"\n{i.ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,4}   {currentPeakRun.Source.PadLeft(descPadding)}");
+		}
+
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+			.WithTitle("Current top homing peaks")
+			.WithDescription(sb.Append("```").ToString());
+
+		return embedBuilder.Build();
 	}
 }
