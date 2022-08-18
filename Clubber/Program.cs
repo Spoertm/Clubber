@@ -57,7 +57,7 @@ public static class Program
 
 		app.Services.GetRequiredService<MessageHandlerService>();
 		app.Services.GetRequiredService<IDatabaseHelper>();
-		//app.Services.GetRequiredService<WelcomeMessage>();
+		app.Services.GetRequiredService<WelcomeMessage>();
 
 		app.UseHttpsRedirection();
 		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
@@ -169,10 +169,10 @@ public static class Program
 			.AddSingleton<IDiscordHelper, DiscordHelper>()
 			.AddSingleton<UserService>()
 			.AddSingleton<IWebService, WebService>()
-			//.AddSingleton<WelcomeMessage>()
-			//.AddHostedService<DdNewsPostService>()
-			//.AddHostedService<DatabaseUpdateService>()
-			//.AddHostedService<KeepDynoAliveService>()
+			.AddSingleton<WelcomeMessage>()
+			.AddHostedService<DdNewsPostService>()
+			.AddHostedService<DatabaseUpdateService>()
+			.AddHostedService<KeepDynoAliveService>()
 			.AddHttpClient()
 			.AddDbContext<DbService>();
 
