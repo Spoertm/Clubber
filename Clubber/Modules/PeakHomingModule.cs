@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 namespace Clubber.Modules;
 
 [Group("checkhoming")]
+[Alias("checkpeak")]
 [Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
 [RequireRole(552525894321700864)]
 [RequireRole(701868700365488281)]
