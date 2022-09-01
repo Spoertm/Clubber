@@ -12,7 +12,7 @@ namespace Clubber.Modules;
 
 [Group("checksplits")]
 [Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
-[RequireRole(552525894321700864)]
+[RequireRole(697777821954736179)]
 [RequireRole(701868700365488281)]
 public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 {
