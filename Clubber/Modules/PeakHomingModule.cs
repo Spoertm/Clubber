@@ -14,7 +14,6 @@ namespace Clubber.Modules;
 [Alias("checkpeak")]
 [Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
 [RequireRole(697777821954736179)]
-[RequireRole(701868700365488281)]
 public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 {
 	private readonly IDatabaseHelper _databaseHelper;
