@@ -76,10 +76,11 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
+		const int messagesToSkip = 2;
 		IEnumerable<IMessage> lastHundredMessages = await currentTextChannel.GetMessagesAsync().FlattenAsync();
 		IEnumerable<IMessage> messagesToDelete = lastHundredMessages
 			.OrderByDescending(m => m.CreatedAt)
-			.SkipLast(1);
+			.SkipLast(messagesToSkip);
 
 		await currentTextChannel.DeleteMessagesAsync(messagesToDelete);
 	}
