@@ -58,7 +58,7 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 			const ulong pendingPbRoleId = 994354086646399066;
 			await user.RemoveRoleAsync(newPalRoleId);
 			await user.AddRoleAsync(pendingPbRoleId);
-			await InlineReplyAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get roled.");
+			await InlineReplyAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get assigned a role.");
 		}
 		else
 		{
