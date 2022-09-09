@@ -22,7 +22,6 @@ public static class Program
 	{
 		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 		AppDomain.CurrentDomain.ProcessExit += StopBot;
-		AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
 		if (builder.Environment.IsProduction())
@@ -201,9 +200,6 @@ public static class Program
 
 		Log.Logger.Write(logLevel, logMessage.Exception, "Source: {LogMsgSrc}\n{Msg}", logMessage.Source, logMessage.Message);
 	}
-
-	private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-		=> Log.Fatal(e.ExceptionObject as Exception, "Caught unhandled exception. IsTerminating: {}", e.IsTerminating);
 
 	private static void StopBot(object? sender, EventArgs e) => StopBot();
 
