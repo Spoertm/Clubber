@@ -44,18 +44,14 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
 			return;
 
-		int? homingPeak = RunAnalyzer.HomingPeak(ddStatsRun);
-		if (await IsError(homingPeak is null, "Failed to find homing peak."))
-			return;
-
-		if (await IsError(homingPeak > _homingPeakLimit, $"Invalid run: the homing peak is unrealistically high (>{_homingPeakLimit})."))
+		if (await IsError(ddStatsRun.GameInfo.HomingDaggersMax > _homingPeakLimit, $"Invalid run: the homing peak is unrealistically high (>{_homingPeakLimit})."))
 			return;
 
 		HomingPeakRun possibleNewTopPeakRun = new()
 		{
 			PlayerName = ddStatsRun.GameInfo.PlayerName,
 			PlayerLeaderboardId = ddStatsRun.GameInfo.PlayerId,
-			HomingPeak = homingPeak!.Value,
+			HomingPeak = ddStatsRun.GameInfo.HomingDaggersMax,
 			Source = $"https://ddstats.com/games/{ddStatsRun.GameInfo.Id}",
 		};
 
