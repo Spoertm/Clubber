@@ -198,7 +198,6 @@ public class DatabaseHelper : IDatabaseHelper
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		HomingPeakRun[] currentTopPeaks = await dbContext.TopHomingPeaks.AsNoTracking().OrderByDescending(thp => thp.HomingPeak).ToArrayAsync();
 
-		bool entriesUpdated = false;
 		HomingPeakRun? oldPlayerRun = Array.Find(currentTopPeaks, hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
 		if (oldPlayerRun != null)
 		{
@@ -206,7 +205,6 @@ public class DatabaseHelper : IDatabaseHelper
 			{
 				runToBeChecked.Id = oldPlayerRun.Id;
 				dbContext.TopHomingPeaks.Update(runToBeChecked);
-				entriesUpdated = true;
 			}
 			else
 			{
@@ -216,11 +214,9 @@ public class DatabaseHelper : IDatabaseHelper
 		else
 		{
 			await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
-			entriesUpdated = true;
 		}
 
-		if (entriesUpdated)
-			await dbContext.SaveChangesAsync();
+		await dbContext.SaveChangesAsync();
 
 		return (currentTopPeaks, runToBeChecked);
 	}
