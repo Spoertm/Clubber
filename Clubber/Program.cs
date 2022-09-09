@@ -199,9 +199,7 @@ public static class Program
 			_                    => throw new ArgumentOutOfRangeException(nameof(logMessage.Severity), logMessage.Severity, null),
 		};
 
-		string message = $"Source: {logMessage.Source}\n{logMessage.Message}";
-		// ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-		Log.Logger.Write(logLevel, logMessage.Exception, message);
+		Log.Logger.Write(logLevel, logMessage.Exception, "Source: {LogMsgSrc}\n{Msg}", logMessage.Source, logMessage.Message);
 	}
 
 	private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
