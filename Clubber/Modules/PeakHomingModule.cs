@@ -45,7 +45,7 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 			return;
 
 		int? homingPeak = RunAnalyzer.HomingPeak(ddStatsRun);
-		if (await IsError(homingPeak is null, "Failed to find homing peak. "))
+		if (await IsError(homingPeak is null, "Failed to find homing peak."))
 			return;
 
 		if (await IsError(homingPeak > _homingPeakLimit, $"Invalid run: the homing peak is unrealistically high (>{_homingPeakLimit})."))
