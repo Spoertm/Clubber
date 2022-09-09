@@ -201,7 +201,7 @@ public class DatabaseHelper : IDatabaseHelper
 		HomingPeakRun? oldPlayerRun = Array.Find(currentTopPeaks, hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
 		if (oldPlayerRun != null)
 		{
-			if (runToBeChecked.HomingPeak >= oldPlayerRun.HomingPeak)
+			if (runToBeChecked.HomingPeak > oldPlayerRun.HomingPeak)
 			{
 				runToBeChecked.Id = oldPlayerRun.Id;
 				dbContext.TopHomingPeaks.Update(runToBeChecked);
