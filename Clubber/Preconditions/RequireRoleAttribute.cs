@@ -10,17 +10,21 @@ public class RequireRoleAttribute : PreconditionAttribute
 
 	public RequireRoleAttribute(ulong requiredRoleId) => _requiredRoleId = requiredRoleId;
 
-	public override string ErrorMessage { get; set; } = string.Empty;
+	public override string? ErrorMessage { get; set; }
 
 	public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
 	{
 		if (context.User is not IGuildUser guildUser)
-			return Task.FromResult(PreconditionResult.FromError("Command has to be executed in a guild channel."));
+		{
+			return Task.FromResult(PreconditionResult.FromError("Command can only be used in a guild."));
+		}
 
 		if (guildUser.GuildPermissions.Administrator || guildUser.RoleIds.Contains(_requiredRoleId))
+		{
 			return Task.FromResult(PreconditionResult.FromSuccess());
+		}
 
 		IRole? requiredRole = context.Guild.GetRole(_requiredRoleId);
-		return Task.FromResult(PreconditionResult.FromError(ErrorMessage.Length == 0 ? $"Only users with {requiredRole.Name} role can use this command." : ErrorMessage));
+		return Task.FromResult(PreconditionResult.FromError(ErrorMessage ?? $"Only users with `{requiredRole.Name}` role can use this command."));
 	}
 }
