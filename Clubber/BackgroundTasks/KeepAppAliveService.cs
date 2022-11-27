@@ -1,10 +1,10 @@
 namespace Clubber.BackgroundTasks;
 
-public class KeepDynoAliveService : AbstractBackgroundService
+public class KeepAppAliveService : AbstractBackgroundService
 {
 	private readonly IHttpClientFactory _httpClientFactory;
 
-	public KeepDynoAliveService(IHttpClientFactory httpClientFactory)
+	public KeepAppAliveService(IHttpClientFactory httpClientFactory)
 	{
 		_httpClientFactory = httpClientFactory;
 	}
@@ -13,7 +13,7 @@ public class KeepDynoAliveService : AbstractBackgroundService
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		const string clubberHerokuUrl = "https://clubberbot.herokuapp.com/";
-		await _httpClientFactory.CreateClient().GetStringAsync(clubberHerokuUrl);
+		const string appUrl = "https://clubberbot.azurewebsites.net/";
+		await _httpClientFactory.CreateClient().GetStringAsync(appUrl);
 	}
 }
