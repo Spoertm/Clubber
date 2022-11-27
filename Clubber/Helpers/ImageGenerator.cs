@@ -13,7 +13,7 @@ public class ImageGenerator
 	public ImageGenerator()
 	{
 		if (OperatingSystem.IsWindows())
-			_toolFilepath = "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltoimage.exe";
+			_toolFilepath = _toolFilename + ".exe";
 		else if (OperatingSystem.IsLinux())
 			_toolFilepath = _toolFilename;
 		else
