@@ -30,11 +30,12 @@ public static class Program
 		ConfigureLogging(builder.Configuration);
 		Log.Information("Starting");
 
+		const GatewayIntents gatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent) & ~GatewayIntents.GuildInvites & ~GatewayIntents.GuildScheduledEvents;
 		DiscordSocketClient client = new(new()
 		{
-			LogLevel = LogSeverity.Error,
+			LogLevel = LogSeverity.Warning,
 			AlwaysDownloadUsers = true,
-			GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
+			GatewayIntents = gatewayIntents,
 		});
 
 		CommandService commands = new(new()
