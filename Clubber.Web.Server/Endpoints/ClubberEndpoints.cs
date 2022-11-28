@@ -47,18 +47,18 @@ public static class ClubberEndpoints
 		return await dbContext.DdNews.AsNoTracking().ToListAsync();
 	}
 
-	private static DdUser? UserByDiscordId(ulong discordId, IServiceScopeFactory scopeFactory)
+	private static async Task<DdUser?> UserByDiscordId(ulong discordId, IServiceScopeFactory scopeFactory)
 	{
 		using IServiceScope scope = scopeFactory.CreateScope();
-		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.DiscordId == discordId);
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(user => user.DiscordId == discordId);
 	}
 
-	private static DdUser? UserByLeaderboardId(int leaderboardId, IServiceScopeFactory scopeFactory)
+	private static async Task<DdUser?> UserByLeaderboardId(int leaderboardId, IServiceScopeFactory scopeFactory)
 	{
 		using IServiceScope scope = scopeFactory.CreateScope();
-		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.LeaderboardId == leaderboardId);
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(user => user.LeaderboardId == leaderboardId);
 	}
 
 	private static async Task<List<DdUser>> RegisteredUsers(IDatabaseHelper dbhelper)
