@@ -1,5 +1,6 @@
 ﻿using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord.WebSocket;
@@ -44,7 +45,7 @@ public class DatabaseHelper : IDatabaseHelper
 		{
 			return ex switch
 			{
-				CustomException      => (false, ex.Message),
+				ClubberException      => (false, ex.Message),
 				HttpRequestException => (false, "DD servers are most likely down."),
 				IOException          => (false, "IO error."),
 				_                    => (false, "No reason specified."),

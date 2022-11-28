@@ -1,6 +1,6 @@
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Logging;
 using Clubber.Domain.Services;
 using Discord;
@@ -133,7 +133,7 @@ internal static class Program
 		Log.Logger = new LoggerConfiguration()
 			.MinimumLevel.Verbose()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}")
-			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"])
+			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"] ?? throw new ConfigurationMissingException("\"ClubberLoggerToken\""))
 			.CreateLogger();
 	}
 
@@ -142,7 +142,7 @@ internal static class Program
 		if (logMessage.Exception is CommandException commandException)
 		{
 			await commandException.Context.Channel.SendMessageAsync("Catastrophic error occured.");
-			if (commandException.InnerException is CustomException customException)
+			if (commandException.InnerException is ClubberException customException)
 				await commandException.Context.Channel.SendMessageAsync(customException.Message);
 		}
 

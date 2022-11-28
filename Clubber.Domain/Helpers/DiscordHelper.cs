@@ -1,4 +1,4 @@
-﻿using Clubber.Domain.Models;
+﻿using Clubber.Domain.Models.Exceptions;
 using Discord.WebSocket;
 
 namespace Clubber.Domain.Helpers;
@@ -13,7 +13,7 @@ public class DiscordHelper : IDiscordHelper
 	}
 
 	public SocketTextChannel GetTextChannel(ulong channelId)
-		=> _client.GetChannel(channelId) as SocketTextChannel ?? throw new CustomException($"No channel with ID {channelId} exists.");
+		=> _client.GetChannel(channelId) as SocketTextChannel ?? throw new ClubberException($"No channel with ID {channelId} exists.");
 
 	public SocketGuildUser? GetGuildUser(ulong guildId, ulong userId)
 		=> _client.GetGuild(guildId)?.GetUser(userId);

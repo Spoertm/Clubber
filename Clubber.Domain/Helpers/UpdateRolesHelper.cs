@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Clubber.Domain.Models;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
@@ -125,13 +126,13 @@ public class UpdateRolesHelper
 
 			return await ExecuteRoleUpdate(user, lbPlayerList[0]);
 		}
-		catch (CustomException)
+		catch (ClubberException)
 		{
 			throw;
 		}
 		catch (Exception ex)
 		{
-			throw new CustomException("Something went wrong. Chupacabra will get on it soon™.", ex);
+			throw new ClubberException("Something went wrong. Chupacabra will get on it soon™.", ex);
 		}
 	}
 

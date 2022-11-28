@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Clubber.Domain.Models.Exceptions;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,7 @@ public class MessageHandlerService
 		_commands = commands;
 		_services = services;
 
-		_prefix = config["Prefix"];
+		_prefix = config["Prefix"] ?? throw new ConfigurationMissingException("Prefix");
 
 		client.MessageReceived += OnMessageRecievedAsync;
 	}

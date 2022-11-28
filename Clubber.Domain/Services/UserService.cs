@@ -1,4 +1,5 @@
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Discord;
 using Microsoft.Extensions.Configuration;
@@ -43,12 +44,12 @@ public class UserService
 		ulong unregRoleId = _config.GetValue<ulong>("UnregisteredRoleId");
 		bool userHasUnregRole = guildUser.RoleIds.Contains(unregRoleId);
 
-		string roleAssignerRoleId = _config["RoleAssignerRoleId"];
+		string roleAssignerRoleId = _config["RoleAssignerRoleId"] ?? throw new ConfigurationMissingException("RoleAssignerRoleId");
 		string message = userUsedCommandForThemselves
 			? $"You're not registered, {guildUser.Username}. Only a <@&{roleAssignerRoleId}> can register you."
 			: $"`{guildUser.Username}` is not registered. Only a <@&{roleAssignerRoleId}> can register them.";
 
-		string registerChannelId = _config["RegisterChannelId"];
+		string registerChannelId = _config["RegisterChannelId"] ?? throw new ConfigurationMissingException("RegisterChannelId");
 		if (userHasUnregRole)
 			message += $"\nPlease refer to the first message in <#{registerChannelId}> for more info.";
 

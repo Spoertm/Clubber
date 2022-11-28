@@ -1,6 +1,6 @@
 ﻿using Clubber.Domain.Helpers;
-using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Preconditions;
 using Clubber.Domain.Services;
@@ -76,7 +76,7 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 		{
 			string errorMsg = ex switch
 			{
-				CustomException            => ex.Message,
+				ClubberException            => ex.Message,
 				HttpRequestException       => "Couldn't fetch run data. Either the provided run ID doesn't exist or ddstats servers are down.",
 				JsonSerializationException => "Couldn't read ddstats run data.",
 				_                          => "Internal error.",

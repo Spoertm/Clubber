@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Clubber.Domain.Models;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Newtonsoft.Json;
 
@@ -58,7 +58,7 @@ public class WebService : IWebService
 		}
 		catch (Exception e)
 		{
-			throw new CustomException("DD servers are experiencing issues atm. Try again later.", e);
+			throw new ClubberException("DD servers are experiencing issues atm. Try again later.", e);
 		}
 	}
 
@@ -166,7 +166,7 @@ public class WebService : IWebService
 	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(string url)
 	{
 		if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
-			throw new CustomException("Invalid URL");
+			throw new ClubberException("Invalid URL");
 
 		string runIdStr = string.Empty;
 		if (url.StartsWith("https://ddstats.com/games/"))
@@ -180,7 +180,7 @@ public class WebService : IWebService
 
 		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
 		if (string.IsNullOrEmpty(runIdStr) || !successfulParse)
-			throw new CustomException("Invalid ddstats URL.");
+			throw new ClubberException("Invalid ddstats URL.");
 
 		string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
 		string ddstatsResponseStr = await _httpClientFactory.CreateClient().GetStringAsync(fullRunReqUrl);
