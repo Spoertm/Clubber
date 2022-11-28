@@ -3,6 +3,7 @@ using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Logging;
 using Clubber.Domain.Services;
+using Clubber.Web.Server.Endpoints;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -80,7 +81,7 @@ internal static class Program
 
 		WebApplication app = builder.Build();
 
-		RegisterEndpoints(app);
+		app.RegisterClubberEndpoints();
 
 		app.UseSwagger();
 
@@ -158,53 +159,5 @@ internal static class Program
 		};
 
 		Log.Logger.Write(logLevel, logMessage.Exception, "Source: {LogMsgSrc}\n{Msg}", logMessage.Source, logMessage.Message);
-	}
-
-	private static void RegisterEndpoints(WebApplication app)
-	{
-		app.MapGet("/", async context =>
-		{
-			string indexHtmlPath = Path.Combine(AppContext.BaseDirectory, "Data", "Pages", "Index.html");
-			string indexHtml = await File.ReadAllTextAsync(indexHtmlPath);
-			await context.Response.WriteAsync(indexHtml);
-		});
-
-		app.MapGet("/users", async (IDatabaseHelper dbhelper) => await dbhelper.GetEntireDatabase())
-			.WithTags("Users");
-
-		app.MapGet("/users/by-leaderboardId", (int leaderboardId, IServiceScopeFactory scopeFactory) =>
-		{
-			using IServiceScope scope = scopeFactory.CreateScope();
-			using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.LeaderboardId == leaderboardId);
-		}).WithTags("Users");
-
-		app.MapGet("/users/by-discordId", (ulong discordId, IServiceScopeFactory scopeFactory) =>
-		{
-			using IServiceScope scope = scopeFactory.CreateScope();
-			using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-			return dbContext.DdPlayers.AsNoTracking().FirstOrDefault(user => user.DiscordId == discordId);
-		}).WithTags("Users");
-
-		app.MapGet("/dailynews", async (IServiceScopeFactory scopeFactory) =>
-		{
-			using IServiceScope scope = scopeFactory.CreateScope();
-			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-			return await dbContext.DdNews.AsNoTracking().ToListAsync();
-		}).WithTags("News");
-
-		app.MapGet("/bestsplits", async (IServiceScopeFactory scopeFactory) =>
-		{
-			using IServiceScope scope = scopeFactory.CreateScope();
-			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-			return await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
-		}).WithTags("Splits");
-
-		app.MapGet("/bestsplits/by-splitname", async (string splitName, IServiceScopeFactory scopeFactory) =>
-		{
-			using IServiceScope scope = scopeFactory.CreateScope();
-			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-			return await dbContext.BestSplits.AsNoTracking().FirstOrDefaultAsync(bs => bs.Name == splitName);
-		}).WithTags("Splits");
 	}
 }
