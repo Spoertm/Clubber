@@ -3,9 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.808.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clubber", "Clubber\Clubber.csproj", "{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E25C132-FFFB-479D-9385-44D50B571346}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Tests", "Clubber.Tests\Clubber.Tests.csproj", "{38347BE5-942A-4423-9E13-D24BC2CDFE1E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CA79BB09-3087-43F7-96F2-62D73084E20F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Domain", "Clubber.Domain\Clubber.Domain.csproj", "{97373321-AEA7-4B88-AE56-B2225EEA7B70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.UnitTests", "Clubber.UnitTests\Clubber.UnitTests.csproj", "{8306CD11-D242-4EEE-A536-A8F8CC5E5616}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Web.Server", "Clubber.Web.Server\Clubber.Web.Server.csproj", "{9ACB6D58-5561-498A-855C-009BF182FADB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Web.Client", "Clubber.Web.Client\Clubber.Web.Client.csproj", "{B8320DD9-4D2B-445B-886A-F285082CC7BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,19 +21,33 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4918DE1C-119F-4B4D-9C7D-847CEF8FEA87}.Release|Any CPU.Build.0 = Release|Any CPU
-		{38347BE5-942A-4423-9E13-D24BC2CDFE1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{38347BE5-942A-4423-9E13-D24BC2CDFE1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{38347BE5-942A-4423-9E13-D24BC2CDFE1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{38347BE5-942A-4423-9E13-D24BC2CDFE1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97373321-AEA7-4B88-AE56-B2225EEA7B70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97373321-AEA7-4B88-AE56-B2225EEA7B70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97373321-AEA7-4B88-AE56-B2225EEA7B70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97373321-AEA7-4B88-AE56-B2225EEA7B70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8306CD11-D242-4EEE-A536-A8F8CC5E5616}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8306CD11-D242-4EEE-A536-A8F8CC5E5616}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8306CD11-D242-4EEE-A536-A8F8CC5E5616}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8306CD11-D242-4EEE-A536-A8F8CC5E5616}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9ACB6D58-5561-498A-855C-009BF182FADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ACB6D58-5561-498A-855C-009BF182FADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ACB6D58-5561-498A-855C-009BF182FADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ACB6D58-5561-498A-855C-009BF182FADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8320DD9-4D2B-445B-886A-F285082CC7BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8320DD9-4D2B-445B-886A-F285082CC7BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8320DD9-4D2B-445B-886A-F285082CC7BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8320DD9-4D2B-445B-886A-F285082CC7BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F5C75D96-99E6-4DF4-BE6F-1BE9388335E0}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{97373321-AEA7-4B88-AE56-B2225EEA7B70} = {4E25C132-FFFB-479D-9385-44D50B571346}
+		{8306CD11-D242-4EEE-A536-A8F8CC5E5616} = {CA79BB09-3087-43F7-96F2-62D73084E20F}
+		{9ACB6D58-5561-498A-855C-009BF182FADB} = {4E25C132-FFFB-479D-9385-44D50B571346}
+		{B8320DD9-4D2B-445B-886A-F285082CC7BF} = {4E25C132-FFFB-479D-9385-44D50B571346}
 	EndGlobalSection
 EndGlobal

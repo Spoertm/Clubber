@@ -360,6 +360,4 @@ MigrationBackup/
 .ionide/
 
 # Appsettings
-Clubber/appsettings.json
-Clubber/appsettings.Development.json
-Clubber.Tests/appsettings.Testing.json
+**/appsettings*.json
