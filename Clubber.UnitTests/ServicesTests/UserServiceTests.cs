@@ -13,8 +13,8 @@ public class UserServiceTests
 {
 	private readonly UserService _sut;
 	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
-	private const ulong CheaterRoleId = 666;
-	private const ulong ExampleDiscordId = 0;
+	private const ulong _cheaterRoleId = 666;
+	private const ulong _exampleDiscordId = 0;
 
 	public UserServiceTests()
 	{
@@ -27,8 +27,8 @@ public class UserServiceTests
 
 	[Theory]
 	[InlineData(true, new ulong[] { 1, 2, 3 })]
-	[InlineData(true, new ulong[] { 1, 2, 3, CheaterRoleId })]
-	[InlineData(false, new ulong[] { 1, 2, 3, CheaterRoleId })]
+	[InlineData(true, new ulong[] { 1, 2, 3, _cheaterRoleId })]
+	[InlineData(false, new ulong[] { 1, 2, 3, _cheaterRoleId })]
 	public void IsValidForRegistration_DetectsBotAndOrCheater_ReturnsError(bool isBot, IReadOnlyCollection<ulong> roleIds)
 	{
 		Mock<IGuildUser> guildUser = new();
@@ -40,8 +40,8 @@ public class UserServiceTests
 
 	[Theory]
 	[InlineData(true, new ulong[] { 1, 2, 3 })]
-	[InlineData(true, new ulong[] { 1, 2, 3, CheaterRoleId })]
-	[InlineData(false, new ulong[] { 1, 2, 3, CheaterRoleId })]
+	[InlineData(true, new ulong[] { 1, 2, 3, _cheaterRoleId })]
+	[InlineData(false, new ulong[] { 1, 2, 3, _cheaterRoleId })]
 	public void IsValid_DetectsBotAndOrCheater_ReturnsError(bool isBot, IReadOnlyCollection<ulong> roleIds)
 	{
 		Mock<IGuildUser> guildUser = new();
@@ -59,7 +59,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.IsBot).Returns(false);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(ExampleDiscordId)).Returns(default(DdUser));
+		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(default(DdUser));
 		UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
 		Assert.False(isValidForRegistrationResponse.IsError);
 	}
@@ -73,7 +73,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(ExampleDiscordId)).Returns(new DdUser(0, 0));
+		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(new DdUser(0, 0));
 		UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
 		Assert.True(isValidForRegistrationResponse.IsError);
 	}
@@ -87,7 +87,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(ExampleDiscordId)).Returns(new DdUser(0, 0));
+		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(new DdUser(0, 0));
 		UserValidationResponse isValid = _sut.IsValid(guildUser.Object, true);
 		Assert.False(isValid.IsError);
 	}
@@ -101,7 +101,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(ExampleDiscordId)).Returns(default(DdUser));
+		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(default(DdUser));
 		UserValidationResponse isValid = _sut.IsValid(guildUser.Object, true);
 		Assert.True(isValid.IsError);
 	}
