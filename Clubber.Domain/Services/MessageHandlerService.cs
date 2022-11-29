@@ -3,7 +3,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using IResult = Discord.Commands.IResult;
 
 namespace Clubber.Domain.Services;
 
