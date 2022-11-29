@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Clubber.Web.Server;
@@ -155,7 +156,7 @@ internal static class Program
 			LogSeverity.Info     => LogEventLevel.Information,
 			LogSeverity.Verbose  => LogEventLevel.Verbose,
 			LogSeverity.Debug    => LogEventLevel.Debug,
-			_                    => throw new ArgumentOutOfRangeException(nameof(logMessage.Severity), logMessage.Severity, null),
+			_                    => throw new UnreachableException($"Encountered unreachable {nameof(LogSeverity)} with value {logMessage.Severity}."),
 		};
 
 		Log.Logger.Write(logLevel, logMessage.Exception, "Source: {LogMsgSrc}\n{Msg}", logMessage.Source, logMessage.Message);
