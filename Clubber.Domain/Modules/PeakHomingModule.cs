@@ -13,7 +13,7 @@ namespace Clubber.Domain.Modules;
 [Group("checkhoming")]
 [Alias("checkpeak")]
 [Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]
-[RequireRole(697777821954736179, ErrorMessage = "Only moderators can use this command.")]
+[RequireAdminOrRole(697777821954736179, ErrorMessage = "Only moderators can use this command.")]
 [RequireContext(ContextType.Guild)]
 public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 {

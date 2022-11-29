@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 namespace Clubber.Domain.Modules;
 
 [Name("Moderator")]
-[RequireRole(697777821954736179, ErrorMessage = "Only moderators can use this command.")]
+[RequireAdminOrRole(697777821954736179, ErrorMessage = "Only moderators can use this command.")]
 [RequireContext(ContextType.Guild)]
 public class Moderator : ExtendedModulebase<SocketCommandContext>
 {

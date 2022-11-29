@@ -4,11 +4,11 @@ using Discord.Commands;
 namespace Clubber.Domain.Preconditions;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class RequireRoleAttribute : PreconditionAttribute
+public class RequireAdminOrRoleAttribute : PreconditionAttribute
 {
 	private readonly ulong _requiredRoleId;
 
-	public RequireRoleAttribute(ulong requiredRoleId) => _requiredRoleId = requiredRoleId;
+	public RequireAdminOrRoleAttribute(ulong requiredRoleId) => _requiredRoleId = requiredRoleId;
 
 	public override string? ErrorMessage { get; set; }
 
