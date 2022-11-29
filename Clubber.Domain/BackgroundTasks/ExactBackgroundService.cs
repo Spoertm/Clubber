@@ -13,24 +13,27 @@ public abstract class ExactBackgroundService : BackgroundService
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			if (DateTime.UtcNow.Hour != UtcTriggerTime.Hour)
-			{
-				await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
-				continue;
-			}
-
-			try
-			{
-				await ExecuteTaskAsync(stoppingToken);
-			}
-			catch (Exception exception)
-			{
-				Log.Error(exception, "Caught exception in {}", nameof(ExactBackgroundService));
-			}
-
-			await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+			await ExecuteIfOnTimeAsync(stoppingToken);
+			await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
 		}
 
 		Log.Warning("{} => service cancelled", nameof(ExactBackgroundService));
+	}
+
+	private async Task ExecuteIfOnTimeAsync(CancellationToken stoppingToken)
+	{
+		if (DateTime.UtcNow.Minute != UtcTriggerTime.Minute)
+		{
+			return;
+		}
+
+		try
+		{
+			await ExecuteTaskAsync(stoppingToken);
+		}
+		catch (Exception exception)
+		{
+			Log.Error(exception, "Caught exception in {}", nameof(ExactBackgroundService));
+		}
 	}
 }
