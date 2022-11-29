@@ -22,7 +22,11 @@ public class MessageHandlerService
 
 		_prefix = config["Prefix"] ?? throw new ConfigurationMissingException("Prefix");
 
-		client.MessageReceived += OnMessageRecievedAsync;
+		_client.Ready += () =>
+		{
+			_client.MessageReceived += message => Task.Run(() => OnMessageRecievedAsync(message));
+			return Task.CompletedTask;
+		};
 	}
 
 	private async Task OnMessageRecievedAsync(SocketMessage msg)
