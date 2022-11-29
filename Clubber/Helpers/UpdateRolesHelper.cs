@@ -2,6 +2,7 @@ using Clubber.Models;
 using Clubber.Models.Responses;
 using Clubber.Services;
 using Discord;
+using Serilog;
 using System.Diagnostics;
 
 namespace Clubber.Helpers;
@@ -130,7 +131,8 @@ public class UpdateRolesHelper
 		}
 		catch (Exception ex)
 		{
-			throw new CustomException("Something went wrong. Chupacabra will get on it soon™.", ex);
+			Log.Error(ex, "Error while updating roles");
+			throw new CustomException("Something went wrong. Chupacabra will get on it soon™.");
 		}
 	}
 
