@@ -111,7 +111,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		await dbContext.Database.ExecuteSqlRawAsync("TRUNCATE \"LeaderboardCache\"");
+		await dbContext.LeaderboardCache.ExecuteDeleteAsync();
 		await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
 		await dbContext.SaveChangesAsync();
 	}
