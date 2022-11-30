@@ -9,8 +9,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Events;
-using System.Diagnostics;
 using System.Globalization;
 
 namespace Clubber.Web.Server;
@@ -52,9 +50,6 @@ internal static class Program
 			CaseSensitiveCommands = false,
 			DefaultRunMode = RunMode.Async,
 		});
-
-		client.Log += OnLog;
-		commands.Log += OnLog;
 
 		builder.Logging.ClearProviders();
 
@@ -137,28 +132,5 @@ internal static class Program
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}")
 			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"] ?? throw new ConfigurationMissingException("ClubberLoggerToken"))
 			.CreateLogger();
-	}
-
-	private static async Task OnLog(LogMessage logMessage)
-	{
-		if (logMessage.Exception is CommandException commandException)
-		{
-			await commandException.Context.Channel.SendMessageAsync("Catastrophic error occured.");
-			if (commandException.InnerException is ClubberException customException)
-				await commandException.Context.Channel.SendMessageAsync(customException.Message);
-		}
-
-		LogEventLevel logLevel = logMessage.Severity switch
-		{
-			LogSeverity.Critical => LogEventLevel.Fatal,
-			LogSeverity.Error    => LogEventLevel.Error,
-			LogSeverity.Warning  => LogEventLevel.Warning,
-			LogSeverity.Info     => LogEventLevel.Information,
-			LogSeverity.Verbose  => LogEventLevel.Verbose,
-			LogSeverity.Debug    => LogEventLevel.Debug,
-			_                    => throw new UnreachableException($"Encountered unreachable {nameof(LogSeverity)} with value {logMessage.Severity}."),
-		};
-
-		Log.Logger.Write(logLevel, logMessage.Exception, "Source: {LogMsgSrc}\n{Msg}", logMessage.Source, logMessage.Message);
 	}
 }
