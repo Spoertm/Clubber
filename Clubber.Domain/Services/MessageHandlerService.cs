@@ -27,11 +27,7 @@ public class MessageHandlerService
 		_client.Log += OnLog;
 		_commands.Log += OnLog;
 
-		_client.Ready += () =>
-		{
-			_client.MessageReceived += message => Task.Run(() => OnMessageRecievedAsync(message));
-			return Task.CompletedTask;
-		};
+		_client.MessageReceived += message => Task.Run(() => OnMessageRecievedAsync(message));
 	}
 
 	private async Task OnMessageRecievedAsync(SocketMessage msg)

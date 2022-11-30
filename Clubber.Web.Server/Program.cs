@@ -128,6 +128,9 @@ internal static class Program
 		await client.SetGameAsync("your roles", null, ActivityType.Watching);
 		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
 
+		// Give the Discord client some time to get ready
+		await Task.Delay(TimeSpan.FromSeconds(5));
+
 		try
 		{
 			await app.RunAsync();
