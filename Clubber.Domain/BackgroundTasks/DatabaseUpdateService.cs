@@ -54,7 +54,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 					break;
 				}
 
-				await dailyUpdateChannel.SendMessageAsync($"⚠️ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
+				await dailyUpdateChannel.SendMessageAsync($"⚠ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
 				await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken); // Sleep 10s
 			}
 		}
