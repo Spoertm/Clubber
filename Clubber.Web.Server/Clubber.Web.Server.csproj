@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj" />
+      <ProjectReference Include="..\Clubber.Web.Client\Clubber.Web.Client.csproj" />
     </ItemGroup>
 
     <ItemGroup>
