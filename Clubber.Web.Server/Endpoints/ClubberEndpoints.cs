@@ -11,8 +11,6 @@ public static class ClubberEndpoints
 {
 	public static void RegisterClubberEndpoints(this WebApplication app)
 	{
-		app.MapGet("/", RootPage);
-
 		app.MapGet("/users", RegisteredUsers).WithTags("Users");
 
 		app.MapGet("/users/by-leaderboardId", UserByLeaderboardId).WithTags("Users");
@@ -64,12 +62,5 @@ public static class ClubberEndpoints
 	private static async Task<List<DdUser>> RegisteredUsers(IDatabaseHelper dbhelper)
 	{
 		return await dbhelper.GetEntireDatabase();
-	}
-
-	private static async Task RootPage(HttpContext context)
-	{
-		string indexHtmlPath = Path.Combine(AppContext.BaseDirectory, "Data", "Pages", "Index.html");
-		string indexHtml = await File.ReadAllTextAsync(indexHtmlPath);
-		await context.Response.WriteAsync(indexHtml);
 	}
 }
