@@ -34,7 +34,7 @@ internal static class Program
 		builder.Services.AddServerSideBlazor();
 		builder.Services.AddEndpointsApiExplorer();
 
-		const GatewayIntents gatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent) &
+		const GatewayIntents gatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers) &
 											~GatewayIntents.GuildInvites &
 											~GatewayIntents.GuildScheduledEvents;
 
