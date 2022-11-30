@@ -22,7 +22,8 @@ public abstract class ExactBackgroundService : BackgroundService
 
 	private async Task ExecuteIfOnTimeAsync(CancellationToken stoppingToken)
 	{
-		if (DateTime.UtcNow.Minute != UtcTriggerTime.Minute)
+		bool isTimeToExecute = (DateTime.UtcNow.Hour, DateTime.UtcNow.Minute) == (UtcTriggerTime.Hour, UtcTriggerTime.Minute);
+		if (!isTimeToExecute)
 		{
 			return;
 		}
