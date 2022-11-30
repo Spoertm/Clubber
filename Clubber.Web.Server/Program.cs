@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Globalization;
+using System.Reflection;
 
 namespace Clubber.Web.Server;
 
@@ -54,7 +55,6 @@ internal static class Program
 		builder.Logging.ClearProviders();
 
 		builder.Services.AddEndpointsApiExplorer();
-		builder.Services.AddSwaggerGen();
 		builder.Services.AddCors();
 		builder.Services.AddSingleton(client);
 		builder.Services.AddSingleton(commands);
@@ -75,17 +75,39 @@ internal static class Program
 			builder.Services.AddHostedService<KeepAppAliveService>();
 		}
 
+		builder.Services.AddSwaggerGen(options =>
+		{
+			options.EnableAnnotations();
+			options.SwaggerDoc("Main", new()
+			{
+				Version = "Main",
+				Title = "Clubber API",
+				Description = """
+				This is an API for getting information regarding registered users in the DD Pals Discord server.
+				Additional information regarding the best Devil Daggers splits and new 1000+ scores can also be obtained.
+				""",
+			});
+		});
+
 		WebApplication app = builder.Build();
 
 		app.RegisterClubberEndpoints();
 
 		app.UseSwagger();
 
-		app.UseSwaggerUI();
+		app.UseSwaggerUI(options =>
+		{
+			options.InjectStylesheet("/swagger-ui/SwaggerDarkReader.css");
+			options.SwaggerEndpoint("/swagger/Main/swagger.json", "Main");
+		});
 
 		app.Services.GetRequiredService<MessageHandlerService>();
 		app.Services.GetRequiredService<IDatabaseHelper>();
-		app.Services.GetRequiredService<WelcomeMessage>();
+
+		if (app.Environment.IsProduction())
+		{
+			app.Services.GetRequiredService<WelcomeMessage>();
+		}
 
 		app.UseHttpsRedirection();
 
@@ -100,6 +122,11 @@ internal static class Program
 		app.MapRazorPages();
 
 		app.MapFallbackToPage("/_Host");
+
+		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
+		await client.StartAsync();
+		await client.SetGameAsync("your roles", null, ActivityType.Watching);
+		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
 
 		try
 		{
