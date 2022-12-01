@@ -13,11 +13,22 @@ public abstract class ExactBackgroundService : BackgroundService
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			await ExecuteIfOnTimeAsync(stoppingToken);
-			await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+			try
+			{
+				await ExecuteIfOnTimeAsync(stoppingToken);
+				await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+			}
+			catch (OperationCanceledException)
+			{
+				Log.Warning("{ClassName} => service cancellation requested", GetType().Name);
+			}
+			catch (Exception exception)
+			{
+				Log.Error(exception, "Caught exception in {ClassName}", GetType().Name);
+			}
 		}
 
-		Log.Warning("{} => service cancelled", nameof(ExactBackgroundService));
+		Log.Warning("{ClassName} => service cancelled", GetType().Name);
 	}
 
 	private async Task ExecuteIfOnTimeAsync(CancellationToken stoppingToken)
@@ -28,13 +39,6 @@ public abstract class ExactBackgroundService : BackgroundService
 			return;
 		}
 
-		try
-		{
-			await ExecuteTaskAsync(stoppingToken);
-		}
-		catch (Exception exception)
-		{
-			Log.Error(exception, "Caught exception in {}", nameof(ExactBackgroundService));
-		}
+		await ExecuteTaskAsync(stoppingToken);
 	}
 }

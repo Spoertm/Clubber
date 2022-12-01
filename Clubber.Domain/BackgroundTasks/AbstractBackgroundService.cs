@@ -16,16 +16,22 @@ public abstract class AbstractBackgroundService : BackgroundService
 			try
 			{
 				await ExecuteTaskAsync(stoppingToken);
+
+				if (Interval.TotalMilliseconds > 0)
+				{
+					await Task.Delay(Interval, stoppingToken);
+				}
+			}
+			catch (OperationCanceledException)
+			{
+				Log.Warning("{ClassName} => service cancellation requested", GetType().Name);
 			}
 			catch (Exception exception)
 			{
-				Log.Error(exception, "Caught exception in {}", nameof(AbstractBackgroundService));
+				Log.Error(exception, "Caught exception in {ClassName}", GetType().Name);
 			}
-
-			if (Interval.TotalMilliseconds > 0)
-				await Task.Delay(Interval, stoppingToken);
 		}
 
-		Log.Warning("{} => service cancelled", nameof(AbstractBackgroundService));
+		Log.Warning("{ClassName} => service cancelled", GetType().Name);
 	}
 }
