@@ -47,7 +47,6 @@ internal static class Program
 		CommandService commands = new(new()
 		{
 			IgnoreExtraArgs = true,
-			CaseSensitiveCommands = false,
 			DefaultRunMode = RunMode.Async,
 		});
 
