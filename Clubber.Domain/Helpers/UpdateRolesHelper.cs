@@ -4,6 +4,7 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System.Diagnostics;
 
 namespace Clubber.Domain.Helpers;
@@ -132,6 +133,7 @@ public class UpdateRolesHelper
 		}
 		catch (Exception ex)
 		{
+			Log.Error(ex, "Error updating user roles");
 			throw new ClubberException("Something went wrong. Chupacabra will get on it soon™.", ex);
 		}
 	}
