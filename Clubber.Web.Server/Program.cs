@@ -2,6 +2,7 @@ using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Logging;
+using Clubber.Domain.Modules;
 using Clubber.Domain.Services;
 using Clubber.Web.Server.Endpoints;
 using Discord;
@@ -128,7 +129,7 @@ internal static class Program
 		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
 		await client.StartAsync();
 		await client.SetGameAsync("your roles", null, ActivityType.Watching);
-		await commands.AddModulesAsync(Assembly.GetEntryAssembly(), app.Services);
+		await commands.AddModulesAsync(Assembly.GetAssembly(typeof(ExtendedModulebase<>)), app.Services);
 
 		// Give the Discord client some time to get ready
 		await Task.Delay(TimeSpan.FromSeconds(5));
