@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Clubber.Domain.Models.Responses;
+using System.Diagnostics;
 using System.Web;
-using Clubber.Domain.Models.Responses;
 
 namespace Clubber.Domain.Helpers;
 

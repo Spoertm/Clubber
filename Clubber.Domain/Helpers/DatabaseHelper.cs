@@ -45,7 +45,7 @@ public class DatabaseHelper : IDatabaseHelper
 		{
 			return ex switch
 			{
-				ClubberException      => (false, ex.Message),
+				ClubberException     => (false, ex.Message),
 				HttpRequestException => (false, "DD servers are most likely down."),
 				IOException          => (false, "IO error."),
 				_                    => (false, "No reason specified."),

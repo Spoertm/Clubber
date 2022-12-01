@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Clubber.Domain.Extensions;
+﻿using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
@@ -9,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using System.Text;
 
 namespace Clubber.Domain.BackgroundTasks;
 

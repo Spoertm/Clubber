@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Clubber.Domain.Models.Responses;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Clubber.Domain.Models.Responses;
 
 namespace Clubber.Domain.Models.DdSplits;
 

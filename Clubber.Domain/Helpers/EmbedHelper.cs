@@ -1,10 +1,10 @@
-using System.Text;
 using Clubber.Domain.Extensions;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Text;
 
 namespace Clubber.Domain.Helpers;
 

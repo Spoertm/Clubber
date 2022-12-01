@@ -1,10 +1,10 @@
-using System.Diagnostics;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics;
 
 namespace Clubber.Domain.Helpers;
 

@@ -1,7 +1,7 @@
-﻿using System.Text;
-using Clubber.Domain.Models.Exceptions;
+﻿using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace Clubber.Domain.Services;
 
