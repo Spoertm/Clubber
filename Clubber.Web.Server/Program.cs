@@ -30,18 +30,14 @@ internal static class Program
 		ConfigureLogging(builder.Configuration);
 		Log.Information("Starting");
 
-		builder.Services.AddRazorPages();
-		builder.Services.AddEndpointsApiExplorer();
-
-		const GatewayIntents gatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers) &
-											~GatewayIntents.GuildInvites &
-											~GatewayIntents.GuildScheduledEvents;
 
 		DiscordSocketClient client = new(new()
 		{
 			LogLevel = LogSeverity.Warning,
 			AlwaysDownloadUsers = true,
-			GatewayIntents = gatewayIntents,
+			GatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers) &
+							~GatewayIntents.GuildInvites &
+							~GatewayIntents.GuildScheduledEvents,
 		});
 
 		CommandService commands = new(new()
@@ -52,8 +48,10 @@ internal static class Program
 
 		builder.Logging.ClearProviders();
 
+		builder.Services.AddRazorPages();
 		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddCors();
+
 		builder.Services.AddSingleton(client);
 		builder.Services.AddSingleton(commands);
 		builder.Services.AddSingleton<MessageHandlerService>();
