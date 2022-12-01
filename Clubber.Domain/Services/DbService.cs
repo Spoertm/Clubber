@@ -16,8 +16,12 @@ public class DbService : DbContext
 	public DbSet<HomingPeakRun> TopHomingPeaks => Set<HomingPeakRun>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		=> optionsBuilder
-			.UseNpgsql(Environment.GetEnvironmentVariable("PostgresConnectionString")!);
+	{
+		string? postgresConnectionString = Environment.GetEnvironmentVariable("PostgresConnectionString");
+		ArgumentException.ThrowIfNullOrEmpty(postgresConnectionString);
+
+		optionsBuilder.UseNpgsql(postgresConnectionString);
+	}
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
