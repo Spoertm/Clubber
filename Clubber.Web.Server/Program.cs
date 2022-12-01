@@ -31,7 +31,6 @@ internal static class Program
 		Log.Information("Starting");
 
 		builder.Services.AddRazorPages();
-		builder.Services.AddServerSideBlazor();
 		builder.Services.AddEndpointsApiExplorer();
 
 		const GatewayIntents gatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers) &
@@ -93,6 +92,14 @@ internal static class Program
 
 		app.RegisterClubberEndpoints();
 
+		if (app.Environment.IsDevelopment())
+		{
+			app.UseDeveloperExceptionPage();
+			app.UseWebAssemblyDebugging();
+		}
+
+		app.UseStaticFiles();
+
 		app.UseSwagger();
 
 		app.UseSwaggerUI(options =>
@@ -101,6 +108,18 @@ internal static class Program
 			options.SwaggerEndpoint("/swagger/Main/swagger.json", "Main");
 		});
 
+		app.UseBlazorFrameworkFiles();
+
+		app.UseRouting();
+
+		app.MapRazorPages();
+
+		app.MapFallbackToFile("index.html");
+
+		app.UseHttpsRedirection();
+
+		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
+
 		app.Services.GetRequiredService<MessageHandlerService>();
 		app.Services.GetRequiredService<IDatabaseHelper>();
 
@@ -108,20 +127,6 @@ internal static class Program
 		{
 			app.Services.GetRequiredService<WelcomeMessage>();
 		}
-
-		app.UseHttpsRedirection();
-
-		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
-
-		app.UseStaticFiles();
-
-		app.UseRouting();
-
-		app.MapBlazorHub();
-
-		app.MapRazorPages();
-
-		app.MapFallbackToPage("/_Host");
 
 		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
 		await client.StartAsync();

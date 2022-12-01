@@ -1,0 +1,45 @@
+﻿@implements IDisposable
+@using Clubber.Web.Client.Services
+@inherits LayoutComponentBase
+@* ReSharper disable InconsistentNaming *@
+@inject DarkModeManager DMM
+@inject IJSRuntime JS
+@* ReSharper restore InconsistentNaming *@
+
+<div>
+	<NavBar/>
+
+	<div>
+		<ErrorBoundary>
+			<ChildContent>
+				<main class="mx-auto container dark:text-white pt-5 pb-20 lg:pt-14">
+					@Body
+				</main>
+
+				<footer class="w-full border-t border-slate-600 bg-slate-100 dark:bg-gray-900 flex justify-center pt-3 pb-5">
+					<div class="mx-auto container px-7 lg:px-20 text-slate-800 dark:text-slate-400">
+						<p>© Clubber 2022</p>
+						<p>Created by Chupacabra#1513 AKA <a class="custom-link" href="https://github.com/Spoertm" target="_blank">Spoertm</a></p>
+					</div>
+				</footer>
+			</ChildContent>
+			<ErrorContent>
+				<div class="text-center mx-auto container h-screen pt-5 lg:pt-14 dark:text-white">An error occured. Try <ReloadLink Text="reloading"></ReloadLink> the page.</div>
+			</ErrorContent>
+		</ErrorBoundary>
+	</div>
+</div>
+
+@code
+{
+	protected override async Task OnInitializedAsync()
+	{
+		await JS.InvokeVoidAsync("setDarkMode", DMM.DarkMode);
+		DMM.DarkModeToggle += OnDmmOnDarkModeToggle;
+		await base.OnInitializedAsync();
+	}
+
+	private async void OnDmmOnDarkModeToggle() => await JS.InvokeVoidAsync("toggleDarkMode");
+
+	public void Dispose() => DMM.DarkModeToggle -= OnDmmOnDarkModeToggle;
+}

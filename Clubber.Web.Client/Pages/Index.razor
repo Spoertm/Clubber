@@ -1,49 +1,89 @@
 ﻿@page "/"
+@using Clubber.Web.Client.Services
+@implements IDisposable
+@* ReSharper disable once InconsistentNaming *@
+@inject DarkModeManager DMM
 
-<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-<h1 class="title">Clubber</h1>
-<div class="homebody">
-	Clubber is a Discord bot that primarily handles score roles in the DD Pals server. It does this by communicating
-	with Sorath's servers to check if a registered user needs updating.
-	This procedure happens once a day but users can choose to invoke it for themselves anytime using a command.
-	Clubber has other features like the ability to post welcome messages or show the statistics of a player's personal
-	best.
+<PageTitle>Clubber - Home</PageTitle>
 
-	<br>For more technical details, please visit the <a class="link" href="https://github.com/Spoertm/Clubber"
-	                                                    target="_blank">GitHub repo</a>.
+<div class="text-center px-7 lg:px-20 lg:text-left">
+	<div class="2xl:px-15 lg:flex lg:justify-between lg:gap-5 lg:items-center lg:flex-row">
+		<div class="lg:max-w-sm">
+			<h1 class="text-4xl font-semibold">Clubber</h1>
+			<h2 class="mt-1 text-gray-600 dark:text-gray-400">
+				A bot for the
+				<a class="custom-link font-semibold" target="_blank" href="https://discord.gg/jMRumVerj2">DD Pals Discord</a>
+				server that keeps your roles updated in accordance with your
+				<a class="custom-link font-semibold" target="_blank" href="https://store.steampowered.com/app/422970/Devil_Daggers/">Devil Daggers</a>
+				score.
+			</h2>
+		</div>
+		<div class="flex justify-center">
+			<img class="rounded-lg shadow-lg mt-6 lg:mt-0 dark:shadow-gray-600/60" src="https://cdn.discordapp.com/attachments/587335375593144321/910859022427652096/PB.png" alt="Swarmer Discord posts">
+		</div>
+	</div>
 
-	<div style="margin-top: 50px"></div>
+	<div class="underline underline-offset-8 decoration-1 mt-30 mb-7 lg:mt-20 flex justify-center px-7 md:px-30 text-3xl font-semibold">
+		Features
+	</div>
 
-	Clubber also has an API one can use to obtain info from its database. If you're interested in the API reference, you
-	should head over to <a class="link" href="swagger" target="_blank">this link</a>.
+	<div class="text-center lg:grid lg:grid-cols-3 lg:gap-12">
+		<div class="mt-10 lg:mt-0">
+			<h1 class="text-2xl font-semibold">Role handling</h1>
+			<h2 class="mt-1 text-gray-600 dark:text-gray-400">
+				Whenever a player gets a new score that qualifies them for a new role, running the
+				<span class="code">pb</span> command will update their roles.
+			</h2>
+		</div>
+		<div>
+			<h1 class="text-2xl font-semibold">
+				DD News
+			</h1>
+			<h2 class="mt-1 text-gray-600 dark:text-gray-400">
+				Notifies whenever a new player gets a personal best that is above 1000s.
+			</h2>
+		</div>
+
+		<div class="mt-10 lg:mt-0">
+			<h1 class="text-2xl font-semibold">Personal stats</h1>
+			<h2 class="mt-1 text-gray-600 dark:text-gray-400">
+				The <span class="code">stats</span> command shows more detailed information about the player, including
+				score, leaderboard ID, rank, number of kills, and more.
+			</h2>
+		</div>
+	</div>
+
+	<div class="underline underline-offset-8 decoration-1 mt-30 mb-7 lg:mt-20 flex justify-center px-7 md:px-30 text-3xl font-semibold">
+		Built with
+	</div>
+
+	<div class="text-2xl sm:px-30 md:px-0">
+		<div class="flex flex-col md:flex-row md:justify-evenly gap-5">
+			<LinkButton Link="https://docs.microsoft.com/en-us/dotnet/csharp/">C#</LinkButton>
+			<LinkButton Link="https://dotnet.microsoft.com/en-us/apps/aspnet">ASP.NET</LinkButton>
+			<LinkButton Link="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor">Blazor</LinkButton>
+			<LinkButton Link="https://webassembly.org/">WebAssembly</LinkButton>
+			<LinkButton Link="https://tailwindcss.com/">Tailwind CSS</LinkButton>
+		</div>
+	</div>
 </div>
 
-<style>
-  body, h1 {
-	text-align: center;
-	padding-top: 25px;
-	font-family: "Montserrat", sans-serif;
-	color: white;
-	font-weight: lighter;
-	background-color: black;
-  }
+@code
+{
+	private bool _darkMode;
 
-  .homebody {
-	text-align: center;
-	padding-top: 10px;
-	font-size: 20px;
-	max-width: 1100px;
-	line-height: 45px;
-	margin: 0 auto;
-  }
+	protected override Task OnInitializedAsync()
+	{
+		_darkMode = DMM.DarkMode;
+		DMM.DarkModeToggle += OnDmmOnDarkModeToggle;
+		return base.OnInitializedAsync();
+	}
 
-  .link:hover {
-	color: #2196F3;
-	text-decoration: none;
-  }
+	private void OnDmmOnDarkModeToggle()
+	{
+		_darkMode = DMM.DarkMode;
+		StateHasChanged();
+	}
 
-  .link {
-	color: inherit;
-	text-decoration: underline;
-  }
-</style>
+	public void Dispose() => DMM.DarkModeToggle -= OnDmmOnDarkModeToggle;
+}

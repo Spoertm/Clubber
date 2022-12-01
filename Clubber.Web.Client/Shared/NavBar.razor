@@ -1,0 +1,86 @@
+﻿@using Clubber.Web.Client.Services
+@inject NavigationManager NavigationManager
+@* ReSharper disable once InconsistentNaming *@
+@inject DarkModeManager DMM
+
+<nav class="px-2 py-2.5 lg:py-1 border-b-2 border-sky-500 dark:border-sky-700">
+	<div class="container flex flex-wrap justify-between mx-auto">
+		@*Clubber logo and text*@
+		<a href="" class="flex items-center">
+			<img src="Assets/Clubber.svg" class="dark:invert mr-4 h-9 sm:h-9" alt="Clubber Logo"/>
+			<span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Clubber</span>
+		</a>
+
+		@*Burger menu*@
+		<button @onclick="@ToggleBurgerMenu" type="button" class="inline-flex items-center p-2 ml-3 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 active:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:active:bg-gray-800">
+			<svg class="w-6 h-6" fill="currentcolor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+				<path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+			</svg>
+		</button>
+
+		@*Icon col/row*@
+		<div class="@_burgerMenuHidden w-full lg:block lg:w-auto lg:font-semibold">
+			<ul class="flex flex-col justify-center place-items-center p-4 mt-2 lg:flex-row lg:space-x-8 dark:border-gray-700">
+				<li class="flex items-center">
+					<NavLink class="flex flex-row nav-item" href="https://github.com/Spoertm/Clubber" target="_blank">
+						<img alt="GitHub logo" class="dark:invert w-6 h-6" src="Assets/github-logo.svg">
+						<span class="ml-2">Source code</span>
+					</NavLink>
+				</li>
+				<li class="flex items-center">
+					<NavLink class="flex flex-row nav-item" href="swagger" target="_blank">
+						<img alt="swagger logo" class="w-6 h-6" src="Assets/swagger-logo.svg">
+						<span class="ml-2">API</span>
+					</NavLink>
+				</li>
+				<li class="flex items-center">
+					<NavLink class="flex flex-row nav-item" href="https://ko-fi.com/chupacabra4129" target="_blank">
+						<img alt="Ko-Fi logo" class="w-6 h-6" src="Assets/kofi-logo.svg">
+						<span class="ml-2">Donate</span>
+					</NavLink>
+				</li>
+
+				<li class="hidden lg:self-stretch lg:block">
+					<div class="w-px h-full bg-gray-400 dark:bg-gray-500"></div>
+				</li>
+
+				<li class="flex items-center">
+					<button @onclick="ToggleDarkMode" id="theme-toggle" type="button" class="rounded block text-white bg-gray-800">
+						@if (DMM.DarkMode)
+						{
+							<div class="flex flex-row place-items-center rounded p-2 hover:bg-gray-100 active:bg-gray-200 dark:text-white dark:hover:bg-gray-700 dark:active:bg-gray-800">
+								<!--Sun-->
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+									<path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.404a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.06l1.06-1.06zM6.464 14.596a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.06l-1.06-1.061a.75.75 0 10-1.06 1.06l1.06 1.06zM5.404 6.464a.75.75 0 001.06-1.06l-1.06-1.06a.75.75 0 10-1.061 1.06l1.06 1.06z"/>
+								</svg>
+								<span class="ml-2 lg:hidden">Toggle theme</span>
+							</div>
+						}
+						else
+						{
+							<div class="flex flex-row place-items-center rounded p-2 hover:bg-gray-600 active:bg-gray-800 dark:text-white dark:hover:bg-gray-700 dark:active:bg-gray-800">
+								<!--Moon-->
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 -scale-x-100">
+									<path fill-rule="evenodd" d="M7.455 2.004a.75.75 0 01.26.77 7 7 0 009.958 7.967.75.75 0 011.067.853A8.5 8.5 0 116.647 1.921a.75.75 0 01.808.083z" clip-rule="evenodd"/>
+								</svg>
+								<span class="ml-2 lg:hidden">Toggle theme</span>
+							</div>
+						}
+					</button>
+				</li>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+@code
+{
+	private string? _burgerMenuHidden = "hidden";
+
+	private async void ToggleDarkMode() => await DMM.ToggleDarkMode();
+
+	private void ToggleBurgerMenu()
+	{
+		_burgerMenuHidden = _burgerMenuHidden == null ? "hidden" : null;
+	}
+}
