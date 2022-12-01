@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8"/>
+	<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport">
+	<title>Clubber</title>
+	<base href="/"/>
+	<link href="app.css" rel="stylesheet"/>
+	<link href="../Styles/app.css">
+	<script>
+		function toggleDarkMode() {
+			document.documentElement.classList.toggle("dark");
+		}
+
+		function setDarkMode(isDarkMode) {
+			if (isDarkMode)
+				document.documentElement.classList.add("dark");
+			else
+				document.documentElement.classList.remove("dark");
+		}
+	</script>
+
+	<!-- If you add any scoped CSS files, uncomment the following to load them
+	<link href="Clubber.Web.Client.styles.css" rel="stylesheet" /> -->
+</head>
+
+<body class="dark:text-white dark:bg-black">
+
+<div id="app">
+	<div class="bg-black text-white text-3xl grid h-screen place-items-center">Loading...</div>
+</div>
+
+<script src="_framework/blazor.webassembly.js"></script>
+
+</body>
+
+</html>
