@@ -17,4 +17,10 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
