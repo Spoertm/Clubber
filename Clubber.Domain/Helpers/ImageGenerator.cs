@@ -14,10 +14,8 @@ public class ImageGenerator
 	{
 		if (OperatingSystem.IsWindows())
 			_toolFilepath = _toolFilename + ".exe";
-		else if (OperatingSystem.IsLinux())
-			_toolFilepath = _toolFilename;
 		else
-			throw new NotSupportedException("OSX not supported");
+			_toolFilepath = _toolFilename;
 	}
 
 	/// <returns>A MemoryStream of the newly generated image file.</returns>
