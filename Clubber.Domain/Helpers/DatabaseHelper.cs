@@ -6,6 +6,7 @@ using Clubber.Domain.Services;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Clubber.Domain.Helpers;
 
@@ -198,15 +199,21 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		HomingPeakRun[] currentTopPeaks = await dbContext.TopHomingPeaks.AsNoTracking().OrderByDescending(thp => thp.HomingPeak).ToArrayAsync();
+		HomingPeakRun[] currentTopPeaks = await dbContext.TopHomingPeaks
+			.AsNoTracking()
+			.OrderByDescending(thp => thp.HomingPeak)
+			.ToArrayAsync();
 
-		HomingPeakRun? oldPlayerRun = Array.Find(currentTopPeaks, hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
+		HomingPeakRun? oldPlayerRun = await dbContext.TopHomingPeaks.FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
 		if (oldPlayerRun != null)
 		{
 			if (runToBeChecked.HomingPeak > oldPlayerRun.HomingPeak)
 			{
-				runToBeChecked.Id = oldPlayerRun.Id;
-				dbContext.TopHomingPeaks.Update(runToBeChecked);
+				oldPlayerRun.PlayerName = runToBeChecked.PlayerName;
+				oldPlayerRun.HomingPeak = runToBeChecked.HomingPeak;
+				oldPlayerRun.Source = runToBeChecked.Source;
+
+				Log.Information("Updating top homing peak for {PlayerName}:\n{@NewRun}", runToBeChecked.PlayerName, runToBeChecked);
 			}
 			else
 			{
@@ -215,7 +222,8 @@ public class DatabaseHelper : IDatabaseHelper
 		}
 		else
 		{
-			await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
+			var response = await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
+			Log.Information("Added new top homing peak run:\n{@NewRun}", response.Entity);
 		}
 
 		await dbContext.SaveChangesAsync();

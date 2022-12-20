@@ -33,5 +33,7 @@ public class DbService : DbContext
 
 		modelBuilder.Entity<DdNewsItem>().HasKey(dni => dni.ItemId);
 		modelBuilder.Entity<DdNewsItem>().Property(dni => dni.ItemId).UseIdentityAlwaysColumn();
+
+		modelBuilder.Entity<HomingPeakRun>().Property(hpr => hpr.Id).ValueGeneratedOnAdd();
 	}
 }
