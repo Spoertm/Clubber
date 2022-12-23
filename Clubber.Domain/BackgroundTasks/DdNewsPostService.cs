@@ -47,14 +47,20 @@ public class DdNewsPostService : AbstractBackgroundService
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
+		Log.Information("Executing {Class}", GetType().Name);
+
 		await _databaseHelper.CleanUpNewsItems();
 		_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
 		using IServiceScope scope = _services.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		List<EntryResponse> oldEntries = dbContext.LeaderboardCache.AsNoTracking().ToList();
 		List<EntryResponse> newEntries = await _webService.GetSufficientLeaderboardEntries(_minimumScore);
+
 		if (newEntries.Count == 0)
+		{
+			Log.Information("Fetched zero new leaderboard entries");
 			return;
+		}
 
 		(EntryResponse, EntryResponse)[] entryTuples = oldEntries.Join(
 				inner: newEntries,
@@ -72,6 +78,8 @@ public class DdNewsPostService : AbstractBackgroundService
 			cacheIsToBeRefreshed = true;
 			if (!_exceptionPlayerIds.Contains(oldEntry.Id) && newEntry.Time / 10000 < 1000)
 				continue;
+
+			Log.Information("Posting news for player entry {@Player}", newEntry);
 
 			int nth = newEntries.Count(entry => entry.Time / 1000000 >= newEntry.Time / 1000000);
 			string message = GetDdNewsMessage(oldEntry, newEntry, nth);
