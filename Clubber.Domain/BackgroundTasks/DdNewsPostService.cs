@@ -15,15 +15,19 @@ namespace Clubber.Domain.BackgroundTasks;
 public class DdNewsPostService : AbstractBackgroundService
 {
 	private const int _minimumScore = 930;
-	private SocketTextChannel? _ddNewsChannel;
+
+	private static readonly int[] _exceptionPlayerIds = { 1 };
+
 	private readonly IConfiguration _config;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IWebService _webService;
-	private readonly StringBuilder _sb = new();
 	private readonly IServiceScopeFactory _services;
+
+	private readonly StringBuilder _sb = new();
 	private readonly ImageGenerator _imageGenerator = new();
-	private static readonly int[] _exceptionPlayerIds = { 1 };
+
+	private SocketTextChannel? _ddNewsChannel;
 
 	public DdNewsPostService(
 		IConfiguration config,
