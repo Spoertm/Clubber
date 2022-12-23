@@ -16,8 +16,6 @@ public class DdNewsPostService : AbstractBackgroundService
 {
 	private const int _minimumScore = 930;
 
-	private static readonly int[] _exceptionPlayerIds = { 1 };
-
 	private readonly IConfiguration _config;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
@@ -76,8 +74,6 @@ public class DdNewsPostService : AbstractBackgroundService
 				continue;
 
 			cacheIsToBeRefreshed = true;
-			if (!_exceptionPlayerIds.Contains(oldEntry.Id) && newEntry.Time / 10000 < 1000)
-				continue;
 
 			Log.Information("Posting news for player entry {@Player}", newEntry);
 
