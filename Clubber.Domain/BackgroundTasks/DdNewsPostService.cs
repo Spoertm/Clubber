@@ -103,6 +103,10 @@ public class DdNewsPostService : AbstractBackgroundService
 			Log.Information("Updating leaderboard cache");
 			await _databaseHelper.UpdateLeaderboardCache(newEntries);
 		}
+		else
+		{
+			Log.Information("No DD News posting required");
+		}
 
 		_sb.Clear();
 	}
