@@ -75,10 +75,23 @@ public class DdNewsPostService : AbstractBackgroundService
 
 			int nth = newEntries.Count(entry => entry.Time / 1000000 >= newEntry.Time / 1000000);
 			string message = GetDdNewsMessage(oldEntry, newEntry, nth);
-			string? countryCode = await _webService.GetCountryCodeForplayer(newEntry.Id);
+			string? countryCode = await GetCountryCode(newEntry);
 			await using MemoryStream screenshot = await _imageGenerator.FromEntryResponse(newEntry, countryCode);
 			await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
 			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
+
+			async Task<string?> GetCountryCode(EntryResponse newEntry)
+			{
+				try
+				{
+					return await _webService.GetCountryCodeForplayer(newEntry.Id);
+				}
+				catch (Exception ex)
+				{
+					Log.Error(ex, "Failed to fetch country code for EntryResponse {@Player}", newEntry);
+					return null;
+				}
+			}
 		}
 
 		if (cacheIsToBeRefreshed)
