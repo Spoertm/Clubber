@@ -78,10 +78,20 @@ public class DdNewsPostService : AbstractBackgroundService
 			Log.Information("Posting news for player entry {@Player}", newEntry);
 
 			int nth = newEntries.Count(entry => entry.Time / 1000000 >= newEntry.Time / 1000000);
+
+			Log.Debug("Getting DD News message");
 			string message = GetDdNewsMessage(oldEntry, newEntry, nth);
+
+			Log.Debug("Getting country code");
 			string? countryCode = await GetCountryCode(newEntry);
+
+			Log.Debug("Getting DD News screenshot");
 			await using MemoryStream screenshot = await _imageGenerator.FromEntryResponse(newEntry, countryCode);
+
+			Log.Debug("Sending DD News to Discord");
 			await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
+
+			Log.Debug("Adding news item to database");
 			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
 
 			async Task<string?> GetCountryCode(EntryResponse newEntry)
