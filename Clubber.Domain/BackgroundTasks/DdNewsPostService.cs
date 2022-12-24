@@ -23,7 +23,7 @@ public class DdNewsPostService : AbstractBackgroundService
 	private readonly IServiceScopeFactory _services;
 
 	private readonly StringBuilder _sb = new();
-	private readonly ImageGenerator _imageGenerator = new();
+	private readonly LeaderboardImageGenerator _imageGenerator = new();
 
 	private SocketTextChannel? _ddNewsChannel;
 
@@ -86,10 +86,11 @@ public class DdNewsPostService : AbstractBackgroundService
 			string? countryCode = await GetCountryCode(newEntry);
 
 			Log.Debug("Getting DD News screenshot");
-			await using MemoryStream screenshot = await _imageGenerator.FromEntryResponse(newEntry, countryCode);
-
-			Log.Debug("Sending DD News to Discord");
-			await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
+			using (MemoryStream screenshot = _imageGenerator.CreateImage(newEntry.Rank, newEntry.Username, newEntry.Time, countryCode))
+			{
+				Log.Debug("Sending DD News to Discord");
+				await _ddNewsChannel.SendFileAsync(screenshot, $"{newEntry.Username}_{newEntry.Time}.png", message);
+			}
 
 			Log.Debug("Adding news item to database");
 			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
