@@ -74,6 +74,8 @@ public class DdNewsPostService : AbstractBackgroundService
 				continue;
 
 			cacheIsToBeRefreshed = true;
+			if (newEntry.Time / 10000 < 1000)
+				continue;
 
 			Log.Information("Posting news for player entry {@Player}", newEntry);
 
