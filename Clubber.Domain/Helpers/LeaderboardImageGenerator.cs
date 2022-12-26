@@ -1,4 +1,3 @@
-using Serilog;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -34,27 +33,28 @@ public class LeaderboardImageGenerator
 		image.Mutate(ctx => ctx.DrawText(username, _goetheBoldFont, Color.Red, new Point(175, _textOriginY)));
 		image.Mutate(ctx => ctx.DrawText((time / 10_000d).ToString("0.0000"), _goetheBoldFont, Color.Red, new Point(880, _textOriginY)));
 
-		string flagPath = GetPathToFlagPng(playerCountryCode);
-		Image flag = Image.Load(flagPath);
-		image.Mutate(ctx => ctx.DrawImage(flag, new Point(90, 8), 1));
+		string? flagPath = GetPathToFlagPng(playerCountryCode);
+		if (flagPath != null)
+		{
+			Image flag = Image.Load(flagPath);
+			image.Mutate(ctx => ctx.DrawImage(flag, new Point(90, 8), 1));
+		}
 
 		MemoryStream stream = new();
 		image.SaveAsPng(stream);
 		return stream;
 	}
 
-	private static string GetPathToFlagPng(string? playerCountryCode)
+	private static string? GetPathToFlagPng(string? playerCountryCode)
 	{
-		string baseFlagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags");
-		string nullFlagPath = Path.Combine(baseFlagPath, "00.png");
-
 		if (string.IsNullOrEmpty(playerCountryCode))
-			return nullFlagPath;
+			return null;
 
+		string baseFlagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags");
 		string flagPath = Path.Combine(baseFlagPath, $"{playerCountryCode}.png");
 		if (File.Exists(flagPath))
 			return flagPath;
 
-		return nullFlagPath;
+		return null;
 	}
 }

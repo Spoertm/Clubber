@@ -45,7 +45,7 @@ public class DdNewsPostService : AbstractBackgroundService
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		Log.Information("Executing {Class}", GetType().Name);
+		Log.Debug("Executing {Class}", GetType().Name);
 
 		await _databaseHelper.CleanUpNewsItems();
 		_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
@@ -118,7 +118,7 @@ public class DdNewsPostService : AbstractBackgroundService
 		}
 		else
 		{
-			Log.Information("No DD News posting required");
+			Log.Debug("No DD News posting required");
 		}
 
 		_sb.Clear();

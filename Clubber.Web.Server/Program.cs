@@ -161,7 +161,7 @@ internal static class Program
 	private static void ConfigureLogging(IConfiguration config)
 	{
 		Log.Logger = new LoggerConfiguration()
-			.MinimumLevel.Verbose()
+			.MinimumLevel.Information()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}")
 			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"] ?? throw new ConfigurationMissingException("ClubberLoggerToken"))
 			.CreateLogger();
