@@ -97,15 +97,15 @@ public class DdNewsPostService : AbstractBackgroundService
 			Log.Debug("Adding news item to database");
 			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
 
-			async Task<string?> GetCountryCode(EntryResponse newEntry)
+			async Task<string?> GetCountryCode(EntryResponse entry)
 			{
 				try
 				{
-					return await _webService.GetCountryCodeForplayer(newEntry.Id);
+					return await _webService.GetCountryCodeForplayer(entry.Id);
 				}
 				catch (Exception ex)
 				{
-					Log.Error(ex, "Failed to fetch country code for EntryResponse {@Player}", newEntry);
+					Log.Error(ex, "Failed to fetch country code for EntryResponse {@Player}", entry);
 					return null;
 				}
 			}

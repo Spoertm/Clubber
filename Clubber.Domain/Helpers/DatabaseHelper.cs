@@ -5,6 +5,7 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -222,7 +223,7 @@ public class DatabaseHelper : IDatabaseHelper
 		}
 		else
 		{
-			var response = await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
+			EntityEntry<HomingPeakRun> response = await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
 			Log.Information("Added new top homing peak run:\n{@NewRun}", response.Entity);
 		}
 
