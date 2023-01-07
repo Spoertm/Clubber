@@ -18,4 +18,21 @@ public static class ExtensionMethods
 
 		return value.Length <= maxChars ? value : value[..(maxChars - 1)] + "…";
 	}
+
+	public static int DigitCount(this int n)
+	{
+		if (n == 0)
+		{
+			return 1;
+		}
+
+		int count = 0;
+		while (n != 0)
+		{
+			count++;
+			n /= 10;
+		}
+
+		return count;
+	}
 }
