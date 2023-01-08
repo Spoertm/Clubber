@@ -10,7 +10,7 @@ namespace Clubber.Domain.Modules;
 
 [Name("Info")]
 [Group("me")]
-[Alias("stats", "statsf", "statsfull")]
+[Alias("stats", "statsf", "statsfull", "mef")]
 [Summary("Provides statistics from the leaderboard for users that are in this server and registered.\n`statsf` shows all the information available.")]
 [RequireContext(ContextType.Guild)]
 public class Stats : ExtendedModulebase<SocketCommandContext>
@@ -82,10 +82,16 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 		List<EntryResponse> lbPlayers = await _webService.GetLbPlayers(new[] { lbPlayerId });
 
 		Embed statsEmbed;
-		if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) || Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase))
+		if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) ||
+			Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase) ||
+			Context.Message.Content.StartsWith("+mef", StringComparison.InvariantCultureIgnoreCase))
+		{
 			statsEmbed = EmbedHelper.FullStats(lbPlayers[0], user);
+		}
 		else
+		{
 			statsEmbed = EmbedHelper.Stats(lbPlayers[0], user);
+		}
 
 		await ReplyAsync(embed: statsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
