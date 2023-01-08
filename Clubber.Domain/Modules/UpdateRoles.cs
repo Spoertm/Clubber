@@ -38,8 +38,19 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 		UpdateRolesResponse response = await _updateRolesHelper.UpdateUserRoles(user);
 
 		if (!response.Success)
-			await InlineReplyAsync("No updates were needed.");
+		{
+			string msg = "No updates were needed.";
+
+			if (response is { SecondsAwayFromNextRole: { }, NextRoleId: { } })
+			{
+				msg += $"\n\nYou're **{response.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(response.NextRoleId.Value)}";
+			}
+
+			await InlineReplyAsync(msg);
+		}
 		else
+		{
 			await ReplyAsync(embed: EmbedHelper.UpdateRoles(response), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+		}
 	}
 }

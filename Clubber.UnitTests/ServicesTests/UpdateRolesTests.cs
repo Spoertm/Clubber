@@ -66,4 +66,25 @@ public class UpdateRolesTests
 		Assert.Equal(topRoleToAdd, expectedTopRoleToAdd);
 		Assert.Equal(topRolesToRemove, expectedTopRolesToRemove);
 	}
+
+	[Theory]
+	[MemberData(nameof(TestData))]
+	public void GetSecondsAwayFromNextRoleAndNextRoleId_DetectsSecondsInconsistency_ReturnsSecondsAndRoleId(
+		decimal scoreInSeconds,
+		decimal? expectedSecondsAwayFromNextRole)
+	{
+		(decimal? secondsAwayFromNextRole, _) = _sut.GetSecondsAwayFromNextRoleAndNextRoleId((int)(scoreInSeconds * 10000));
+		Assert.Equal(expectedSecondsAwayFromNextRole, secondsAwayFromNextRole);
+	}
+
+	public static IEnumerable<object?[]> TestData => new List<object?[]>
+	{
+		new object?[] { 0M, 100M },
+		new object?[] { 35M, 65M },
+		new object?[] { 3000M, null },
+		new object?[] { 99.1238M, 0.8762M },
+		new object?[] { 700.5000M, 99.5M },
+		new object?[] { 532M, 68M },
+		new object?[] { 900M, 50M },
+	};
 }
