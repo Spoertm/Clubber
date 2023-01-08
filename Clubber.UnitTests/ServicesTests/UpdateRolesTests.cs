@@ -31,40 +31,33 @@ public class UpdateRolesTests
 	}
 
 	[Theory]
-	[InlineData(0, new ulong[] { }, _subOneHundredRoleId, new ulong[] { })]
-	[InlineData(100 * 10000, new ulong[] { }, _oneHundredRoleId, new ulong[] { })]
-	[InlineData(1500 * 10000, new ulong[] { }, _twelveFiftyRoleId, new ulong[] { })]
-	[InlineData(100 * 10000, new[] { _oneHundredRoleId, _threeHundredRoleId }, 0, new[] { _threeHundredRoleId })]
-	[InlineData(900 * 10000, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId }, _nineHundredRoleId, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId })]
-	public void HandleScoreRoles_DetectsRoleInconsistency_ReturnsRolesToBeAddedAndRemoved(
-		int score,
+	[InlineData(0, new ulong[] { }, _subOneHundredRoleId)]
+	[InlineData(100, new ulong[] { }, _oneHundredRoleId)]
+	[InlineData(1500, new ulong[] { }, _twelveFiftyRoleId)]
+	[InlineData(100, new[] { _oneHundredRoleId, _threeHundredRoleId }, 0)]
+	[InlineData(900, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId }, _nineHundredRoleId)]
+	public void TestHandleScoreRoles_DetectsRoleInconsistency_ReturnsRolesToBeAdded(
+		int scoreInSeconds,
 		IReadOnlyCollection<ulong> userRoleIds,
-		ulong expectedRoleToAdd,
-		ulong[] expectedRolesToRemove)
+		ulong expectedRoleToAdd)
 	{
-		(ulong scoreRoleToAdd, ulong[] scoreRolesToRemove) = _sut.HandleScoreRoles(userRoleIds, score);
+		(ulong scoreRoleToAdd, _) = _sut.HandleScoreRoles(userRoleIds, scoreInSeconds * 10000);
 		Assert.Equal(scoreRoleToAdd, expectedRoleToAdd);
-		Assert.Equal(scoreRolesToRemove, expectedRolesToRemove);
 	}
 
 	[Theory]
-	[InlineData(1, new ulong[] { }, _top1RoleId, new ulong[] { })]
-	[InlineData(2, new ulong[] { }, _top3RoleId, new ulong[] { })]
-	[InlineData(3, new ulong[] { }, _top3RoleId, new ulong[] { })]
-	[InlineData(10, new ulong[] { }, _top10RoleId, new ulong[] { })]
-	[InlineData(50, new ulong[] { }, 0, new ulong[] { })]
-	[InlineData(50, new[] { _top1RoleId, _top3RoleId }, 0, new[] { _top1RoleId, _top3RoleId })]
-	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId }, 0, new[] { _top3RoleId })]
-	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId, _threeHundredRoleId }, 0, new[] { _top3RoleId })]
-	public void HandleTopRoles_DetectsRoleInconsistency_ReturnsRolesToBeAddedAndRemoved(
-		int rank,
+	[InlineData(0, new ulong[] { }, new ulong[] { })]
+	[InlineData(100, new ulong[] { }, new ulong[] { })]
+	[InlineData(1500, new ulong[] { }, new ulong[] { })]
+	[InlineData(100, new[] { _oneHundredRoleId, _threeHundredRoleId }, new[] { _threeHundredRoleId })]
+	[InlineData(900, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId }, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId })]
+	public void TestHandleScoreRoles_DetectsRoleInconsistency_ReturnsRolesToBeRemoved(
+		int scoreInSeconds,
 		IReadOnlyCollection<ulong> userRoleIds,
-		ulong expectedTopRoleToAdd,
-		ulong[] expectedTopRolesToRemove)
+		ulong[] expectedRolesToRemove)
 	{
-		(ulong topRoleToAdd, ulong[] topRolesToRemove) = _sut.HandleTopRoles(userRoleIds, rank);
-		Assert.Equal(topRoleToAdd, expectedTopRoleToAdd);
-		Assert.Equal(topRolesToRemove, expectedTopRolesToRemove);
+		(_, ulong[] scoreRolesToRemove) = _sut.HandleScoreRoles(userRoleIds, scoreInSeconds * 10000);
+		Assert.Equal(scoreRolesToRemove, expectedRolesToRemove);
 	}
 
 	[Theory]

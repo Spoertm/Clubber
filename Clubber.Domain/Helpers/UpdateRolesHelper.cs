@@ -127,8 +127,9 @@ public class UpdateRolesHelper
 
 			return await ExecuteRoleUpdate(user, lbPlayerList[0]);
 		}
-		catch (ClubberException)
+		catch (ClubberException clubberException)
 		{
+			Log.Error(clubberException, "Error updating user roles");
 			throw;
 		}
 		catch (Exception ex)
