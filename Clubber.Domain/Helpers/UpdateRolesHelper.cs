@@ -101,9 +101,9 @@ public class UpdateRolesHelper
 			.ToList();
 
 		IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
-		IEnumerable<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
+		List<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
-		(IGuildUser GuildUser, EntryResponse LbUser)[] updatedUsers = registeredUsers.Join(
+		IEnumerable<(IGuildUser GuildUser, EntryResponse LbUser)> updatedUsers = registeredUsers.Join(
 				inner: lbPlayers,
 				outerKeySelector: ru => ru.DdUser.LeaderboardId,
 				innerKeySelector: lbp => lbp.Id,
@@ -112,8 +112,8 @@ public class UpdateRolesHelper
 
 		List<UpdateRolesResponse> responses = new();
 
-		for (int i = 0; i < updatedUsers.Length; i++)
-			responses.Add(await ExecuteRoleUpdate(updatedUsers[i].GuildUser, updatedUsers[i].LbUser));
+		foreach ((IGuildUser guildUser, EntryResponse lbUser) in updatedUsers)
+			responses.Add(await ExecuteRoleUpdate(guildUser, lbUser));
 
 		return (dbUsers.Count - registeredUsers.Count, responses);
 	}
