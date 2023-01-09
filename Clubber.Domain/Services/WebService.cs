@@ -1,6 +1,7 @@
 ﻿using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Newtonsoft.Json;
+using Serilog;
 using System.Text;
 
 namespace Clubber.Domain.Services;
@@ -58,6 +59,7 @@ public class WebService : IWebService
 		}
 		catch (Exception e)
 		{
+			Log.Error(e, "{Class}.GetLbPlayers => Failed to fetch leaderboard players", GetType().Name);
 			throw new ClubberException("DD servers are experiencing issues atm. Try again later.", e);
 		}
 	}
@@ -84,9 +86,10 @@ public class WebService : IWebService
 			{
 				entries.AddRange((await GetLeaderboardEntries(rank)).Entries);
 			}
-			catch
+			catch (Exception e)
 			{
-				return new();
+				Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => failed to fetch LB entries", GetType().Name);
+				throw;
 			}
 
 			rank += 100;
