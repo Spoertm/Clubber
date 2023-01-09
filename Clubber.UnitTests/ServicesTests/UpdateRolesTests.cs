@@ -61,6 +61,42 @@ public class UpdateRolesTests
 	}
 
 	[Theory]
+	[InlineData(1, new ulong[] { }, _top1RoleId)]
+	[InlineData(2, new ulong[] { }, _top3RoleId)]
+	[InlineData(3, new ulong[] { }, _top3RoleId)]
+	[InlineData(10, new ulong[] { }, _top10RoleId)]
+	[InlineData(50, new ulong[] { }, 0)]
+	[InlineData(50, new[] { _top1RoleId, _top3RoleId }, 0)]
+	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId }, 0)]
+	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId, _threeHundredRoleId }, 0)]
+	public void HandleTopRoles_DetectsRoleInconsistency_ReturnsRolesToBeAdded(
+		int rank,
+		IReadOnlyCollection<ulong> userRoleIds,
+		ulong expectedTopRoleToAdd)
+	{
+		(ulong topRoleToAdd, _) = _sut.HandleTopRoles(userRoleIds, rank);
+		Assert.Equal(topRoleToAdd, expectedTopRoleToAdd);
+	}
+
+	[Theory]
+	[InlineData(1, new ulong[] { }, new ulong[] { })]
+	[InlineData(2, new ulong[] { }, new ulong[] { })]
+	[InlineData(3, new ulong[] { }, new ulong[] { })]
+	[InlineData(10, new ulong[] { }, new ulong[] { })]
+	[InlineData(50, new ulong[] { }, new ulong[] { })]
+	[InlineData(50, new[] { _top1RoleId, _top3RoleId }, new[] { _top1RoleId, _top3RoleId })]
+	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId }, new[] { _top3RoleId })]
+	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId, _threeHundredRoleId }, new[] { _top3RoleId })]
+	public void HandleTopRoles_DetectsRoleInconsistency_ReturnsRolesToBeRemoved(
+		int rank,
+		IReadOnlyCollection<ulong> userRoleIds,
+		ulong[] expectedTopRolesToRemove)
+	{
+		(_, ulong[] topRolesToRemove) = _sut.HandleTopRoles(userRoleIds, rank);
+		Assert.Equal(topRolesToRemove, expectedTopRolesToRemove);
+	}
+
+	[Theory]
 	[MemberData(nameof(TestData))]
 	public void GetSecondsAwayFromNextRoleAndNextRoleId_DetectsSecondsInconsistency_ReturnsSecondsAndRoleId(
 		decimal scoreInSeconds,

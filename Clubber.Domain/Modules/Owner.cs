@@ -14,12 +14,6 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 		_updateRolesHelper = updateRolesHelper;
 	}
 
-	[Command("stopbot")]
-	public async Task StopBot()
-	{
-		await ReplyAsync("Exiting...");
-	}
-
 	[Command("update database")]
 	[RequireContext(ContextType.Guild)]
 	public async Task UpdateDatabase()
