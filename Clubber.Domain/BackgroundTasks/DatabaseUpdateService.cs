@@ -24,10 +24,10 @@ public class DatabaseUpdateService : ExactBackgroundService
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
 		SocketGuild ddPals = _discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new("DD Pals server not found with the provided ID.");
+		SocketTextChannel dailyUpdateLoggingChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateLoggingChannelId"));
 		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
-		IUserMessage msg = await dailyUpdateChannel.SendMessageAsync("Checking for role updates...");
+		IUserMessage msg = await dailyUpdateLoggingChannel.SendMessageAsync("Checking for role updates...");
 
-		List<Exception> exceptionList = new();
 		int tries = 0;
 		const int maxTries = 5;
 		bool success = false;
@@ -35,29 +35,48 @@ public class DatabaseUpdateService : ExactBackgroundService
 		{
 			try
 			{
+				tries++;
+
 				(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await _updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
 				await msg.ModifyAsync(m => m.Content = repsonseMessage);
-				for (int i = 0; i < responseRoleUpdateEmbeds.Length; i++)
-					await dailyUpdateChannel.SendMessageAsync(embed: responseRoleUpdateEmbeds[i]);
+
+				if (responseRoleUpdateEmbeds.Length > 0)
+				{
+					await dailyUpdateChannel.SendMessageAsync($"Updated {responseRoleUpdateEmbeds.Length} users today.");
+					await SendEmbedsEfficiently(responseRoleUpdateEmbeds, dailyUpdateLoggingChannel, dailyUpdateChannel, stoppingToken);
+				}
 
 				success = true;
 			}
 			catch (Exception ex)
 			{
-				exceptionList.Add(ex);
-				if (tries++ > maxTries)
+				Log.Error(ex, "DB update procedure failed");
+				if (tries >= maxTries)
 				{
-					await dailyUpdateChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
-					foreach (Exception exc in exceptionList.GroupBy(e => e.ToString()).Select(group => group.First()))
-						Log.Error(exc, "DB update procedure failed");
-
-					break;
+					await dailyUpdateLoggingChannel.SendMessageAsync($"❌ Failed to update DB {maxTries} times then exited.");
+					return;
 				}
 
-				await dailyUpdateChannel.SendMessageAsync($"⚠ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
+				await dailyUpdateLoggingChannel.SendMessageAsync($"⚠ ({tries}/{maxTries}) Update failed. Trying again in 10s...");
 				await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken); // Sleep 10s
 			}
 		}
 		while (!success);
+	}
+
+	private static async Task SendEmbedsEfficiently(
+		Embed[] responseRoleUpdateEmbeds,
+		SocketTextChannel dailyUpdateLoggingChannel,
+		SocketTextChannel dailyUpdateChannel,
+		CancellationToken stoppingToken)
+	{
+		IEnumerable<Embed[]> embedChunks = responseRoleUpdateEmbeds.Chunk(DiscordConfig.MaxEmbedsPerMessage);
+		foreach (Embed[] embedChunk in embedChunks)
+		{
+			await Task.Delay(1000, stoppingToken);
+			await dailyUpdateLoggingChannel.SendMessageAsync(embeds: embedChunk);
+			await Task.Delay(1000, stoppingToken);
+			await dailyUpdateChannel.SendMessageAsync(embeds: embedChunk);
+		}
 	}
 }
