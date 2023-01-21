@@ -43,8 +43,8 @@ public class WelcomeMessage
 		if (!response.Success)
 			return;
 
-		ulong dailyUpdateChannelId = _config.GetValue<ulong>("DailyUpdateChannelId");
-		if (joiningUser.Guild.GetChannel(dailyUpdateChannelId) is SocketTextChannel logsChannel)
+		ulong logChannelId = _config.GetValue<ulong>("DailyUpdateLoggingChannelId");
+		if (joiningUser.Guild.GetChannel(logChannelId) is SocketTextChannel logsChannel)
 			await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
 	}
 }
