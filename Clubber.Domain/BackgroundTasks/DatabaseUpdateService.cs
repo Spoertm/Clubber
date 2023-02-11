@@ -42,9 +42,11 @@ public class DatabaseUpdateService : ExactBackgroundService
 
 				if (responseRoleUpdateEmbeds.Length > 0)
 				{
-					string userStr = responseRoleUpdateEmbeds.Length == 1 ? "user" : "users";
-					await dailyUpdateChannel.SendMessageAsync($"Updated {responseRoleUpdateEmbeds.Length} {userStr} today.");
-					await SendEmbedsEfficientlyAsync(responseRoleUpdateEmbeds, dailyUpdateLoggingChannel, dailyUpdateChannel, stoppingToken);
+					await SendEmbedsEfficientlyAsync(
+						responseRoleUpdateEmbeds,
+						dailyUpdateLoggingChannel,
+						dailyUpdateChannel,
+						stoppingToken);
 				}
 
 				success = true;
@@ -75,9 +77,15 @@ public class DatabaseUpdateService : ExactBackgroundService
 		foreach (Embed[] embedChunk in embedChunks)
 		{
 			await Task.Delay(1000, stoppingToken);
+
 			await dailyUpdateLoggingChannel.SendMessageAsync(embeds: embedChunk);
+
 			await Task.Delay(1000, stoppingToken);
-			await dailyUpdateChannel.SendMessageAsync(embeds: embedChunk);
+
+			string userStr = responseRoleUpdateEmbeds.Length == 1 ? "user" : "users";
+			string dailyUpdateMessageStr = $"Updated {responseRoleUpdateEmbeds.Length} {userStr} today.";
+
+			await dailyUpdateChannel.SendMessageAsync(dailyUpdateMessageStr, embeds: embedChunk);
 		}
 	}
 }
