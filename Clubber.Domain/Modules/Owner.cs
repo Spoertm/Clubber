@@ -30,5 +30,5 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 
 	[Command("welcome")]
 	[RequireContext(ContextType.Guild)]
-	public async Task PostWelcome() => await Context.Channel.SendMessageAsync(embed: EmbedHelper.WelcomeMessage(Context.Client.CurrentUser));
+	public async Task PostWelcome() => await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds(Context.Client.CurrentUser));
 }

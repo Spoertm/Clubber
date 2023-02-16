@@ -77,7 +77,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		const int messagesToSkip = 2;
+		const int messagesToSkip = 1;
 		IEnumerable<IMessage> lastHundredMessages = await currentTextChannel.GetMessagesAsync().FlattenAsync();
 		IEnumerable<IMessage> messagesToDelete = lastHundredMessages
 			.OrderByDescending(m => m.CreatedAt)

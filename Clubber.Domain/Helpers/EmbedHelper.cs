@@ -198,8 +198,10 @@ public static class EmbedHelper
 		return $"{user.Username} ({user.Nickname})";
 	}
 
-	public static Embed WelcomeMessage(IUser botUser)
+	public static Embed[] RegisterEmbeds(IUser botUser)
 	{
+		Embed[] embeds = new Embed[2];
+
 		const string registerForRolesText = @"This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&980126799075876874>.
 
 If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
@@ -217,7 +219,16 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 			.AddField(":arrow_forward: Registering for roles", registerForRolesText)
 			.AddField(":arrow_forward: Twitch", twitchText);
 
-		return embedBuilder.Build();
+		embeds[0] = embedBuilder.Build();
+
+		embedBuilder = new EmbedBuilder()
+			.WithTitle("How to find your ID")
+			.WithDescription("Go to https://devildaggers.info/Leaderboard/search and follow the GIF below.")
+			.WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/1075788891480670311/HowToFindYourID.gif");
+
+		embeds[1] = embedBuilder.Build();
+
+		return embeds;
 	}
 
 	public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
