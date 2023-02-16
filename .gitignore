@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Appsettings
 **/appsettings*.json
+
+# SonarQube
+.sonarqube
