@@ -3,6 +3,7 @@ using Discord;
 using Discord.Webhook;
 using Serilog.Core;
 using Serilog.Events;
+using Color = Discord.Color;
 
 namespace Clubber.Domain.Models.Logging;
 
