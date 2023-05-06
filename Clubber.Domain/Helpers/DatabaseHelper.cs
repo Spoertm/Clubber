@@ -59,7 +59,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not { } ddUser)
+		if (await dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
 		{
 			return Result.Failure("Couldn't find user in database.");
 		}
@@ -73,7 +73,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not { } ddUser)
+		if (await dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
 		{
 			return Result.Failure("Couldn't find user in database.");
 		}
@@ -88,7 +88,7 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public async Task<bool> RemoveUser(ulong discordId)
 	{
-		DdUser? toRemove = GetDdUserBy(discordId);
+		DdUser? toRemove = await GetDdUserBy(discordId);
 		if (toRemove is null)
 		{
 			return false;
@@ -101,18 +101,18 @@ public class DatabaseHelper : IDatabaseHelper
 		return true;
 	}
 
-	public DdUser? GetDdUserBy(int lbId)
+	public async Task<DdUser?> GetDdUserBy(int lbId)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return dbContext.DdPlayers.FirstOrDefault(ddp => ddp.LeaderboardId == lbId);
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		return await dbContext.DdPlayers.FindAsync(lbId);
 	}
 
-	public DdUser? GetDdUserBy(ulong discordId)
+	public async Task<DdUser?> GetDdUserBy(ulong discordId)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
-		using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == discordId);
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.DiscordId == discordId);
 	}
 
 	public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
@@ -138,15 +138,14 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+
 		DateTime utcNow = DateTime.UtcNow;
 		IQueryable<DdNewsItem> toRemove = dbContext.DdNews.Where(ddn => utcNow - ddn.TimeOfOccurenceUtc >= TimeSpan.FromDays(1));
-		if (!toRemove.Any())
+		if (toRemove.Any())
 		{
-			return;
+			dbContext.DdNews.RemoveRange(toRemove);
+			await dbContext.SaveChangesAsync();
 		}
-
-		dbContext.DdNews.RemoveRange(toRemove);
-		await dbContext.SaveChangesAsync();
 	}
 
 	public async Task<bool> TwitchUsernameIsRegistered(string twitchUsername)
@@ -175,7 +174,7 @@ public class DatabaseHelper : IDatabaseHelper
 		List<BestSplit> superiorNewSplits = new();
 		foreach (Split newSplit in splitsToBeChecked)
 		{
-			BestSplit? currentBestSplit = currentBestSplits.FirstOrDefault(cbs => cbs.Name == newSplit.Name);
+			BestSplit? currentBestSplit = Array.Find(currentBestSplits, cbs => cbs.Name == newSplit.Name);
 			BestSplit newBest = new()
 			{
 				Name = newSplit.Name,

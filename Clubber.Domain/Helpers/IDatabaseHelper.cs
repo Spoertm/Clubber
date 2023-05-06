@@ -19,9 +19,9 @@ public interface IDatabaseHelper
 
 	Task<bool> RemoveUser(ulong discordId);
 
-	DdUser? GetDdUserBy(int lbId);
+	Task<DdUser?> GetDdUserBy(int lbId);
 
-	DdUser? GetDdUserBy(ulong discordId);
+	Task<DdUser?> GetDdUserBy(ulong discordId);
 
 	Task UpdateLeaderboardCache(List<EntryResponse> newEntries);
 

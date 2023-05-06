@@ -122,7 +122,7 @@ public class UpdateRolesHelper
 	{
 		try
 		{
-			int lbId = _databaseHelper.GetDdUserBy(user.Id)!.LeaderboardId;
+			int lbId = (await _databaseHelper.GetDdUserBy(user.Id))!.LeaderboardId;
 			List<EntryResponse> lbPlayerList = await _webService.GetLbPlayers(new[] { (uint)lbId });
 
 			return await ExecuteRoleUpdate(user, lbPlayerList[0]);

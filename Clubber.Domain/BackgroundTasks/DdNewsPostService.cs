@@ -82,7 +82,7 @@ public class DdNewsPostService : AbstractBackgroundService
 			int nth = newEntries.Count(entry => entry.Time / 1000000 >= newEntry.Time / 1000000);
 
 			Log.Debug("Getting DD News message");
-			string message = GetDdNewsMessage(oldEntry, newEntry, nth);
+			string message = await GetDdNewsMessage(oldEntry, newEntry, nth);
 
 			Log.Debug("Getting country code");
 			string? countryCode = await GetCountryCode(newEntry);
@@ -124,11 +124,11 @@ public class DdNewsPostService : AbstractBackgroundService
 		_sb.Clear();
 	}
 
-	private string GetDdNewsMessage(EntryResponse oldEntry, EntryResponse newEntry, int nth)
+	private async Task<string> GetDdNewsMessage(EntryResponse oldEntry, EntryResponse newEntry, int nth)
 	{
 		string userName = newEntry.Username;
 		ulong ddPalsId = _config.GetValue<ulong>("DdPalsId");
-		if (_databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
+		if (await _databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 
 		double oldScore = oldEntry.Time / 10000d;
