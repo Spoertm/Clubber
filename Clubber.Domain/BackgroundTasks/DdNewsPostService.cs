@@ -17,9 +17,6 @@ public class DdNewsPostService : AbstractBackgroundService
 	private const int _minimumScore = 930;
 
 	private readonly IConfiguration _config;
-	private readonly IDatabaseHelper _databaseHelper;
-	private readonly IDiscordHelper _discordHelper;
-	private readonly IWebService _webService;
 	private readonly IServiceScopeFactory _services;
 
 	private readonly StringBuilder _sb = new();
@@ -29,15 +26,9 @@ public class DdNewsPostService : AbstractBackgroundService
 
 	public DdNewsPostService(
 		IConfiguration config,
-		IDatabaseHelper databaseHelper,
-		IDiscordHelper discordHelper,
-		IWebService webService,
 		IServiceScopeFactory services)
 	{
 		_config = config;
-		_databaseHelper = databaseHelper;
-		_discordHelper = discordHelper;
-		_webService = webService;
 		_services = services;
 	}
 
@@ -47,12 +38,16 @@ public class DdNewsPostService : AbstractBackgroundService
 	{
 		Log.Debug("Executing {Class}", GetType().Name);
 
-		await _databaseHelper.CleanUpNewsItems();
-		_ddNewsChannel ??= _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
-		using IServiceScope scope = _services.CreateScope();
+		await using AsyncServiceScope scope = _services.CreateAsyncScope();
+		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
+		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		IWebService webService = scope.ServiceProvider.GetRequiredService<IWebService>();
+
+		await databaseHelper.CleanUpNewsItems();
+		_ddNewsChannel ??= discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
 		List<EntryResponse> oldEntries = dbContext.LeaderboardCache.AsNoTracking().ToList();
-		List<EntryResponse> newEntries = await _webService.GetSufficientLeaderboardEntries(_minimumScore);
+		List<EntryResponse> newEntries = await webService.GetSufficientLeaderboardEntries(_minimumScore);
 
 		if (newEntries.Count == 0)
 		{
@@ -82,7 +77,7 @@ public class DdNewsPostService : AbstractBackgroundService
 			int nth = newEntries.Count(entry => entry.Time / 1000000 >= newEntry.Time / 1000000);
 
 			Log.Debug("Getting DD News message");
-			string message = await GetDdNewsMessage(oldEntry, newEntry, nth);
+			string message = await GetDdNewsMessage(databaseHelper, discordHelper, oldEntry, newEntry, nth);
 
 			Log.Debug("Getting country code");
 			string? countryCode = await GetCountryCode(newEntry);
@@ -95,13 +90,13 @@ public class DdNewsPostService : AbstractBackgroundService
 			}
 
 			Log.Debug("Adding news item to database");
-			await _databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
+			await databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
 
 			async Task<string?> GetCountryCode(EntryResponse entry)
 			{
 				try
 				{
-					return await _webService.GetCountryCodeForplayer(entry.Id);
+					return await webService.GetCountryCodeForplayer(entry.Id);
 				}
 				catch (Exception ex)
 				{
@@ -114,7 +109,7 @@ public class DdNewsPostService : AbstractBackgroundService
 		if (cacheIsToBeRefreshed)
 		{
 			Log.Information("Updating leaderboard cache");
-			await _databaseHelper.UpdateLeaderboardCache(newEntries);
+			await databaseHelper.UpdateLeaderboardCache(newEntries);
 		}
 		else
 		{
@@ -124,11 +119,16 @@ public class DdNewsPostService : AbstractBackgroundService
 		_sb.Clear();
 	}
 
-	private async Task<string> GetDdNewsMessage(EntryResponse oldEntry, EntryResponse newEntry, int nth)
+	private async Task<string> GetDdNewsMessage(
+		IDatabaseHelper databaseHelper,
+		IDiscordHelper discordHelper,
+		EntryResponse oldEntry,
+		EntryResponse newEntry,
+		int nth)
 	{
 		string userName = newEntry.Username;
 		ulong ddPalsId = _config.GetValue<ulong>("DdPalsId");
-		if (await _databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && _discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
+		if (await databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 
 		double oldScore = oldEntry.Time / 10000d;

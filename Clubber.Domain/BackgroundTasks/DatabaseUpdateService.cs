@@ -2,6 +2,7 @@
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace Clubber.Domain.BackgroundTasks;
@@ -9,23 +10,25 @@ namespace Clubber.Domain.BackgroundTasks;
 public class DatabaseUpdateService : ExactBackgroundService
 {
 	private readonly IConfiguration _config;
-	private readonly IDiscordHelper _discordHelper;
-	private readonly UpdateRolesHelper _updateRolesHelper;
+	private readonly IServiceScopeFactory _services;
 
-	public DatabaseUpdateService(IConfiguration config, IDiscordHelper discordHelper, UpdateRolesHelper updateRolesHelper)
+	public DatabaseUpdateService(IConfiguration config, IServiceScopeFactory services)
 	{
 		_config = config;
-		_discordHelper = discordHelper;
-		_updateRolesHelper = updateRolesHelper;
+		_services = services;
 	}
 
 	protected override TimeOnly UtcTriggerTime => new(16, 00);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		SocketGuild ddPals = _discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new("DD Pals server not found with the provided ID.");
-		SocketTextChannel dailyUpdateLoggingChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateLoggingChannelId"));
-		SocketTextChannel dailyUpdateChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
+		await using AsyncServiceScope scope = _services.CreateAsyncScope();
+		UpdateRolesHelper updateRolesHelper = scope.ServiceProvider.GetRequiredService<UpdateRolesHelper>();
+		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
+
+		SocketGuild ddPals = discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new("DD Pals server not found with the provided ID.");
+		SocketTextChannel dailyUpdateLoggingChannel = discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateLoggingChannelId"));
+		SocketTextChannel dailyUpdateChannel = discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
 		IUserMessage msg = await dailyUpdateLoggingChannel.SendMessageAsync("Checking for role updates...");
 
 		int tries = 0;
@@ -37,7 +40,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 			{
 				tries++;
 
-				(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await _updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
+				(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
 				await msg.ModifyAsync(m => m.Content = repsonseMessage);
 
 				if (responseRoleUpdateEmbeds.Length > 0)
