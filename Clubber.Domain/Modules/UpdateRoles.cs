@@ -1,4 +1,5 @@
 ﻿using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
@@ -28,10 +29,10 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 	public async Task UpdateRolesFromCurrentUser()
 	{
 		SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
-		(bool isError, string? message) = _userService.IsValid(user, user.Id == Context.User.Id);
-		if (isError && message is not null)
+		Result result = _userService.IsValid(user, user.Id == Context.User.Id);
+		if (result.IsFailure)
 		{
-			await InlineReplyAsync(message);
+			await InlineReplyAsync(result.ErrorMsg);
 			return;
 		}
 

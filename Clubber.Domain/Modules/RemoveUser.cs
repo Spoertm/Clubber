@@ -1,4 +1,5 @@
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -25,13 +26,17 @@ public class RemoveUser : ExtendedModulebase<SocketCommandContext>
 	[Priority(1)]
 	public async Task RemoveByName([Name("name | tag")][Remainder] string name)
 	{
-		(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-		if (success && user is not null)
+		Result<SocketGuildUser> result = await FoundOneUserFromName(name);
+		if (result.IsSuccess)
 		{
-			if (await _databaseHelper.RemoveUser(user))
+			if (await _databaseHelper.RemoveUser(result.Value))
+			{
 				await InlineReplyAsync("✅ Successfully removed.");
+			}
 			else
+			{
 				await InlineReplyAsync("User not registered to begin with.");
+			}
 		}
 	}
 
@@ -41,8 +46,12 @@ public class RemoveUser : ExtendedModulebase<SocketCommandContext>
 	public async Task RemoveByDiscordId([Name("Discord ID")] ulong discordId)
 	{
 		if (await _databaseHelper.RemoveUser(discordId))
+		{
 			await InlineReplyAsync("✅ Successfully removed.");
+		}
 		else
+		{
 			await InlineReplyAsync("No such ID found.");
+		}
 	}
 }

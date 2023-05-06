@@ -1,4 +1,5 @@
 ﻿using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
@@ -34,9 +35,9 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 	[Priority(2)]
 	public async Task RegisterByName([Name("Twitch username")] string twitchUsername, [Name("name | tag")][Remainder] string name)
 	{
-		(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-		if (success && user is not null)
-			await CheckUserAndRegisterTwitch(user, twitchUsername);
+		Result<SocketGuildUser> result = await FoundOneUserFromName(name);
+		if (result.IsSuccess)
+			await CheckUserAndRegisterTwitch(result.Value, twitchUsername);
 	}
 
 	[Command("id")]
@@ -45,17 +46,17 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 	[Priority(3)]
 	public async Task RegisterByDiscordId([Name("Twitch username")] string twitchUsername, [Name("Discord ID")] ulong discordId)
 	{
-		(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-		if (success && user is not null)
-			await CheckUserAndRegisterTwitch(user, twitchUsername);
+		Result<SocketGuildUser> result = await FoundUserFromDiscordId(discordId);
+		if (result.IsSuccess)
+			await CheckUserAndRegisterTwitch(result.Value, twitchUsername);
 	}
 
 	private async Task CheckUserAndRegisterTwitch(IGuildUser user, string twitchUsername, bool selfCommand = false)
 	{
-		(bool isError, string? message) = _userService.IsBotOrCheater(user, selfCommand);
-		if (isError && message is not null)
+		Result result = _userService.IsBotOrCheater(user, selfCommand);
+		if (result.IsFailure)
 		{
-			await InlineReplyAsync(message);
+			await InlineReplyAsync(result.ErrorMsg);
 			return;
 		}
 
@@ -65,10 +66,14 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		(bool success, string registerResponseMessage) = await _databaseHelper.RegisterTwitch(user.Id, twitchUsername);
-		if (success)
+		Result registrationResult = await _databaseHelper.RegisterTwitch(user.Id, twitchUsername);
+		if (registrationResult.IsSuccess)
+		{
 			await InlineReplyAsync("✅ Successfully linked Twitch.");
+		}
 		else
-			await InlineReplyAsync($"Failed to execute command: {registerResponseMessage}");
+		{
+			await InlineReplyAsync($"Failed to execute command: {registrationResult.ErrorMsg}");
+		}
 	}
 }

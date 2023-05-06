@@ -1,6 +1,6 @@
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Clubber.Domain.Models.Exceptions;
-using Clubber.Domain.Models.Responses;
 using Discord;
 using Microsoft.Extensions.Configuration;
 
@@ -17,29 +17,39 @@ public class UserService
 		_databaseHelper = databaseHelper;
 	}
 
-	public UserValidationResponse IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
+	public Result IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
-		(bool responseIsError, string? responseMessage) = IsBotOrCheater(guildUser, userUsedCommandForThemselves);
-		if (responseIsError)
-			return new(IsError: true, Message: responseMessage);
+		Result result = IsBotOrCheater(guildUser, userUsedCommandForThemselves);
+		if (result.IsFailure)
+		{
+			return Result.Failure(result.ErrorMsg);
+		}
 
 		if (_databaseHelper.GetDdUserBy(guildUser.Id) is not null)
-			return new(IsError: true, Message: $"User `{guildUser.Username}` is already registered.");
+		{
+			return Result.Failure($"User `{guildUser.Username}` is already registered.");
+		}
 
-		return new(IsError: false, Message: null);
+		return Result.Success();
 	}
 
-	public UserValidationResponse IsValid(IGuildUser guildUser, bool userUsedCommandForThemselves)
+	public Result IsValid(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
-		(bool reponseIsError, string? responseMessage) = IsBotOrCheater(guildUser, userUsedCommandForThemselves);
-		if (reponseIsError)
-			return new(IsError: true, Message: responseMessage);
+		Result result = IsBotOrCheater(guildUser, userUsedCommandForThemselves);
+		if (result.IsFailure)
+		{
+			return Result.Failure(result.ErrorMsg);
+		}
 
 		if (_databaseHelper.GetDdUserBy(guildUser.Id) is not null)
-			return new(IsError: false, Message: null);
+		{
+			return Result.Success();
+		}
 
 		if (guildUser.GuildPermissions.ManageRoles)
-			return new(IsError: true, $"`{guildUser.Username}` is not registered.");
+		{
+			return Result.Failure($"`{guildUser.Username}` is not registered.");
+		}
 
 		ulong unregRoleId = _config.GetValue<ulong>("UnregisteredRoleId");
 		bool userHasUnregRole = guildUser.RoleIds.Contains(unregRoleId);
@@ -51,24 +61,30 @@ public class UserService
 
 		string registerChannelId = _config["RegisterChannelId"] ?? throw new ConfigurationMissingException("RegisterChannelId");
 		if (userHasUnregRole)
+		{
 			message += $"\nPlease refer to the first message in <#{registerChannelId}> for more info.";
+		}
 
-		return new(IsError: true, Message: message);
+		return Result.Failure(message);
 	}
 
-	public UserValidationResponse IsBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
+	public Result IsBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
 		if (guildUser.IsBot)
-			return new(IsError: true, Message: $"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
+		{
+			return Result.Failure($"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
+		}
 
 		ulong cheaterRoleId = _config.GetValue<ulong>("CheaterRoleId");
 		if (guildUser.RoleIds.All(rId => rId != cheaterRoleId))
-			return new(IsError: false, Message: null);
+		{
+			return Result.Success();
+		}
 
 		string message = userUsedCommandForThemselves
 			? $"{guildUser.Username}, you can't register because you've cheated."
 			: $"{guildUser.Username} can't be registered because they've cheated.";
 
-		return new(IsError: true, Message: message);
+		return Result.Failure(message);
 	}
 }
