@@ -31,7 +31,6 @@ internal static class Program
 		ConfigureLogging(builder.Configuration);
 		Log.Information("Starting");
 
-
 		DiscordSocketClient client = new(new()
 		{
 			LogLevel = LogSeverity.Warning,
