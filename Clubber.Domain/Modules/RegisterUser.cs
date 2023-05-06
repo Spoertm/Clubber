@@ -45,7 +45,7 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 
 	private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 	{
-		Result result = _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
+		Result result = await _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
 		if (result.IsFailure)
 		{
 			await InlineReplyAsync(result.ErrorMsg);

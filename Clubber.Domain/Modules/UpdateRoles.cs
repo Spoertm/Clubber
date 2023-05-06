@@ -29,7 +29,7 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 	public async Task UpdateRolesFromCurrentUser()
 	{
 		SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
-		Result result = _userService.IsValid(user, user.Id == Context.User.Id);
+		Result result = await _userService.IsValid(user, user.Id == Context.User.Id);
 		if (result.IsFailure)
 		{
 			await InlineReplyAsync(result.ErrorMsg);

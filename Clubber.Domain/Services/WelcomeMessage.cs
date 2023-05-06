@@ -31,7 +31,7 @@ public class WelcomeMessage
 
 		// User is registered
 		ulong unregRoleId = _config.GetValue<ulong>("UnregisteredRoleId");
-		if (_databaseHelper.GetDdUserBy(joiningUser.Id) is not null)
+		if (await _databaseHelper.GetDdUserBy(joiningUser.Id) is not null)
 			await UpdateRolesForRegisteredUser(joiningUser);
 		else
 			await joiningUser.AddRoleAsync(unregRoleId);

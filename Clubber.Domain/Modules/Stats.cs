@@ -48,14 +48,19 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
 	{
 		SocketGuildUser? user = Context.Guild.GetUser(discordId);
-		DdUser? ddUser = _databaseHelper.GetDdUserBy(discordId);
+		DdUser? ddUser = await _databaseHelper.GetDdUserBy(discordId);
 
 		if (ddUser is null)
 		{
 			if (user is null)
+			{
 				await InlineReplyAsync("User not found.");
+			}
 			else
-				await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).ErrorMsg);
+			{
+				Result userValidationResult = await _userService.IsValid(user, user.Id == Context.User.Id);
+				await InlineReplyAsync(userValidationResult.ErrorMsg);
+			}
 
 			return;
 		}
@@ -65,11 +70,12 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 
 	private async Task CheckUserAndShowStats(SocketGuildUser user)
 	{
-		DdUser? ddUser = _databaseHelper.GetDdUserBy(user.Id);
+		DdUser? ddUser = await _databaseHelper.GetDdUserBy(user.Id);
 
 		if (ddUser is null)
 		{
-			await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).ErrorMsg);
+			Result userValidationResult = await _userService.IsValid(user, user.Id == Context.User.Id);
+			await InlineReplyAsync(userValidationResult.ErrorMsg);
 			return;
 		}
 
