@@ -29,7 +29,7 @@ public class DatabaseHelper : IDatabaseHelper
 		return dbContext.DdPlayers.AsNoTracking().ToList();
 	}
 
-	public async Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user)
+	public async Task<Result> RegisterUser(uint lbId, SocketGuildUser user)
 	{
 		try
 		{
@@ -41,42 +41,46 @@ public class DatabaseHelper : IDatabaseHelper
 			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 			await dbContext.AddAsync(newDdUser);
 			await dbContext.SaveChangesAsync();
-			return (true, string.Empty);
+			return Result.Success();
 		}
 		catch (Exception ex)
 		{
 			return ex switch
 			{
-				ClubberException     => (false, ex.Message),
-				HttpRequestException => (false, "DD servers are most likely down."),
-				IOException          => (false, "IO error."),
-				_                    => (false, "No reason specified."),
+				ClubberException     => Result.Failure(ex.Message),
+				HttpRequestException => Result.Failure("DD servers are most likely down."),
+				IOException          => Result.Failure("IO error."),
+				_                    => Result.Failure("No reason specified."),
 			};
 		}
 	}
 
-	public async Task<(bool Success, string Message)> RegisterTwitch(ulong userId, string twitchUsername)
+	public async Task<Result> RegisterTwitch(ulong userId, string twitchUsername)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not { } ddUser)
-			return (false, "Couldn't find user in database.");
+		{
+			return Result.Failure("Couldn't find user in database.");
+		}
 
 		ddUser.TwitchUsername = twitchUsername;
 		await dbContext.SaveChangesAsync();
-		return (true, string.Empty);
+		return Result.Success();
 	}
 
-	public async Task<(bool Success, string Message)> UnregisterTwitch(ulong userId)
+	public async Task<Result> UnregisterTwitch(ulong userId)
 	{
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
 		if (dbContext.DdPlayers.FirstOrDefault(ddp => ddp.DiscordId == userId) is not { } ddUser)
-			return (false, "Couldn't find user in database.");
+		{
+			return Result.Failure("Couldn't find user in database.");
+		}
 
 		ddUser.TwitchUsername = null;
 		await dbContext.SaveChangesAsync();
-		return (true, string.Empty);
+		return Result.Success(ddUser);
 	}
 
 	public async Task<bool> RemoveUser(SocketGuildUser user)
@@ -86,7 +90,9 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		DdUser? toRemove = GetDdUserBy(discordId);
 		if (toRemove is null)
+		{
 			return false;
+		}
 
 		using IServiceScope scope = _scopeFactory.CreateScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
@@ -135,7 +141,9 @@ public class DatabaseHelper : IDatabaseHelper
 		DateTime utcNow = DateTime.UtcNow;
 		IQueryable<DdNewsItem> toRemove = dbContext.DdNews.Where(ddn => utcNow - ddn.TimeOfOccurenceUtc >= TimeSpan.FromDays(1));
 		if (!toRemove.Any())
+		{
 			return;
+		}
 
 		dbContext.DdNews.RemoveRange(toRemove);
 		await dbContext.SaveChangesAsync();
@@ -190,7 +198,9 @@ public class DatabaseHelper : IDatabaseHelper
 		}
 
 		if (superiorNewSplits.Count == 0)
+		{
 			return (currentBestSplits, superiorNewSplits.ToArray());
+		}
 
 		await dbContext.SaveChangesAsync();
 		return (currentBestSplits, superiorNewSplits.ToArray());

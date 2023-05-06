@@ -9,11 +9,11 @@ public interface IDatabaseHelper
 {
 	Task<List<DdUser>> GetEntireDatabase();
 
-	Task<(bool Success, string Message)> RegisterUser(uint lbId, SocketGuildUser user);
+	Task<Result> RegisterUser(uint lbId, SocketGuildUser user);
 
-	Task<(bool Success, string Message)> RegisterTwitch(ulong userId, string twitchUsername);
+	Task<Result> RegisterTwitch(ulong userId, string twitchUsername);
 
-	Task<(bool Success, string Message)> UnregisterTwitch(ulong userId);
+	Task<Result> UnregisterTwitch(ulong userId);
 
 	Task<bool> RemoveUser(SocketGuildUser user);
 

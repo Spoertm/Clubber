@@ -1,4 +1,5 @@
 ﻿using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -31,9 +32,11 @@ public class UnregisterTwitch : ExtendedModulebase<SocketCommandContext>
 	[Priority(2)]
 	public async Task UnregisterByName([Name("name | tag")][Remainder] string name)
 	{
-		(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-		if (success && user is not null)
-			await CheckUserAndUnregisterTwitch(user);
+		Result<SocketGuildUser> result = await FoundOneUserFromName(name);
+		if (result.IsSuccess)
+		{
+			await CheckUserAndUnregisterTwitch(result.Value);
+		}
 	}
 
 	[Command("id")]
@@ -42,17 +45,23 @@ public class UnregisterTwitch : ExtendedModulebase<SocketCommandContext>
 	[Priority(3)]
 	public async Task UnregisterByDiscordId([Name("Discord ID")] ulong discordId)
 	{
-		(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-		if (success && user is not null)
-			await CheckUserAndUnregisterTwitch(user);
+		Result<SocketGuildUser> result = await FoundUserFromDiscordId(discordId);
+		if (result.IsSuccess)
+		{
+			await CheckUserAndUnregisterTwitch(result.Value);
+		}
 	}
 
 	private async Task CheckUserAndUnregisterTwitch(IGuildUser user)
 	{
-		(bool success, string errorMsg) = await _databaseHelper.UnregisterTwitch(user.Id);
-		if (success)
+		Result result = await _databaseHelper.UnregisterTwitch(user.Id);
+		if (result.IsSuccess)
+		{
 			await InlineReplyAsync("✅ Successfully unlinked Twitch account.");
+		}
 		else
-			await InlineReplyAsync($"Failed to execute command: {errorMsg}");
+		{
+			await InlineReplyAsync($"Failed to execute command: {result.ErrorMsg}");
+		}
 	}
 }

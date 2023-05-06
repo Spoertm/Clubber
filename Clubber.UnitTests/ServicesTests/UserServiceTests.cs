@@ -1,6 +1,5 @@
 ﻿using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
-using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
 using Microsoft.Extensions.Configuration;
@@ -34,8 +33,8 @@ public class UserServiceTests
 		Mock<IGuildUser> guildUser = new();
 		guildUser.SetupGet(user => user.IsBot).Returns(isBot);
 		guildUser.SetupGet(user => user.RoleIds).Returns(roleIds);
-		UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
-		Assert.True(isValidForRegistrationResponse.IsError);
+		Result isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
+		Assert.True(isValidForRegistrationResponse.IsFailure);
 	}
 
 	[Theory]
@@ -47,8 +46,8 @@ public class UserServiceTests
 		Mock<IGuildUser> guildUser = new();
 		guildUser.SetupGet(user => user.IsBot).Returns(isBot);
 		guildUser.SetupGet(user => user.RoleIds).Returns(roleIds);
-		UserValidationResponse isValidResponse = _sut.IsValid(guildUser.Object, true);
-		Assert.True(isValidResponse.IsError);
+		Result isValidResponse = _sut.IsValid(guildUser.Object, true);
+		Assert.True(isValidResponse.IsFailure);
 	}
 
 	[Fact]
@@ -60,8 +59,8 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
 		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(default(DdUser));
-		UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
-		Assert.False(isValidForRegistrationResponse.IsError);
+		Result isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
+		Assert.False(isValidForRegistrationResponse.IsFailure);
 	}
 
 	[Fact]
@@ -74,8 +73,8 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
 		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(new DdUser(0, 0));
-		UserValidationResponse isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
-		Assert.True(isValidForRegistrationResponse.IsError);
+		Result isValidForRegistrationResponse = _sut.IsValidForRegistration(guildUser.Object, true);
+		Assert.True(isValidForRegistrationResponse.IsFailure);
 	}
 
 	[Fact]
@@ -88,8 +87,8 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
 		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(new DdUser(0, 0));
-		UserValidationResponse isValid = _sut.IsValid(guildUser.Object, true);
-		Assert.False(isValid.IsError);
+		Result isValid = _sut.IsValid(guildUser.Object, true);
+		Assert.False(isValid.IsFailure);
 	}
 
 	[Fact]
@@ -102,7 +101,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
 		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId)).Returns(default(DdUser));
-		UserValidationResponse isValid = _sut.IsValid(guildUser.Object, true);
-		Assert.True(isValid.IsError);
+		Result isValid = _sut.IsValid(guildUser.Object, true);
+		Assert.True(isValid.IsFailure);
 	}
 }

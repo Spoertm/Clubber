@@ -37,9 +37,9 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	[Priority(2)]
 	public async Task StatsFromName([Name("name | tag")][Remainder] string name)
 	{
-		(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-		if (success && user is not null)
-			await CheckUserAndShowStats(user);
+		Result<SocketGuildUser> result = await FoundOneUserFromName(name);
+		if (result.IsSuccess)
+			await CheckUserAndShowStats(result.Value);
 	}
 
 	[Command("id")]
@@ -55,7 +55,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 			if (user is null)
 				await InlineReplyAsync("User not found.");
 			else
-				await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).Message!);
+				await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).ErrorMsg);
 
 			return;
 		}
@@ -69,7 +69,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 
 		if (ddUser is null)
 		{
-			await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).Message!);
+			await InlineReplyAsync(_userService.IsValid(user, user.Id == Context.User.Id).ErrorMsg);
 			return;
 		}
 

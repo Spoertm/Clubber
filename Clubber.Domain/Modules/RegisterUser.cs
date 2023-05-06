@@ -1,4 +1,5 @@
 ﻿using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
@@ -27,9 +28,9 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 	[Priority(1)]
 	public async Task RegisterByName([Name("leaderboard ID")] uint lbId, [Name("name | tag")][Remainder] string name)
 	{
-		(bool success, SocketGuildUser? user) = await FoundOneUserFromName(name);
-		if (success && user is not null)
-			await CheckUserAndRegister(lbId, user);
+		Result<SocketGuildUser> result = await FoundOneUserFromName(name);
+		if (result.IsSuccess)
+			await CheckUserAndRegister(lbId, result.Value);
 	}
 
 	[Command("id")]
@@ -37,22 +38,22 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 	[Priority(2)]
 	public async Task RegisterByDiscordId([Name("leaderboard ID")] uint lbId, [Name("Discord ID")] ulong discordId)
 	{
-		(bool success, SocketGuildUser? user) = await FoundUserFromDiscordId(discordId);
-		if (success && user is not null)
-			await CheckUserAndRegister(lbId, user);
+		Result<SocketGuildUser> result = await FoundUserFromDiscordId(discordId);
+		if (result.IsSuccess)
+			await CheckUserAndRegister(lbId, result.Value);
 	}
 
 	private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 	{
-		(bool isError, string? message) = _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
-		if (isError && message is not null)
+		Result result = _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
+		if (result.IsFailure)
 		{
-			await InlineReplyAsync(message);
+			await InlineReplyAsync(result.ErrorMsg);
 			return;
 		}
 
-		(bool success, string registerResponseMessage) = await _databaseHelper.RegisterUser(lbId, user);
-		if (success)
+		Result registrationResult = await _databaseHelper.RegisterUser(lbId, user);
+		if (registrationResult.IsSuccess)
 		{
 			const ulong newPalRoleId = 728663492424499200;
 			const ulong pendingPbRoleId = 994354086646399066;
@@ -62,7 +63,7 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 		}
 		else
 		{
-			await InlineReplyAsync($"Failed to execute command: {registerResponseMessage}");
+			await InlineReplyAsync($"Failed to execute command: {registrationResult.ErrorMsg}");
 		}
 	}
 }
