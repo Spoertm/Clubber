@@ -31,7 +31,6 @@ internal static class Program
 		ConfigureLogging(builder.Configuration);
 		Log.Information("Starting");
 
-
 		DiscordSocketClient client = new(new()
 		{
 			LogLevel = LogSeverity.Warning,
@@ -56,13 +55,15 @@ internal static class Program
 		builder.Services.AddSingleton(client);
 		builder.Services.AddSingleton(commands);
 		builder.Services.AddSingleton<MessageHandlerService>();
-		builder.Services.AddSingleton<IDatabaseHelper, DatabaseHelper>();
-		builder.Services.AddSingleton<UpdateRolesHelper>();
-		builder.Services.AddSingleton<IDiscordHelper, DiscordHelper>();
-		builder.Services.AddSingleton<UserService>();
-		builder.Services.AddSingleton<IWebService, WebService>();
+
+		builder.Services.AddTransient<UpdateRolesHelper>();
+		builder.Services.AddTransient<IDiscordHelper, DiscordHelper>();
+		builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
+		builder.Services.AddTransient<UserService>();
+		builder.Services.AddTransient<IWebService, WebService>();
+
 		builder.Services.AddHttpClient();
-		builder.Services.AddDbContext<DbService>();
+		builder.Services.AddDbContext<DbService>(ServiceLifetime.Transient);
 
 		if (builder.Environment.IsProduction())
 		{
@@ -119,7 +120,6 @@ internal static class Program
 		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
 
 		app.Services.GetRequiredService<MessageHandlerService>();
-		app.Services.GetRequiredService<IDatabaseHelper>();
 
 		if (app.Environment.IsProduction())
 		{
