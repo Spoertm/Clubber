@@ -12,7 +12,7 @@ namespace Clubber.Domain.Helpers;
 
 public class UpdateRolesHelper
 {
-	private static readonly ImmutableSortedDictionary<int, ulong> _scoreRoles = ImmutableSortedDictionary.CreateRange(new KeyValuePair<int, ulong>[]
+	private static readonly ImmutableDictionary<int, ulong> _scoreRoles = ImmutableDictionary.CreateRange(new KeyValuePair<int, ulong>[]
 	{
 		new(1250, 980126799075876874),
 		new(1240, 980126039055429655),
@@ -46,7 +46,7 @@ public class UpdateRolesHelper
 		new(0, 461203024128376832),
 	});
 	private readonly List<ulong> _uselessRoles;
-	private static readonly ImmutableSortedDictionary<int, ulong> _rankRoles = ImmutableSortedDictionary.CreateRange(new KeyValuePair<int, ulong>[]
+	private static readonly ImmutableDictionary<int, ulong> _rankRoles = ImmutableDictionary.CreateRange(new KeyValuePair<int, ulong>[]
 	{
 		new(1, 446688666325090310),
 		new(3, 472451008342261820),
