@@ -17,7 +17,7 @@ public sealed class DarkModeManager
 
 	public async Task Init()
 	{
-		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
 		DarkMode = await scope.ServiceProvider.GetRequiredService<ILocalStorageService>().GetItemAsync<bool>("darkmode");
 		DarkModeToggle?.Invoke();
 	}
@@ -26,7 +26,7 @@ public sealed class DarkModeManager
 	{
 		DarkMode = !DarkMode;
 		DarkModeToggle?.Invoke();
-		using IServiceScope scope = _scopeFactory.CreateScope();
+		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
 		await scope.ServiceProvider.GetRequiredService<ILocalStorageService>().SetItemAsync("darkmode", DarkMode);
 	}
 }
