@@ -1,8 +1,4 @@
 ﻿@page "/"
-@using Clubber.Web.Client.Services
-@implements IDisposable
-@* ReSharper disable once InconsistentNaming *@
-@inject DarkModeManager DMM
 
 <PageTitle>Clubber - Home</PageTitle>
 
@@ -67,23 +63,3 @@
 		</div>
 	</div>
 </div>
-
-@code
-{
-	private bool _darkMode;
-
-	protected override Task OnInitializedAsync()
-	{
-		_darkMode = DMM.DarkMode;
-		DMM.DarkModeToggle += OnDmmOnDarkModeToggle;
-		return base.OnInitializedAsync();
-	}
-
-	private void OnDmmOnDarkModeToggle()
-	{
-		_darkMode = DMM.DarkMode;
-		StateHasChanged();
-	}
-
-	public void Dispose() => DMM.DarkModeToggle -= OnDmmOnDarkModeToggle;
-}
