@@ -6,7 +6,6 @@ using Clubber.Domain.Services;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace Clubber.Domain.Helpers;
@@ -14,19 +13,17 @@ namespace Clubber.Domain.Helpers;
 public class DatabaseHelper : IDatabaseHelper
 {
 	private readonly IWebService _webService;
-	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly DbService _dbContext;
 
-	public DatabaseHelper(IWebService webService, IServiceScopeFactory scopeFactory)
+	public DatabaseHelper(IWebService webService, DbService dbContext)
 	{
 		_webService = webService;
-		_scopeFactory = scopeFactory;
+		_dbContext = dbContext;
 	}
 
 	public async Task<List<DdUser>> GetEntireDatabase()
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return dbContext.DdPlayers.AsNoTracking().ToList();
+		return await _dbContext.DdPlayers.AsNoTracking().ToListAsync();
 	}
 
 	public async Task<Result> RegisterUser(uint lbId, SocketGuildUser user)
@@ -37,10 +34,9 @@ public class DatabaseHelper : IDatabaseHelper
 
 			EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 			DdUser newDdUser = new(user.Id, lbPlayer.Id);
-			await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-			await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-			await dbContext.AddAsync(newDdUser);
-			await dbContext.SaveChangesAsync();
+
+			await _dbContext.AddAsync(newDdUser);
+			await _dbContext.SaveChangesAsync();
 			return Result.Success();
 		}
 		catch (Exception ex)
@@ -57,29 +53,25 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public async Task<Result> RegisterTwitch(ulong userId, string twitchUsername)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		if (await dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
+		if (await _dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
 		{
 			return Result.Failure("Couldn't find user in database.");
 		}
 
 		ddUser.TwitchUsername = twitchUsername;
-		await dbContext.SaveChangesAsync();
+		await _dbContext.SaveChangesAsync();
 		return Result.Success();
 	}
 
 	public async Task<Result> UnregisterTwitch(ulong userId)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		if (await dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
+		if (await _dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
 		{
 			return Result.Failure("Couldn't find user in database.");
 		}
 
 		ddUser.TwitchUsername = null;
-		await dbContext.SaveChangesAsync();
+		await _dbContext.SaveChangesAsync();
 		return Result.Success(ddUser);
 	}
 
@@ -94,72 +86,54 @@ public class DatabaseHelper : IDatabaseHelper
 			return false;
 		}
 
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		dbContext.Remove(toRemove);
-		await dbContext.SaveChangesAsync();
+		_dbContext.Remove(toRemove);
+		await _dbContext.SaveChangesAsync();
 		return true;
 	}
 
 	public async Task<DdUser?> GetDdUserBy(int lbId)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdPlayers.FindAsync(lbId);
+		return await _dbContext.DdPlayers.FindAsync(lbId);
 	}
 
 	public async Task<DdUser?> GetDdUserBy(ulong discordId)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.DiscordId == discordId);
+		return await _dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.DiscordId == discordId);
 	}
 
 	public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		await dbContext.LeaderboardCache.ExecuteDeleteAsync();
-		await dbContext.LeaderboardCache.AddRangeAsync(newEntries);
-		await dbContext.SaveChangesAsync();
+		await _dbContext.LeaderboardCache.ExecuteDeleteAsync();
+		await _dbContext.LeaderboardCache.AddRangeAsync(newEntries);
+		await _dbContext.SaveChangesAsync();
 	}
 
 	public async Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-
 		DdNewsItem newItem = new(oldEntry.Id, oldEntry, newEntry, DateTime.UtcNow, nth);
-		await dbContext.DdNews.AddAsync(newItem);
-		await dbContext.SaveChangesAsync();
+		await _dbContext.DdNews.AddAsync(newItem);
+		await _dbContext.SaveChangesAsync();
 	}
 
 	public async Task CleanUpNewsItems()
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-
 		DateTime utcNow = DateTime.UtcNow;
-		IQueryable<DdNewsItem> toRemove = dbContext.DdNews.Where(ddn => utcNow - ddn.TimeOfOccurenceUtc >= TimeSpan.FromDays(1));
+		IQueryable<DdNewsItem> toRemove = _dbContext.DdNews.Where(ddn => utcNow - ddn.TimeOfOccurenceUtc >= TimeSpan.FromDays(1));
 		if (toRemove.Any())
 		{
-			dbContext.DdNews.RemoveRange(toRemove);
-			await dbContext.SaveChangesAsync();
+			_dbContext.DdNews.RemoveRange(toRemove);
+			await _dbContext.SaveChangesAsync();
 		}
 	}
 
 	public async Task<bool> TwitchUsernameIsRegistered(string twitchUsername)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.TwitchUsername == twitchUsername) is not null;
+		return await _dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.TwitchUsername == twitchUsername) is not null;
 	}
 
 	public async Task<BestSplit[]> GetBestSplits()
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.BestSplits.AsNoTracking().OrderBy(s => s.Time).ToArrayAsync();
+		return await _dbContext.BestSplits.AsNoTracking().OrderBy(s => s.Time).ToArrayAsync();
 	}
 
 	/// <summary>
@@ -168,9 +142,7 @@ public class DatabaseHelper : IDatabaseHelper
 	/// <returns>Tuple containing all the old best splits and the updated new splits.</returns>
 	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(Split[] splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		BestSplit[] currentBestSplits = await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
+		BestSplit[] currentBestSplits = await _dbContext.BestSplits.AsNoTracking().ToArrayAsync();
 		List<BestSplit> superiorNewSplits = new();
 		foreach (Split newSplit in splitsToBeChecked)
 		{
@@ -187,12 +159,12 @@ public class DatabaseHelper : IDatabaseHelper
 			if (currentBestSplit is null)
 			{
 				superiorNewSplits.Add(newBest);
-				await dbContext.BestSplits.AddAsync(newBest);
+				await _dbContext.BestSplits.AddAsync(newBest);
 			}
 			else if (newSplit.Value > currentBestSplit.Value)
 			{
 				superiorNewSplits.Add(newBest);
-				dbContext.BestSplits.Update(newBest);
+				_dbContext.BestSplits.Update(newBest);
 			}
 		}
 
@@ -201,20 +173,18 @@ public class DatabaseHelper : IDatabaseHelper
 			return (currentBestSplits, superiorNewSplits.ToArray());
 		}
 
-		await dbContext.SaveChangesAsync();
+		await _dbContext.SaveChangesAsync();
 		return (currentBestSplits, superiorNewSplits.ToArray());
 	}
 
 	public async Task<(HomingPeakRun[] OldTopPeaks, HomingPeakRun? NewPeakRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked)
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		HomingPeakRun[] currentTopPeaks = await dbContext.TopHomingPeaks
+		HomingPeakRun[] currentTopPeaks = await _dbContext.TopHomingPeaks
 			.AsNoTracking()
 			.OrderByDescending(thp => thp.HomingPeak)
 			.ToArrayAsync();
 
-		HomingPeakRun? oldPlayerRun = await dbContext.TopHomingPeaks.FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
+		HomingPeakRun? oldPlayerRun = await _dbContext.TopHomingPeaks.FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
 		if (oldPlayerRun != null)
 		{
 			if (runToBeChecked.HomingPeak > oldPlayerRun.HomingPeak)
@@ -232,19 +202,20 @@ public class DatabaseHelper : IDatabaseHelper
 		}
 		else
 		{
-			EntityEntry<HomingPeakRun> response = await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
+			EntityEntry<HomingPeakRun> response = await _dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
 			Log.Information("Added new top homing peak run:\n{@NewRun}", response.Entity);
 		}
 
-		await dbContext.SaveChangesAsync();
+		await _dbContext.SaveChangesAsync();
 
 		return (currentTopPeaks, runToBeChecked);
 	}
 
 	public async Task<HomingPeakRun[]> GetTopHomingPeaks()
 	{
-		await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.TopHomingPeaks.AsNoTracking().OrderByDescending(pr => pr.HomingPeak).ToArrayAsync();
+		return await _dbContext.TopHomingPeaks
+			.AsNoTracking()
+			.OrderByDescending(pr => pr.HomingPeak)
+			.ToArrayAsync();
 	}
 }

@@ -63,7 +63,7 @@ internal static class Program
 		builder.Services.AddTransient<IWebService, WebService>();
 
 		builder.Services.AddHttpClient();
-		builder.Services.AddDbContext<DbService>();
+		builder.Services.AddDbContext<DbService>(ServiceLifetime.Transient);
 
 		if (builder.Environment.IsProduction())
 		{
