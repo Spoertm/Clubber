@@ -63,7 +63,11 @@ internal static class Program
 		builder.Services.AddTransient<IWebService, WebService>();
 
 		builder.Services.AddHttpClient();
-		builder.Services.AddDbContext<AppDbContext>(ServiceLifetime.Transient);
+		builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
+		{
+			string connectionString = Environment.GetEnvironmentVariable("PostgresConnectionString") ?? throw new("Envvar PostgresConnectionString not found.");
+			optionsBuilder.UseNpgsql(connectionString);
+		}, ServiceLifetime.Transient);
 
 		if (builder.Environment.IsProduction())
 		{

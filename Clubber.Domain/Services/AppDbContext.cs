@@ -8,20 +8,20 @@ namespace Clubber.Domain.Services;
 
 public class AppDbContext : DbContext
 {
+	public AppDbContext()
+	{
+	}
+
+	public AppDbContext(DbContextOptions options) : base(options)
+	{
+	}
+
 	public DbSet<ClubberDbConfig> ClubberConfig => Set<ClubberDbConfig>();
 	public DbSet<EntryResponse> LeaderboardCache => Set<EntryResponse>();
 	public DbSet<DdUser> DdPlayers => Set<DdUser>();
 	public DbSet<DdNewsItem> DdNews => Set<DdNewsItem>();
 	public DbSet<BestSplit> BestSplits => Set<BestSplit>();
 	public DbSet<HomingPeakRun> TopHomingPeaks => Set<HomingPeakRun>();
-
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	{
-		string? postgresConnectionString = Environment.GetEnvironmentVariable("PostgresConnectionString");
-		ArgumentException.ThrowIfNullOrEmpty(postgresConnectionString);
-
-		optionsBuilder.UseNpgsql(postgresConnectionString);
-	}
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
