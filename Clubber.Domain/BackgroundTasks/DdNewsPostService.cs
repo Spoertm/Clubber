@@ -41,12 +41,12 @@ public class DdNewsPostService : AbstractBackgroundService
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		await using AppDbContext appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 		IWebService webService = scope.ServiceProvider.GetRequiredService<IWebService>();
 
 		await databaseHelper.CleanUpNewsItems();
 		_ddNewsChannel ??= discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
-		List<EntryResponse> oldEntries = dbContext.LeaderboardCache.AsNoTracking().ToList();
+		List<EntryResponse> oldEntries = appDbContext.LeaderboardCache.AsNoTracking().ToList();
 		List<EntryResponse> newEntries = await webService.GetSufficientLeaderboardEntries(_minimumScore);
 
 		if (newEntries.Count == 0)

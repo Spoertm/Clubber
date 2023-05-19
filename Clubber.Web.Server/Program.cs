@@ -63,7 +63,7 @@ internal static class Program
 		builder.Services.AddTransient<IWebService, WebService>();
 
 		builder.Services.AddHttpClient();
-		builder.Services.AddDbContext<DbService>(ServiceLifetime.Transient);
+		builder.Services.AddDbContext<AppDbContext>(ServiceLifetime.Transient);
 
 		if (builder.Environment.IsProduction())
 		{
@@ -151,8 +151,8 @@ internal static class Program
 
 	private static void SetConfigFromDb(WebApplicationBuilder builder)
 	{
-		using DbService dbService = new();
-		string jsonConfig = dbService.ClubberConfig.AsNoTracking().First().JsonConfig;
+		using AppDbContext appDbContext = new();
+		string jsonConfig = appDbContext.ClubberConfig.AsNoTracking().First().JsonConfig;
 		string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DbConfig.json");
 		File.WriteAllText(configPath, jsonConfig);
 		builder.Configuration.AddJsonFile(configPath);

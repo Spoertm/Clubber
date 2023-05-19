@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Clubber.Domain.Services;
 
-public class DbService : DbContext
+public class AppDbContext : DbContext
 {
 	public DbSet<ClubberDbConfig> ClubberConfig => Set<ClubberDbConfig>();
 	public DbSet<EntryResponse> LeaderboardCache => Set<EntryResponse>();
