@@ -99,9 +99,9 @@ public static class EmbedHelper
 ⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
 🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
 🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
-🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
 🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
+🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
 😵 Total deaths: {lbPlayer.DeathsTotal}
 😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}")
