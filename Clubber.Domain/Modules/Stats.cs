@@ -85,18 +85,24 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
 	{
 		uint lbPlayerId = (uint)ddUser.LeaderboardId;
-		List<EntryResponse> lbPlayers = await _webService.GetLbPlayers(new[] { lbPlayerId });
+
+		Task<List<EntryResponse>> playerEntryTask = _webService.GetLbPlayers(new[] { lbPlayerId });
+		Task<DateTime?> playerPbDateTimeTask = _webService.GetPlayerPbDateTime((int)lbPlayerId);
+		await Task.WhenAll(playerEntryTask, playerPbDateTimeTask);
+
+		EntryResponse playerEntry = (await playerEntryTask)[0];
+		DateTime? playerPbDatetime = await playerPbDateTimeTask;
 
 		Embed statsEmbed;
 		if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) ||
 			Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase) ||
 			Context.Message.Content.StartsWith("+mef", StringComparison.InvariantCultureIgnoreCase))
 		{
-			statsEmbed = EmbedHelper.FullStats(lbPlayers[0], user);
+			statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerPbDatetime);
 		}
 		else
 		{
-			statsEmbed = EmbedHelper.Stats(lbPlayers[0], user);
+			statsEmbed = EmbedHelper.Stats(playerEntry, user, playerPbDatetime);
 		}
 
 		await ReplyAsync(embed: statsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
