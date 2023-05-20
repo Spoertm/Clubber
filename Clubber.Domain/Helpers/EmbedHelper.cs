@@ -60,51 +60,59 @@ public static class EmbedHelper
 	}
 
 	/// <summary>
-	/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats(EntryResponse, SocketGuildUser)" />.
+	/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats" />.
 	/// </summary>
-	public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
+	public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser, DateTime? playerPbDatetime)
 	{
+		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:u}";
+
 		return new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription($@"✏️ Leaderboard name: {lbPlayer.Username}
-🛂 Leaderboard ID: {lbPlayer.Id}
-⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
-🥇 Rank: {lbPlayer.Rank}
-💀 Kills: {lbPlayer.Kills}
-♦️ Gems: {lbPlayer.Gems}
-🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+			.WithDescription($"""
+				✏️ Leaderboard name: {lbPlayer.Username}
+				🛂 Leaderboard ID: {lbPlayer.Id}
+				⏱ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
+				🥇 Rank: {lbPlayer.Rank}
+				💀 Kills: {lbPlayer.Kills}
+				♦️ Gems: {lbPlayer.Gems}
+				🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 
-• For full stats, use `statsf`.")
+				• For full stats, use `statsf`.
+				""")
 			.Build();
 	}
 
 	/// <summary>
-	/// Returns full stats Embed. For the default stats Embed use <see cref="Stats(EntryResponse, SocketGuildUser)" />.
+	/// Returns full stats Embed. For the default stats Embed use <see cref="Stats" />.
 	/// </summary>
-	public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser)
+	public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, DateTime? playerPbDatetime)
 	{
+		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:u}";
 		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
+
 		return new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription($@"✏️ Leaderboard name: {lbPlayer.Username}
-🛂 Leaderboard ID: {lbPlayer.Id}
-⏱ Score: {lbPlayer.Time / 10000d:0.0000}s
-🥇 Rank: {lbPlayer.Rank}
-💀 Kills: {lbPlayer.Kills}
-💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
-♦️ Gems: {lbPlayer.Gems}
-♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
-⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
-🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
-🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
-🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
-🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
-🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
-🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
-😵 Total deaths: {lbPlayer.DeathsTotal}
-😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}")
+			.WithDescription($"""
+				✏️ Leaderboard name: {lbPlayer.Username}
+				🛂 Leaderboard ID: {lbPlayer.Id}
+				⏱ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
+				🥇 Rank: {lbPlayer.Rank}
+				💀 Kills: {lbPlayer.Kills}
+				💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
+				♦️ Gems: {lbPlayer.Gems}
+				♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
+				⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
+				🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
+				🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
+				🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
+				🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
+				🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+				🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
+				😵 Total deaths: {lbPlayer.DeathsTotal}
+				😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}
+				""")
 			.Build();
 	}
 

@@ -10,5 +10,7 @@ public interface IWebService
 
 	Task<string?> GetCountryCodeForplayer(int lbId);
 
+	Task<DateTime?> GetPlayerPbDateTime(int lbId);
+
 	Task<DdStatsFullRunResponse> GetDdstatsResponse(string url);
 }

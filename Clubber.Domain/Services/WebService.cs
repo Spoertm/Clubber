@@ -1,5 +1,6 @@
 ﻿using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
 using Newtonsoft.Json;
 using Serilog;
 using System.Text;
@@ -164,6 +165,14 @@ public class WebService : IWebService
 		string url = $"https://devildaggers.info/api/clubber/players/{lbId}/country-code";
 		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
 		return JsonConvert.DeserializeObject<dynamic>(responseStr)?.countryCode;
+	}
+
+	public async Task<DateTime?> GetPlayerPbDateTime(int leaderboardId)
+	{
+		string url = $"https://devildaggers.info/api/players/{leaderboardId}/history";
+		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
+		GetPlayerHistory? playerHistory = JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
+		return playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
 	}
 
 	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(string url)
