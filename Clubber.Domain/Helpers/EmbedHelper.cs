@@ -64,7 +64,7 @@ public static class EmbedHelper
 	/// </summary>
 	public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser, DateTime? playerPbDatetime)
 	{
-		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:u}";
+		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
 
 		return new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
@@ -88,7 +88,7 @@ public static class EmbedHelper
 	/// </summary>
 	public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, DateTime? playerPbDatetime)
 	{
-		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:u}";
+		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
 		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 
 		return new EmbedBuilder()
