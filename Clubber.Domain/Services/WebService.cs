@@ -169,7 +169,7 @@ public class WebService : IWebService
 
 	public async Task<DateTime?> GetPlayerPbDateTime(int leaderboardId)
 	{
-		string url = $"https://devildaggers.info/api/players/{leaderboardId}/history";
+		string url = $"https://devildaggers.info/api/clubber/players/{leaderboardId}/history";
 		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
 		GetPlayerHistory? playerHistory = JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
 		return playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
