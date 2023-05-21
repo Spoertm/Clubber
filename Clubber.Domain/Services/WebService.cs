@@ -167,12 +167,11 @@ public class WebService : IWebService
 		return JsonConvert.DeserializeObject<dynamic>(responseStr)?.countryCode;
 	}
 
-	public async Task<DateTime?> GetPlayerPbDateTime(int leaderboardId)
+	public async Task<GetPlayerHistory?> GetPlayerHistory(int leaderboardId)
 	{
-		string url = $"https://devildaggers.info/api/players/{leaderboardId}/history";
+		string url = $"https://devildaggers.info/api/clubber/players/{leaderboardId}/history";
 		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
-		GetPlayerHistory? playerHistory = JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
-		return playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
+		return JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
 	}
 
 	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(string url)

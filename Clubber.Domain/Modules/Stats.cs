@@ -1,6 +1,7 @@
 ﻿using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
 using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
@@ -87,22 +88,22 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 		uint lbPlayerId = (uint)ddUser.LeaderboardId;
 
 		Task<List<EntryResponse>> playerEntryTask = _webService.GetLbPlayers(new[] { lbPlayerId });
-		Task<DateTime?> playerPbDateTimeTask = _webService.GetPlayerPbDateTime((int)lbPlayerId);
-		await Task.WhenAll(playerEntryTask, playerPbDateTimeTask);
+		Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory((int)lbPlayerId);
+		await Task.WhenAll(playerEntryTask, playerHistoryTask);
 
 		EntryResponse playerEntry = (await playerEntryTask)[0];
-		DateTime? playerPbDatetime = await playerPbDateTimeTask;
+		GetPlayerHistory? playerHistory = await playerHistoryTask;
 
 		Embed statsEmbed;
 		if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) ||
 			Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase) ||
 			Context.Message.Content.StartsWith("+mef", StringComparison.InvariantCultureIgnoreCase))
 		{
-			statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerPbDatetime);
+			statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
 		}
 		else
 		{
-			statsEmbed = EmbedHelper.Stats(playerEntry, user, playerPbDatetime);
+			statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
 		}
 
 		await ReplyAsync(embed: statsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
