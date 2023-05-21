@@ -1,6 +1,7 @@
 using Clubber.Domain.Extensions;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -62,8 +63,9 @@ public static class EmbedHelper
 	/// <summary>
 	/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats" />.
 	/// </summary>
-	public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser, DateTime? playerPbDatetime)
+	public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
 	{
+		DateTime? playerPbDatetime = playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
 		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
 
 		return new EmbedBuilder()
@@ -72,13 +74,15 @@ public static class EmbedHelper
 			.WithDescription($"""
 				✏️ Leaderboard name: {lbPlayer.Username}
 				🛂 Leaderboard ID: {lbPlayer.Id}
-				⏱ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
+				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
 				🥇 Rank: {lbPlayer.Rank}
 				💀 Kills: {lbPlayer.Kills}
 				♦️ Gems: {lbPlayer.Gems}
 				🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 
 				• For full stats, use `statsf`.
+
+				{Format.Url($"{lbPlayer.Username} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
 				""")
 			.Build();
 	}
@@ -86,24 +90,25 @@ public static class EmbedHelper
 	/// <summary>
 	/// Returns full stats Embed. For the default stats Embed use <see cref="Stats" />.
 	/// </summary>
-	public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, DateTime? playerPbDatetime)
+	public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
 	{
-		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
+		GetPlayerHistoryScoreEntry? playerPb = playerHistory?.ScoreHistory.LastOrDefault();
+		string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
 		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 
-		return new EmbedBuilder()
+		EmbedBuilder? embedBuilder = new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription($"""
 				✏️ Leaderboard name: {lbPlayer.Username}
 				🛂 Leaderboard ID: {lbPlayer.Id}
-				⏱ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
-				🥇 Rank: {lbPlayer.Rank}
+				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s
+				🥇 Rank: {lbPlayer.Rank} {peakRankFormatted}
 				💀 Kills: {lbPlayer.Kills}
 				💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
 				♦️ Gems: {lbPlayer.Gems}
 				♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
-				⏱ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
+				⏲️ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
 				🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
 				🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
 				🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
@@ -112,8 +117,27 @@ public static class EmbedHelper
 				🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
 				😵 Total deaths: {lbPlayer.DeathsTotal}
 				😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}
-				""")
-			.Build();
+				{(playerPb is null ? null : "\u200B")}
+				""");
+
+		if (playerPb != null)
+		{
+			embedBuilder.AddField("📅 PB achieved on", $"{playerPb.DateTime:yyyy-MM-dd}", true);
+		}
+
+		if (playerHistory?.ScoreHistory.Count > 1)
+		{
+			embedBuilder.AddField("🥈 Previous PB", $"{playerHistory.ScoreHistory[^2].Time:0.0000}s", true);
+		}
+
+		if (playerHistory?.ActivityHistory.LastOrDefault(h => h.DeathsIncrement != 0 || h.TimeIncrement != 0) is { } lastActivity)
+		{
+			embedBuilder.AddField("💤 Last active", $"{lastActivity.DateTime:yyyy-MM-dd}", true);
+		}
+
+		embedBuilder.AddField("\u200B", Format.Url($"{lbPlayer.Username} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
+
+		return embedBuilder.Build();
 	}
 
 	public static Embed GenericHelp(ICommandContext context, CommandService service)

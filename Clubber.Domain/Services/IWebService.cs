@@ -1,4 +1,5 @@
 ﻿using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
 
 namespace Clubber.Domain.Services;
 
@@ -10,7 +11,7 @@ public interface IWebService
 
 	Task<string?> GetCountryCodeForplayer(int lbId);
 
-	Task<DateTime?> GetPlayerPbDateTime(int lbId);
+	Task<GetPlayerHistory?> GetPlayerHistory(int lbId);
 
 	Task<DdStatsFullRunResponse> GetDdstatsResponse(string url);
 }
