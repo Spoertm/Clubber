@@ -55,14 +55,14 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 			Source = $"https://ddstats.com/games/{ddStatsRun.GameInfo.Id}",
 		};
 
-		(HomingPeakRun[] OldTopPeaks, HomingPeakRun? NewPeakRun) response = await _databaseHelper.UpdateTopHomingPeaksIfNeeded(possibleNewTopPeakRun);
-		if (response.NewPeakRun is null)
+		(HomingPeakRun? OldRun, HomingPeakRun? NewRun) response = await _databaseHelper.UpdateTopHomingPeaksIfNeeded(possibleNewTopPeakRun);
+		if (response.NewRun is null)
 		{
 			await InlineReplyAsync("No updates were needed.");
 			return;
 		}
 
-		Embed updatedRolesEmbed = EmbedHelper.UpdateTopPeakRuns(response.OldTopPeaks, response.NewPeakRun);
+		Embed updatedRolesEmbed = EmbedHelper.UpdateTopPeakRuns((Context.User as IGuildUser)!, response.NewRun, response.OldRun);
 		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
 	}
 
