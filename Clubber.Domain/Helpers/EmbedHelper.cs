@@ -71,7 +71,8 @@ public static class EmbedHelper
 		return new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription($"""
+			.WithDescription(
+				$"""
 				✏️ Leaderboard name: {lbPlayer.Username}
 				🛂 Leaderboard ID: {lbPlayer.Id}
 				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
@@ -99,7 +100,8 @@ public static class EmbedHelper
 		EmbedBuilder? embedBuilder = new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription($"""
+			.WithDescription(
+				$"""
 				✏️ Leaderboard name: {lbPlayer.Username}
 				🛂 Leaderboard ID: {lbPlayer.Id}
 				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s
@@ -343,11 +345,11 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		string name = user.Nickname ?? user.GlobalName ?? user.Username;
 		string formattedName = name.EndsWith("s") ? name + "'" : name + "'s";
 		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle($"Updated {formattedName} homing peak")
-			.WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());;
+			.WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
 
 		if (oldRun != null)
 		{
+			embedBuilder.WithTitle($"Updated {formattedName} homing peak");
 			int homingDiff = newRun.HomingPeak - oldRun.HomingPeak;
 			embedBuilder.WithDescription(
 				$"""
@@ -357,11 +359,8 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		}
 		else
 		{
-			embedBuilder.WithDescription(
-				$"""
-				## [{newRun.HomingPeak}]({newRun.Source})")
-				"""
-			);
+			embedBuilder.WithTitle($"Added {formattedName} homing peak");
+			embedBuilder.WithDescription($"## [{newRun.HomingPeak}]({newRun.Source}) <:peak:884397348481019924>");
 		}
 
 		return embedBuilder.Build();
