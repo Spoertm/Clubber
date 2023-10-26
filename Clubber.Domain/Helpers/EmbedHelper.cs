@@ -11,8 +11,6 @@ namespace Clubber.Domain.Helpers;
 
 public static class EmbedHelper
 {
-	private static int _maxNameWidth = 10;
-
 	private static readonly Dictionary<int, string> _deathtypeDict = new()
 	{
 		[0] = "FALLEN",
@@ -37,7 +35,7 @@ public static class EmbedHelper
 	public static Embed UpdateRoles(UpdateRolesResponse response)
 	{
 		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle($"Updated roles for {response.User!.Username}")
+			.WithTitle($"Updated roles for {response.User!.AvailableName()}")
 			.WithDescription($"User: {response.User!.Mention}")
 			.WithThumbnailUrl(response.User!.GetAvatarUrl() ?? response.User!.GetDefaultAvatarUrl());
 
@@ -69,9 +67,10 @@ public static class EmbedHelper
 		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
 
 		return new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
+			.WithTitle($"Stats for {guildUser?.AvailableName() ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription($"""
+			.WithDescription(
+				$"""
 				✏️ Leaderboard name: {lbPlayer.Username}
 				🛂 Leaderboard ID: {lbPlayer.Id}
 				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
@@ -96,10 +95,11 @@ public static class EmbedHelper
 		string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
 		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 
-		EmbedBuilder? embedBuilder = new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+			.WithTitle($"Stats for {guildUser.AvailableName() ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription($"""
+			.WithDescription(
+				$"""
 				✏️ Leaderboard name: {lbPlayer.Username}
 				🛂 Leaderboard ID: {lbPlayer.Id}
 				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s
@@ -210,7 +210,7 @@ public static class EmbedHelper
 
 		IEnumerable<SocketGuildUser> socketGuildUsers = userMatches as SocketGuildUser[] ?? userMatches.ToArray();
 		string userFieldValue = string.Join("\n", socketGuildUsers.Select(um => $"- {FormatUser(um)}"));
-		string discordIdFieldValue = string.Join("\n", socketGuildUsers.Select(um => um.Id));
+		string discordIdFieldValue = string.Join("\n", socketGuildUsers.Select(um => $"- {um.Id}"));
 
 		if (userFieldValue.Length <= 1024 && discordIdFieldValue.Length <= 1024)
 		{
@@ -265,42 +265,33 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 	public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
 	{
-		int oldSplitsDescriptionPadding = oldBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
-		int newSplitsDescriptionPadding = updatedBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
-		int descPadding = Math.Max(oldSplitsDescriptionPadding, newSplitsDescriptionPadding);
-
-		StringBuilder sb = new($"```diff\n{"Name",-8}{"Time",-6}{"Old value",-11}{"New value",-11}{"Description".PadLeft(descPadding)}");
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Updated best splits");
+		StringBuilder sb = new($"`  {"Split",-9}{"Old",-8}New` Run");
 
 		foreach ((string Name, int Time) split in Split.V3Splits)
 		{
 			BestSplit? oldBestSplit = Array.Find(oldBestSplits, obs => obs.Name == split.Name);
 			BestSplit? newBestSplit = Array.Find(updatedBestSplits, ubs => ubs.Name == split.Name);
-			string desc = newBestSplit?.Description ?? oldBestSplit?.Description ?? "N/A";
 			sb.Append((oldBestSplit, newBestSplit) switch
 			{
-				({ }, { })   => $"\n+ {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {newBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
-				({ }, null)  => $"\n= {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {oldBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
-				(null, { })  => $"\n+ {split.Name,-6}{split.Time,4}  {"N/A",9}  {newBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
-				(null, null) => $"\n= {split.Name,-6}{split.Time,4}  {"N/A",9}  {"N/A",9}  {desc.PadLeft(descPadding)}",
+				({ }, { })   => $"\n**`\u22c6 {split.Name,-7} {oldBestSplit.Value,4}  {newBestSplit.Value,6}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
+				({ }, null)  => $"\n`  {split.Name,-7} {oldBestSplit.Value,4}  {oldBestSplit.Value,6}` [{oldBestSplit.Description}]({oldBestSplit.GameInfo?.Url})",
+				(null, { })  => $"\n**`\u22c6 {split.Name,-7} {"N/A",4}  {newBestSplit.Value,6}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
+				(null, null) => $"\n`  {split.Name,-7} {"N/A",4}  {"N/A",6}` N/A",
 			});
 		}
 
-		embedBuilder.Description = sb.Append("```").ToString();
-		return embedBuilder.Build();
+		return new EmbedBuilder()
+			.WithTitle("Updated best splits")
+			.WithDescription(sb.ToString())
+			.Build();
 	}
 
 	public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
 	{
-		int descPadding = currentBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
 		StringBuilder sb = new();
 		sb.Append("Theoretical best peak: ")
 			.AppendLine(GetTheoreticalBestPeak(currentBestSplits).ToString())
-			.Append($"```{"Name",-6}{"Time",-6}{"Split",-7}{"Description".PadLeft(descPadding)}");
-
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Current best splits");
+			.Append($"\n`{"Name",-7}{"Time",-7}{"Split",-5}` Run");
 
 		foreach ((string Name, int Time) split in Split.V3Splits)
 		{
@@ -308,15 +299,18 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 			string value = "N/A";
 			string desc = currentBestSplit?.Description ?? "N/A";
+			string descUrl = currentBestSplit is null ? desc : $"[{desc}]({currentBestSplit.GameInfo?.Url})";
 
 			if (currentBestSplit is not null)
 				value = currentBestSplit.Name == "350" ? (currentBestSplit.Value - 105).ToString() : currentBestSplit.Value.ToString();
 
-			sb.Append($"\n{split.Name,-6}{split.Time,4}  {value,5}  {desc.PadLeft(descPadding)}");
+			sb.Append($"\n`{split.Name,-7}{split.Time,4}  {value,6}` {descUrl}");
 		}
 
-		embedBuilder.Description = sb.Append("```").ToString();
-		return embedBuilder.Build();
+		return new EmbedBuilder()
+			.WithTitle("Current best splits")
+			.WithDescription(sb.ToString())
+			.Build();
 	}
 
 	private static int GetTheoreticalBestPeak(BestSplit[] bestSplits)
@@ -338,69 +332,42 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		return highest;
 	}
 
-	public static Embed UpdateTopPeakRuns(HomingPeakRun[] oldTopPeaks, HomingPeakRun updatedTopPeakRun)
+	public static Embed UpdateTopPeakRuns(IGuildUser user, HomingPeakRun newRun, HomingPeakRun? oldRun = null)
 	{
-		int oldSplitsDescriptionPadding = oldTopPeaks.MaxBy(otp => otp.Source.Length)?.Source.Length ?? 11;
-		int descPadding = Math.Max(oldSplitsDescriptionPadding, updatedTopPeakRun.Source.Length);
-		int maxNumberDigits = oldTopPeaks.Length.ToString().Length;
-		int nameWidth = Math.Min(_maxNameWidth, oldTopPeaks.MaxBy(otp => otp.PlayerName.Length)!.PlayerName.Length);
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+			.WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
 
-		StringBuilder sb = new();
-		HomingPeakRun? oldPlayerRun = Array.Find(oldTopPeaks, otp => otp.PlayerLeaderboardId == updatedTopPeakRun.PlayerLeaderboardId);
-		if (oldPlayerRun != null)
+		if (oldRun != null)
 		{
-			sb.Append($"```diff\n  {"#".PadLeft(maxNumberDigits)}  {"Player".PadRight(nameWidth)}  Old peak  New peak  {"Source".PadLeft(7)}");
-			for (int i = 0; i < oldTopPeaks.Length; i++)
-			{
-				HomingPeakRun currentPeakRun = oldTopPeaks[i];
-				int nr = i + 1;
-				if (currentPeakRun == oldPlayerRun)
-					sb.Append($"\n+ {nr.ToString().PadLeft(maxNumberDigits)}  {updatedTopPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,8}  {updatedTopPeakRun.HomingPeak,8}  {updatedTopPeakRun.Source.PadLeft(descPadding)}");
-				else
-					sb.Append($"\n= {nr.ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,8}  {currentPeakRun.HomingPeak,8}  {currentPeakRun.Source.PadLeft(descPadding)}");
-			}
+			embedBuilder.WithTitle($"Updated {user.AvailableName()} homing peak");
+			int homingDiff = newRun.HomingPeak - oldRun.HomingPeak;
+			embedBuilder.WithDescription(
+				$"""
+				## [{oldRun.HomingPeak}]({oldRun.Source}) → [{newRun.HomingPeak}]({newRun.Source}) (+{homingDiff})
+				"""
+			);
 		}
 		else
 		{
-			sb.Append($"```diff\n{"#".PadLeft(maxNumberDigits + 2)}  {"Player".PadRight(nameWidth)}  Peak  {"Source".PadLeft(descPadding)}");
-			HomingPeakRun[] newEntries = oldTopPeaks.Append(updatedTopPeakRun).OrderByDescending(otp => otp.HomingPeak).ToArray();
-			for (int i = 0; i < newEntries.Length; i++)
-			{
-				HomingPeakRun currentPeakRun = newEntries[i];
-				string entry = $"{(i + 1).ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,4}  {currentPeakRun.Source.PadLeft(descPadding)}";
-				if (currentPeakRun == updatedTopPeakRun)
-					sb.Append($"\n+ {entry}");
-				else
-					sb.Append($"\n= {entry}");
-			}
+			embedBuilder.WithTitle($"Added {user.AvailableName()} homing peak");
+			embedBuilder.WithDescription($"## [{newRun.HomingPeak}]({newRun.Source}) <:peak:884397348481019924>");
 		}
-
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Updated top homing peaks")
-			.WithDescription(sb.Append("```").ToString());
 
 		return embedBuilder.Build();
 	}
 
 	public static Embed CurrentTopPeakRuns(HomingPeakRun[] currentTopPeakRuns)
 	{
-		int descPadding = currentTopPeakRuns.MaxBy(obs => obs.Source.Length)?.Source.Length ?? 11;
-		int maxNumberDigits = currentTopPeakRuns.Length.ToString().Length;
-		int nameWidth = Math.Max(4, Math.Min(_maxNameWidth, currentTopPeakRuns.MaxBy(otp => otp.PlayerName.Length)!.PlayerName.Length));
-
 		StringBuilder sb = new();
-		sb.Append($"```{"#".PadLeft(maxNumberDigits)}  {"Player".PadRight(nameWidth)}  Peak   {"Source".PadLeft(descPadding)}");
-
 		for (int i = 0; i < currentTopPeakRuns.Length; i++)
 		{
 			HomingPeakRun currentPeakRun = currentTopPeakRuns[i];
-			sb.Append($"\n{(i + 1).ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,4}   {currentPeakRun.Source.PadLeft(descPadding)}");
+			sb.Append($"\n{i + 1}. [{currentPeakRun.HomingPeak}]({currentPeakRun.Source}) {currentPeakRun.PlayerName}");
 		}
 
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Current top homing peaks")
-			.WithDescription(sb.Append("```").ToString());
-
-		return embedBuilder.Build();
+		return new EmbedBuilder()
+			.WithTitle("Top homing peaks")
+			.WithDescription(sb.ToString())
+			.Build();
 	}
 }

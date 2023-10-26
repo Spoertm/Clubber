@@ -1,4 +1,7 @@
-﻿namespace Clubber.Domain.Extensions;
+﻿using Discord;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Clubber.Domain.Extensions;
 
 public static class ExtensionMethods
 {
@@ -34,5 +37,16 @@ public static class ExtensionMethods
 		}
 
 		return count;
+	}
+
+	[return: NotNullIfNotNull(nameof(guildUser))]
+	public static string? AvailableName(this IGuildUser? guildUser)
+	{
+		if (guildUser is null)
+		{
+			return null;
+		}
+
+		return guildUser.Nickname ?? guildUser.GlobalName ?? guildUser.Username;
 	}
 }

@@ -35,7 +35,7 @@ public interface IDatabaseHelper
 
 	Task<BestSplit[]> GetBestSplits();
 
-	Task<(HomingPeakRun[] OldTopPeaks, HomingPeakRun? NewPeakRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked);
+	Task<(HomingPeakRun? OldRun, HomingPeakRun? NewRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked);
 
 	Task<HomingPeakRun[]> GetTopHomingPeaks();
 }

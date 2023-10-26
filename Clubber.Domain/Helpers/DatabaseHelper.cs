@@ -177,27 +177,20 @@ public class DatabaseHelper : IDatabaseHelper
 		return (currentBestSplits, superiorNewSplits.ToArray());
 	}
 
-	public async Task<(HomingPeakRun[] OldTopPeaks, HomingPeakRun? NewPeakRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked)
+	public async Task<(HomingPeakRun? OldRun, HomingPeakRun? NewRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked)
 	{
-		HomingPeakRun[] currentTopPeaks = await _dbContext.TopHomingPeaks
-			.AsNoTracking()
-			.OrderByDescending(thp => thp.HomingPeak)
-			.ToArrayAsync();
-
-		HomingPeakRun? oldPlayerRun = await _dbContext.TopHomingPeaks.FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
-		if (oldPlayerRun != null)
+		HomingPeakRun? oldRun = await _dbContext.TopHomingPeaks.AsNoTracking().FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
+		if (oldRun != null)
 		{
-			if (runToBeChecked.HomingPeak > oldPlayerRun.HomingPeak)
+			if (runToBeChecked.HomingPeak > oldRun.HomingPeak)
 			{
-				oldPlayerRun.PlayerName = runToBeChecked.PlayerName;
-				oldPlayerRun.HomingPeak = runToBeChecked.HomingPeak;
-				oldPlayerRun.Source = runToBeChecked.Source;
-
+				runToBeChecked.Id = oldRun.Id;
+				_dbContext.TopHomingPeaks.Update(runToBeChecked);
 				Log.Information("Updating top homing peak for {PlayerName}:\n{@NewRun}", runToBeChecked.PlayerName, runToBeChecked);
 			}
 			else
 			{
-				return (currentTopPeaks, null);
+				return (oldRun, null);
 			}
 		}
 		else
@@ -208,7 +201,7 @@ public class DatabaseHelper : IDatabaseHelper
 
 		await _dbContext.SaveChangesAsync();
 
-		return (currentTopPeaks, runToBeChecked);
+		return (oldRun, runToBeChecked);
 	}
 
 	public async Task<HomingPeakRun[]> GetTopHomingPeaks()
