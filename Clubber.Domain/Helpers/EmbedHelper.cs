@@ -1,4 +1,3 @@
-using Clubber.Domain.Extensions;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -11,8 +10,6 @@ namespace Clubber.Domain.Helpers;
 
 public static class EmbedHelper
 {
-	private static int _maxNameWidth = 10;
-
 	private static readonly Dictionary<int, string> _deathtypeDict = new()
 	{
 		[0] = "FALLEN",
@@ -301,7 +298,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 			string value = "N/A";
 			string desc = currentBestSplit?.Description ?? "N/A";
-			string descUrl = currentBestSplit is null ? desc : $"[{desc}]({currentBestSplit?.GameInfo?.Url})";
+			string descUrl = currentBestSplit is null ? desc : $"[{desc}]({currentBestSplit.GameInfo?.Url})";
 
 			if (currentBestSplit is not null)
 				value = currentBestSplit.Name == "350" ? (currentBestSplit.Value - 105).ToString() : currentBestSplit.Value.ToString();
@@ -362,23 +359,16 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 	public static Embed CurrentTopPeakRuns(HomingPeakRun[] currentTopPeakRuns)
 	{
-		int descPadding = currentTopPeakRuns.MaxBy(obs => obs.Source.Length)?.Source.Length ?? 11;
-		int maxNumberDigits = currentTopPeakRuns.Length.ToString().Length;
-		int nameWidth = Math.Max(4, Math.Min(_maxNameWidth, currentTopPeakRuns.MaxBy(otp => otp.PlayerName.Length)!.PlayerName.Length));
-
 		StringBuilder sb = new();
-		sb.Append($"```{"#".PadLeft(maxNumberDigits)}  {"Player".PadRight(nameWidth)}  Peak   {"Source".PadLeft(descPadding)}");
-
 		for (int i = 0; i < currentTopPeakRuns.Length; i++)
 		{
 			HomingPeakRun currentPeakRun = currentTopPeakRuns[i];
-			sb.Append($"\n{(i + 1).ToString().PadLeft(maxNumberDigits)}  {currentPeakRun.PlayerName.Truncate(_maxNameWidth).PadRight(nameWidth)}  {currentPeakRun.HomingPeak,4}   {currentPeakRun.Source.PadLeft(descPadding)}");
+			sb.Append($"\n{i + 1}. [{currentPeakRun.HomingPeak}]({currentPeakRun.Source}) {currentPeakRun.PlayerName}");
 		}
 
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Current top homing peaks")
-			.WithDescription(sb.Append("```").ToString());
-
-		return embedBuilder.Build();
+		return new EmbedBuilder()
+			.WithTitle("Top homing peaks")
+			.WithDescription(sb.ToString())
+			.Build();
 	}
 }
