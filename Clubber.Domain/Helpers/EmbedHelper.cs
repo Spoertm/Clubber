@@ -267,7 +267,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 	public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
 	{
-		StringBuilder sb = new($"`  {"Split",-9}{"Old",-8}New Run`");
+		StringBuilder sb = new($"`  {"Split",-9}{"Old",-8}New` Run");
 
 		foreach ((string Name, int Time) split in Split.V3Splits)
 		{
@@ -278,7 +278,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 				({ }, { })   => $"\n**`\u22c6 {split.Name,-7} {oldBestSplit.Value,4}  {newBestSplit.Value,6}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
 				({ }, null)  => $"\n`  {split.Name,-7} {oldBestSplit.Value,4}  {oldBestSplit.Value,6}` [{oldBestSplit.Description}]({oldBestSplit.GameInfo?.Url})",
 				(null, { })  => $"\n**`\u22c6 {split.Name,-7} {"N/A",4}  {newBestSplit.Value,6}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
-				(null, null) => $"\n`  {split.Name,-7} {"N/A",4}  {"N/A",6} N/A`",
+				(null, null) => $"\n`  {split.Name,-7} {"N/A",4}  {"N/A",6}` N/A",
 			});
 		}
 
