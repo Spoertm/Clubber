@@ -210,7 +210,7 @@ public static class EmbedHelper
 
 		IEnumerable<SocketGuildUser> socketGuildUsers = userMatches as SocketGuildUser[] ?? userMatches.ToArray();
 		string userFieldValue = string.Join("\n", socketGuildUsers.Select(um => $"- {FormatUser(um)}"));
-		string discordIdFieldValue = string.Join("\n", socketGuildUsers.Select(um => um.Id));
+		string discordIdFieldValue = string.Join("\n", socketGuildUsers.Select(um => $"- {um.Id}"));
 
 		if (userFieldValue.Length <= 1024 && discordIdFieldValue.Length <= 1024)
 		{
