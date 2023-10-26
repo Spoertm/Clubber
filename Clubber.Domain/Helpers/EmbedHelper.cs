@@ -290,14 +290,10 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 	public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
 	{
-		int descPadding = currentBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
 		StringBuilder sb = new();
 		sb.Append("Theoretical best peak: ")
 			.AppendLine(GetTheoreticalBestPeak(currentBestSplits).ToString())
-			.Append($"```{"Name",-6}{"Time",-6}{"Split",-7}{"Description".PadLeft(descPadding)}");
-
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Current best splits");
+			.Append($"\n`{"Name",-7}{"Time",-7}{"Split",-5}` Run");
 
 		foreach ((string Name, int Time) split in Split.V3Splits)
 		{
@@ -305,15 +301,18 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 			string value = "N/A";
 			string desc = currentBestSplit?.Description ?? "N/A";
+			string descUrl = currentBestSplit is null ? desc : $"[{desc}]({currentBestSplit?.GameInfo?.Url})";
 
 			if (currentBestSplit is not null)
 				value = currentBestSplit.Name == "350" ? (currentBestSplit.Value - 105).ToString() : currentBestSplit.Value.ToString();
 
-			sb.Append($"\n{split.Name,-6}{split.Time,4}  {value,5}  {desc.PadLeft(descPadding)}");
+			sb.Append($"\n`{split.Name,-7}{split.Time,4}  {value,6}` {descUrl}");
 		}
 
-		embedBuilder.Description = sb.Append("```").ToString();
-		return embedBuilder.Build();
+		return new EmbedBuilder()
+			.WithTitle("Current best splits")
+			.WithDescription(sb.ToString())
+			.Build();
 	}
 
 	private static int GetTheoreticalBestPeak(BestSplit[] bestSplits)
