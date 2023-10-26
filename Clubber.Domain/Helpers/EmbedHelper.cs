@@ -337,9 +337,10 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 			.WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
 
+		string nameApostrophe = user.AvailableName().EndsWith("s") ? user.AvailableName() + "'" : user.AvailableName() + "'s";
 		if (oldRun != null)
 		{
-			embedBuilder.WithTitle($"Updated {user.AvailableName()} homing peak");
+			embedBuilder.WithTitle($"Updated {nameApostrophe} homing peak");
 			int homingDiff = newRun.HomingPeak - oldRun.HomingPeak;
 			embedBuilder.WithDescription(
 				$"""
@@ -349,7 +350,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		}
 		else
 		{
-			embedBuilder.WithTitle($"Added {user.AvailableName()} homing peak");
+			embedBuilder.WithTitle($"Added {nameApostrophe} homing peak");
 			embedBuilder.WithDescription($"## [{newRun.HomingPeak}]({newRun.Source}) <:peak:884397348481019924>");
 		}
 
