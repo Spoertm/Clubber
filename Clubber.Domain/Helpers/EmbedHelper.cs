@@ -1,3 +1,4 @@
+using Clubber.Domain.Extensions;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -34,7 +35,7 @@ public static class EmbedHelper
 	public static Embed UpdateRoles(UpdateRolesResponse response)
 	{
 		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle($"Updated roles for {response.User!.Username}")
+			.WithTitle($"Updated roles for {response.User!.AvailableName()}")
 			.WithDescription($"User: {response.User!.Mention}")
 			.WithThumbnailUrl(response.User!.GetAvatarUrl() ?? response.User!.GetDefaultAvatarUrl());
 
@@ -66,7 +67,7 @@ public static class EmbedHelper
 		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
 
 		return new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
+			.WithTitle($"Stats for {guildUser?.AvailableName() ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
@@ -94,8 +95,8 @@ public static class EmbedHelper
 		string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
 		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
 
-		EmbedBuilder? embedBuilder = new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser?.Username ?? lbPlayer.Username}")
+		EmbedBuilder embedBuilder = new EmbedBuilder()
+			.WithTitle($"Stats for {guildUser.AvailableName() ?? lbPlayer.Username}")
 			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
@@ -333,14 +334,12 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 	public static Embed UpdateTopPeakRuns(IGuildUser user, HomingPeakRun newRun, HomingPeakRun? oldRun = null)
 	{
-		string name = user.Nickname ?? user.GlobalName ?? user.Username;
-		string formattedName = name.EndsWith("s") ? name + "'" : name + "'s";
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 			.WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
 
 		if (oldRun != null)
 		{
-			embedBuilder.WithTitle($"Updated {formattedName} homing peak");
+			embedBuilder.WithTitle($"Updated {user.AvailableName()} homing peak");
 			int homingDiff = newRun.HomingPeak - oldRun.HomingPeak;
 			embedBuilder.WithDescription(
 				$"""
@@ -350,7 +349,7 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		}
 		else
 		{
-			embedBuilder.WithTitle($"Added {formattedName} homing peak");
+			embedBuilder.WithTitle($"Added {user.AvailableName()} homing peak");
 			embedBuilder.WithDescription($"## [{newRun.HomingPeak}]({newRun.Source}) <:peak:884397348481019924>");
 		}
 
