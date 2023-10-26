@@ -267,30 +267,25 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 
 	public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
 	{
-		int oldSplitsDescriptionPadding = oldBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
-		int newSplitsDescriptionPadding = updatedBestSplits.MaxBy(obs => obs.Description.Length)?.Description.Length ?? 11;
-		int descPadding = Math.Max(oldSplitsDescriptionPadding, newSplitsDescriptionPadding);
-
-		StringBuilder sb = new($"```diff\n{"Name",-8}{"Time",-6}{"Old value",-11}{"New value",-11}{"Description".PadLeft(descPadding)}");
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Updated best splits");
+		StringBuilder sb = new($"`  {"Name",-6}{"Time",-6}{"Old value",-11}{"New value",-10}Description`");
 
 		foreach ((string Name, int Time) split in Split.V3Splits)
 		{
 			BestSplit? oldBestSplit = Array.Find(oldBestSplits, obs => obs.Name == split.Name);
 			BestSplit? newBestSplit = Array.Find(updatedBestSplits, ubs => ubs.Name == split.Name);
-			string desc = newBestSplit?.Description ?? oldBestSplit?.Description ?? "N/A";
 			sb.Append((oldBestSplit, newBestSplit) switch
 			{
-				({ }, { })   => $"\n+ {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {newBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
-				({ }, null)  => $"\n= {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {oldBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
-				(null, { })  => $"\n+ {split.Name,-6}{split.Time,4}  {"N/A",9}  {newBestSplit.Value,9}  {desc.PadLeft(descPadding)}",
-				(null, null) => $"\n= {split.Name,-6}{split.Time,4}  {"N/A",9}  {"N/A",9}  {desc.PadLeft(descPadding)}",
+				({ }, { })   => $"\n**`\u22c6 {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {newBestSplit.Value,9}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
+				({ }, null)  => $"\n`  {split.Name,-6}{split.Time,4}  {oldBestSplit.Value,9}  {oldBestSplit.Value,9}` [{oldBestSplit.Description}]({oldBestSplit.GameInfo?.Url})",
+				(null, { })  => $"\n**`\u22c6 {split.Name,-6}{split.Time,4}  {"N/A",9}  {newBestSplit.Value,9}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
+				(null, null) => $"\n`  {split.Name,-6}{split.Time,4}  {"N/A",9}  {"N/A",9} N/A`",
 			});
 		}
 
-		embedBuilder.Description = sb.Append("```").ToString();
-		return embedBuilder.Build();
+		return new EmbedBuilder()
+			.WithTitle("Updated best splits")
+			.WithDescription(sb.ToString())
+			.Build();
 	}
 
 	public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
