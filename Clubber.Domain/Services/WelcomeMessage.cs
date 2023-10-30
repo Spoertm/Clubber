@@ -48,15 +48,13 @@ public class WelcomeMessage
 		UpdateRolesHelper updateRolesHelper = scope.ServiceProvider.GetRequiredService<UpdateRolesHelper>();
 		UpdateRolesResponse response = await updateRolesHelper.UpdateUserRoles(joiningUser);
 
-		if (!response.Success)
+		if (response is UpdateRolesResponse.Full fullResponse)
 		{
-			return;
-		}
-
-		ulong logChannelId = _config.GetValue<ulong>("DailyUpdateLoggingChannelId");
-		if (joiningUser.Guild.GetChannel(logChannelId) is SocketTextChannel logsChannel)
-		{
-			await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(response));
+			ulong logChannelId = _config.GetValue<ulong>("DailyUpdateLoggingChannelId");
+			if (joiningUser.Guild.GetChannel(logChannelId) is SocketTextChannel logsChannel)
+			{
+				await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(fullResponse));
+			}
 		}
 	}
 }

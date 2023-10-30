@@ -32,26 +32,26 @@ public static class EmbedHelper
 		[16] = "HAUNTED",
 	};
 
-	public static Embed UpdateRoles(UpdateRolesResponse response)
+	public static Embed UpdateRoles(UpdateRolesResponse.Full response)
 	{
 		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle($"Updated roles for {response.User!.AvailableName()}")
-			.WithDescription($"User: {response.User!.Mention}")
-			.WithThumbnailUrl(response.User!.GetAvatarUrl() ?? response.User!.GetDefaultAvatarUrl());
+			.WithTitle($"Updated roles for {response.User.AvailableName()}")
+			.WithDescription($"User: {response.User.Mention}")
+			.WithThumbnailUrl(response.User.GetAvatarUrl() ?? response.User.GetDefaultAvatarUrl());
 
-		if (response.RolesRemoved!.Any())
+		if (response.RolesRemoved.Any())
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Removed:")
-				.WithValue(string.Join('\n', response.RolesRemoved!.Select(rr => $"<@&{rr}>")))
+				.WithValue(string.Join('\n', response.RolesRemoved.Select(rr => $"<@&{rr}>")))
 				.WithIsInline(true));
 		}
 
-		if (response.RolesAdded!.Any())
+		if (response.RolesAdded.Any())
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Added:")
-				.WithValue(string.Join('\n', response.RolesAdded!.Select(ar => $"<@&{ar}>")))
+				.WithValue(string.Join('\n', response.RolesAdded.Select(ar => $"<@&{ar}>")))
 				.WithIsInline(true));
 		}
 
@@ -332,12 +332,15 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		return highest;
 	}
 
-	public static Embed UpdateTopPeakRuns(IGuildUser user, HomingPeakRun newRun, HomingPeakRun? oldRun = null)
+	public static Embed UpdateTopPeakRuns(string userName, HomingPeakRun newRun, HomingPeakRun? oldRun = null, string? avatarUrl = null)
 	{
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
+		EmbedBuilder embedBuilder = new();
+		if (avatarUrl != null)
+		{
+			embedBuilder.WithThumbnailUrl(avatarUrl);
+		}
 
-		string nameApostrophe = user.AvailableName().EndsWith("s") ? user.AvailableName() + "'" : user.AvailableName() + "'s";
+		string nameApostrophe = userName.EndsWith("s") ? userName + "'" : userName + "'s";
 		if (oldRun != null)
 		{
 			embedBuilder.WithTitle($"Updated {nameApostrophe} homing peak");

@@ -5,6 +5,7 @@ using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Diagnostics;
 
 namespace Clubber.Domain.Modules;
 
@@ -37,21 +38,27 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 		}
 
 		UpdateRolesResponse response = await _updateRolesHelper.UpdateUserRoles(user);
-
-		if (!response.Success)
+		if (response is UpdateRolesResponse.Full fullResponse)
+		{
+			await ReplyAsync(embed: EmbedHelper.UpdateRoles(fullResponse), allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		}
+		else if (response is UpdateRolesResponse.Partial partialResponse)
 		{
 			string msg = "No updates were needed.";
-
-			if (response is { SecondsAwayFromNextRole: { }, NextRoleId: { } })
+			if (partialResponse.SecondsAwayFromNextRole == 0)
 			{
-				msg += $"\n\nYou're **{response.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(response.NextRoleId.Value)}";
+				msg += "\n\nYou already have the highest role in the server!";
+			}
+			else
+			{
+				msg += $"\n\nYou're **{partialResponse.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(partialResponse.NextRoleId)}";
 			}
 
 			await InlineReplyAsync(msg);
 		}
 		else
 		{
-			await ReplyAsync(embed: EmbedHelper.UpdateRoles(response), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+			throw new UnreachableException($"{nameof(UpdateRolesResponse)} isn't supposed to have a third state.");
 		}
 	}
 }

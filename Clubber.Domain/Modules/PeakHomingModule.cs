@@ -1,4 +1,6 @@
-﻿using Clubber.Domain.Helpers;
+﻿using Clubber.Domain.Extensions;
+using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
@@ -62,7 +64,16 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		Embed updatedRolesEmbed = EmbedHelper.UpdateTopPeakRuns((Context.User as IGuildUser)!, response.NewRun, response.OldRun);
+		string userName = ddStatsRun.GameInfo.PlayerName;
+		string? avatarUrl = null;
+		DdUser? ding = await _databaseHelper.GetDdUserBy(ddStatsRun.GameInfo.PlayerId);
+		if (ding != null && Context.Guild.GetUser(ding.DiscordId) is { } user)
+		{
+			userName = user.AvailableName();
+			avatarUrl = user.GetDisplayAvatarUrl() ?? user.GetDefaultAvatarUrl();
+		}
+
+		Embed updatedRolesEmbed = EmbedHelper.UpdateTopPeakRuns(userName, response.NewRun, response.OldRun, avatarUrl);
 		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
 	}
 
