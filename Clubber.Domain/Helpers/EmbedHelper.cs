@@ -32,26 +32,26 @@ public static class EmbedHelper
 		[16] = "HAUNTED",
 	};
 
-	public static Embed UpdateRoles(UpdateRolesResponse response)
+	public static Embed UpdateRoles(UpdateRolesResponse.Full response)
 	{
 		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle($"Updated roles for {response.User!.AvailableName()}")
-			.WithDescription($"User: {response.User!.Mention}")
-			.WithThumbnailUrl(response.User!.GetAvatarUrl() ?? response.User!.GetDefaultAvatarUrl());
+			.WithTitle($"Updated roles for {response.User.AvailableName()}")
+			.WithDescription($"User: {response.User.Mention}")
+			.WithThumbnailUrl(response.User.GetAvatarUrl() ?? response.User.GetDefaultAvatarUrl());
 
-		if (response.RolesRemoved!.Any())
+		if (response.RolesRemoved.Any())
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Removed:")
-				.WithValue(string.Join('\n', response.RolesRemoved!.Select(rr => $"<@&{rr}>")))
+				.WithValue(string.Join('\n', response.RolesRemoved.Select(rr => $"<@&{rr}>")))
 				.WithIsInline(true));
 		}
 
-		if (response.RolesAdded!.Any())
+		if (response.RolesAdded.Any())
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Added:")
-				.WithValue(string.Join('\n', response.RolesAdded!.Select(ar => $"<@&{ar}>")))
+				.WithValue(string.Join('\n', response.RolesAdded.Select(ar => $"<@&{ar}>")))
 				.WithIsInline(true));
 		}
 

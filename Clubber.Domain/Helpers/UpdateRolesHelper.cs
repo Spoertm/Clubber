@@ -73,7 +73,7 @@ public class UpdateRolesHelper
 
 		int updatedUsers = 0;
 		List<Embed> embedList = new();
-		foreach (UpdateRolesResponse updateResponse in updateRolesResponses.Where(ur => ur.Success))
+		foreach (UpdateRolesResponse.Full updateResponse in updateRolesResponses.OfType<UpdateRolesResponse.Full>())
 		{
 			embedList.Add(EmbedHelper.UpdateRoles(updateResponse));
 			updatedUsers++;
@@ -144,14 +144,10 @@ public class UpdateRolesHelper
 	{
 		(ulong scoreRoleToAdd, ulong[] scoreRolesToRemove) = HandleScoreRoles(guildUser.RoleIds, lbUser.Time);
 		(ulong topRoleToAdd, ulong[] topRolesToRemove) = HandleTopRoles(guildUser.RoleIds, lbUser.Rank);
-		(decimal? secondsAwayFromNextRole, ulong? nextRoleId) = GetSecondsAwayFromNextRoleAndNextRoleId(lbUser.Time);
+		(decimal secondsAwayFromNextRole, ulong nextRoleId) = GetSecondsAwayFromNextRoleAndNextRoleId(lbUser.Time);
 
 		if (scoreRoleToAdd == 0 && scoreRolesToRemove.Length == 0 && topRoleToAdd == 0 && topRolesToRemove.Length == 0)
-			return new(
-				false,
-				secondsAwayFromNextRole,
-				nextRoleId,
-				null, null, null);
+			return new UpdateRolesResponse.Partial(secondsAwayFromNextRole, nextRoleId);
 
 		List<ulong> roleIdsToAdd = new(2);
 		if (scoreRoleToAdd != 0)
@@ -169,14 +165,10 @@ public class UpdateRolesHelper
 		if (socketRolesToRemove.Length > 0)
 			await guildUser.RemoveRolesAsync(socketRolesToRemove);
 
-		return new(
-			true,
-			secondsAwayFromNextRole,
-			nextRoleId,
+		return new UpdateRolesResponse.Full(
 			guildUser,
 			roleIdsToAdd,
-			socketRolesToRemove
-		);
+			socketRolesToRemove);
 	}
 
 	public (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(IReadOnlyCollection<ulong> userRolesIds, int playerTime)
@@ -206,13 +198,13 @@ public class UpdateRolesHelper
 		return new(topRoleToAdd, userRolesIds.Intersect(filteredTopRoles).ToArray());
 	}
 
-	public (decimal? SecondsAwayFromNextRole, ulong? NextRoleId) GetSecondsAwayFromNextRoleAndNextRoleId(int playerTime)
+	public (decimal SecondsAwayFromNextRole, ulong NextRoleId) GetSecondsAwayFromNextRoleAndNextRoleId(int playerTime)
 	{
 		(int score, _) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
 
 		if (score == _scoreRoles.Keys.Max())
 		{
-			return (null, null);
+			return default;
 		}
 
 		(int nextScore, ulong nextRoleId) = _scoreRoles.Last(sr => sr.Key > playerTime / 10000);

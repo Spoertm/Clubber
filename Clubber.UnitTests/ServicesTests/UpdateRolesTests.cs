@@ -110,7 +110,7 @@ public class UpdateRolesTests
 	{
 		new object?[] { 0M, 100M },
 		new object?[] { 35M, 65M },
-		new object?[] { 3000M, null },
+		new object?[] { 3000M, 0M },
 		new object?[] { 99.1238M, 0.8762M },
 		new object?[] { 700.5000M, 99.5M },
 		new object?[] { 532M, 68M },
