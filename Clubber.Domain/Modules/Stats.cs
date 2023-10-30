@@ -106,6 +106,6 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 			statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
 		}
 
-		await ReplyAsync(embed: statsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+		await ReplyAsync(embed: statsEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
 	}
 }

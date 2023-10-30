@@ -35,7 +35,7 @@ To speed this up, you can manually update your own roles by using the `+pb` or `
 	public async Task Help()
 	{
 		Embed embed = EmbedHelper.GenericHelp(Context, _commands);
-		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
 	}
 
 	[Command("help")]
@@ -53,7 +53,7 @@ To speed this up, you can manually update your own roles by using the `+pb` or `
 			return;
 
 		Embed embed = EmbedHelper.CommandHelp(Context, searchResult);
-		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
 	}
 
 	[Command("bestsplits")]
