@@ -332,12 +332,15 @@ If you don't play the game or simply don't want to be registered, post ""`no sco
 		return highest;
 	}
 
-	public static Embed UpdateTopPeakRuns(IGuildUser user, HomingPeakRun newRun, HomingPeakRun? oldRun = null)
+	public static Embed UpdateTopPeakRuns(string userName, HomingPeakRun newRun, HomingPeakRun? oldRun = null, string? avatarUrl = null)
 	{
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
+		EmbedBuilder embedBuilder = new();
+		if (avatarUrl != null)
+		{
+			embedBuilder.WithThumbnailUrl(avatarUrl);
+		}
 
-		string nameApostrophe = user.AvailableName().EndsWith("s") ? user.AvailableName() + "'" : user.AvailableName() + "'s";
+		string nameApostrophe = userName.EndsWith("s") ? userName + "'" : userName + "'s";
 		if (oldRun != null)
 		{
 			embedBuilder.WithTitle($"Updated {nameApostrophe} homing peak");
