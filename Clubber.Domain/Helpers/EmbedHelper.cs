@@ -37,7 +37,7 @@ public static class EmbedHelper
 		EmbedBuilder embed = new EmbedBuilder()
 			.WithTitle($"Updated roles for {response.User.AvailableName()}")
 			.WithDescription($"User: {response.User.Mention}")
-			.WithThumbnailUrl(response.User.GetAvatarUrl() ?? response.User.GetDefaultAvatarUrl());
+			.WithThumbnailUrl(response.User.GetDisplayAvatarUrl() ?? response.User.GetDefaultAvatarUrl());
 
 		if (response.RolesRemoved.Any())
 		{
@@ -68,7 +68,7 @@ public static class EmbedHelper
 
 		return new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser?.AvailableName() ?? lbPlayer.Username}")
-			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
+			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
 				✏️ Leaderboard name: {lbPlayer.Username}
@@ -97,7 +97,7 @@ public static class EmbedHelper
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 			.WithTitle($"Stats for {guildUser.AvailableName() ?? lbPlayer.Username}")
-			.WithThumbnailUrl(guildUser?.GetAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
+			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
 				✏️ Leaderboard name: {lbPlayer.Username}
