@@ -234,15 +234,21 @@ public static class EmbedHelper
 	{
 		Embed[] embeds = new Embed[2];
 
-		const string registerForRolesText = @"This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&980126799075876874>.
+		const string registerForRolesText =
+			"""
+			This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&980126799075876874>.
 
-If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
+			If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
 
-If you don't play the game or simply don't want to be registered, post ""`no score`"".
+			If you don't play the game or simply don't want to be registered, post "`no score`".
 
-**After posting the message in this channel, a moderator will then soon register you**.";
+			**After posting the message in this channel, a moderator will then soon register you**.
+			""";
 
-		const string twitchText = @"You can link your Twitch account to your player page on [DDLIVE](https://ddstats.live/) using ""`+twitch MyTwitchUserName`"", so others can see who you are in-game when you're live on Twitch.";
+		const string twitchText =
+			"""
+			You can link your Twitch account to your player page on [DDLIVE](https://ddstats.live/) using "`+twitch MyTwitchUserName`", so others can see who you are in-game when you're live on Twitch.
+			""";
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
 			.WithAuthor(botUser)
