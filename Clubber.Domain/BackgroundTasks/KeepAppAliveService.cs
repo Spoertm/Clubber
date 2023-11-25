@@ -13,7 +13,7 @@ public class KeepAppAliveService : AbstractBackgroundService
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		const string appUrl = "https://clubberbot.azurewebsites.net/";
+		const string appUrl = "https://clubber.onrender.com";
 		await _httpClientFactory.CreateClient().GetStringAsync(appUrl, stoppingToken);
 	}
 }
