@@ -9,6 +9,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Serilog;
 using System.Globalization;
 using System.Reflection;
@@ -20,6 +21,9 @@ internal static class Program
 	public static async Task Main(string[] args)
 	{
 		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+#pragma warning disable CS0618 // Type or member is obsolete
+		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+#pragma warning restore CS0618 // Type or member is obsolete
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
