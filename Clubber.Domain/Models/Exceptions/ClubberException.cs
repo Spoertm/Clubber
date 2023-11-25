@@ -1,8 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿namespace Clubber.Domain.Models.Exceptions;
 
-namespace Clubber.Domain.Models.Exceptions;
-
-[Serializable]
 public class ClubberException : Exception
 {
 	public ClubberException()
@@ -16,11 +13,6 @@ public class ClubberException : Exception
 
 	public ClubberException(string? message, Exception innerException)
 		: base(message, innerException)
-	{
-	}
-
-	protected ClubberException(SerializationInfo info, StreamingContext context)
-		: base(info, context)
 	{
 	}
 }
