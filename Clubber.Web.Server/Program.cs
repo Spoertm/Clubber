@@ -2,6 +2,7 @@ using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Logging;
+using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Modules;
 using Clubber.Domain.Services;
 using Clubber.Web.Server.Endpoints;
@@ -22,7 +23,7 @@ internal static class Program
 	{
 		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 #pragma warning disable CS0618 // Type or member is obsolete
-		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson(new []{ typeof(EntryResponse), typeof(GameInfo) });
 #pragma warning restore CS0618 // Type or member is obsolete
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
