@@ -74,7 +74,7 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 		}
 
 		Embed updatedRolesEmbed = EmbedHelper.UpdateTopPeakRuns(userName, response.NewRun, response.OldRun, avatarUrl);
-		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
 	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(string url)

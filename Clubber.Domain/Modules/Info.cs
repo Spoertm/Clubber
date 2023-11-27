@@ -35,7 +35,7 @@ To speed this up, you can manually update your own roles by using the `+pb` or `
 	public async Task Help()
 	{
 		Embed embed = EmbedHelper.GenericHelp(Context, _commands);
-		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
 	[Command("help")]
@@ -53,7 +53,7 @@ To speed this up, you can manually update your own roles by using the `+pb` or `
 			return;
 
 		Embed embed = EmbedHelper.CommandHelp(Context, searchResult);
-		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
 	[Command("bestsplits")]
@@ -63,7 +63,7 @@ To speed this up, you can manually update your own roles by using the `+pb` or `
 	{
 		BestSplit[] bestSplits = await _databaseHelper.GetBestSplits();
 		Embed bestSplitsEmbed = EmbedHelper.CurrentBestSplits(bestSplits);
-		await ReplyAsync(embed: bestSplitsEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: bestSplitsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
 	[Command("toppeaks")]
@@ -74,6 +74,6 @@ To speed this up, you can manually update your own roles by using the `+pb` or `
 	{
 		HomingPeakRun[] topHomingPeaks = await _databaseHelper.GetTopHomingPeaks();
 		Embed topPeaksEmbed = EmbedHelper.CurrentTopPeakRuns(topHomingPeaks);
-		await ReplyAsync(embed: topPeaksEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: topPeaksEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 }
