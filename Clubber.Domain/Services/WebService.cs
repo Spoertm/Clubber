@@ -11,7 +11,7 @@ public class WebService : IWebService
 {
 #pragma warning disable S1075
 	private const string _getMultipleUsersByIdUrl = "http://l.sorath.com/dd/get_multiple_users_by_id_public.php";
-	private const string _getScoresUrl = "http://dd.hasmodai.com/backend15/get_scores.php";
+	private const string _getScoresUrl = "http://dd.hasmodai.com/dd3/get_scores.php";
 #pragma warning restore S1075
 	private readonly IHttpClientFactory _httpClientFactory;
 
@@ -133,24 +133,23 @@ public class WebService : IWebService
 		for (int i = 0; i < leaderboard.TotalEntries; i++)
 		{
 			short usernameLength = br.ReadInt16();
-			EntryResponse entry = new()
-			{
-				Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength)),
-				Rank = br.ReadInt32(),
-				Id = br.ReadInt32(),
-				Time = br.ReadInt32(),
-				Kills = br.ReadInt32(),
-				DaggersFired = br.ReadInt32(),
-				DaggersHit = br.ReadInt32(),
-				Gems = br.ReadInt32(),
-				DeathType = br.ReadInt32(),
-				DeathsTotal = br.ReadUInt64(),
-				KillsTotal = br.ReadUInt64(),
-				DaggersFiredTotal = br.ReadUInt64(),
-				TimeTotal = br.ReadUInt64(),
-				GemsTotal = br.ReadUInt64(),
-				DaggersHitTotal = br.ReadUInt64(),
-			};
+			EntryResponse entry = new();
+			entry.Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength));
+			entry.Rank = br.ReadInt32();
+			entry.Id = br.ReadInt32();
+			_ = br.ReadInt32();
+			entry.Time = br.ReadInt32();
+			entry.Kills = br.ReadInt32();
+			entry.DaggersFired = br.ReadInt32();
+			entry.DaggersHit = br.ReadInt32();
+			entry.Gems = br.ReadInt32();
+			entry.DeathType = br.ReadInt32();
+			entry.DeathsTotal = br.ReadUInt64();
+			entry.KillsTotal = br.ReadUInt64();
+			entry.DaggersFiredTotal = br.ReadUInt64();
+			entry.TimeTotal = br.ReadUInt64();
+			entry.GemsTotal = br.ReadUInt64();
+			entry.DaggersHitTotal = br.ReadUInt64();
 
 			br.BaseStream.Seek(4, SeekOrigin.Current);
 
