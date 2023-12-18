@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>wwwroot\ClubberWhite.ico</ApplicationIcon>
     <LangVersion>12</LangVersion>
+    <AnalysisMode>All</AnalysisMode>
   </PropertyGroup>
 
   <ItemGroup>

@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>12</LangVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <AnalysisMode>All</AnalysisMode>
   </PropertyGroup>
 
   <ItemGroup>
