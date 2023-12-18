@@ -143,7 +143,7 @@ public class DatabaseHelper : IDatabaseHelper
 	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(Split[] splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
 	{
 		BestSplit[] currentBestSplits = await _dbContext.BestSplits.AsNoTracking().ToArrayAsync();
-		List<BestSplit> superiorNewSplits = new();
+		List<BestSplit> superiorNewSplits = [];
 		foreach (Split newSplit in splitsToBeChecked)
 		{
 			BestSplit? currentBestSplit = Array.Find(currentBestSplits, cbs => cbs.Name == newSplit.Name);

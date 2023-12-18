@@ -7,7 +7,7 @@ public static class RunAnalyzer
 {
 	public static Split[] GetData(DdStatsFullRunResponse ddstatsRun)
 	{
-		List<Split> splits = new();
+		List<Split> splits = [];
 		(string Name, int Time) currentSplit = new("0", 0);
 		for (int i = 0; i < Split.V3Splits.Length; i++)
 		{

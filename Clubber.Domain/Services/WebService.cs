@@ -21,17 +21,17 @@ public class WebService : IWebService
 	{
 		try
 		{
-			List<KeyValuePair<string?, string?>> postValues = new()
-			{
+			List<KeyValuePair<string?, string?>> postValues =
+			[
 				new("uid", string.Join(',', ids)),
-			};
+			];
 
 			using FormUrlEncodedContent content = new(postValues);
 			HttpResponseMessage response = await _httpClientFactory.CreateClient().PostAsync(_getMultipleUsersByIdUrl, content);
 			byte[] data = await response.Content.ReadAsByteArrayAsync();
 
 			int bytePosition = 19;
-			List<EntryResponse> users = new();
+			List<EntryResponse> users = [];
 			while (bytePosition < data.Length)
 			{
 				users.Add(new()
@@ -79,7 +79,7 @@ public class WebService : IWebService
 
 	public async Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
 	{
-		List<EntryResponse> entries = new();
+		List<EntryResponse> entries = [];
 		int rank = 1;
 		do
 		{

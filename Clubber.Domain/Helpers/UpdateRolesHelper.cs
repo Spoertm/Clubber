@@ -62,7 +62,7 @@ public class UpdateRolesHelper
 		_webService = webService;
 
 		ulong unregRoleId = config.GetValue<ulong>("UnregisteredRoleId");
-		_uselessRoles = new() { unregRoleId, 458375331468935178, 994354086646399066 };
+		_uselessRoles = [unregRoleId, 458375331468935178, 994354086646399066];
 	}
 
 	public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IReadOnlyCollection<IGuildUser> guildUsers)
@@ -72,7 +72,7 @@ public class UpdateRolesHelper
 		sw.Stop();
 
 		int updatedUsers = 0;
-		List<Embed> embedList = new();
+		List<Embed> embedList = [];
 		foreach (UpdateRolesResponse.Full updateResponse in updateRolesResponses.OfType<UpdateRolesResponse.Full>())
 		{
 			embedList.Add(EmbedHelper.UpdateRoles(updateResponse));
@@ -111,7 +111,7 @@ public class UpdateRolesHelper
 				resultSelector: (ru, lbp) => (ru.GuildUser, lbp))
 			.ToArray();
 
-		List<UpdateRolesResponse> responses = new();
+		List<UpdateRolesResponse> responses = [];
 
 		foreach ((IGuildUser guildUser, EntryResponse lbUser) in updatedUsers)
 			responses.Add(await ExecuteRoleUpdate(guildUser, lbUser));
