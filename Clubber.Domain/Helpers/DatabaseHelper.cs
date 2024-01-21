@@ -30,7 +30,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		try
 		{
-			uint[] playerRequest = { lbId };
+			uint[] playerRequest = [lbId];
 
 			EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
 			DdUser newDdUser = new(user.Id, lbPlayer.Id);

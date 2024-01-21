@@ -23,7 +23,7 @@ internal static class Program
 	{
 		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 #pragma warning disable CS0618 // Type or member is obsolete
-		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson(new []{ typeof(EntryResponse), typeof(GameInfo) });
+		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson([typeof(EntryResponse), typeof(GameInfo)]);
 #pragma warning restore CS0618 // Type or member is obsolete
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -76,6 +76,7 @@ internal static class Program
 			builder.Services.AddHostedService<DdNewsPostService>();
 			builder.Services.AddHostedService<DatabaseUpdateService>();
 			builder.Services.AddHostedService<KeepAppAliveService>();
+			builder.Services.AddHostedService<ChannelClearingService>();
 		}
 
 		builder.Services.AddSwaggerGen(options =>

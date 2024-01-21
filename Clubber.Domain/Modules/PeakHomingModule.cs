@@ -69,7 +69,7 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 		DdUser? ding = await _databaseHelper.GetDdUserBy(ddStatsRun.GameInfo.PlayerId);
 		if (ding != null && Context.Guild.GetUser(ding.DiscordId) is { } user)
 		{
-			userName = user.AvailableName();
+			userName = user.AvailableNameSanitized();
 			avatarUrl = user.GetDisplayAvatarUrl() ?? user.GetDefaultAvatarUrl();
 		}
 

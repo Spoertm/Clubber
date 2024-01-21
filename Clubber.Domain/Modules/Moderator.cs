@@ -71,19 +71,12 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 	public async Task Clear()
 	{
 		ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
-		if (Context.Channel is not SocketTextChannel currentTextChannel || currentTextChannel.Id != registerChannelId)
+		if (Context.Channel is not SocketTextChannel channel || channel.Id != registerChannelId)
 		{
 			await ReplyAsync($"This command can only be run in <#{registerChannelId}>.");
 			return;
 		}
 
-		const int messagesToSkip = 1;
-		IEnumerable<IMessage> lastHundredMessages = await currentTextChannel.GetMessagesAsync().FlattenAsync();
-		IEnumerable<IMessage> messagesToDelete = lastHundredMessages
-			.Where(x => (DateTimeOffset.UtcNow - x.Timestamp).TotalDays <= 14)
-			.OrderByDescending(m => m.CreatedAt)
-			.SkipLast(messagesToSkip);
-
-		await currentTextChannel.DeleteMessagesAsync(messagesToDelete);
+		await _discordHelper.ClearChannelAsync(channel);
 	}
 }

@@ -17,8 +17,8 @@ public class Split
 	public int Value { get; set; }
 
 	[JsonIgnore]
-	public static (string Name, int Time)[] V3Splits => new[]
-	{
+	public static (string Name, int Time)[] V3Splits =>
+	[
 		("350", 366),
 		("700", 709),
 		("800", 800),
@@ -33,5 +33,5 @@ public class Split
 		("1230", 1231),
 		("1260", 1260),
 		("1290", 1290),
-	};
+	];
 }

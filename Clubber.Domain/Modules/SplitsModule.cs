@@ -58,7 +58,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 			return;
 
 		string desc = description ?? $"{ddstatsRun.GameInfo.PlayerName} {ddstatsRun.GameInfo.GameTime:0.0000}";
-		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded(new[] { split }, ddstatsRun, desc);
+		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded([split], ddstatsRun, desc);
 		if (response.UpdatedBestSplits.Length == 0)
 		{
 			await InlineReplyAsync("No updates were needed.");
