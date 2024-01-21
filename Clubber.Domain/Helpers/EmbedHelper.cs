@@ -35,7 +35,7 @@ public static class EmbedHelper
 	public static Embed UpdateRoles(UpdateRolesResponse.Full response)
 	{
 		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle($"Updated roles for {response.User.AvailableName()}")
+			.WithTitle($"Updated roles for {response.User.AvailableNameSanitized()}")
 			.WithDescription($"User: {response.User.Mention}")
 			.WithThumbnailUrl(response.User.GetDisplayAvatarUrl() ?? response.User.GetDefaultAvatarUrl());
 
@@ -65,13 +65,14 @@ public static class EmbedHelper
 	{
 		DateTime? playerPbDatetime = playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
 		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
+		string sanitizedLbName = Format.Sanitize(lbPlayer.Username);
 
 		return new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser?.AvailableName() ?? lbPlayer.Username}")
+			.WithTitle($"Stats for {guildUser?.AvailableNameSanitized() ?? sanitizedLbName}")
 			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
-				✏️ Leaderboard name: {lbPlayer.Username}
+				✏️ Leaderboard name: {sanitizedLbName}
 				🛂 Leaderboard ID: {lbPlayer.Id}
 				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
 				🥇 Rank: {lbPlayer.Rank}
@@ -81,7 +82,7 @@ public static class EmbedHelper
 
 				• For full stats, use `statsf`.
 
-				{Format.Url($"{lbPlayer.Username} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
+				{Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
 				""")
 			.Build();
 	}
@@ -94,13 +95,14 @@ public static class EmbedHelper
 		GetPlayerHistoryScoreEntry? playerPb = playerHistory?.ScoreHistory.LastOrDefault();
 		string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
 		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
+		string sanitizedLbName = Format.Sanitize(lbPlayer.Username);
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser.AvailableName() ?? lbPlayer.Username}")
+			.WithTitle($"Stats for {guildUser?.AvailableNameSanitized() ?? sanitizedLbName}")
 			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
-				✏️ Leaderboard name: {lbPlayer.Username}
+				✏️ Leaderboard name: {sanitizedLbName}
 				🛂 Leaderboard ID: {lbPlayer.Id}
 				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s
 				🥇 Rank: {lbPlayer.Rank} {peakRankFormatted}
@@ -135,7 +137,7 @@ public static class EmbedHelper
 			embedBuilder.AddField("💤 Last active", $"{lastActivity.DateTime:yyyy-MM-dd}", true);
 		}
 
-		embedBuilder.AddField("\u200B", Format.Url($"{lbPlayer.Username} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
+		embedBuilder.AddField("\u200B", Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
 
 		return embedBuilder.Build();
 	}
@@ -224,10 +226,8 @@ public static class EmbedHelper
 
 	private static string FormatUser(IGuildUser user)
 	{
-		if (user.Nickname is null)
-			return user.Username;
-
-		return $"{user.Username} ({user.Nickname})";
+		string formattedName = user.Nickname is null ? user.Username : $"{user.Username} ({user.Nickname})";
+		return Format.Sanitize(formattedName);
 	}
 
 	public static Embed[] RegisterEmbeds(IUser botUser)
@@ -372,7 +372,7 @@ public static class EmbedHelper
 		for (int i = 0; i < currentTopPeakRuns.Length; i++)
 		{
 			HomingPeakRun currentPeakRun = currentTopPeakRuns[i];
-			sb.Append($"\n{i + 1}. [{currentPeakRun.HomingPeak}]({currentPeakRun.Source}) {currentPeakRun.PlayerName}");
+			sb.Append($"\n{i + 1}. [{currentPeakRun.HomingPeak}]({currentPeakRun.Source}) {Format.Sanitize(currentPeakRun.PlayerName)}");
 		}
 
 		return new EmbedBuilder()
