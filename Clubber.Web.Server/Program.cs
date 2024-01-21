@@ -76,6 +76,7 @@ internal static class Program
 			builder.Services.AddHostedService<DdNewsPostService>();
 			builder.Services.AddHostedService<DatabaseUpdateService>();
 			builder.Services.AddHostedService<KeepAppAliveService>();
+			builder.Services.AddHostedService<ChannelClearingService>();
 		}
 
 		builder.Services.AddSwaggerGen(options =>
