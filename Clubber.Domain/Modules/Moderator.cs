@@ -77,12 +77,11 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		const int messagesToSkip = 1;
+		DateTimeOffset utcNow = DateTimeOffset.Now;
 		IEnumerable<IMessage> lastHundredMessages = await currentTextChannel.GetMessagesAsync().FlattenAsync();
 		IEnumerable<IMessage> messagesToDelete = lastHundredMessages
-			.Where(x => (DateTimeOffset.UtcNow - x.Timestamp).TotalDays <= 14)
-			.OrderByDescending(m => m.CreatedAt)
-			.SkipLast(messagesToSkip);
+			.Where(x => (utcNow - x.Timestamp).TotalDays <= 14)
+			.OrderByDescending(m => m.CreatedAt);
 
 		await currentTextChannel.DeleteMessagesAsync(messagesToDelete);
 	}
