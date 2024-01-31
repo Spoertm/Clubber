@@ -154,7 +154,7 @@ public class DdNewsPostService : AbstractBackgroundService
 		{
 			_sb.Append(" They are the ")
 				.Append(nth)
-				.Append(nth.OrdinalIndicator());
+				.Append(nth.OrdinalNumeral());
 
 			if (oldHundredth < 10 && newHundredth == 10)
 				_sb.Append(" player to unlock the leviathan dagger!");

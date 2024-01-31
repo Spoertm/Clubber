@@ -5,7 +5,7 @@ namespace Clubber.Domain.Extensions;
 
 public static class ExtensionMethods
 {
-	public static string OrdinalIndicator(this int number) => (number % 100, number % 10) switch
+	public static string OrdinalNumeral(this int number) => (number % 100, number % 10) switch
 	{
 		(11 or 12 or 13, _) => "th",
 		(_, 1)              => "st",

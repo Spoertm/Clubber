@@ -15,6 +15,6 @@ public class ExtentionMethodsTests
 	[InlineData(13, "th")]
 	public void OrdinalIndicator_GetsNumber_ReturnsCorrectOrdinalIndicator(int number, string expectedOrdinalIndicator)
 	{
-		Assert.Equal(number.OrdinalIndicator(), expectedOrdinalIndicator);
+		Assert.Equal(number.OrdinalNumeral(), expectedOrdinalIndicator);
 	}
 }
