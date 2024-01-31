@@ -173,7 +173,7 @@ public class UpdateRolesHelper
 
 	public (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(IReadOnlyCollection<ulong> userRolesIds, int playerTime)
 	{
-		(_, ulong scoreRoleId) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
+		(_, ulong scoreRoleId) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10_000);
 
 		ulong scoreRoleToAdd = 0;
 		if (!userRolesIds.Contains(scoreRoleId))
@@ -200,15 +200,15 @@ public class UpdateRolesHelper
 
 	public (decimal SecondsAwayFromNextRole, ulong NextRoleId) GetSecondsAwayFromNextRoleAndNextRoleId(int playerTime)
 	{
-		(int score, _) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10000);
+		(int score, _) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10_000);
 
 		if (score == _scoreRoles.Keys.Max())
 		{
 			return default;
 		}
 
-		(int nextScore, ulong nextRoleId) = _scoreRoles.Last(sr => sr.Key > playerTime / 10000);
-		decimal secondsAwayFromNextRole = nextScore - playerTime / 10000M;
+		(int nextScore, ulong nextRoleId) = _scoreRoles.Last(sr => sr.Key > playerTime / 10_000);
+		decimal secondsAwayFromNextRole = nextScore - playerTime / 10_000M;
 
 		return (secondsAwayFromNextRole, nextRoleId);
 	}

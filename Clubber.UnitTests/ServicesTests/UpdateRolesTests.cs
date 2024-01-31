@@ -41,7 +41,7 @@ public class UpdateRolesTests
 		IReadOnlyCollection<ulong> userRoleIds,
 		ulong expectedRoleToAdd)
 	{
-		(ulong scoreRoleToAdd, _) = _sut.HandleScoreRoles(userRoleIds, scoreInSeconds * 10000);
+		(ulong scoreRoleToAdd, _) = _sut.HandleScoreRoles(userRoleIds, scoreInSeconds * 10_000);
 		Assert.Equal(scoreRoleToAdd, expectedRoleToAdd);
 	}
 
@@ -56,7 +56,7 @@ public class UpdateRolesTests
 		IReadOnlyCollection<ulong> userRoleIds,
 		ulong[] expectedRolesToRemove)
 	{
-		(_, ulong[] scoreRolesToRemove) = _sut.HandleScoreRoles(userRoleIds, scoreInSeconds * 10000);
+		(_, ulong[] scoreRolesToRemove) = _sut.HandleScoreRoles(userRoleIds, scoreInSeconds * 10_000);
 		Assert.Equal(scoreRolesToRemove, expectedRolesToRemove);
 	}
 
@@ -102,7 +102,7 @@ public class UpdateRolesTests
 		decimal scoreInSeconds,
 		decimal? expectedSecondsAwayFromNextRole)
 	{
-		(decimal? secondsAwayFromNextRole, _) = _sut.GetSecondsAwayFromNextRoleAndNextRoleId((int)(scoreInSeconds * 10000));
+		(decimal? secondsAwayFromNextRole, _) = _sut.GetSecondsAwayFromNextRoleAndNextRoleId((int)(scoreInSeconds * 10_000));
 		Assert.Equal(expectedSecondsAwayFromNextRole, secondsAwayFromNextRole);
 	}
 

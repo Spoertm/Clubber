@@ -69,12 +69,12 @@ public class DdNewsPostService : AbstractBackgroundService
 				continue;
 
 			cacheIsToBeRefreshed = true;
-			if (newEntry.Time / 10000 < 1000)
+			if (newEntry.Time / 10_000 < 1000)
 				continue;
 
 			Log.Information("Posting news for player entry {@Player}", newEntry);
 
-			int nth = newEntries.Count(entry => entry.Time / 1000000 >= newEntry.Time / 1000000);
+			int nth = newEntries.Count(entry => entry.Time / 1_000_000 >= newEntry.Time / 1_000_000);
 
 			Log.Debug("Getting DD News message");
 			string message = await GetDdNewsMessage(databaseHelper, discordHelper, oldEntry, newEntry, nth);
@@ -131,8 +131,8 @@ public class DdNewsPostService : AbstractBackgroundService
 		if (await databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 
-		double oldScore = oldEntry.Time / 10000d;
-		double newScore = newEntry.Time / 10000d;
+		double oldScore = oldEntry.Time / 10_000d;
+		double newScore = newEntry.Time / 10_000d;
 		int ranksChanged = oldEntry.Rank - newEntry.Rank;
 		_sb.Clear()
 			.Append("Congratulations to ")
@@ -148,8 +148,8 @@ public class DdNewsPostService : AbstractBackgroundService
 			.Append(ranksChanged == 0 ? "" : Math.Abs(ranksChanged))
 			.Append(Math.Abs(ranksChanged) is 1 or 0 ? " rank." : " ranks.");
 
-		int oldHundredth = oldEntry.Time / 1000000;
-		int newHundredth = newEntry.Time / 1000000;
+		int oldHundredth = oldEntry.Time / 1_000_000;
+		int newHundredth = newEntry.Time / 1_000_000;
 		if (newHundredth > oldHundredth)
 		{
 			_sb.Append(" They are the ")

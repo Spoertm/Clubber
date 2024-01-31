@@ -96,7 +96,7 @@ public class WebService : IWebService
 			rank += 100;
 			await Task.Delay(2000);
 		}
-		while (entries[^1].Time / 10000 >= minimumScore);
+		while (entries[^1].Time / 10_000 >= minimumScore);
 
 		return entries;
 	}
