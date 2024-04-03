@@ -235,7 +235,7 @@ public static class EmbedHelper
 		Embed[] embeds = new Embed[2];
 
 		ulong lowestScoreRoleId = UpdateRolesHelper.ScoreRoles.MinBy(sr => sr.Key).Value;
-		ulong highestScoreRoleId = UpdateRolesHelper.ScoreRoles.MinBy(sr => sr.Key).Value;
+		ulong highestScoreRoleId = UpdateRolesHelper.ScoreRoles.MaxBy(sr => sr.Key).Value;
 
 		string registerForRolesText =
 			$"""
