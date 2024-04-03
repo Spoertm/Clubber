@@ -234,9 +234,12 @@ public static class EmbedHelper
 	{
 		Embed[] embeds = new Embed[2];
 
-		const string registerForRolesText =
-			"""
-			This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&980126799075876874>.
+		ulong lowestScoreRoleId = UpdateRolesHelper.ScoreRoles.MinBy(sr => sr.Key).Value;
+		ulong highestScoreRoleId = UpdateRolesHelper.ScoreRoles.MinBy(sr => sr.Key).Value;
+
+		string registerForRolesText =
+			$"""
+			This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&{lowestScoreRoleId}> to <@&{highestScoreRoleId}>.
 
 			If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
 

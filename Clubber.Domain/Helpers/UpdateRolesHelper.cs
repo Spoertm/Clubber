@@ -11,7 +11,7 @@ namespace Clubber.Domain.Helpers;
 
 public class UpdateRolesHelper
 {
-	private static readonly Dictionary<int, ulong> _scoreRoles = new()
+	public static readonly Dictionary<int, ulong> ScoreRoles = new()
 	{
 		[1300] = 1046380614431019038,
 		[1290] = 1046380561985454120,
@@ -178,13 +178,13 @@ public class UpdateRolesHelper
 
 	public (ulong ScoreRoleToAdd, ulong[] ScoreRolesToRemove) HandleScoreRoles(IReadOnlyCollection<ulong> userRolesIds, int playerTime)
 	{
-		(_, ulong scoreRoleId) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10_000);
+		(_, ulong scoreRoleId) = ScoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10_000);
 
 		ulong scoreRoleToAdd = 0;
 		if (!userRolesIds.Contains(scoreRoleId))
 			scoreRoleToAdd = scoreRoleId;
 
-		IEnumerable<ulong> filteredScoreRoles = _scoreRoles.Values.Where(rid => rid != scoreRoleId).Concat(_uselessRoles);
+		IEnumerable<ulong> filteredScoreRoles = ScoreRoles.Values.Where(rid => rid != scoreRoleId).Concat(_uselessRoles);
 		return (scoreRoleToAdd, userRolesIds.Intersect(filteredScoreRoles).ToArray());
 	}
 
@@ -205,14 +205,14 @@ public class UpdateRolesHelper
 
 	public (decimal SecondsAwayFromNextRole, ulong NextRoleId) GetSecondsAwayFromNextRoleAndNextRoleId(int playerTime)
 	{
-		(int score, _) = _scoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10_000);
+		(int score, _) = ScoreRoles.FirstOrDefault(sr => sr.Key <= playerTime / 10_000);
 
-		if (score == _scoreRoles.Keys.Max())
+		if (score == ScoreRoles.Keys.Max())
 		{
 			return default;
 		}
 
-		(int nextScore, ulong nextRoleId) = _scoreRoles.Last(sr => sr.Key > playerTime / 10_000);
+		(int nextScore, ulong nextRoleId) = ScoreRoles.Last(sr => sr.Key > playerTime / 10_000);
 		decimal secondsAwayFromNextRole = nextScore - playerTime / 10_000M;
 
 		return (secondsAwayFromNextRole, nextRoleId);
