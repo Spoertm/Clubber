@@ -22,11 +22,13 @@ public class DiscordHelper : IDiscordHelper
 	public SocketGuild? GetGuild(ulong guildId)
 		=> _client.GetGuild(guildId);
 
-	public async Task ClearChannelAsync(ITextChannel channel)
+	public async Task ClearChannelAsync(ITextChannel channel, int exclude = 0)
 	{
 		DateTimeOffset utcNow = DateTimeOffset.UtcNow;
 		IEnumerable<IMessage> lastHundredMessages = await channel.GetMessagesAsync().FlattenAsync();
-		IEnumerable<IMessage> messagesToDelete = lastHundredMessages.Where(x => (utcNow - x.Timestamp).TotalDays <= 14 && x.Flags is not MessageFlags.Ephemeral);
+		IEnumerable<IMessage> messagesToDelete = lastHundredMessages
+			.Where(x => (utcNow - x.Timestamp).TotalDays <= 14 && x.Flags is not MessageFlags.Ephemeral)
+			.Skip(exclude); // Exclude the n oldest messages
 
 		await channel.DeleteMessagesAsync(messagesToDelete);
 	}
