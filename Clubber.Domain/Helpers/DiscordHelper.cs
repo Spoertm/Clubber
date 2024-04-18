@@ -28,7 +28,7 @@ public class DiscordHelper : IDiscordHelper
 		IEnumerable<IMessage> lastHundredMessages = await channel.GetMessagesAsync().FlattenAsync();
 		IEnumerable<IMessage> messagesToDelete = lastHundredMessages
 			.Where(x => (utcNow - x.Timestamp).TotalDays <= 14 && x.Flags is not MessageFlags.Ephemeral)
-			.Skip(exclude); // Exclude the n oldest messages
+			.SkipLast(exclude); // Exclude the n oldest messages
 
 		await channel.DeleteMessagesAsync(messagesToDelete);
 	}
