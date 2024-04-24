@@ -11,11 +11,12 @@ public class UpdateRolesTests
 	private readonly UpdateRolesHelper _sut;
 	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
 	private readonly Mock<IWebService> _webserviceMock = new();
+	private static readonly ulong _topScoreRoleId = UpdateRolesHelper.ScoreRoles.MaxBy(s => s.Key).Value;
 	private const ulong _subOneHundredRoleId = 461203024128376832;
 	private const ulong _oneHundredRoleId = 399569183966363648;
 	private const ulong _threeHundredRoleId = 399569332532674562;
 	private const ulong _twelveThirtyRoleId = 903024433315323915;
-	private const ulong _twelveFiftyRoleId = 980126799075876874;
+	private const ulong _thirteenHundredRole = 1046380614431019038;
 	private const ulong _nineHundredRoleId = 399570895741386765;
 	private const ulong _top1RoleId = 446688666325090310;
 	private const ulong _top3RoleId = 472451008342261820;
@@ -33,7 +34,7 @@ public class UpdateRolesTests
 	[Theory]
 	[InlineData(0, new ulong[] { }, _subOneHundredRoleId)]
 	[InlineData(100, new ulong[] { }, _oneHundredRoleId)]
-	[InlineData(1500, new ulong[] { }, _twelveFiftyRoleId)]
+	[InlineData(1500, new ulong[] { }, _thirteenHundredRole)]
 	[InlineData(100, new[] { _oneHundredRoleId, _threeHundredRoleId }, 0)]
 	[InlineData(900, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId }, _nineHundredRoleId)]
 	public void TestHandleScoreRoles_DetectsRoleInconsistency_ReturnsRolesToBeAdded(

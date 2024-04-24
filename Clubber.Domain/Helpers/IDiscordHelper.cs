@@ -11,5 +11,5 @@ public interface IDiscordHelper
 
 	SocketGuild? GetGuild(ulong guildId);
 
-	Task ClearChannelAsync(ITextChannel channel, int exclude = 0);
+	Task ClearChannelAsync(ITextChannel channel);
 }

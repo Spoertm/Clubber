@@ -77,6 +77,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		await _discordHelper.ClearChannelAsync(channel, 1);
+		await _discordHelper.ClearChannelAsync(channel);
+		await channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds(Context.Client.CurrentUser));
 	}
 }
