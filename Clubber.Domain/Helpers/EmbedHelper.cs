@@ -74,7 +74,7 @@ public static class EmbedHelper
 				$"""
 				✏️ Leaderboard name: {sanitizedLbName}
 				🛂 Leaderboard ID: {lbPlayer.Id}
-				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s {pbDateTimeFormatted}
+				⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s {pbDateTimeFormatted}
 				🥇 Rank: {lbPlayer.Rank}
 				💀 Kills: {lbPlayer.Kills}
 				♦️ Gems: {lbPlayer.Gems}
@@ -94,7 +94,7 @@ public static class EmbedHelper
 	{
 		GetPlayerHistoryScoreEntry? playerPb = playerHistory?.ScoreHistory.LastOrDefault();
 		string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
-		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10000);
+		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10_000);
 		string sanitizedLbName = Format.Sanitize(lbPlayer.Username);
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
@@ -104,7 +104,7 @@ public static class EmbedHelper
 				$"""
 				✏️ Leaderboard name: {sanitizedLbName}
 				🛂 Leaderboard ID: {lbPlayer.Id}
-				⏲️ Score: {lbPlayer.Time / 10000d:0.0000}s
+				⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s
 				🥇 Rank: {lbPlayer.Rank} {peakRankFormatted}
 				💀 Kills: {lbPlayer.Kills}
 				💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
@@ -234,9 +234,12 @@ public static class EmbedHelper
 	{
 		Embed[] embeds = new Embed[2];
 
-		const string registerForRolesText =
-			"""
-			This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&461203024128376832> to <@&980126799075876874>.
+		ulong lowestScoreRoleId = UpdateRolesHelper.ScoreRoles.MinBy(sr => sr.Key).Value;
+		ulong highestScoreRoleId = UpdateRolesHelper.ScoreRoles.MaxBy(sr => sr.Key).Value;
+
+		string registerForRolesText =
+			$"""
+			This is a bot related to the game Devil Daggers. We have roles corresponding to in-game scores ranging from <@&{lowestScoreRoleId}> to <@&{highestScoreRoleId}>.
 
 			If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID - which you can get from [devildaggers.info](https://devildaggers.info/Leaderboard) (*hover over your rank and it should appear*).
 
