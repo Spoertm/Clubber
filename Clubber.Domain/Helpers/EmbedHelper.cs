@@ -230,7 +230,7 @@ public static class EmbedHelper
 		return Format.Sanitize(formattedName);
 	}
 
-	public static Embed[] RegisterEmbeds(IUser botUser)
+	public static Embed[] RegisterEmbeds()
 	{
 		Embed[] embeds = new Embed[2];
 
@@ -254,7 +254,6 @@ public static class EmbedHelper
 			""";
 
 		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithAuthor(botUser)
 			.WithTitle("Welcome!")
 			.WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/910859022427652096/PB.png")
 			.AddField(":arrow_forward: Registering for roles", registerForRolesText)

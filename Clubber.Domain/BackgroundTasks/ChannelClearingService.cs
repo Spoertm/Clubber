@@ -27,10 +27,16 @@ public class ChannelClearingService : AbstractBackgroundService
 
 		IOrderedEnumerable<IMessage> messages = (await registerChannel.GetMessagesAsync(1).FlattenAsync()).OrderBy(x => x.Timestamp);
 
-		// Only clear if there has been no activity for
+		if (messages.TryGetNonEnumeratedCount(out int msgCount) && msgCount == 1)
+		{
+			return;
+		}
+
+		// Only clear if there has been no activity
 		if (messages.FirstOrDefault() is { } msg && DateTimeOffset.Now - msg.Timestamp >= _inactivityTime)
 		{
 			await _discordHelper.ClearChannelAsync(registerChannel);
+			await registerChannel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
 		}
 	}
 }
