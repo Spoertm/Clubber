@@ -54,9 +54,11 @@ public class MessageHandlerService
 	{
 		if (logMessage.Exception is CommandException commandException)
 		{
-			await commandException.Context.Channel.SendMessageAsync("Catastrophic error occured.");
+			string message = "### Catastrophic error occured.";
 			if (commandException.InnerException is ClubberException customException)
-				await commandException.Context.Channel.SendMessageAsync(customException.Message);
+				message += $"\n{customException.Message}";
+
+			await commandException.Context.Channel.SendMessageAsync(message);
 		}
 
 		LogEventLevel logLevel = logMessage.Severity switch
