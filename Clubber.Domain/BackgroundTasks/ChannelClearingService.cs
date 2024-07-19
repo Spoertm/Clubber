@@ -16,16 +16,16 @@ public class ChannelClearingService : AbstractBackgroundService
 		_discordHelper = discordHelper;
 	}
 
-	protected override TimeSpan Interval => TimeSpan.FromDays(1);
+	protected override TimeSpan Interval => TimeSpan.FromHours(1);
 
-	private static readonly TimeSpan _inactivityTime = TimeSpan.FromDays(1);
+	private static readonly TimeSpan _inactivityTime = TimeSpan.FromHours(8);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
 		ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
 		SocketTextChannel registerChannel = _discordHelper.GetTextChannel(registerChannelId);
 
-		IOrderedEnumerable<IMessage> messages = (await registerChannel.GetMessagesAsync(1).FlattenAsync()).OrderBy(x => x.Timestamp);
+		IOrderedEnumerable<IMessage> messages = (await registerChannel.GetMessagesAsync(10).FlattenAsync()).OrderBy(x => x.Timestamp);
 
 		if (messages.TryGetNonEnumeratedCount(out int msgCount) && msgCount == 1)
 		{
