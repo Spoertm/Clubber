@@ -101,11 +101,7 @@ public class MessageHandlerService
 			{fullstatsEmbed.Description}
 			""");
 
-			// a:b:c:d
-			// a: "register"
-			// b: user ID
-			// c: leaderboard ID or "-1" for no score role
-			// d: message ID in the registration channel
+			// Refer to RegistrationContext.Parse in InteractionHandler
 			string buttonId = $"register:{message.Author.Id}:{foundId}:{message.Id}";
 
 			cb.WithButton("Register", buttonId, ButtonStyle.Success);

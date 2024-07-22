@@ -151,6 +151,11 @@ public class InteractionHandler
 
 	private record struct RegistrationContext(ulong UserId, int LeaderboardId, ulong RegisterMessageId)
 	{
+		// a:b:c:d
+		// a: "register"
+		// b: user ID
+		// c: leaderboard ID or "-1" for no score role
+		// d: message ID in the registration channel
 		public static RegistrationContext Parse(string input)
 		{
 			string[] data = input.Split(':');
