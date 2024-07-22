@@ -45,14 +45,22 @@ public class MessageHandlerService
 		_commands.Log += OnLog;
 
 		_client.MessageReceived += message => Task.Run(() => OnMessageRecievedAsync(message));
+		_client.MessageReceived += message =>
+		{
+			ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
+			if (message is SocketUserMessage { Source: MessageSource.User } socketUserMsg && message.Channel.Id == registerChannelId)
+			{
+				return Task.Run(() => ExecuteRegistrationProcedure(socketUserMsg));
+			}
+
+			return Task.CompletedTask;
+		};
 	}
 
 	private async Task OnMessageRecievedAsync(SocketMessage msg)
 	{
 		if (msg is not SocketUserMessage { Source: MessageSource.User } message)
 			return;
-
-		await Task.Run(() => ExecuteRegistrationProcedure(message));
 
 		int argumentPos = 0;
 		if (!message.HasStringPrefix(_prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
