@@ -13,17 +13,20 @@ public class InteractionHandler
 	private readonly UserService _userService;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
+	private readonly RegistrationTracker _registrationTracker;
 
 	public InteractionHandler(
 		IConfiguration config,
 		UserService userService,
 		IDatabaseHelper databaseHelper,
-		IDiscordHelper discordHelper)
+		IDiscordHelper discordHelper,
+		RegistrationTracker registrationTracker)
 	{
 		_config = config;
 		_userService = userService;
 		_databaseHelper = databaseHelper;
 		_discordHelper = discordHelper;
+		_registrationTracker = registrationTracker;
 	}
 
 	public async Task OnButtonExecuted(SocketMessageComponent component)
@@ -70,6 +73,8 @@ public class InteractionHandler
 			await ClearMessageComponents(component);
 			return;
 		}
+
+		_registrationTracker.UnflagUser(guildUser.Id);
 
 		SocketTextChannel? registerChannel = null;
 		try

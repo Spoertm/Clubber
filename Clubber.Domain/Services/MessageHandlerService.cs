@@ -20,6 +20,7 @@ public class MessageHandlerService
 	private readonly IServiceProvider _services;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IWebService _webService;
+	private readonly RegistrationTracker _registrationTracker;
 	private readonly string _prefix;
 
 	public MessageHandlerService(
@@ -29,7 +30,8 @@ public class MessageHandlerService
 		IServiceProvider services,
 		InteractionHandler interactionHandler,
 		IDiscordHelper discordHelper,
-		IWebService webService)
+		IWebService webService,
+		RegistrationTracker registrationTracker)
 	{
 		_config = config;
 		_client = client;
@@ -37,6 +39,7 @@ public class MessageHandlerService
 		_services = services;
 		_discordHelper = discordHelper;
 		_webService = webService;
+		_registrationTracker = registrationTracker;
 
 		_prefix = config["Prefix"] ?? throw new ConfigurationMissingException("Prefix");
 
@@ -85,6 +88,12 @@ public class MessageHandlerService
 			return;
 		}
 
+		if (_registrationTracker.UserIsFlagged(message.Author.Id))
+		{
+			await message.ReplyAsync(embed: new EmbedBuilder().WithDescription("ℹ️ You've already provided an ID. Mods will register you soon.").Build());
+			return;
+		}
+
 		EmbedBuilder eb = new();
 		ComponentBuilder cb = new();
 
@@ -130,6 +139,8 @@ public class MessageHandlerService
 		{
 			return;
 		}
+
+		_registrationTracker.FlagUser(message.Author.Id);
 
 		ulong modsChannelId = _config.GetValue<ulong>("ModsChannelId");
 		SocketTextChannel modsChannel = _discordHelper.GetTextChannel(modsChannelId);
