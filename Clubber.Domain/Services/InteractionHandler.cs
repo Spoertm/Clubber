@@ -84,7 +84,7 @@ public class InteractionHandler
 		string modsSuccessEmbedDescription = "✅ Done!";
 		if (registerChannel == null)
 		{
-			modsSuccessEmbedDescription += "\n\nℹ️ Registration channel couldn't be found so the user couldn't be informed of their registration.";
+			modsSuccessEmbedDescription += "\n\nℹ️ Register channel couldn't be found so the user couldn't be informed of their registration.";
 		}
 		else
 		{
