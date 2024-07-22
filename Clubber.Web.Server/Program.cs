@@ -60,6 +60,8 @@ internal static class Program
 		builder.Services.AddSingleton(client);
 		builder.Services.AddSingleton(commands);
 		builder.Services.AddSingleton<MessageHandlerService>();
+		builder.Services.AddSingleton<InteractionHandler>();
+		builder.Services.AddSingleton<RegistrationTracker>();
 
 		builder.Services.AddTransient<UpdateRolesHelper>();
 		builder.Services.AddTransient<IDiscordHelper, DiscordHelper>();

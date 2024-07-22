@@ -52,4 +52,23 @@ public static class ExtensionMethods
 
 		return Format.Sanitize(guildUser.Nickname ?? guildUser.GlobalName ?? guildUser.Username);
 	}
+
+	public static int FindFirstInt(this string? input)
+	{
+		if (string.IsNullOrEmpty(input))
+		{
+			return -1;
+		}
+
+		string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		foreach (string part in parts)
+		{
+			if (int.TryParse(part, out int result))
+			{
+				return result;
+			}
+		}
+
+		return -1;
+	}
 }
