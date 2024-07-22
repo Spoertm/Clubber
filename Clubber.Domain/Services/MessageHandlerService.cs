@@ -98,15 +98,8 @@ public class MessageHandlerService
 		ComponentBuilder cb = new();
 
 		// User specified an ID
-		if (message.Content.FindFirstInt() != -1)
+		if (message.Content.FindFirstInt() is var foundId and > 0)
 		{
-			int foundId = message.Content.FindFirstInt();
-
-			if (foundId <= 1)
-			{
-				return;
-			}
-
 			EntryResponse lbPlayerInfo = (await _webService.GetLbPlayers([(uint)foundId]))[0];
 			Embed fullstatsEmbed = EmbedHelper.FullStats(lbPlayerInfo, null, null);
 
