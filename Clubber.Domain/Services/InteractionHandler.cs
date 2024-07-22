@@ -63,7 +63,7 @@ public class InteractionHandler
 			return;
 		}
 
-		Result registrationResult = Result.Success();//await CheckUserAndRegister(regContext.LeaderboardId, guildUser);
+		Result registrationResult = await CheckUserAndRegister(regContext.LeaderboardId, guildUser);
 		if (registrationResult.IsFailure)
 		{
 			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription($"{registrationResult.ErrorMsg}").Build()]);
@@ -84,7 +84,7 @@ public class InteractionHandler
 		string modsSuccessEmbedDescription = "✅ Done!";
 		if (registerChannel == null)
 		{
-			modsSuccessEmbedDescription += "\n\n⚠️ Register channel couldn't be found so the user couldn't be informed of their registration.";
+			modsSuccessEmbedDescription += "\n\nℹ️ Register channel couldn't be found so the user couldn't be informed of their registration.";
 		}
 		else
 		{
