@@ -78,7 +78,7 @@ public class InteractionHandler
 		}
 		catch (Exception e)
 		{
-			Log.Warning(e, "Failed to retrieve register channel");
+			Log.Warning(e, "Failed to retrieve Register channel");
 		}
 
 		string modsSuccessEmbedDescription = "✅ Done!";
