@@ -38,7 +38,7 @@ public class Info : ExtendedModulebase<SocketCommandContext>
 	public async Task Help()
 	{
 		Embed embed = EmbedHelper.GenericHelp(Context, _commands);
-		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
 	[Command("help")]
@@ -56,7 +56,7 @@ public class Info : ExtendedModulebase<SocketCommandContext>
 			return;
 
 		Embed embed = EmbedHelper.CommandHelp(Context, searchResult);
-		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: embed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
 	[Command("bestsplits")]
@@ -66,7 +66,7 @@ public class Info : ExtendedModulebase<SocketCommandContext>
 	{
 		BestSplit[] bestSplits = await _databaseHelper.GetBestSplits();
 		Embed bestSplitsEmbed = EmbedHelper.CurrentBestSplits(bestSplits);
-		await ReplyAsync(embed: bestSplitsEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: bestSplitsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
 	[Command("toppeaks")]
@@ -77,6 +77,6 @@ public class Info : ExtendedModulebase<SocketCommandContext>
 	{
 		HomingPeakRun[] topHomingPeaks = await _databaseHelper.GetTopHomingPeaks();
 		Embed topPeaksEmbed = EmbedHelper.CurrentTopPeakRuns(topHomingPeaks);
-		await ReplyAsync(embed: topPeaksEmbed, allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: topPeaksEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 }

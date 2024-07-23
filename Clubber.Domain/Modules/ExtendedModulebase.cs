@@ -21,7 +21,7 @@ public abstract class ExtendedModulebase<T> : ModuleBase<T>
 	}
 
 	protected async Task InlineReplyAsync(string message, bool ping = false)
-		=> await ReplyAsync(message, allowedMentions: ping ? null : AllowedMentions.None, messageReference: Context.Message.Reference);
+		=> await ReplyAsync(message, allowedMentions: ping ? null : AllowedMentions.None, messageReference: new(Context.Message.Id));
 
 	protected async Task<Result<SocketGuildUser>> FoundUserFromDiscordId(ulong discordId)
 	{
@@ -61,7 +61,7 @@ public abstract class ExtendedModulebase<T> : ModuleBase<T>
 			return Result.Success(userMatches[0]);
 		}
 
-		await ReplyAsync(embed: EmbedHelper.MultipleMatches(userMatches, name), allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+		await ReplyAsync(embed: EmbedHelper.MultipleMatches(userMatches, name), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 		return Result.Failure<SocketGuildUser>("Found multiple matches.")!;
 	}
 }

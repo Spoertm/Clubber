@@ -40,7 +40,7 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 		UpdateRolesResponse response = await _updateRolesHelper.UpdateUserRoles(user);
 		if (response is UpdateRolesResponse.Full fullResponse)
 		{
-			await ReplyAsync(embed: EmbedHelper.UpdateRoles(fullResponse), allowedMentions: AllowedMentions.None, messageReference: Context.Message.Reference);
+			await ReplyAsync(embed: EmbedHelper.UpdateRoles(fullResponse), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 		}
 		else if (response is UpdateRolesResponse.Partial partialResponse)
 		{
