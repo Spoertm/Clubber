@@ -25,6 +25,7 @@ public class RequireAdminOrRoleAttribute : PreconditionAttribute
 		}
 
 		IRole? requiredRole = context.Guild.GetRole(_requiredRoleId);
-		return Task.FromResult(PreconditionResult.FromError(ErrorMessage ?? $"Only users with `{requiredRole.Name}` role can use this command."));
+		string roleName = requiredRole is null ? MentionUtils.MentionRole(_requiredRoleId) : requiredRole.Name;
+		return Task.FromResult(PreconditionResult.FromError(ErrorMessage ?? $"Only users with `{roleName}` role can use this command."));
 	}
 }
