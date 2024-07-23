@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Clubber.Domain.BackgroundTasks;
 
-public class ChannelClearingService : AbstractBackgroundService
+public class ChannelClearingService : RepeatingBackgroundService
 {
 	private readonly IConfiguration _config;
 	private readonly IDiscordHelper _discordHelper;
@@ -16,7 +16,7 @@ public class ChannelClearingService : AbstractBackgroundService
 		_discordHelper = discordHelper;
 	}
 
-	protected override TimeSpan Interval => TimeSpan.FromHours(1);
+	protected override TimeSpan TickInterval => TimeSpan.FromHours(1);
 
 	private static readonly TimeSpan _inactivityTime = TimeSpan.FromHours(8);
 

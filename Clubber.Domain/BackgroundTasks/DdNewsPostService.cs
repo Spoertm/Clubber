@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Clubber.Domain.BackgroundTasks;
 
-public class DdNewsPostService : AbstractBackgroundService
+public class DdNewsPostService : RepeatingBackgroundService
 {
 	private const int _minimumScore = 930;
 
@@ -32,7 +32,7 @@ public class DdNewsPostService : AbstractBackgroundService
 		_services = services;
 	}
 
-	protected override TimeSpan Interval => TimeSpan.FromMinutes(1);
+	protected override TimeSpan TickInterval => TimeSpan.FromMinutes(1);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{

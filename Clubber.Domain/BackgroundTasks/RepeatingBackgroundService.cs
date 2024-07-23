@@ -3,15 +3,15 @@ using Serilog;
 
 namespace Clubber.Domain.BackgroundTasks;
 
-public abstract class AbstractBackgroundService : BackgroundService
+public abstract class RepeatingBackgroundService : BackgroundService
 {
-	protected abstract TimeSpan Interval { get; }
+	protected abstract TimeSpan TickInterval { get; }
 
 	protected abstract Task ExecuteTaskAsync(CancellationToken stoppingToken);
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		using PeriodicTimer timer = new(Interval);
+		using PeriodicTimer timer = new(TickInterval);
 
 		while (!stoppingToken.IsCancellationRequested)
 		{

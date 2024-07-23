@@ -2,7 +2,7 @@ using Serilog;
 
 namespace Clubber.Domain.BackgroundTasks;
 
-public class KeepAppAliveService : AbstractBackgroundService
+public class KeepAppAliveService : RepeatingBackgroundService
 {
 	private readonly IHttpClientFactory _httpClientFactory;
 
@@ -11,7 +11,7 @@ public class KeepAppAliveService : AbstractBackgroundService
 		_httpClientFactory = httpClientFactory;
 	}
 
-	protected override TimeSpan Interval => TimeSpan.FromMinutes(5);
+	protected override TimeSpan TickInterval => TimeSpan.FromMinutes(5);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
