@@ -11,15 +11,15 @@ public abstract class AbstractBackgroundService : BackgroundService
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
+		using PeriodicTimer timer = new(Interval);
+
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			try
 			{
-				await ExecuteTaskAsync(stoppingToken);
-
-				if (Interval.TotalMilliseconds > 0)
+				if (await timer.WaitForNextTickAsync(stoppingToken))
 				{
-					await Task.Delay(Interval, stoppingToken);
+					await ExecuteTaskAsync(stoppingToken);
 				}
 			}
 			catch (OperationCanceledException)
