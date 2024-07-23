@@ -7,12 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Clubber.Domain.Services;
 
-public class WelcomeMessage
+public class UserJoinHandler
 {
 	private readonly IServiceScopeFactory _services;
 	private readonly IConfiguration _config;
 
-	public WelcomeMessage(
+	public UserJoinHandler(
 		IServiceScopeFactory services,
 		IConfiguration config,
 		DiscordSocketClient client)

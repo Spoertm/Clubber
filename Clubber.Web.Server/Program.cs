@@ -74,7 +74,7 @@ internal static class Program
 
 		if (builder.Environment.IsProduction())
 		{
-			builder.Services.AddSingleton<WelcomeMessage>();
+			builder.Services.AddSingleton<UserJoinHandler>();
 			builder.Services.AddHostedService<DdNewsPostService>();
 			builder.Services.AddHostedService<DatabaseUpdateService>();
 			builder.Services.AddHostedService<KeepAppAliveService>();
@@ -131,7 +131,7 @@ internal static class Program
 
 		if (app.Environment.IsProduction())
 		{
-			app.Services.GetRequiredService<WelcomeMessage>();
+			app.Services.GetRequiredService<UserJoinHandler>();
 		}
 
 		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
