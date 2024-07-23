@@ -1,5 +1,6 @@
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Responses;
+using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +36,7 @@ public class WelcomeMessage
 
 		if (await dbHelper.GetDdUserBy(joiningUser.Id) is not null)
 		{
-			await UpdateRolesForRegisteredUser(scope, joiningUser);
+			await UpdateRolesForRegisteredUser(joiningUser);
 		}
 		else
 		{
@@ -43,17 +44,18 @@ public class WelcomeMessage
 		}
 	}
 
-	private async Task UpdateRolesForRegisteredUser(AsyncServiceScope scope, SocketGuildUser joiningUser)
+	private async Task UpdateRolesForRegisteredUser(IGuildUser joiningUser)
 	{
+		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		UpdateRolesHelper updateRolesHelper = scope.ServiceProvider.GetRequiredService<UpdateRolesHelper>();
 		UpdateRolesResponse response = await updateRolesHelper.UpdateUserRoles(joiningUser);
 
 		if (response is UpdateRolesResponse.Full fullResponse)
 		{
 			ulong logChannelId = _config.GetValue<ulong>("DailyUpdateLoggingChannelId");
-			if (joiningUser.Guild.GetChannel(logChannelId) is SocketTextChannel logsChannel)
+			if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
 			{
-				await logsChannel.SendMessageAsync(null, false, EmbedHelper.UpdateRoles(fullResponse));
+				await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(fullResponse)]);
 			}
 		}
 	}
