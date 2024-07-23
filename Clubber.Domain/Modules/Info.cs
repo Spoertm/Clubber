@@ -21,10 +21,13 @@ public class Info : ExtendedModulebase<SocketCommandContext>
 	[Summary("Describes what the bot does.")]
 	public async Task WhyAreYou()
 	{
-		const string whyAreYouText = @"Every day or so, I automatically update people's DD roles.
-For example, if someone beats their score of 300s and gets 400s, I update their role from `300+ club` to `400+ club`.
+		const string whyAreYouText =
+			"""
+			Every day or so, I automatically update people's DD roles.
+			For example, if someone beats their score of 300s and gets 400s, I update their role from `300+ club` to `400+ club`.
 
-To speed this up, you can manually update your own roles by using the `+pb` or `+updateroles` command.";
+			To speed this up, you can manually update your own roles by using the `+pb` or `+updateroles` command.
+			""";
 
 		await InlineReplyAsync(whyAreYouText);
 	}
