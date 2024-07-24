@@ -47,7 +47,7 @@ public class MessageHandlerService
 		_client.ButtonExecuted += interactionHandler.OnButtonExecuted;
 		_commands.Log += OnLog;
 
-		_client.MessageReceived += message => Task.Run(() => OnMessageRecievedAsync(message));
+		_client.MessageReceived += message => Task.Run(() => OnMessageReceivedAsync(message));
 		_client.MessageReceived += message =>
 		{
 			ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
@@ -60,7 +60,7 @@ public class MessageHandlerService
 		};
 	}
 
-	private async Task OnMessageRecievedAsync(SocketMessage msg)
+	private async Task OnMessageReceivedAsync(SocketMessage msg)
 	{
 		if (msg is not SocketUserMessage { Source: MessageSource.User } message)
 			return;
