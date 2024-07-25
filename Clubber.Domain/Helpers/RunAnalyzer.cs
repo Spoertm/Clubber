@@ -9,14 +9,14 @@ public static class RunAnalyzer
 	{
 		List<Split> splits = [];
 		(string Name, int Time) currentSplit = new("0", 0);
-		for (int i = 0; i < Split.V3Splits.Length; i++)
+		for (int i = 0; i < Split.V3Splits.Count; i++)
 		{
 			(string Name, int Time) nextSplit = Split.V3Splits[i];
 			if (ddstatsRun.GameInfo.GameTime < currentSplit.Time)
 				break;
 
-			State? startOfSplitState = Array.Find(ddstatsRun.States, s => (int)s.GameTime == currentSplit.Time);
-			State? endOfSplitState = Array.Find(ddstatsRun.States, s => (int)s.GameTime == nextSplit.Time);
+			State? startOfSplitState = ddstatsRun.States.FirstOrDefault(s => (int)s.GameTime == currentSplit.Time);
+			State? endOfSplitState = ddstatsRun.States.FirstOrDefault(s => (int)s.GameTime == nextSplit.Time);
 			if (startOfSplitState is null || endOfSplitState is null)
 				continue;
 

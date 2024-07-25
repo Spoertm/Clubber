@@ -47,8 +47,8 @@ public class DdNewsPostService : RepeatingBackgroundService
 
 		await databaseHelper.CleanUpNewsItems();
 		_ddNewsChannel ??= discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
-		List<EntryResponse> oldEntries = dbContext.LeaderboardCache.AsNoTracking().ToList();
-		List<EntryResponse> newEntries = await webService.GetSufficientLeaderboardEntries(_minimumScore);
+		EntryResponse[] oldEntries = await dbContext.LeaderboardCache.AsNoTracking().ToArrayAsync(stoppingToken);
+		ICollection<EntryResponse> newEntries = await webService.GetSufficientLeaderboardEntries(_minimumScore);
 
 		if (newEntries.Count == 0)
 		{
@@ -63,7 +63,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 				resultSelector: (oldEntry, newEntry) => (oldEntry, newEntry))
 			.ToArray();
 
-		bool cacheIsToBeRefreshed = newEntries.Count > oldEntries.Count;
+		bool cacheIsToBeRefreshed = newEntries.Count > oldEntries.Length;
 		foreach ((EntryResponse oldEntry, EntryResponse newEntry) in entryTuples)
 		{
 			if (oldEntry.Time == newEntry.Time)

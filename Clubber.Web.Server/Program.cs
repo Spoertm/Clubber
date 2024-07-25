@@ -153,7 +153,7 @@ internal static class Program
 		finally
 		{
 			Log.Information("Shut-down complete");
-			Log.CloseAndFlush();
+			await Log.CloseAndFlushAsync();
 		}
 	}
 
@@ -170,7 +170,7 @@ internal static class Program
 	{
 		Log.Logger = new LoggerConfiguration()
 			.MinimumLevel.Information()
-			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}")
+			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}", formatProvider: CultureInfo.InvariantCulture)
 			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"] ?? throw new ConfigurationMissingException("ClubberLoggerToken"))
 			.CreateLogger();
 	}

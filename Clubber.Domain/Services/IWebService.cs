@@ -5,9 +5,9 @@ namespace Clubber.Domain.Services;
 
 public interface IWebService
 {
-	Task<List<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
+	Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
 
-	Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
+	Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
 
 	Task<string?> GetCountryCodeForplayer(int lbId);
 

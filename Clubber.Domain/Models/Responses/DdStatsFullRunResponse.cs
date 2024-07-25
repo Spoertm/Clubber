@@ -8,7 +8,7 @@ public class DdStatsFullRunResponse
 	public GameInfo GameInfo { get; set; } = null!;
 
 	[JsonProperty("states")]
-	public State[] States { get; set; } = null!;
+	public IReadOnlyList<State> States { get; set; } = null!;
 }
 
 public class State
@@ -131,5 +131,5 @@ public class GameInfo
 	public bool IsReplay { get; set; }
 
 	[System.Text.Json.Serialization.JsonIgnore]
-	public string Url => $"https://ddstats.com/games/{Id}";
+	public Uri Url => new($"https://ddstats.com/games/{Id}");
 }

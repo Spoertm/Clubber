@@ -174,6 +174,7 @@ csharp_preserve_single_line_statements = true
 
 # SA1000: The keyword 'new' should be followed by a space.
 # SA1027: Replace tabs with spaces.
+# SA1025: Code should not contain multiple whitespace characters in a row.
 # SA1101: Prefix local calls with this.
 # SA1124: Do not use regions.
 # SA1200: Using directive should appear within a namespace declaration.
@@ -198,6 +199,7 @@ csharp_preserve_single_line_statements = true
 # SA1642: Constructor summary documentation should begin with standard text.
 
 dotnet_diagnostic.SA1000.severity = none
+dotnet_diagnostic.SA1025.severity = none
 dotnet_diagnostic.SA1027.severity = none
 dotnet_diagnostic.SA1101.severity = none
 dotnet_diagnostic.SA1124.severity = none
@@ -209,6 +211,7 @@ dotnet_diagnostic.SA1214.severity = none
 dotnet_diagnostic.SA1303.severity = none
 dotnet_diagnostic.SA1309.severity = none
 dotnet_diagnostic.SA1311.severity = none
+dotnet_diagnostic.SA1402.severity = none
 dotnet_diagnostic.SA1407.severity = none
 dotnet_diagnostic.SA1408.severity = none
 dotnet_diagnostic.SA1503.severity = none
@@ -221,10 +224,10 @@ dotnet_diagnostic.SA1615.severity = none
 dotnet_diagnostic.SA1623.severity = none
 dotnet_diagnostic.SA1633.severity = none
 dotnet_diagnostic.SA1642.severity = none
+dotnet_diagnostic.CA2007.severity = none
 
 # SonarAnalyzers suppressions
 
-# S112: 'System.Exception' should not be thrown by user code.
 # S2368: Make this method private or simplify its parameters to not use multidimensional arrays.
 # S3358: Extract this nested ternary operation into an independent statement.
 
@@ -234,7 +237,6 @@ dotnet_diagnostic.S3358.severity = none
 
 # RoslynatorAnalyzers suppressions
 
-# RCS1090: Call 'ConfigureAwait(false)'.
 # RCS1123: Add parentheses when necessary.
 
 dotnet_diagnostic.RCS1090.severity = none

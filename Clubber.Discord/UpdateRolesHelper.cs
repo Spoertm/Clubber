@@ -108,7 +108,7 @@ public class UpdateRolesHelper
 			.ToList();
 
 		IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId);
-		List<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
+		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
 		IEnumerable<(IGuildUser GuildUser, EntryResponse LbUser)> updatedUsers = registeredUsers.Join(
 				inner: lbPlayers,
@@ -129,8 +129,9 @@ public class UpdateRolesHelper
 	{
 		try
 		{
-			int lbId = (await _databaseHelper.GetDdUserBy(user.Id))!.LeaderboardId;
-			List<EntryResponse> lbPlayerList = await _webService.GetLbPlayers(new[] { (uint)lbId });
+			DdUser ddUser = await _databaseHelper.GetDdUserBy(user.Id) ?? throw new ClubberException("User not found in database.");
+			int lbId = ddUser.LeaderboardId;
+			IReadOnlyList<EntryResponse> lbPlayerList = await _webService.GetLbPlayers([(uint)lbId]);
 
 			return await ExecuteRoleUpdate(user, lbPlayerList[0]);
 		}

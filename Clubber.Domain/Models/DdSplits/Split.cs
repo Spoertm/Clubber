@@ -17,7 +17,7 @@ public class Split
 	public int Value { get; set; }
 
 	[JsonIgnore]
-	public static (string Name, int Time)[] V3Splits =>
+	public static IReadOnlyList<(string Name, int Time)> V3Splits =>
 	[
 		("350", 366),
 		("700", 709),

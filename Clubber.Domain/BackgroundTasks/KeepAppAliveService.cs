@@ -24,7 +24,8 @@ public class KeepAppAliveService : RepeatingBackgroundService
 
 		try
 		{
-			await _httpClientFactory.CreateClient().GetStringAsync(appUrl, stoppingToken).ConfigureAwait(false);
+			using HttpClient client = _httpClientFactory.CreateClient();
+			await client.GetStringAsync(new Uri(appUrl), stoppingToken).ConfigureAwait(false);
 		}
 		catch (Exception e)
 		{

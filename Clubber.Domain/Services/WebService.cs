@@ -9,15 +9,13 @@ namespace Clubber.Domain.Services;
 
 public class WebService : IWebService
 {
-#pragma warning disable S1075
-	private const string _getMultipleUsersByIdUrl = "http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php";
-	private const string _getScoresUrl = "http://dd.hasmodai.com/dd3/get_scores.php";
-#pragma warning restore S1075
+	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
+	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
 	private readonly IHttpClientFactory _httpClientFactory;
 
 	public WebService(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
-	public async Task<List<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
+	public async Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
 	{
 		try
 		{
@@ -27,7 +25,8 @@ public class WebService : IWebService
 			];
 
 			using FormUrlEncodedContent content = new(postValues);
-			HttpResponseMessage response = await _httpClientFactory.CreateClient().PostAsync(_getMultipleUsersByIdUrl, content);
+			using HttpClient client = _httpClientFactory.CreateClient();
+			using HttpResponseMessage response = await client.PostAsync(_getMultipleUsersByIdUri, content);
 			byte[] data = await response.Content.ReadAsByteArrayAsync();
 
 			int bytePosition = 19;
@@ -65,7 +64,7 @@ public class WebService : IWebService
 		}
 	}
 
-	private string GetUserName(byte[] data, ref int bytePos)
+	private static string GetUserName(byte[] data, ref int bytePos)
 	{
 		short usernameLength = BitConverter.ToInt16(data, bytePos);
 		bytePos += 2;
@@ -77,7 +76,7 @@ public class WebService : IWebService
 		return Encoding.UTF8.GetString(usernameBytes);
 	}
 
-	public async Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
+	public async Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
 	{
 		List<EntryResponse> entries = [];
 		int rank = 1;
@@ -106,7 +105,8 @@ public class WebService : IWebService
 	private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 	{
 		using FormUrlEncodedContent content = new(new[] { new KeyValuePair<string?, string?>("offset", (rankStart - 1).ToString()) });
-		using HttpResponseMessage response = await _httpClientFactory.CreateClient().PostAsync(_getScoresUrl, content);
+		using HttpClient client = _httpClientFactory.CreateClient();
+		using HttpResponseMessage response = await client.PostAsync(_getScoresUri, content);
 
 		MemoryStream ms = new();
 		await response.Content.CopyToAsync(ms);
@@ -161,15 +161,17 @@ public class WebService : IWebService
 
 	public async Task<string?> GetCountryCodeForplayer(int lbId)
 	{
-		string url = $"https://devildaggers.info/api/clubber/players/{lbId}/country-code";
-		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
+		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/country-code");
+		using HttpClient client = _httpClientFactory.CreateClient();
+		string responseStr = await client.GetStringAsync(uri);
 		return JsonConvert.DeserializeObject<dynamic>(responseStr)?.countryCode;
 	}
 
-	public async Task<GetPlayerHistory?> GetPlayerHistory(int leaderboardId)
+	public async Task<GetPlayerHistory?> GetPlayerHistory(int lbId)
 	{
-		string url = $"https://devildaggers.info/api/clubber/players/{leaderboardId}/history";
-		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
+		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
+		using HttpClient client = _httpClientFactory.CreateClient();
+		string responseStr = await client.GetStringAsync(uri);
 		return JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
 	}
 
@@ -193,7 +195,8 @@ public class WebService : IWebService
 			throw new ClubberException("Invalid ddstats URL.");
 
 		string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
-		string ddstatsResponseStr = await _httpClientFactory.CreateClient().GetStringAsync(fullRunReqUrl);
+		using HttpClient client = _httpClientFactory.CreateClient();
+		string ddstatsResponseStr = await client.GetStringAsync(fullRunReqUrl);
 		return JsonConvert.DeserializeObject<DdStatsFullRunResponse>(ddstatsResponseStr) ?? throw new JsonSerializationException();
 	}
 }

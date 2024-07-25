@@ -20,7 +20,7 @@ public interface IDatabaseHelper
 
 	Task<DdUser?> GetDdUserBy(ulong discordId);
 
-	Task UpdateLeaderboardCache(List<EntryResponse> newEntries);
+	Task UpdateLeaderboardCache(ICollection<EntryResponse> newEntries);
 
 	Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth);
 

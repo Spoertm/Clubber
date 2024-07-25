@@ -87,7 +87,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	{
 		uint lbPlayerId = (uint)ddUser.LeaderboardId;
 
-		Task<List<EntryResponse>> playerEntryTask = _webService.GetLbPlayers(new[] { lbPlayerId });
+		Task<IReadOnlyList<EntryResponse>> playerEntryTask = _webService.GetLbPlayers(new[] { lbPlayerId });
 		Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory((int)lbPlayerId);
 		await Task.WhenAll(playerEntryTask, playerHistoryTask);
 

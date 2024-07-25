@@ -1,6 +1,8 @@
 ﻿// Taken from devildaggers.info and modified
 // Credit goes to Noah Stolk https://github.com/NoahStolk
 
+using System.Collections.ObjectModel;
+
 namespace Clubber.Domain.Models.Responses;
 
 public record struct LeaderboardResponse
@@ -36,5 +38,5 @@ public record struct LeaderboardResponse
 
 	public ushort TotalEntries { get; set; }
 
-	public List<EntryResponse> Entries { get; init; } = [];
+	public ICollection<EntryResponse> Entries { get; init; } = [];
 }

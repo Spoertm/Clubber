@@ -97,7 +97,7 @@ public class DatabaseHelper : IDatabaseHelper
 		return await _dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.DiscordId == discordId);
 	}
 
-	public async Task UpdateLeaderboardCache(List<EntryResponse> newEntries)
+	public async Task UpdateLeaderboardCache(ICollection<EntryResponse> newEntries)
 	{
 		await _dbContext.LeaderboardCache.ExecuteDeleteAsync();
 		await _dbContext.LeaderboardCache.AddRangeAsync(newEntries);
@@ -115,7 +115,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		DateTime utcNow = DateTime.UtcNow;
 		IQueryable<DdNewsItem> toRemove = _dbContext.DdNews.Where(ddn => utcNow - ddn.TimeOfOccurenceUtc >= TimeSpan.FromDays(1));
-		if (toRemove.Any())
+		if (await toRemove.AnyAsync())
 		{
 			_dbContext.DdNews.RemoveRange(toRemove);
 			await _dbContext.SaveChangesAsync();
