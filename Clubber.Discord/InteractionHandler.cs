@@ -5,7 +5,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
-namespace Clubber.Domain.Services;
+namespace Clubber.Discord;
 
 public class InteractionHandler
 {
@@ -139,7 +139,7 @@ public class InteractionHandler
 		}
 		else
 		{
-			Result registrationResult = await _databaseHelper.RegisterUser((uint)lbId, user);
+			Result registrationResult = await _databaseHelper.RegisterUser((uint)lbId, user.Id);
 			if (registrationResult.IsFailure)
 			{
 				return Result.Failure($"❌ Failed to execute command: {registrationResult.ErrorMsg}");

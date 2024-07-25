@@ -1,11 +1,10 @@
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models.Responses;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Clubber.Domain.Services;
+namespace Clubber.Discord;
 
 public class UserJoinHandler
 {

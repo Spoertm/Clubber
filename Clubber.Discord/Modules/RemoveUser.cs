@@ -4,7 +4,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Name("Database")]
 [Group("unregister")]
@@ -29,7 +29,7 @@ public class RemoveUser : ExtendedModulebase<SocketCommandContext>
 		Result<SocketGuildUser> result = await FoundOneUserFromName(name);
 		if (result.IsSuccess)
 		{
-			if (await _databaseHelper.RemoveUser(result.Value))
+			if (await _databaseHelper.RemoveUser(result.Value.Id))
 			{
 				await InlineReplyAsync("✅ Successfully removed.");
 			}

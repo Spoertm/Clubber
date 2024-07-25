@@ -130,6 +130,6 @@ public class GameInfo
 	[JsonProperty("is_replay")]
 	public bool IsReplay { get; set; }
 
-	[JsonIgnore]
+	[System.Text.Json.Serialization.JsonIgnore]
 	public string Url => $"https://ddstats.com/games/{Id}";
 }

@@ -1,11 +1,10 @@
 ﻿using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
-using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Name("Database")]
 [Group("register")]
@@ -52,7 +51,7 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		Result registrationResult = await _databaseHelper.RegisterUser(lbId, user);
+		Result registrationResult = await _databaseHelper.RegisterUser(lbId, user.Id);
 		if (registrationResult.IsSuccess)
 		{
 			const ulong newPalRoleId = 728663492424499200;

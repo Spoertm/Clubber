@@ -1,6 +1,6 @@
 ﻿using Discord;
 
-namespace Clubber.Domain.Models.Responses;
+namespace Clubber.Discord;
 
 public abstract class UpdateRolesResponse
 {

@@ -2,13 +2,12 @@
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
-using Clubber.Domain.Preconditions;
 using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Group("checksplits")]
 [Summary("Checks if the provided ddstats run has better splits than the current best ones and updates if necessary.")]

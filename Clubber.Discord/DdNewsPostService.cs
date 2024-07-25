@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Extensions;
+﻿using Clubber.Domain.BackgroundTasks;
+using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System.Text;
 
-namespace Clubber.Domain.BackgroundTasks;
+namespace Clubber.Discord;
 
 public class DdNewsPostService : RepeatingBackgroundService
 {

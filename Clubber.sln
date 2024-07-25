@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Web.Server", "Clubb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Web.Client", "Clubber.Web.Client\Clubber.Web.Client.csproj", "{B8320DD9-4D2B-445B-886A-F285082CC7BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Discord", "Clubber.Discord\Clubber.Discord.csproj", "{E1059DA1-E872-49A1-B73A-6596CB861E89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{B8320DD9-4D2B-445B-886A-F285082CC7BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8320DD9-4D2B-445B-886A-F285082CC7BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8320DD9-4D2B-445B-886A-F285082CC7BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1059DA1-E872-49A1-B73A-6596CB861E89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1059DA1-E872-49A1-B73A-6596CB861E89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1059DA1-E872-49A1-B73A-6596CB861E89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1059DA1-E872-49A1-B73A-6596CB861E89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,5 +55,6 @@ Global
 		{8306CD11-D242-4EEE-A536-A8F8CC5E5616} = {CA79BB09-3087-43F7-96F2-62D73084E20F}
 		{9ACB6D58-5561-498A-855C-009BF182FADB} = {4E25C132-FFFB-479D-9385-44D50B571346}
 		{B8320DD9-4D2B-445B-886A-F285082CC7BF} = {4E25C132-FFFB-479D-9385-44D50B571346}
+		{E1059DA1-E872-49A1-B73A-6596CB861E89} = {4E25C132-FFFB-479D-9385-44D50B571346}
 	EndGlobalSection
 EndGlobal

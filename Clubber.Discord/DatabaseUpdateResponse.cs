@@ -1,5 +1,5 @@
 ﻿using Discord;
 
-namespace Clubber.Domain.Models.Responses;
+namespace Clubber.Discord;
 
 public record struct DatabaseUpdateResponse(string Message, Embed[] RoleUpdateEmbeds);

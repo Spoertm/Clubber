@@ -1,9 +1,9 @@
-﻿using Clubber.Domain.Helpers;
+﻿using Clubber.Domain.BackgroundTasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 
-namespace Clubber.Domain.BackgroundTasks;
+namespace Clubber.Discord;
 
 public class ChannelClearingService : RepeatingBackgroundService
 {

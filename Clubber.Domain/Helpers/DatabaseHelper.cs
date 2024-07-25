@@ -3,7 +3,6 @@ using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
-using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;
@@ -26,14 +25,14 @@ public class DatabaseHelper : IDatabaseHelper
 		return await _dbContext.DdPlayers.AsNoTracking().ToListAsync();
 	}
 
-	public async Task<Result> RegisterUser(uint lbId, SocketGuildUser user)
+	public async Task<Result> RegisterUser(uint lbId, ulong discordId)
 	{
 		try
 		{
 			uint[] playerRequest = [lbId];
 
 			EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
-			DdUser newDdUser = new(user.Id, lbPlayer.Id);
+			DdUser newDdUser = new(discordId, lbPlayer.Id);
 
 			await _dbContext.AddAsync(newDdUser);
 			await _dbContext.SaveChangesAsync();
@@ -74,9 +73,6 @@ public class DatabaseHelper : IDatabaseHelper
 		await _dbContext.SaveChangesAsync();
 		return Result.Success(ddUser);
 	}
-
-	public async Task<bool> RemoveUser(SocketGuildUser user)
-		=> await RemoveUser(user.Id);
 
 	public async Task<bool> RemoveUser(ulong discordId)
 	{

@@ -7,7 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Name("Info")]
 [Group("me")]

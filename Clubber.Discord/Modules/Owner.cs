@@ -1,8 +1,7 @@
-using Clubber.Domain.Helpers;
 using Discord;
 using Discord.Commands;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [RequireOwner]
 public class Owner : ExtendedModulebase<SocketCommandContext>

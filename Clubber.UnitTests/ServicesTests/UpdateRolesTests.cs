@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Helpers;
+﻿using Clubber.Discord;
+using Clubber.Domain.Helpers;
 using Clubber.Domain.Services;
 using Microsoft.Extensions.Configuration;
 using Moq;

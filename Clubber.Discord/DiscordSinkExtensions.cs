@@ -2,7 +2,7 @@ using Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
 
-namespace Clubber.Domain.Models.Logging;
+namespace Clubber.Discord;
 
 public static class DiscordSinkExtensions
 {

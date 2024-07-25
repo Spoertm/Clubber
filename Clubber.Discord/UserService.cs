@@ -1,11 +1,10 @@
-using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Exceptions;
 using Discord;
 using Microsoft.Extensions.Configuration;
 
-namespace Clubber.Domain.Services;
+namespace Clubber.Discord;
 
 public class UserService
 {

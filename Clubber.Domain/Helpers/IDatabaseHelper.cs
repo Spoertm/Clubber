@@ -1,7 +1,6 @@
 ﻿using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
-using Discord.WebSocket;
 
 namespace Clubber.Domain.Helpers;
 
@@ -9,13 +8,11 @@ public interface IDatabaseHelper
 {
 	Task<List<DdUser>> GetEntireDatabase();
 
-	Task<Result> RegisterUser(uint lbId, SocketGuildUser user);
+	Task<Result> RegisterUser(uint lbId, ulong discordId);
 
 	Task<Result> RegisterTwitch(ulong userId, string twitchUsername);
 
 	Task<Result> UnregisterTwitch(ulong userId);
-
-	Task<bool> RemoveUser(SocketGuildUser user);
 
 	Task<bool> RemoveUser(ulong discordId);
 

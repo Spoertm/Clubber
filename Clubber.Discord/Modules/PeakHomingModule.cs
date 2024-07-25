@@ -1,16 +1,14 @@
-﻿using Clubber.Domain.Extensions;
-using Clubber.Domain.Helpers;
+﻿using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
-using Clubber.Domain.Preconditions;
 using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Group("checkhoming")]
 [Alias("checkpeak")]

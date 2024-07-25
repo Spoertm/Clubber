@@ -1,11 +1,9 @@
-﻿using Clubber.Domain.Helpers;
-using Clubber.Domain.Preconditions;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Name("Moderator")]
 [RequireAdminOrRole(697777821954736179, ErrorMessage = "Only moderators can use this command.")]

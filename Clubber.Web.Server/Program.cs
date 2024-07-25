@@ -1,9 +1,9 @@
+using Clubber.Discord;
+using Clubber.Discord.Modules;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Exceptions;
-using Clubber.Domain.Models.Logging;
 using Clubber.Domain.Models.Responses;
-using Clubber.Domain.Modules;
 using Clubber.Domain.Services;
 using Clubber.Web.Server.Endpoints;
 using Discord;
@@ -89,9 +89,9 @@ internal static class Program
 				Version = "Main",
 				Title = "Clubber API",
 				Description = """
-				This is an API for getting information regarding registered users in the DD Pals Discord server.
-				Additional information regarding the best Devil Daggers splits and new 1000+ scores can also be obtained.
-				""",
+							This is an API for getting information regarding registered users in the DD Pals Discord server.
+							Additional information regarding the best Devil Daggers splits and new 1000+ scores can also be obtained.
+							""",
 			});
 		});
 

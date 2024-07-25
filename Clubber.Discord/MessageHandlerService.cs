@@ -2,6 +2,7 @@
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -10,7 +11,7 @@ using Serilog;
 using Serilog.Events;
 using System.Diagnostics;
 
-namespace Clubber.Domain.Services;
+namespace Clubber.Discord;
 
 public class MessageHandlerService
 {

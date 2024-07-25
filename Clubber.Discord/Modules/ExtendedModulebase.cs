@@ -1,10 +1,9 @@
-﻿using Clubber.Domain.Helpers;
-using Clubber.Domain.Models;
+﻿using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 public abstract class ExtendedModulebase<T> : ModuleBase<T>
 	where T : SocketCommandContext

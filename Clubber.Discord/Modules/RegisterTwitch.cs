@@ -1,11 +1,10 @@
 ﻿using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
-using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Name("Database")]
 [Group("linktwitch")]

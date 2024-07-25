@@ -3,7 +3,7 @@ using Clubber.Domain.Models.DdSplits;
 using Discord;
 using Discord.Commands;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [RequireContext(ContextType.Guild)]
 public class Info : ExtendedModulebase<SocketCommandContext>

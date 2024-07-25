@@ -1,13 +1,10 @@
-﻿using Clubber.Domain.Helpers;
-using Clubber.Domain.Models;
-using Clubber.Domain.Models.Responses;
-using Clubber.Domain.Services;
+﻿using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Diagnostics;
 
-namespace Clubber.Domain.Modules;
+namespace Clubber.Discord.Modules;
 
 [Name("Roles")]
 [Group("pb")]
