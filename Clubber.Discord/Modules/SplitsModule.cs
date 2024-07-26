@@ -91,7 +91,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
 			return;
 
-		Split[] splits = RunAnalyzer.GetData(ddStatsRun);
+		IReadOnlyCollection<Split> splits = RunAnalyzer.GetData(ddStatsRun);
 		if (await IsError(splits.Any(s => s.Value > 1000), "Invalid run: too many homings gained on some splits."))
 			return;
 

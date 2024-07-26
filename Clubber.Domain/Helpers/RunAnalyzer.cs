@@ -5,7 +5,7 @@ namespace Clubber.Domain.Helpers;
 
 public static class RunAnalyzer
 {
-	public static Split[] GetData(DdStatsFullRunResponse ddstatsRun)
+	public static IReadOnlyCollection<Split> GetData(DdStatsFullRunResponse ddstatsRun)
 	{
 		List<Split> splits = [];
 		(string Name, int Time) currentSplit = new("0", 0);
@@ -28,6 +28,6 @@ public static class RunAnalyzer
 			splits.Add(new(currentSplit.Name, currentSplit.Time, splitValue));
 		}
 
-		return splits.ToArray();
+		return splits.AsReadOnly();
 	}
 }

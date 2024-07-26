@@ -136,7 +136,7 @@ public class DatabaseHelper : IDatabaseHelper
 	/// Updates the current best splits as necessary if the provided splits are superior.
 	/// </summary>
 	/// <returns>Tuple containing all the old best splits and the updated new splits.</returns>
-	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(Split[] splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
+	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(IReadOnlyCollection<Split> splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
 	{
 		BestSplit[] currentBestSplits = await _dbContext.BestSplits.AsNoTracking().ToArrayAsync();
 		List<BestSplit> superiorNewSplits = [];

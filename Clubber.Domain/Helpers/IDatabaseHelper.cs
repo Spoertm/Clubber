@@ -28,7 +28,7 @@ public interface IDatabaseHelper
 
 	Task<bool> TwitchUsernameIsRegistered(string twitchUsername);
 
-	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(Split[] splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description);
+	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(IReadOnlyCollection<Split> splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description);
 
 	Task<BestSplit[]> GetBestSplits();
 
