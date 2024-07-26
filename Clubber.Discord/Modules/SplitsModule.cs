@@ -45,7 +45,13 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(!v3SplitNames.Contains(splitName.ToString()), $"The split `{splitName}` doesn't exist."))
 			return;
 
-		if (await GetDdstatsResponse(url) is not { } ddstatsRun)
+		if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
+		{
+			await InlineReplyAsync("Invalid URL.");
+			return;
+		}
+
+		if (await GetDdstatsResponse(uri) is not { } ddstatsRun)
 			return;
 
 		if (await IsError(!ddstatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
@@ -73,7 +79,13 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 SomeDescription")]
 	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
 	{
-		if (await GetDdstatsResponse(url) is not { } ddStatsRun)
+		if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
+		{
+			await InlineReplyAsync("Invalid URL.");
+			return;
+		}
+
+		if (await GetDdstatsResponse(uri) is not { } ddStatsRun)
 			return;
 
 		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
@@ -95,11 +107,11 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
-	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(string url)
+	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(Uri uri)
 	{
 		try
 		{
-			return await _webService.GetDdstatsResponse(url);
+			return await _webService.GetDdstatsResponse(uri);
 		}
 		catch (Exception ex)
 		{

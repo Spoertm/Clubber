@@ -38,7 +38,13 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 	[Remarks("checkhoming https://ddstats.com/games/123456789")]
 	public async Task FromDdstatsUrl(string url)
 	{
-		if (await GetDdstatsResponse(url) is not { } ddStatsRun)
+		if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
+		{
+			await InlineReplyAsync("Invalid URL.");
+			return;
+		}
+
+		if (await GetDdstatsResponse(uri) is not { } ddStatsRun)
 			return;
 
 		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "It has to be a v3 run."))
@@ -75,11 +81,11 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
 	}
 
-	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(string url)
+	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(Uri uri)
 	{
 		try
 		{
-			return await _webService.GetDdstatsResponse(url);
+			return await _webService.GetDdstatsResponse(uri);
 		}
 		catch (Exception ex)
 		{

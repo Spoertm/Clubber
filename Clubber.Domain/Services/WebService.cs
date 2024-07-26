@@ -175,20 +175,18 @@ public class WebService : IWebService
 		return JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
 	}
 
-	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(string url)
+	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri)
 	{
-		if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
-			throw new ClubberException("Invalid URL");
-
+		string uriStr = uri.ToString();
 		string runIdStr = string.Empty;
-		if (url.StartsWith("https://ddstats.com/games/"))
-			runIdStr = url[26..];
-		else if (url.StartsWith("https://www.ddstats.com/games/"))
-			runIdStr = url[30..];
-		else if (url.StartsWith("https://ddstats.com/api/v2/game/full"))
-			runIdStr = url[40..];
-		else if (url.StartsWith("https://www.ddstats.com/api/v2/game/full"))
-			runIdStr = url[44..];
+		if (uriStr.StartsWith("https://ddstats.com/games/"))
+			runIdStr = uriStr[26..];
+		else if (uriStr.StartsWith("https://www.ddstats.com/games/"))
+			runIdStr = uriStr[30..];
+		else if (uriStr.StartsWith("https://ddstats.com/api/v2/game/full"))
+			runIdStr = uriStr[40..];
+		else if (uriStr.StartsWith("https://www.ddstats.com/api/v2/game/full"))
+			runIdStr = uriStr[44..];
 
 		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
 		if (string.IsNullOrEmpty(runIdStr) || !successfulParse)
