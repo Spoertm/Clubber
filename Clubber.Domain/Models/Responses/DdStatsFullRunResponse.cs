@@ -1,135 +1,135 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace Clubber.Domain.Models.Responses;
 
 public class DdStatsFullRunResponse
 {
-	[JsonProperty("game_info")]
+	[JsonPropertyName("game_info")]
 	public GameInfo GameInfo { get; set; } = null!;
 
-	[JsonProperty("states")]
+	[JsonPropertyName("states")]
 	public IReadOnlyList<State> States { get; set; } = null!;
 }
 
 public class State
 {
-	[JsonProperty("game_time")]
+	[JsonPropertyName("game_time")]
 	public double GameTime { get; set; }
 
-	[JsonProperty("gems")]
+	[JsonPropertyName("gems")]
 	public int Gems { get; set; }
 
-	[JsonProperty("homing_daggers")]
+	[JsonPropertyName("homing_daggers")]
 	public int HomingDaggers { get; set; }
 
-	[JsonProperty("daggers_hit")]
+	[JsonPropertyName("daggers_hit")]
 	public int DaggersHit { get; set; }
 
-	[JsonProperty("daggers_fired")]
+	[JsonPropertyName("daggers_fired")]
 	public int DaggersFired { get; set; }
 
-	[JsonProperty("accuracy")]
+	[JsonPropertyName("accuracy")]
 	public double Accuracy { get; set; }
 
-	[JsonProperty("enemies_alive")]
+	[JsonPropertyName("enemies_alive")]
 	public int EnemiesAlive { get; set; }
 
-	[JsonProperty("enemies_killed")]
+	[JsonPropertyName("enemies_killed")]
 	public int EnemiesKilled { get; set; }
 
-	[JsonProperty("gems_despawned")]
+	[JsonPropertyName("gems_despawned")]
 	public int GemsDespawned { get; set; }
 }
 
 public class GameInfo
 {
-	[JsonProperty("player_name")]
+	[JsonPropertyName("player_name")]
 	public string PlayerName { get; set; } = null!;
 
-	[JsonProperty("id")]
+	[JsonPropertyName("id")]
 	public int Id { get; set; }
 
-	[JsonProperty("player_id")]
+	[JsonPropertyName("player_id")]
 	public int PlayerId { get; set; }
 
-	[JsonProperty("player_game_time")]
+	[JsonPropertyName("player_game_time")]
 	public int PlayerGameTime { get; set; }
 
-	[JsonProperty("granularity")]
+	[JsonPropertyName("granularity")]
 	public int Granularity { get; set; }
 
-	[JsonProperty("game_time")]
+	[JsonPropertyName("game_time")]
 	public float GameTime { get; set; }
 
-	[JsonProperty("death_type")]
+	[JsonPropertyName("death_type")]
 	public string DeathType { get; set; } = null!;
 
-	[JsonProperty("gems")]
+	[JsonPropertyName("gems")]
 	public int Gems { get; set; }
 
-	[JsonProperty("homing_daggers")]
+	[JsonPropertyName("homing_daggers")]
 	public int HomingDaggers { get; set; }
 
-	[JsonProperty("daggers_fired")]
+	[JsonPropertyName("daggers_fired")]
 	public int DaggersFired { get; set; }
 
-	[JsonProperty("daggers_hit")]
+	[JsonPropertyName("daggers_hit")]
 	public int DaggersHit { get; set; }
 
-	[JsonProperty("accuracy")]
+	[JsonPropertyName("accuracy")]
 	public double Accuracy { get; set; }
 
-	[JsonProperty("enemies_alive")]
+	[JsonPropertyName("enemies_alive")]
 	public int EnemiesAlive { get; set; }
 
-	[JsonProperty("enemies_killed")]
+	[JsonPropertyName("enemies_killed")]
 	public int EnemiesKilled { get; set; }
 
-	[JsonProperty("time_stamp")]
+	[JsonPropertyName("time_stamp")]
 	public DateTime TimeStamp { get; set; }
 
-	[JsonProperty("replay_player_id")]
+	[JsonPropertyName("replay_player_id")]
 	public int ReplayPlayerId { get; set; }
 
-	[JsonProperty("replay_player_name")]
+	[JsonPropertyName("replay_player_name")]
 	public string ReplayPlayerName { get; set; } = null!;
 
-	[JsonProperty("spawnset")]
+	[JsonPropertyName("spawnset")]
 	public string Spawnset { get; set; } = null!;
 
-	[JsonProperty("version")]
+	[JsonPropertyName("version")]
 	public string Version { get; set; } = null!;
 
-	[JsonProperty("level_two_time")]
+	[JsonPropertyName("level_two_time")]
 	public double LevelTwoTime { get; set; }
 
-	[JsonProperty("level_three_time")]
+	[JsonPropertyName("level_three_time")]
 	public double LevelThreeTime { get; set; }
 
-	[JsonProperty("level_four_time")]
+	[JsonPropertyName("level_four_time")]
 	public double LevelFourTime { get; set; }
 
-	[JsonProperty("levi_down_time")]
+	[JsonPropertyName("levi_down_time")]
 	public double LeviDownTime { get; set; }
 
-	[JsonProperty("orb_down_time")]
+	[JsonPropertyName("orb_down_time")]
 	public double OrbDownTime { get; set; }
 
-	[JsonProperty("homing_daggers_max_time")]
+	[JsonPropertyName("homing_daggers_max_time")]
 	public double HomingDaggersMaxTime { get; set; }
 
-	[JsonProperty("enemies_alive_max_time")]
+	[JsonPropertyName("enemies_alive_max_time")]
 	public double EnemiesAliveMaxTime { get; set; }
 
-	[JsonProperty("homing_daggers_max")]
+	[JsonPropertyName("homing_daggers_max")]
 	public int HomingDaggersMax { get; set; }
 
-	[JsonProperty("enemies_alive_max")]
+	[JsonPropertyName("enemies_alive_max")]
 	public int EnemiesAliveMax { get; set; }
 
-	[JsonProperty("is_replay")]
+	[JsonPropertyName("is_replay")]
 	public bool IsReplay { get; set; }
 
-	[System.Text.Json.Serialization.JsonIgnore]
+	[JsonIgnore]
 	public Uri Url => new($"https://ddstats.com/games/{Id}");
 }

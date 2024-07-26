@@ -1,9 +1,10 @@
 ﻿using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
-using Newtonsoft.Json;
 using Serilog;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Json;
 
 namespace Clubber.Domain.Services;
 
@@ -11,6 +12,10 @@ public class WebService : IWebService
 {
 	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
 	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
+	private readonly JsonSerializerOptions _serializerOptions = new()
+	{
+		PropertyNameCaseInsensitive = true,
+	};
 	private readonly IHttpClientFactory _httpClientFactory;
 
 	public WebService(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
@@ -163,16 +168,18 @@ public class WebService : IWebService
 	{
 		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/country-code");
 		using HttpClient client = _httpClientFactory.CreateClient();
-		string responseStr = await client.GetStringAsync(uri);
-		return JsonConvert.DeserializeObject<dynamic>(responseStr)?.countryCode;
+		await using Stream responseStream = await client.GetStreamAsync(uri);
+		using JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream);
+
+		return jsonDocument.RootElement.TryGetProperty("countryCode", out JsonElement countryCodeElement) ? countryCodeElement.GetString() : null;
 	}
 
 	public async Task<GetPlayerHistory?> GetPlayerHistory(int lbId)
 	{
 		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
 		using HttpClient client = _httpClientFactory.CreateClient();
-		string responseStr = await client.GetStringAsync(uri);
-		return JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
+		await using Stream responseStream = await client.GetStreamAsync(uri);
+		return await JsonSerializer.DeserializeAsync<GetPlayerHistory>(responseStream, _serializerOptions);
 	}
 
 	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri)
@@ -194,7 +201,7 @@ public class WebService : IWebService
 
 		string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
 		using HttpClient client = _httpClientFactory.CreateClient();
-		string ddstatsResponseStr = await client.GetStringAsync(fullRunReqUrl);
-		return JsonConvert.DeserializeObject<DdStatsFullRunResponse>(ddstatsResponseStr) ?? throw new JsonSerializationException();
+		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUrl);
+		return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
 	}
 }
