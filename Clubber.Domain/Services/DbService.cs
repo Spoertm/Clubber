@@ -1,5 +1,4 @@
 using Clubber.Domain.Models;
-using Clubber.Domain.Models.Database;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +7,6 @@ namespace Clubber.Domain.Services;
 
 public class DbService : DbContext
 {
-	public DbSet<ClubberDbConfig> ClubberConfig => Set<ClubberDbConfig>();
 	public DbSet<EntryResponse> LeaderboardCache => Set<EntryResponse>();
 	public DbSet<DdUser> DdPlayers => Set<DdUser>();
 	public DbSet<DdNewsItem> DdNews => Set<DdNewsItem>();

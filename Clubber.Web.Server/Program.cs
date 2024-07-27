@@ -5,11 +5,11 @@ using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
+using Clubber.Web.Server.Configuration;
 using Clubber.Web.Server.Endpoints;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Serilog;
 using System.Globalization;
@@ -28,12 +28,10 @@ internal static class Program
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-		if (builder.Environment.IsProduction())
-		{
-			SetConfigFromDb(builder);
-		}
+		builder.ConfigureConfiguration();
 
-		ConfigureLogging(builder.Configuration);
+		builder.ConfigureLogging(builder.Configuration);
+
 		Log.Information("Starting");
 
 		DiscordSocketClient client = new(new()
@@ -50,8 +48,6 @@ internal static class Program
 			IgnoreExtraArgs = true,
 			DefaultRunMode = RunMode.Async,
 		});
-
-		builder.Logging.ClearProviders();
 
 		builder.Services.AddRazorPages();
 		builder.Services.AddEndpointsApiExplorer();
@@ -157,18 +153,12 @@ internal static class Program
 		}
 	}
 
-	private static void SetConfigFromDb(WebApplicationBuilder builder)
+	private static void ConfigureLogging(this WebApplicationBuilder builder, IConfiguration config)
 	{
-		using DbService dbService = new();
-		string jsonConfig = dbService.ClubberConfig.AsNoTracking().First().JsonConfig;
-		string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DbConfig.json");
-		File.WriteAllText(configPath, jsonConfig);
-		builder.Configuration.AddJsonFile(configPath);
-	}
+		builder.Logging.ClearProviders();
 
-	private static void ConfigureLogging(IConfiguration config)
-	{
 		Log.Logger = new LoggerConfiguration()
+			.Enrich.FromLogContext()
 			.MinimumLevel.Information()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}", formatProvider: CultureInfo.InvariantCulture)
 			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"] ?? throw new ConfigurationMissingException("ClubberLoggerToken"))
