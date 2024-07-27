@@ -49,24 +49,13 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	public async Task StatsFromDiscordId([Name("Discord ID")] ulong discordId)
 	{
 		SocketGuildUser? user = Context.Guild.GetUser(discordId);
-		DdUser? ddUser = await _databaseHelper.GetDdUserBy(discordId);
-
-		if (ddUser is null)
+		if (user is null)
 		{
-			if (user is null)
-			{
-				await InlineReplyAsync("User not found.");
-			}
-			else
-			{
-				Result userValidationResult = await _userService.IsValid(user, user.Id == Context.User.Id);
-				await InlineReplyAsync(userValidationResult.ErrorMsg);
-			}
-
+			await InlineReplyAsync("User not found.");
 			return;
 		}
 
-		await ShowStats(ddUser, user);
+		await CheckUserAndShowStats(user);
 	}
 
 	private async Task CheckUserAndShowStats(SocketGuildUser user)
@@ -80,15 +69,13 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		await ShowStats(ddUser, user);
+		await ShowStats((uint)ddUser.LeaderboardId, user);
 	}
 
-	private async Task ShowStats(DdUser ddUser, SocketGuildUser? user)
+	private async Task ShowStats(uint lbId, SocketGuildUser? user)
 	{
-		uint lbPlayerId = (uint)ddUser.LeaderboardId;
-
-		Task<IReadOnlyList<EntryResponse>> playerEntryTask = _webService.GetLbPlayers(new[] { lbPlayerId });
-		Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory((int)lbPlayerId);
+		Task<IReadOnlyList<EntryResponse>> playerEntryTask = _webService.GetLbPlayers([lbId]);
+		Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory((int)lbId);
 		await Task.WhenAll(playerEntryTask, playerHistoryTask);
 
 		EntryResponse playerEntry = (await playerEntryTask)[0];
