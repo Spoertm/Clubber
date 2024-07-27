@@ -10,6 +10,7 @@ public class ChannelClearingService : RepeatingBackgroundService
 {
 	private readonly AppConfig _config;
 	private readonly IDiscordHelper _discordHelper;
+	private static readonly TimeSpan _inactivityTime = TimeSpan.FromHours(8);
 
 	public ChannelClearingService(IOptions<AppConfig> config, IDiscordHelper discordHelper)
 	{
@@ -18,8 +19,6 @@ public class ChannelClearingService : RepeatingBackgroundService
 	}
 
 	protected override TimeSpan TickInterval => TimeSpan.FromHours(1);
-
-	private static readonly TimeSpan _inactivityTime = TimeSpan.FromHours(8);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
