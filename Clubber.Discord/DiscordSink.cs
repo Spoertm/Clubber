@@ -37,7 +37,8 @@ public class DiscordSink : ILogEventSink
 				embedBuilder.AddField("Exception message:", logEvent.Exception.Message.Truncate(1024), true);
 			}
 
-			_webHook.SendMessageAsync(embeds: new[] { embedBuilder.Build() }).GetAwaiter().GetResult();
+			Embed embed = embedBuilder.Build();
+			_webHook.SendMessageAsync(embeds: [embed]).GetAwaiter().GetResult();
 		}
 		catch (Exception ex)
 		{
