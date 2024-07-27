@@ -18,7 +18,7 @@ public abstract class UpdateRolesResponse
 		public IEnumerable<ulong> RolesRemoved { get; }
 	}
 
-	public class Partial : UpdateRolesResponse
+	public sealed class Partial : UpdateRolesResponse
 	{
 		public Partial(decimal secondsAwayFromNextRole, ulong nextRoleId)
 		{
