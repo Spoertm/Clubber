@@ -132,7 +132,7 @@ internal static class Program
 			app.Services.GetRequiredService<UserJoinHandler>();
 		}
 
-		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
+		await client.LoginAsync(TokenType.Bot, appConfig.BotToken);
 		await client.StartAsync();
 		await client.SetGameAsync("your roles", null, ActivityType.Watching);
 		await commands.AddModulesAsync(Assembly.GetAssembly(typeof(ExtendedModulebase<>)), app.Services);
