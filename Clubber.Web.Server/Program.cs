@@ -1,8 +1,8 @@
 using Clubber.Discord;
 using Clubber.Discord.Modules;
 using Clubber.Domain.BackgroundTasks;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Clubber.Web.Server.Configuration;
@@ -10,6 +10,7 @@ using Clubber.Web.Server.Endpoints;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using Serilog;
 using System.Globalization;
@@ -30,7 +31,8 @@ internal static class Program
 
 		builder.ConfigureConfiguration();
 
-		builder.ConfigureLogging(builder.Configuration);
+		AppConfig appConfig = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<AppConfig>>().Value;
+		builder.ConfigureLogging(appConfig);
 
 		Log.Information("Starting");
 
@@ -153,7 +155,7 @@ internal static class Program
 		}
 	}
 
-	private static void ConfigureLogging(this WebApplicationBuilder builder, IConfiguration config)
+	private static void ConfigureLogging(this WebApplicationBuilder builder, AppConfig config)
 	{
 		builder.Logging.ClearProviders();
 
@@ -161,7 +163,7 @@ internal static class Program
 			.Enrich.FromLogContext()
 			.MinimumLevel.Information()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}", formatProvider: CultureInfo.InvariantCulture)
-			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"] ?? throw new ConfigurationMissingException("ClubberLoggerToken"))
+			.WriteTo.Discord(config.ClubberLoggerId, config.ClubberLoggerToken)
 			.CreateLogger();
 	}
 }

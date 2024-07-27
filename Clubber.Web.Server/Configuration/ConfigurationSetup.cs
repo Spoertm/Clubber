@@ -1,4 +1,4 @@
-﻿using Clubber.Domain.Models.Exceptions;
+﻿using Clubber.Domain.Configuration;
 using System.Text;
 
 namespace Clubber.Web.Server.Configuration;
@@ -21,10 +21,15 @@ public static class ConfigurationSetup
 		}
 		else
 		{
-			string configJson = Environment.GetEnvironmentVariable("Configuration") ?? throw new ConfigurationMissingException("Configuration");
+			string configJson = Environment.GetEnvironmentVariable("Configuration") ?? throw new("Configuration environment variable not set");
 
 			using MemoryStream stream = new(Encoding.UTF8.GetBytes(configJson));
 			builder.Configuration.AddJsonStream(stream);
 		}
+
+		builder.Services.AddOptions<AppConfig>()
+			.Bind(builder.Configuration)
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
 	}
 }

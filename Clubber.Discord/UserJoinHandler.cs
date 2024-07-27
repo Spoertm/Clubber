@@ -1,35 +1,33 @@
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord;
 
 public class UserJoinHandler
 {
 	private readonly IServiceScopeFactory _services;
-	private readonly IConfiguration _config;
+	private readonly AppConfig _config;
 
 	public UserJoinHandler(
 		IServiceScopeFactory services,
-		IConfiguration config,
+		IOptions<AppConfig> config,
 		DiscordSocketClient client)
 	{
 		_services = services;
-		_config = config;
+		_config = config.Value;
 		client.UserJoined += OnUserJoined;
 	}
 
 	private async Task OnUserJoined(SocketGuildUser joiningUser)
 	{
-		ulong ddpalsId = _config.GetValue<ulong>("DdPalsId");
-		if (joiningUser.Guild.Id != ddpalsId || joiningUser.IsBot)
+		if (joiningUser.Guild.Id != _config.DdPalsId || joiningUser.IsBot)
 			return;
 
 		// User is registered
-		ulong unregRoleId = _config.GetValue<ulong>("UnregisteredRoleId");
-
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		IDatabaseHelper dbHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
 
@@ -39,7 +37,7 @@ public class UserJoinHandler
 		}
 		else
 		{
-			await joiningUser.AddRoleAsync(unregRoleId);
+			await joiningUser.AddRoleAsync(_config.UnregisteredRoleId);
 		}
 	}
 
@@ -51,7 +49,7 @@ public class UserJoinHandler
 
 		if (response is UpdateRolesResponse.Full fullResponse)
 		{
-			ulong logChannelId = _config.GetValue<ulong>("DailyUpdateLoggingChannelId");
+			ulong logChannelId = _config.DailyUpdateLoggingChannelId;
 			if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
 			{
 				await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(fullResponse)]);

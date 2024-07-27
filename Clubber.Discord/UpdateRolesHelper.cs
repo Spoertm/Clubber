@@ -1,10 +1,11 @@
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Diagnostics;
 
@@ -62,13 +63,12 @@ public class UpdateRolesHelper
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;
 
-	public UpdateRolesHelper(IConfiguration config, IDatabaseHelper databaseHelper, IWebService webService)
+	public UpdateRolesHelper(IOptions<AppConfig> config, IDatabaseHelper databaseHelper, IWebService webService)
 	{
 		_databaseHelper = databaseHelper;
 		_webService = webService;
 
-		ulong unregRoleId = config.GetValue<ulong>("UnregisteredRoleId");
-		_uselessRoles = [unregRoleId, 458375331468935178, 994354086646399066];
+		_uselessRoles = [config.Value.UnregisteredRoleId, 458375331468935178, 994354086646399066];
 	}
 
 	public async Task<DatabaseUpdateResponse> UpdateRolesAndDb(IReadOnlyCollection<IGuildUser> guildUsers)

@@ -1,4 +1,5 @@
 ﻿using Clubber.Domain.BackgroundTasks;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Responses;
@@ -6,8 +7,8 @@ using Clubber.Domain.Services;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text;
 
@@ -17,7 +18,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 {
 	private const int _minimumScore = 930;
 
-	private readonly IConfiguration _config;
+	private readonly AppConfig _config;
 	private readonly IServiceScopeFactory _services;
 
 	private readonly StringBuilder _sb = new();
@@ -26,10 +27,10 @@ public class DdNewsPostService : RepeatingBackgroundService
 	private SocketTextChannel? _ddNewsChannel;
 
 	public DdNewsPostService(
-		IConfiguration config,
+		IOptions<AppConfig> config,
 		IServiceScopeFactory services)
 	{
-		_config = config;
+		_config = config.Value;
 		_services = services;
 	}
 
@@ -46,7 +47,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 		IWebService webService = scope.ServiceProvider.GetRequiredService<IWebService>();
 
 		await databaseHelper.CleanUpNewsItems();
-		_ddNewsChannel ??= discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
+		_ddNewsChannel ??= discordHelper.GetTextChannel(_config.DdNewsChannelId);
 		EntryResponse[] oldEntries = await dbContext.LeaderboardCache.AsNoTracking().ToArrayAsync(stoppingToken);
 		ICollection<EntryResponse> newEntries = await webService.GetSufficientLeaderboardEntries(_minimumScore);
 
@@ -128,8 +129,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 		int nth)
 	{
 		string userName = newEntry.Username;
-		ulong ddPalsId = _config.GetValue<ulong>("DdPalsId");
-		if (await databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(ddPalsId, dbUser.DiscordId) is { } guildUser)
+		if (await databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 
 		double oldScore = oldEntry.Time / 10_000d;

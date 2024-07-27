@@ -1,20 +1,21 @@
 ﻿using Clubber.Domain.BackgroundTasks;
+using Clubber.Domain.Configuration;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Clubber.Discord;
 
 public class DatabaseUpdateService : ExactBackgroundService
 {
-	private readonly IConfiguration _config;
+	private readonly AppConfig _config;
 	private readonly IServiceScopeFactory _services;
 
-	public DatabaseUpdateService(IConfiguration config, IServiceScopeFactory services)
+	public DatabaseUpdateService(IOptions<AppConfig> config, IServiceScopeFactory services)
 	{
-		_config = config;
+		_config = config.Value;
 		_services = services;
 	}
 
@@ -26,9 +27,9 @@ public class DatabaseUpdateService : ExactBackgroundService
 		UpdateRolesHelper updateRolesHelper = scope.ServiceProvider.GetRequiredService<UpdateRolesHelper>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 
-		SocketGuild ddPals = discordHelper.GetGuild(_config.GetValue<ulong>("DdPalsId")) ?? throw new("DD Pals server not found with the provided ID.");
-		SocketTextChannel dailyUpdateLoggingChannel = discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateLoggingChannelId"));
-		SocketTextChannel dailyUpdateChannel = discordHelper.GetTextChannel(_config.GetValue<ulong>("DailyUpdateChannelId"));
+		SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId) ?? throw new("DD Pals server not found with the provided ID.");
+		SocketTextChannel dailyUpdateLoggingChannel = discordHelper.GetTextChannel(_config.DailyUpdateLoggingChannelId);
+		SocketTextChannel dailyUpdateChannel = discordHelper.GetTextChannel(_config.DailyUpdateChannel);
 		IUserMessage msg = await dailyUpdateLoggingChannel.SendMessageAsync("Checking for role updates...");
 
 		int tries = 0;

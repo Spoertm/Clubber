@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Extensions;
+﻿using Clubber.Domain.Configuration;
+using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
@@ -6,7 +7,7 @@ using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using System.Diagnostics;
@@ -15,17 +16,16 @@ namespace Clubber.Discord;
 
 public class MessageHandlerService
 {
-	private readonly IConfiguration _config;
+	private readonly AppConfig _config;
 	private readonly DiscordSocketClient _client;
 	private readonly CommandService _commands;
 	private readonly IServiceProvider _services;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IWebService _webService;
 	private readonly RegistrationTracker _registrationTracker;
-	private readonly string _prefix;
 
 	public MessageHandlerService(
-		IConfiguration config,
+		IOptions<AppConfig> config,
 		DiscordSocketClient client,
 		CommandService commands,
 		IServiceProvider services,
@@ -34,15 +34,13 @@ public class MessageHandlerService
 		IWebService webService,
 		RegistrationTracker registrationTracker)
 	{
-		_config = config;
+		_config = config.Value;
 		_client = client;
 		_commands = commands;
 		_services = services;
 		_discordHelper = discordHelper;
 		_webService = webService;
 		_registrationTracker = registrationTracker;
-
-		_prefix = config["Prefix"] ?? throw new ConfigurationMissingException("Prefix");
 
 		_client.Log += OnLog;
 		_client.ButtonExecuted += interactionHandler.OnButtonExecuted;
@@ -51,8 +49,7 @@ public class MessageHandlerService
 		_client.MessageReceived += message => Task.Run(() => OnMessageReceivedAsync(message));
 		_client.MessageReceived += message =>
 		{
-			ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
-			if (message is SocketUserMessage { Source: MessageSource.User } socketUserMsg && message.Channel.Id == registerChannelId)
+			if (message is SocketUserMessage { Source: MessageSource.User } socketUserMsg && message.Channel.Id == _config.RegisterChannelId)
 			{
 				return Task.Run(() => ExecuteRegistrationProcedure(socketUserMsg));
 			}
@@ -67,7 +64,7 @@ public class MessageHandlerService
 			return;
 
 		int argumentPos = 0;
-		if (!message.HasStringPrefix(_prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
+		if (!message.HasStringPrefix(_config.Prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
 			return;
 
 		SocketCommandContext context = new(_client, message);
@@ -83,8 +80,7 @@ public class MessageHandlerService
 
 	private async Task ExecuteRegistrationProcedure(SocketUserMessage message)
 	{
-		ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
-		if (message.Channel.Id != registerChannelId)
+		if (message.Channel.Id != _config.RegisterChannelId)
 		{
 			return;
 		}
@@ -121,8 +117,7 @@ public class MessageHandlerService
 		// User specified "no score"
 		else if (message.Content.Contains("no score", StringComparison.OrdinalIgnoreCase))
 		{
-			ulong noScoreRoleId = _config.GetValue<ulong>("NoScoreRoleId");
-			eb.WithDescription($"## Give {message.Author.Mention} {MentionUtils.MentionRole(noScoreRoleId)} role?");
+			eb.WithDescription($"## Give {message.Author.Mention} {MentionUtils.MentionRole(_config.NoScoreRoleId)} role?");
 
 			string buttonId = $"register:{message.Author.Id}:-1:{message.Id}";
 
@@ -136,8 +131,7 @@ public class MessageHandlerService
 
 		_registrationTracker.FlagUser(message.Author.Id);
 
-		ulong modsChannelId = _config.GetValue<ulong>("ModsChannelId");
-		SocketTextChannel modsChannel = _discordHelper.GetTextChannel(modsChannelId);
+		SocketTextChannel modsChannel = _discordHelper.GetTextChannel(_config.ModsChannelId);
 		await modsChannel.SendMessageAsync(embed: eb.Build(), components: cb.Build());
 
 		const string notifMessage = "ℹ️ I've notified the mods. You'll be registered soon.";

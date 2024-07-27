@@ -1,19 +1,19 @@
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
-using Clubber.Domain.Models.Exceptions;
 using Discord;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord;
 
 public class UserService
 {
-	private readonly IConfiguration _config;
+	private readonly AppConfig _config;
 	private readonly IDatabaseHelper _databaseHelper;
 
-	public UserService(IConfiguration config, IDatabaseHelper databaseHelper)
+	public UserService(IOptions<AppConfig> config, IDatabaseHelper databaseHelper)
 	{
-		_config = config;
+		_config = config.Value;
 		_databaseHelper = databaseHelper;
 	}
 
@@ -51,18 +51,15 @@ public class UserService
 			return Result.Failure($"`{guildUser.AvailableNameSanitized()}` is not registered.");
 		}
 
-		ulong unregRoleId = _config.GetValue<ulong>("UnregisteredRoleId");
-		bool userHasUnregRole = guildUser.RoleIds.Contains(unregRoleId);
+		bool userHasUnregRole = guildUser.RoleIds.Contains(_config.UnregisteredRoleId);
 
-		string roleAssignerRoleId = _config["RoleAssignerRoleId"] ?? throw new ConfigurationMissingException("RoleAssignerRoleId");
 		string message = userUsedCommandForThemselves
-			? $"You're not registered, {guildUser.AvailableNameSanitized()}. Only a <@&{roleAssignerRoleId}> can register you."
-			: $"`{guildUser.AvailableNameSanitized()}` is not registered. Only a <@&{roleAssignerRoleId}> can register them.";
+			? $"You're not registered, {guildUser.AvailableNameSanitized()}. Only a <@&{_config.RoleAssignerRoleId}> can register you."
+			: $"`{guildUser.AvailableNameSanitized()}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.";
 
-		string registerChannelId = _config["RegisterChannelId"] ?? throw new ConfigurationMissingException("RegisterChannelId");
 		if (userHasUnregRole)
 		{
-			message += $"\nPlease refer to the first message in <#{registerChannelId}> for more info.";
+			message += $"\nPlease refer to the first message in <#{_config.RegisterChannelId}> for more info.";
 		}
 
 		return Result.Failure(message);
@@ -75,8 +72,7 @@ public class UserService
 			return Result.Failure($"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 		}
 
-		ulong cheaterRoleId = _config.GetValue<ulong>("CheaterRoleId");
-		if (guildUser.RoleIds.All(rId => rId != cheaterRoleId))
+		if (guildUser.RoleIds.All(rId => rId != _config.CheaterRoleId))
 		{
 			return Result.Success();
 		}

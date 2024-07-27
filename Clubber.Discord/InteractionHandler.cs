@@ -1,28 +1,29 @@
-﻿using Clubber.Domain.Helpers;
+﻿using Clubber.Domain.Configuration;
+using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Clubber.Discord;
 
 public class InteractionHandler
 {
-	private readonly IConfiguration _config;
+	private readonly AppConfig _config;
 	private readonly UserService _userService;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly RegistrationTracker _registrationTracker;
 
 	public InteractionHandler(
-		IConfiguration config,
+		IOptions<AppConfig> config,
 		UserService userService,
 		IDatabaseHelper databaseHelper,
 		IDiscordHelper discordHelper,
 		RegistrationTracker registrationTracker)
 	{
-		_config = config;
+		_config = config.Value;
 		_userService = userService;
 		_databaseHelper = databaseHelper;
 		_discordHelper = discordHelper;
@@ -79,7 +80,7 @@ public class InteractionHandler
 		SocketTextChannel? registerChannel = null;
 		try
 		{
-			registerChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("RegisterChannelId"));
+			registerChannel = _discordHelper.GetTextChannel(_config.RegisterChannelId);
 		}
 		catch (Exception e)
 		{
@@ -134,8 +135,7 @@ public class InteractionHandler
 
 		if (lbId < 0)
 		{
-			ulong noScoreRoleId = _config.GetValue<ulong>("NoScoreRoleId");
-			await user.AddRoleAsync(noScoreRoleId);
+			await user.AddRoleAsync(_config.NoScoreRoleId);
 		}
 		else
 		{

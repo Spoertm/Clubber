@@ -1,7 +1,9 @@
 ﻿using Clubber.Discord;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -29,7 +31,11 @@ public class UpdateRolesTests
 			.AddJsonFile("appsettings.Testing.json")
 			.Build();
 
-		_sut = new(configMock, _databaseHelperMock.Object, _webserviceMock.Object);
+		AppConfig appConfig = new();
+		configMock.Bind(appConfig);
+		IOptions<AppConfig> options = Options.Create(appConfig);
+
+		_sut = new(options, _databaseHelperMock.Object, _webserviceMock.Object);
 	}
 
 	[Theory]

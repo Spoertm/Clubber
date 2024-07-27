@@ -1,7 +1,8 @@
-﻿using Discord;
+﻿using Clubber.Domain.Configuration;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Modules;
 
@@ -10,12 +11,12 @@ namespace Clubber.Discord.Modules;
 [RequireContext(ContextType.Guild)]
 public class Moderator : ExtendedModulebase<SocketCommandContext>
 {
-	private readonly IConfiguration _config;
+	private readonly AppConfig _config;
 	private readonly IDiscordHelper _discordHelper;
 
-	public Moderator(IConfiguration config, IDiscordHelper discordHelper)
+	public Moderator(IOptions<AppConfig> config, IDiscordHelper discordHelper)
 	{
-		_config = config;
+		_config = config.Value;
 		_discordHelper = discordHelper;
 	}
 
@@ -28,7 +29,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 			return;
 
-		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
+		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.DdNewsChannelId);
 		if (await ddnewsPostChannel.GetMessageAsync(messageId) is not IUserMessage messageToEdit)
 		{
 			await InlineReplyAsync("Could not find message.");
@@ -51,7 +52,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 			return;
 
-		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.GetValue<ulong>("DdNewsChannelId"));
+		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.DdNewsChannelId);
 		IEnumerable<IMessage> messages = await ddnewsPostChannel.GetMessagesAsync(5).FlattenAsync();
 		if (messages.Where(m => m.Author.Id == Context.Client.CurrentUser.Id).MaxBy(m => m.CreatedAt) is not IUserMessage messageToEdit)
 		{
@@ -68,7 +69,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 	[Remarks("clear")]
 	public async Task Clear()
 	{
-		ulong registerChannelId = _config.GetValue<ulong>("RegisterChannelId");
+		ulong registerChannelId = _config.RegisterChannelId;
 		if (Context.Channel is not SocketTextChannel channel || channel.Id != registerChannelId)
 		{
 			await ReplyAsync($"This command can only be run in <#{registerChannelId}>.");
