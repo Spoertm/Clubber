@@ -59,8 +59,8 @@ public static class ClubberEndpoints
 		return await dbContext.DdPlayers.FindAsync(leaderboardId);
 	}
 
-	private static async Task<List<DdUser>> RegisteredUsers(IDatabaseHelper dbhelper)
+	private static async Task<List<DdUser>> RegisteredUsers(IDatabaseHelper dbHelper)
 	{
-		return await dbhelper.GetEntireDatabase();
+		return await dbHelper.GetEntireDatabase();
 	}
 }
