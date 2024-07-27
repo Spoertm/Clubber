@@ -47,7 +47,7 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 		if (await GetDdstatsResponse(uri) is not { } ddStatsRun)
 			return;
 
-		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "It has to be a v3 run."))
+		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.OrdinalIgnoreCase), "It has to be a v3 run."))
 			return;
 
 		if (await IsError(ddStatsRun.GameInfo.HomingDaggersMax > _homingPeakLimit, $"Invalid run: the homing peak is unrealistically high (>{_homingPeakLimit})."))

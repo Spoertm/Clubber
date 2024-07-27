@@ -46,8 +46,8 @@ public abstract class ExtendedModulebase<T> : ModuleBase<T>
 		SocketGuildUser[] userMatches = Context.Guild.Users
 			.Where(u =>
 				!u.IsBot &&
-				(u.Username.Contains(name, StringComparison.InvariantCultureIgnoreCase) ||
-				u.Nickname?.Contains(name, StringComparison.InvariantCultureIgnoreCase) == true))
+				(u.Username.Contains(name, StringComparison.OrdinalIgnoreCase) ||
+				u.Nickname?.Contains(name, StringComparison.OrdinalIgnoreCase) == true))
 			.ToArray();
 
 		if (await IsError(userMatches.Length == 0, "User not found."))

@@ -54,7 +54,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		if (await GetDdstatsResponse(uri) is not { } ddstatsRun)
 			return;
 
-		if (await IsError(!ddstatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
+		if (await IsError(!ddstatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.OrdinalIgnoreCase), "That's not a V3 run."))
 			return;
 
 		Split? split = RunAnalyzer.GetData(ddstatsRun).FirstOrDefault(s => s.Name == splitName.ToString());
@@ -88,7 +88,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		if (await GetDdstatsResponse(uri) is not { } ddStatsRun)
 			return;
 
-		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.InvariantCultureIgnoreCase), "That's not a V3 run."))
+		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.OrdinalIgnoreCase), "That's not a V3 run."))
 			return;
 
 		IReadOnlyCollection<Split> splits = RunAnalyzer.GetData(ddStatsRun);

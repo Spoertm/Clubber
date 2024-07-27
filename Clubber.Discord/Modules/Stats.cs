@@ -95,9 +95,9 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 		GetPlayerHistory? playerHistory = await playerHistoryTask;
 
 		Embed statsEmbed;
-		if (Context.Message.Content.StartsWith("+statsf", StringComparison.InvariantCultureIgnoreCase) ||
-			Context.Message.Content.StartsWith("+statsfull", StringComparison.InvariantCultureIgnoreCase) ||
-			Context.Message.Content.StartsWith("+mef", StringComparison.InvariantCultureIgnoreCase))
+		if (Context.Message.Content.StartsWith("+statsf", StringComparison.OrdinalIgnoreCase) ||
+			Context.Message.Content.StartsWith("+statsfull", StringComparison.OrdinalIgnoreCase) ||
+			Context.Message.Content.StartsWith("+mef", StringComparison.OrdinalIgnoreCase))
 		{
 			statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
 		}
