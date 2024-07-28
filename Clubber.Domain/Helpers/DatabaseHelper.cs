@@ -1,6 +1,5 @@
 ﻿using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
-using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +10,9 @@ namespace Clubber.Domain.Helpers;
 
 public class DatabaseHelper : IDatabaseHelper
 {
-	private readonly IWebService _webService;
 	private readonly DbService _dbContext;
 
-	public DatabaseHelper(IWebService webService, DbService dbContext)
-	{
-		_webService = webService;
-		_dbContext = dbContext;
-	}
+	public DatabaseHelper(DbService dbContext) => _dbContext = dbContext;
 
 	public async Task<List<DdUser>> GetEntireDatabase()
 	{
@@ -29,10 +23,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		try
 		{
-			uint[] playerRequest = [lbId];
-
-			EntryResponse lbPlayer = (await _webService.GetLbPlayers(playerRequest))[0];
-			DdUser newDdUser = new(discordId, lbPlayer.Id);
+			DdUser newDdUser = new(discordId, (int)lbId);
 
 			await _dbContext.AddAsync(newDdUser);
 			await _dbContext.SaveChangesAsync();
@@ -42,10 +33,8 @@ public class DatabaseHelper : IDatabaseHelper
 		{
 			return ex switch
 			{
-				ClubberException     => Result.Failure(ex.Message),
-				HttpRequestException => Result.Failure("DD servers are most likely down."),
-				IOException          => Result.Failure("IO error."),
-				_                    => Result.Failure("No reason specified."),
+				DbUpdateException => Result.Failure("Database error."),
+				_                 => Result.Failure("No reason specified."),
 			};
 		}
 	}
