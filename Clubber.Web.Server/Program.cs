@@ -51,7 +51,7 @@ internal static class Program
 		builder.Services.AddSingleton<InteractionHandler>();
 		builder.Services.AddSingleton<RegistrationTracker>();
 
-		builder.Services.AddTransient<UpdateRolesHelper>();
+		builder.Services.AddTransient<ScoreRoleService>();
 		builder.Services.AddTransient<IDiscordHelper, DiscordHelper>();
 		builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
 		builder.Services.AddTransient<UserService>();

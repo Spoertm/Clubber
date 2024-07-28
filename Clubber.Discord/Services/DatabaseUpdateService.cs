@@ -25,7 +25,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
-		UpdateRolesHelper updateRolesHelper = scope.ServiceProvider.GetRequiredService<UpdateRolesHelper>();
+		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 
 		SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId) ?? throw new("DD Pals server not found with the provided ID.");
@@ -42,7 +42,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 			{
 				tries++;
 
-				(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await updateRolesHelper.UpdateRolesAndDb(ddPals.Users);
+				(string repsonseMessage, Embed[] responseRoleUpdateEmbeds) = await scoreRoleService.UpdateRolesAndDb(ddPals.Users);
 				await msg.ModifyAsync(m => m.Content = repsonseMessage);
 
 				if (responseRoleUpdateEmbeds.Length > 0)

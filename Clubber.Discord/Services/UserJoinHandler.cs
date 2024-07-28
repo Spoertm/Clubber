@@ -46,8 +46,8 @@ public class UserJoinHandler
 	private async Task UpdateRolesForRegisteredUser(IGuildUser joiningUser)
 	{
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
-		UpdateRolesHelper updateRolesHelper = scope.ServiceProvider.GetRequiredService<UpdateRolesHelper>();
-		UpdateRolesResponse response = await updateRolesHelper.UpdateUserRoles(joiningUser);
+		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
+		UpdateRolesResponse response = await scoreRoleService.UpdateUserRoles(joiningUser);
 
 		if (response is UpdateRolesResponse.Full fullResponse)
 		{

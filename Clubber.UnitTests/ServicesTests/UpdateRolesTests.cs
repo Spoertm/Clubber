@@ -11,7 +11,7 @@ namespace Clubber.UnitTests.ServicesTests;
 
 public class UpdateRolesTests
 {
-	private readonly UpdateRolesHelper _sut;
+	private readonly ScoreRoleService _sut;
 	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
 	private readonly Mock<IWebService> _webserviceMock = new();
 	private static readonly ulong _topScoreRoleId = AppConfig.ScoreRoles.MaxBy(s => s.Key).Value;

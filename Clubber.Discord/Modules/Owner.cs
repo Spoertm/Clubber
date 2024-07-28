@@ -7,11 +7,11 @@ namespace Clubber.Discord.Modules;
 [RequireOwner]
 public class Owner : ExtendedModulebase<SocketCommandContext>
 {
-	private readonly UpdateRolesHelper _updateRolesHelper;
+	private readonly ScoreRoleService _scoreRoleService;
 
-	public Owner(UpdateRolesHelper updateRolesHelper)
+	public Owner(ScoreRoleService scoreRoleService)
 	{
-		_updateRolesHelper = updateRolesHelper;
+		_scoreRoleService = scoreRoleService;
 	}
 
 	[Command("update database")]
@@ -21,7 +21,7 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 		const string checkingString = "Checking for role updates...";
 		IUserMessage msg = await ReplyAsync(checkingString);
 
-		(string message, Embed[] roleUpdateEmbeds) = await _updateRolesHelper.UpdateRolesAndDb(Context.Guild.Users);
+		(string message, Embed[] roleUpdateEmbeds) = await _scoreRoleService.UpdateRolesAndDb(Context.Guild.Users);
 		await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{message}");
 
 		for (int i = 0; i < roleUpdateEmbeds.Length; i++)

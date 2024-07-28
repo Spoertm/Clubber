@@ -12,13 +12,13 @@ using System.Diagnostics;
 
 namespace Clubber.Discord.Helpers;
 
-public class UpdateRolesHelper
+public class ScoreRoleService
 {
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;
 	private readonly IReadOnlyList<ulong> _uselessRoles;
 
-	public UpdateRolesHelper(IOptions<AppConfig> config, IDatabaseHelper databaseHelper, IWebService webService)
+	public ScoreRoleService(IOptions<AppConfig> config, IDatabaseHelper databaseHelper, IWebService webService)
 	{
 		_databaseHelper = databaseHelper;
 		_webService = webService;

@@ -16,12 +16,12 @@ namespace Clubber.Discord.Modules;
 [RequireContext(ContextType.Guild)]
 public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 {
-	private readonly UpdateRolesHelper _updateRolesHelper;
+	private readonly ScoreRoleService _scoreRoleService;
 	private readonly UserService _userService;
 
-	public UpdateRoles(UpdateRolesHelper updateRolesHelper, UserService userService)
+	public UpdateRoles(ScoreRoleService scoreRoleService, UserService userService)
 	{
-		_updateRolesHelper = updateRolesHelper;
+		_scoreRoleService = scoreRoleService;
 		_userService = userService;
 	}
 
@@ -37,7 +37,7 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		UpdateRolesResponse response = await _updateRolesHelper.UpdateUserRoles(user);
+		UpdateRolesResponse response = await _scoreRoleService.UpdateUserRoles(user);
 		if (response is UpdateRolesResponse.Full fullResponse)
 		{
 			await ReplyAsync(embed: EmbedHelper.UpdateRoles(fullResponse), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
