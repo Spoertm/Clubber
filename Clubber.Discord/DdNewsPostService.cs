@@ -57,21 +57,21 @@ public class DdNewsPostService : RepeatingBackgroundService
 			return;
 		}
 
-		(EntryResponse, EntryResponse)[] entryTuples = oldEntries.Join(
+		(EntryResponse oldEntry, EntryResponse newEntry)[] entryTuples = oldEntries.Join(
 				inner: newEntries,
 				outerKeySelector: oldEntry => oldEntry.Id,
 				innerKeySelector: newEntry => newEntry.Id,
 				resultSelector: (oldEntry, newEntry) => (oldEntry, newEntry))
 			.ToArray();
 
-		bool cacheIsToBeRefreshed = newEntries.Count > oldEntries.Length;
-		foreach ((EntryResponse oldEntry, EntryResponse newEntry) in entryTuples)
-		{
-			if (oldEntry.Time == newEntry.Time)
-				continue;
+		bool cacheIsToBeRefreshed = newEntries.Count > oldEntries.Length || entryTuples.Any(e => e.oldEntry.Time != e.newEntry.Time);
 
-			cacheIsToBeRefreshed = true;
-			if (newEntry.Time / 10_000 < 1000)
+		IEnumerable<(EntryResponse oldEntry, EntryResponse newEntry)> changedEntriesOver1000 = entryTuples
+			.Where(e => e.oldEntry.Time != e.newEntry.Time && e.newEntry.Time / 10_000 >= 1000);
+
+		foreach ((EntryResponse oldEntry, EntryResponse newEntry) in changedEntriesOver1000)
+		{
+			if (oldEntry.Time == newEntry.Time || newEntry.Time / 10_000 < 1000)
 				continue;
 
 			Log.Information("Posting news for player entry {@Player}", newEntry);
@@ -93,6 +93,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 
 			Log.Debug("Adding news item to database");
 			await databaseHelper.AddDdNewsItem(oldEntry, newEntry, nth);
+			continue;
 
 			async Task<string?> GetCountryCode(EntryResponse entry)
 			{
