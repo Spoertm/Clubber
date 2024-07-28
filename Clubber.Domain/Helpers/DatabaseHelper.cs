@@ -42,7 +42,7 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public async Task<Result> RegisterTwitch(ulong userId, string twitchUsername)
 	{
-		if (await _dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
+		if (await FindRegisteredUser(userId) is not { } ddUser)
 		{
 			return Result.Failure("User isn't registered.");
 		}
@@ -54,7 +54,7 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public async Task<Result> UnregisterTwitch(ulong userId)
 	{
-		if (await _dbContext.DdPlayers.FirstOrDefaultAsync(ddp => ddp.DiscordId == userId) is not { } ddUser)
+		if (await FindRegisteredUser(userId) is not { } ddUser)
 		{
 			return Result.Failure("Couldn't find user in database.");
 		}
