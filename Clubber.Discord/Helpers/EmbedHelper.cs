@@ -12,27 +12,6 @@ namespace Clubber.Discord.Helpers;
 
 public static class EmbedHelper
 {
-	private static readonly Dictionary<int, string> _deathtypeDict = new()
-	{
-		[0] = "FALLEN",
-		[1] = "SWARMED",
-		[2] = "IMPALED",
-		[3] = "GORED",
-		[4] = "INFESTED",
-		[5] = "OPENED",
-		[6] = "PURGED",
-		[7] = "DESECRATED",
-		[8] = "SACRIFICED",
-		[9] = "EVISCERATED",
-		[10] = "ANNIHILATED",
-		[11] = "INTOXICATED",
-		[12] = "ENVENOMATED",
-		[13] = "INCARNATED",
-		[14] = "DISCARNATED",
-		[15] = "ENTANGLED",
-		[16] = "HAUNTED",
-	};
-
 	public static Embed UpdateRoles(UpdateRolesResponse.Full response)
 	{
 		EmbedBuilder embed = new EmbedBuilder()
@@ -119,7 +98,7 @@ public static class EmbedHelper
 				🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 				🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
 				😵 Total deaths: {lbPlayer.DeathsTotal}
-				😵 Death type: {_deathtypeDict[lbPlayer.DeathType]}
+				😵 Death type: {AppConfig.DeathTypes[lbPlayer.DeathType]}
 				{(playerPb is null ? null : "\u200B")}
 				""");
 

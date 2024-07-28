@@ -53,9 +53,32 @@ public class AppConfig
 		[25] = 992793365684949063,
 	};
 
+	private static readonly Dictionary<int, string> _deathtypeDict = new()
+	{
+		[0] = "FALLEN",
+		[1] = "SWARMED",
+		[2] = "IMPALED",
+		[3] = "GORED",
+		[4] = "INFESTED",
+		[5] = "OPENED",
+		[6] = "PURGED",
+		[7] = "DESECRATED",
+		[8] = "SACRIFICED",
+		[9] = "EVISCERATED",
+		[10] = "ANNIHILATED",
+		[11] = "INTOXICATED",
+		[12] = "ENVENOMATED",
+		[13] = "INCARNATED",
+		[14] = "DISCARNATED",
+		[15] = "ENTANGLED",
+		[16] = "HAUNTED",
+	};
+
 	public static IReadOnlyDictionary<int, ulong> ScoreRoles { get; } = new ReadOnlyDictionary<int, ulong>(_scoreRoles);
 
 	public static IReadOnlyDictionary<int, ulong> RankRoles { get; } = new ReadOnlyDictionary<int, ulong>(_rankRoles);
+
+	public static Dictionary<int, string> DeathTypes { get; } = new(_deathtypeDict);
 
 	[Required]
 	public string Prefix { get; set; } = "+";
