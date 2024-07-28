@@ -64,7 +64,7 @@ public class WebService : IWebService
 		}
 		catch (Exception e)
 		{
-			Log.Error(e, "{Class}.GetLbPlayers => Failed to fetch leaderboard players", GetType().Name);
+			Log.Error(e, "{Class}.GetLbPlayers => Failed to fetch leaderboard players", nameof(WebService));
 			throw new ClubberException("DD servers are experiencing issues atm.", e);
 		}
 	}
@@ -93,7 +93,7 @@ public class WebService : IWebService
 			}
 			catch (Exception e)
 			{
-				Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => failed to fetch LB entries", GetType().Name);
+				Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => failed to fetch LB entries", nameof(WebService));
 				throw;
 			}
 

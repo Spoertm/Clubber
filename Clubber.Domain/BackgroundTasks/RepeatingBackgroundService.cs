@@ -24,14 +24,14 @@ public abstract class RepeatingBackgroundService : BackgroundService
 			}
 			catch (OperationCanceledException)
 			{
-				Log.Warning("{ClassName} => service cancellation requested", GetType().Name);
+				Log.Warning("{ClassName} => service cancellation requested", nameof(RepeatingBackgroundService));
 			}
 			catch (Exception exception)
 			{
-				Log.Error(exception, "Caught exception in {ClassName}", GetType().Name);
+				Log.Error(exception, "Caught exception in {ClassName}", nameof(RepeatingBackgroundService));
 			}
 		}
 
-		Log.Warning("{ClassName} => service cancelled", GetType().Name);
+		Log.Warning("{ClassName} => service cancelled", nameof(RepeatingBackgroundService));
 	}
 }

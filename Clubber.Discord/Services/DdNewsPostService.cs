@@ -37,7 +37,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		Log.Debug("Executing {Class}", GetType().Name);
+		Log.Debug("Executing {Class}", nameof(DdNewsPostService));
 
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
