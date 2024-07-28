@@ -137,7 +137,8 @@ public class DdNewsPostService : RepeatingBackgroundService
 			oldEntry.Time,
 			oldEntry.Rank,
 			newEntry.Time,
-			newEntry.Rank, nth);
+			newEntry.Rank,
+			nth);
 
 		return msg;
 	}
