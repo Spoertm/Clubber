@@ -1,6 +1,16 @@
 ﻿namespace Clubber.Domain.Models;
 
-public record DdUser(ulong DiscordId, uint LeaderboardId, string? TwitchUsername = null)
+public record DdUser
 {
-	public string? TwitchUsername { get; set; } = TwitchUsername;
+	public DdUser(ulong discordId, uint lbId)
+	{
+		DiscordId = discordId;
+		LeaderboardId = lbId;
+	}
+
+	public uint LeaderboardId { get; }
+
+	public ulong DiscordId { get; }
+
+	public string? TwitchUsername { get; set; }
 }
