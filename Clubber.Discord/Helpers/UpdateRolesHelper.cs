@@ -40,11 +40,9 @@ public class UpdateRolesHelper
 			updatedUsers++;
 		}
 
-		string message;
-		if (updatedUsers > 0)
-			message = $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms.";
-		else
-			message = $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
+		string message = updatedUsers > 0
+			? $"✅ Successfully updated database and {updatedUsers} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
+			: $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
 
 		if (nonMemberCount > 0)
 			message += $"\nℹ️ {nonMemberCount} user(s) are registered but aren't in the server.";
