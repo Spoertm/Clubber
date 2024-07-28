@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Services;
 
 public class DdNewsPostService : RepeatingBackgroundService
 {

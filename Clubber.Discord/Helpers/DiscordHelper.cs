@@ -2,7 +2,7 @@
 using Discord;
 using Discord.WebSocket;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Helpers;
 
 public class DiscordHelper : IDiscordHelper
 {

@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Helpers;
+﻿using Clubber.Discord.Helpers;
+using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.DdSplits;
 using Discord;
 using Discord.Commands;

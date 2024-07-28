@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.BackgroundTasks;
+﻿using Clubber.Discord.Helpers;
+using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
 using Discord;
 using Discord.WebSocket;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Services;
 
 public class DatabaseUpdateService : ExactBackgroundService
 {

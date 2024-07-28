@@ -4,7 +4,7 @@ using Clubber.Domain.Models;
 using Discord;
 using Microsoft.Extensions.Options;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Services;
 
 public class UserService
 {

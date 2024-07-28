@@ -1,3 +1,4 @@
+using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using System.Diagnostics;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Helpers;
 
 public class UpdateRolesHelper
 {

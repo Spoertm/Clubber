@@ -1,5 +1,7 @@
-using Clubber.Discord;
+using Clubber.Discord.Helpers;
 using Clubber.Discord.Logging;
+using Clubber.Discord.Models;
+using Clubber.Discord.Services;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;

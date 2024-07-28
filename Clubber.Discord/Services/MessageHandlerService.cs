@@ -4,7 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Options;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Services;
 
 public class MessageHandlerService
 {

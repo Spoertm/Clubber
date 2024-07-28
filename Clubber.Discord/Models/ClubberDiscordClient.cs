@@ -1,11 +1,12 @@
 ﻿using Clubber.Discord.Logging;
+using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Options;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Models;
 
 public class ClubberDiscordClient : DiscordSocketClient
 {

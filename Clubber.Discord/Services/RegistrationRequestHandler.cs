@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Configuration;
+﻿using Clubber.Discord.Helpers;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
@@ -10,7 +11,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Options;
 using System.Runtime.Serialization;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Services;
 
 public class RegistrationRequestHandler
 {

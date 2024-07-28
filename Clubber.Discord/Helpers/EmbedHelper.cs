@@ -1,3 +1,4 @@
+using Clubber.Discord.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -6,7 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.Text;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Helpers;
 
 public static class EmbedHelper
 {

@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Models;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public class RequireAdminOrRoleAttribute : PreconditionAttribute

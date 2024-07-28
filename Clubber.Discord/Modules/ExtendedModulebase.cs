@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Models;
+﻿using Clubber.Discord.Helpers;
+using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

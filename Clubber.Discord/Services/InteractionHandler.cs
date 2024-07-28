@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Configuration;
+﻿using Clubber.Discord.Helpers;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Discord;
@@ -6,7 +7,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Options;
 using Serilog;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Services;
 
 public class InteractionHandler
 {
