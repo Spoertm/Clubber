@@ -31,10 +31,11 @@ public class DatabaseHelper : IDatabaseHelper
 		}
 		catch (Exception ex)
 		{
+			Log.Error(ex, "Error registering user {DiscordId} with {LbId}", discordId, lbId);
 			return ex switch
 			{
 				DbUpdateException => Result.Failure("Database error."),
-				_                 => Result.Failure("No reason specified."),
+				_                 => Result.Failure("Internal error."),
 			};
 		}
 	}
