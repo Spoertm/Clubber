@@ -67,13 +67,10 @@ public class DdNewsPostService : RepeatingBackgroundService
 		bool cacheIsToBeRefreshed = newEntries.Count > oldEntries.Length || entryTuples.Any(e => e.oldEntry.Time != e.newEntry.Time);
 
 		IEnumerable<(EntryResponse oldEntry, EntryResponse newEntry)> changedEntriesOver1000 = entryTuples
-			.Where(e => e.oldEntry.Time != e.newEntry.Time && e.newEntry.Time / 10_000 >= 1000);
+			.Where(e => e.newEntry.Time > e.oldEntry.Time && e.newEntry.Time / 10_000 >= 1000);
 
 		foreach ((EntryResponse oldEntry, EntryResponse newEntry) in changedEntriesOver1000)
 		{
-			if (oldEntry.Time == newEntry.Time || newEntry.Time / 10_000 < 1000)
-				continue;
-
 			Log.Information("Posting news for player entry {@Player}", newEntry);
 
 			int nth = newEntries.Count(entry => entry.Time / 1_000_000 >= newEntry.Time / 1_000_000);
