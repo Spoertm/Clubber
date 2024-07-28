@@ -1,4 +1,5 @@
 using Clubber.Discord.Helpers;
+using Clubber.Discord.Services;
 using Discord;
 using Discord.Commands;
 

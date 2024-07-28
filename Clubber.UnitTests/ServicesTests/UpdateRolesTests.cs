@@ -1,4 +1,5 @@
 ﻿using Clubber.Discord.Helpers;
+using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Services;

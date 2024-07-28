@@ -1,3 +1,4 @@
+using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using System.Diagnostics;
 
-namespace Clubber.Discord.Helpers;
+namespace Clubber.Discord.Services;
 
 public class ScoreRoleService
 {
