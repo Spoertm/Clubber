@@ -4,7 +4,7 @@ using Discord.Webhook;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Clubber.Discord;
+namespace Clubber.Discord.Logging;
 
 public class DiscordSink : ILogEventSink
 {

@@ -1,4 +1,5 @@
 using Clubber.Discord;
+using Clubber.Discord.Logging;
 using Clubber.Discord.Modules;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
