@@ -56,7 +56,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		if (await FindRegisteredUser(userId) is not { } ddUser)
 		{
-			return Result.Failure("Couldn't find user in database.");
+			return Result.Failure("User isn't registered.");
 		}
 
 		ddUser.TwitchUsername = null;
