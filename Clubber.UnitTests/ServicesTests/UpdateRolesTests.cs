@@ -15,11 +15,11 @@ public class UpdateRolesTests
 	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
 	private readonly Mock<IWebService> _webserviceMock = new();
 	private static readonly ulong _topScoreRoleId = UpdateRolesHelper.ScoreRoles.MaxBy(s => s.Key).Value;
-	private const ulong _subOneHundredRoleId = 461203024128376832;
-	private const ulong _oneHundredRoleId = 399569183966363648;
-	private const ulong _threeHundredRoleId = 399569332532674562;
-	private const ulong _twelveThirtyRoleId = 903024433315323915;
-	private const ulong _nineHundredRoleId = 399570895741386765;
+	private const ulong _sub100RoleId = 461203024128376832;
+	private const ulong _100RoleId = 399569183966363648;
+	private const ulong _300RoleId = 399569332532674562;
+	private const ulong _1230RoleId = 903024433315323915;
+	private const ulong _900RoleId = 399570895741386765;
 	private const ulong _top1RoleId = 446688666325090310;
 	private const ulong _top3RoleId = 472451008342261820;
 	private const ulong _top10RoleId = 556255819323277312;
@@ -38,10 +38,10 @@ public class UpdateRolesTests
 	}
 
 	[Theory]
-	[InlineData(0, new ulong[] { }, _subOneHundredRoleId)]
-	[InlineData(100, new ulong[] { }, _oneHundredRoleId)]
-	[InlineData(100, new[] { _oneHundredRoleId, _threeHundredRoleId }, 0)]
-	[InlineData(900, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId }, _nineHundredRoleId)]
+	[InlineData(0, new ulong[] { }, _sub100RoleId)]
+	[InlineData(100, new ulong[] { }, _100RoleId)]
+	[InlineData(100, new[] { _100RoleId, _300RoleId }, 0)]
+	[InlineData(900, new[] { _100RoleId, _300RoleId, _1230RoleId }, _900RoleId)]
 	public void TestHandleScoreRoles_DetectsRoleInconsistency_ReturnsRolesToBeAdded(
 		int scoreInSeconds,
 		IReadOnlyCollection<ulong> userRoleIds,
@@ -66,8 +66,8 @@ public class UpdateRolesTests
 	[InlineData(0, new ulong[] { }, new ulong[] { })]
 	[InlineData(100, new ulong[] { }, new ulong[] { })]
 	[InlineData(1500, new ulong[] { }, new ulong[] { })]
-	[InlineData(100, new[] { _oneHundredRoleId, _threeHundredRoleId }, new[] { _threeHundredRoleId })]
-	[InlineData(900, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId }, new[] { _oneHundredRoleId, _threeHundredRoleId, _twelveThirtyRoleId })]
+	[InlineData(100, new[] { _100RoleId, _300RoleId }, new[] { _300RoleId })]
+	[InlineData(900, new[] { _100RoleId, _300RoleId, _1230RoleId }, new[] { _100RoleId, _300RoleId, _1230RoleId })]
 	public void TestHandleScoreRoles_DetectsRoleInconsistency_ReturnsRolesToBeRemoved(
 		int scoreInSeconds,
 		IReadOnlyCollection<ulong> userRoleIds,
@@ -84,8 +84,8 @@ public class UpdateRolesTests
 	[InlineData(10, new ulong[] { }, _top10RoleId)]
 	[InlineData(50, new ulong[] { }, 0)]
 	[InlineData(50, new[] { _top1RoleId, _top3RoleId }, 0)]
-	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId }, 0)]
-	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId, _threeHundredRoleId }, 0)]
+	[InlineData(50, new[] { _100RoleId, _top3RoleId }, 0)]
+	[InlineData(50, new[] { _100RoleId, _top3RoleId, _300RoleId }, 0)]
 	public void HandleTopRoles_DetectsRoleInconsistency_ReturnsRolesToBeAdded(
 		int rank,
 		IReadOnlyCollection<ulong> userRoleIds,
@@ -102,8 +102,8 @@ public class UpdateRolesTests
 	[InlineData(10, new ulong[] { }, new ulong[] { })]
 	[InlineData(50, new ulong[] { }, new ulong[] { })]
 	[InlineData(50, new[] { _top1RoleId, _top3RoleId }, new[] { _top1RoleId, _top3RoleId })]
-	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId }, new[] { _top3RoleId })]
-	[InlineData(50, new[] { _oneHundredRoleId, _top3RoleId, _threeHundredRoleId }, new[] { _top3RoleId })]
+	[InlineData(50, new[] { _100RoleId, _top3RoleId }, new[] { _top3RoleId })]
+	[InlineData(50, new[] { _100RoleId, _top3RoleId, _300RoleId }, new[] { _top3RoleId })]
 	public void HandleTopRoles_DetectsRoleInconsistency_ReturnsRolesToBeRemoved(
 		int rank,
 		IReadOnlyCollection<ulong> userRoleIds,
