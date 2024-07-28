@@ -1,6 +1,5 @@
 using Clubber.Discord;
 using Clubber.Discord.Logging;
-using Clubber.Discord.Modules;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
@@ -8,14 +7,11 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Clubber.Web.Server.Configuration;
 using Clubber.Web.Server.Endpoints;
-using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using Serilog;
 using System.Globalization;
-using System.Reflection;
 
 namespace Clubber.Web.Server;
 
@@ -37,15 +33,6 @@ internal static class Program
 
 		Log.Information("Starting");
 
-		DiscordSocketClient client = new(new()
-		{
-			LogLevel = LogSeverity.Warning,
-			AlwaysDownloadUsers = true,
-			GatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers) &
-							~GatewayIntents.GuildInvites &
-							~GatewayIntents.GuildScheduledEvents,
-		});
-
 		CommandService commands = new(new()
 		{
 			IgnoreExtraArgs = true,
@@ -56,7 +43,7 @@ internal static class Program
 		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddCors();
 
-		builder.Services.AddSingleton(client);
+		builder.Services.AddSingleton<ClubberDiscordClient>();
 		builder.Services.AddSingleton(commands);
 		builder.Services.AddSingleton<MessageHandlerService>();
 		builder.Services.AddSingleton<InteractionHandler>();
@@ -74,6 +61,7 @@ internal static class Program
 		if (builder.Environment.IsProduction())
 		{
 			builder.Services.AddSingleton<UserJoinHandler>();
+			builder.Services.AddSingleton<RegistrationRequestHandler>();
 			builder.Services.AddHostedService<DdNewsPostService>();
 			builder.Services.AddHostedService<DatabaseUpdateService>();
 			builder.Services.AddHostedService<KeepAppAliveService>();
@@ -133,13 +121,7 @@ internal static class Program
 			app.Services.GetRequiredService<UserJoinHandler>();
 		}
 
-		await client.LoginAsync(TokenType.Bot, appConfig.BotToken);
-		await client.StartAsync();
-		await client.SetGameAsync("your roles", null, ActivityType.Watching);
-		await commands.AddModulesAsync(Assembly.GetAssembly(typeof(ExtendedModulebase<>)), app.Services);
-
-		// Give the Discord client some time to get ready
-		await Task.Delay(TimeSpan.FromSeconds(5));
+		await app.Services.GetRequiredService<ClubberDiscordClient>().InitAsync();
 
 		try
 		{

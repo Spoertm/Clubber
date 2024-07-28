@@ -65,7 +65,7 @@ public class WebService : IWebService
 		catch (Exception e)
 		{
 			Log.Error(e, "{Class}.GetLbPlayers => Failed to fetch leaderboard players", GetType().Name);
-			throw new ClubberException("DD servers are experiencing issues atm. Try again later.", e);
+			throw new ClubberException("DD servers are experiencing issues atm.", e);
 		}
 	}
 

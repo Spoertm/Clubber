@@ -381,4 +381,26 @@ public static class EmbedHelper
 			.WithDescription(sb.ToString())
 			.Build();
 	}
+
+	public static Embed RegisterUserModEmbed(string userName, int foundId, string extraInfo)
+	{
+		EmbedBuilder eb = new();
+		eb.WithDescription
+		($"""
+		## Register {userName} with ID `{foundId}`?
+
+		### Info about ID {foundId} [from ddinfo](https://devildaggers.info/leaderboard/player/{foundId}):
+		{extraInfo}
+		""");
+
+		return eb.Build();
+	}
+
+	public static Embed GiveUserRoleModEmbed(string userName, ulong noScoreRoleId)
+	{
+		EmbedBuilder eb = new();
+		eb.WithDescription($"## Give {userName} {MentionUtils.MentionRole(noScoreRoleId)} role?");
+
+		return eb.Build();
+	}
 }
