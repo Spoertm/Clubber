@@ -1,10 +1,9 @@
-﻿using Clubber.Domain.BackgroundTasks;
+﻿using Clubber.Discord.Helpers;
+using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
-using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -128,42 +127,18 @@ public class DdNewsPostService : RepeatingBackgroundService
 	{
 		string userName = newEntry.Username;
 		if (await databaseHelper.FindRegisteredUser(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
-			userName = guildUser.Mention;
-
-		double oldScore = oldEntry.Time / 10_000d;
-		double newScore = newEntry.Time / 10_000d;
-		int ranksChanged = oldEntry.Rank - newEntry.Rank;
-		_sb.Clear()
-			.Append("Congratulations to ")
-			.Append(userName)
-			.Append(" for getting a new PB of ")
-			.Append($"{newScore:0.0000}")
-			.Append(" seconds! They beat their old PB of ")
-			.Append($"{oldScore:0.0000}")
-			.Append("s (**+")
-			.Append($"{newScore - oldScore:0.0000}")
-			.Append("s**), ")
-			.Append(ranksChanged > 0 ? "gaining " : ranksChanged == 0 ? "but didn't change" : "but lost ")
-			.Append(ranksChanged == 0 ? "" : Math.Abs(ranksChanged))
-			.Append(Math.Abs(ranksChanged) is 1 or 0 ? " rank." : " ranks.");
-
-		int oldHundredth = oldEntry.Time / 1_000_000;
-		int newHundredth = newEntry.Time / 1_000_000;
-		if (newHundredth > oldHundredth)
 		{
-			_sb.Append(" They are the ")
-				.Append(nth)
-				.Append(nth.OrdinalNumeral());
-
-			if (oldHundredth < 10 && newHundredth == 10)
-				_sb.Append(" player to unlock the leviathan dagger!");
-			else
-				_sb.Append($" {newHundredth * 100} player!");
+			userName = guildUser.Mention;
 		}
 
-		if (newEntry.Rank == 1)
-			_sb.Append(Format.Bold(" It's a new WR! 👑 🎉"));
+		DdNewsMessageBuilder messageBuilder = new();
+		string msg = messageBuilder.Build(
+			userName,
+			oldEntry.Time,
+			oldEntry.Rank,
+			newEntry.Time,
+			newEntry.Rank, nth);
 
-		return _sb.ToString();
+		return msg;
 	}
 }
