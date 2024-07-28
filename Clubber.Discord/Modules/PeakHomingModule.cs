@@ -75,7 +75,7 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 
 		string userName = ddStatsRun.GameInfo.PlayerName;
 		string? avatarUrl = null;
-		DdUser? ding = await _databaseHelper.GetDdUserBy(ddStatsRun.GameInfo.PlayerId);
+		DdUser? ding = await _databaseHelper.FindRegisteredUser(ddStatsRun.GameInfo.PlayerId);
 		if (ding != null && Context.Guild.GetUser(ding.DiscordId) is { } user)
 		{
 			userName = user.AvailableNameSanitized();

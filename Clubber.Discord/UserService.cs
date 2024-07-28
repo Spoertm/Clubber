@@ -25,7 +25,7 @@ public class UserService
 			return Result.Failure(result.ErrorMsg);
 		}
 
-		if (await _databaseHelper.GetDdUserBy(guildUser.Id) is not null)
+		if (await _databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
 		{
 			return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
 		}
@@ -41,7 +41,7 @@ public class UserService
 			return Result.Failure(result.ErrorMsg);
 		}
 
-		if (await _databaseHelper.GetDdUserBy(guildUser.Id) is not null)
+		if (await _databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
 		{
 			return Result.Success();
 		}

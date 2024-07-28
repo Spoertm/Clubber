@@ -31,7 +31,7 @@ public class UserJoinHandler
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		IDatabaseHelper dbHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
 
-		if (await dbHelper.GetDdUserBy(joiningUser.Id) is not null)
+		if (await dbHelper.FindRegisteredUser(joiningUser.Id) is not null)
 		{
 			await UpdateRolesForRegisteredUser(joiningUser);
 		}

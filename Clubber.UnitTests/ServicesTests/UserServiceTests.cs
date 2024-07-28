@@ -66,7 +66,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.IsBot).Returns(false);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(default(DdUser));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
 		Assert.False(isValidForRegistrationResponse.IsFailure);
 	}
@@ -80,7 +80,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
 		Assert.True(isValidForRegistrationResponse.IsFailure);
 	}
@@ -94,7 +94,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
 		Result isValid = await _sut.IsValid(guildUser.Object, true);
 		Assert.False(isValid.IsFailure);
 	}
@@ -108,7 +108,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(default(DdUser));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
 		Result isValid = await _sut.IsValid(guildUser.Object, true);
 		Assert.True(isValid.IsFailure);
 	}

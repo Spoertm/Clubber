@@ -130,7 +130,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 		int nth)
 	{
 		string userName = newEntry.Username;
-		if (await databaseHelper.GetDdUserBy(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
+		if (await databaseHelper.FindRegisteredUser(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
 			userName = guildUser.Mention;
 
 		double oldScore = oldEntry.Time / 10_000d;

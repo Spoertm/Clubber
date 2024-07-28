@@ -60,7 +60,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 
 	private async Task CheckUserAndShowStats(SocketGuildUser user)
 	{
-		DdUser? ddUser = await _databaseHelper.GetDdUserBy(user.Id);
+		DdUser? ddUser = await _databaseHelper.FindRegisteredUser(user.Id);
 
 		if (ddUser is null)
 		{

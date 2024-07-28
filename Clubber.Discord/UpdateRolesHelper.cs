@@ -129,7 +129,7 @@ public class UpdateRolesHelper
 	{
 		try
 		{
-			DdUser ddUser = await _databaseHelper.GetDdUserBy(user.Id) ?? throw new ClubberException("User not found in database.");
+			DdUser ddUser = await _databaseHelper.FindRegisteredUser(user.Id) ?? throw new ClubberException("User not found in database.");
 			uint lbId = ddUser.LeaderboardId;
 			IReadOnlyList<EntryResponse> lbPlayerList = await _webService.GetLbPlayers([lbId]);
 

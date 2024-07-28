@@ -65,7 +65,7 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public async Task<bool> RemoveUser(ulong discordId)
 	{
-		DdUser? toRemove = await GetDdUserBy(discordId);
+		DdUser? toRemove = await FindRegisteredUser(discordId);
 		if (toRemove is null)
 		{
 			return false;
@@ -76,12 +76,12 @@ public class DatabaseHelper : IDatabaseHelper
 		return true;
 	}
 
-	public async Task<DdUser?> GetDdUserBy(int lbId)
+	public async Task<DdUser?> FindRegisteredUser(int lbId)
 	{
 		return await _dbContext.DdPlayers.FindAsync(lbId);
 	}
 
-	public async Task<DdUser?> GetDdUserBy(ulong discordId)
+	public async Task<DdUser?> FindRegisteredUser(ulong discordId)
 	{
 		return await _dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.DiscordId == discordId);
 	}
