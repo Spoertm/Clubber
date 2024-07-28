@@ -41,10 +41,24 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 	[Remarks("checksplits https://ddstats.com/games/123456789 350\nchecksplits https://ddstats.com/games/123456789 350 SomeDescription.")]
 	public async Task FromDdstatsUrl(string url, uint splitName, [Remainder] string? description = null)
 	{
-		string[] v3SplitNames = Split.V3Splits.Select(s => s.Name).ToArray();
-		if (await IsError(!v3SplitNames.Contains(splitName.ToString()), $"The split `{splitName}` doesn't exist."))
+		string splitNameStr = splitName.ToString();
+		bool splitExists = Split.V3Splits.Any(s => s.Name == splitNameStr);
+		if (await IsError(!splitExists, $"The split `{splitNameStr}` doesn't exist."))
 			return;
 
+		await CheckSplitsAndRespond(url, splitNameStr, description);
+	}
+
+	[Priority(1)]
+	[Command]
+	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 SomeDescription")]
+	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
+	{
+		await CheckSplitsAndRespond(url, null, description);
+	}
+
+	private async Task CheckSplitsAndRespond(string url, string? splitName, string? description)
+	{
 		if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
 		{
 			await InlineReplyAsync("Invalid URL.");
@@ -57,46 +71,28 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(!ddstatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.OrdinalIgnoreCase), "That's not a V3 run."))
 			return;
 
-		Split? split = RunAnalyzer.GetData(ddstatsRun).FirstOrDefault(s => s.Name == splitName.ToString());
-		if (await IsError(split is null, $"The split `{splitName}` isn't in the run.") ||
-			await IsError(split!.Value > 1000, "Invalid run: too many homings gained on that split."))
-			return;
-
 		string desc = description ?? $"{ddstatsRun.GameInfo.PlayerName} {ddstatsRun.GameInfo.GameTime:0.0000}";
-		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded([split], ddstatsRun, desc);
-		if (response.UpdatedBestSplits.Length == 0)
+
+		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response;
+
+		if (splitName is not null)
 		{
-			await InlineReplyAsync("No updates were needed.");
-			return;
+			Split? split = RunAnalyzer.GetData(ddstatsRun).FirstOrDefault(s => s.Name == splitName);
+			if (await IsError(split is null, $"The split `{splitName}` isn't in the run.") ||
+				await IsError(split!.Value > 1000, "Invalid run: too many homings gained on that split."))
+				return;
+
+			response = await _databaseHelper.UpdateBestSplitsIfNeeded([split], ddstatsRun, desc);
+		}
+		else
+		{
+			IReadOnlyCollection<Split> splits = RunAnalyzer.GetData(ddstatsRun);
+			if (await IsError(splits.Any(s => s.Value > 1000), "Invalid run: too many homings gained on some splits."))
+				return;
+
+			response = await _databaseHelper.UpdateBestSplitsIfNeeded(splits, ddstatsRun, desc);
 		}
 
-		Embed updatedRolesEmbed = EmbedHelper.UpdatedSplits(response.OldBestSplits, response.UpdatedBestSplits);
-		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
-	}
-
-	[Priority(1)]
-	[Command]
-	[Remarks("checksplits https://ddstats.com/games/123456789\nchecksplits https://ddstats.com/games/123456789 SomeDescription")]
-	public async Task FromDdstatsUrl(string url, [Remainder] string? description = null)
-	{
-		if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
-		{
-			await InlineReplyAsync("Invalid URL.");
-			return;
-		}
-
-		if (await GetDdstatsResponse(uri) is not { } ddStatsRun)
-			return;
-
-		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.OrdinalIgnoreCase), "That's not a V3 run."))
-			return;
-
-		IReadOnlyCollection<Split> splits = RunAnalyzer.GetData(ddStatsRun);
-		if (await IsError(splits.Any(s => s.Value > 1000), "Invalid run: too many homings gained on some splits."))
-			return;
-
-		string desc = description ?? $"{ddStatsRun.GameInfo.PlayerName} {ddStatsRun.GameInfo.GameTime:0.0000}";
-		(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits) response = await _databaseHelper.UpdateBestSplitsIfNeeded(splits, ddStatsRun, desc);
 		if (response.UpdatedBestSplits.Length == 0)
 		{
 			await InlineReplyAsync("No updates were needed.");
