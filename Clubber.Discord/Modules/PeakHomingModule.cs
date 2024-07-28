@@ -38,13 +38,18 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 	[Remarks("checkhoming https://ddstats.com/games/123456789")]
 	public async Task FromDdstatsUrl(string url)
 	{
-		if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
+		if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? ddstatsUri))
 		{
 			await InlineReplyAsync("Invalid URL.");
 			return;
 		}
 
-		if (await GetDdstatsResponse(uri) is not { } ddStatsRun)
+		await CheckPeakAndRespond(ddstatsUri);
+	}
+
+	private async Task CheckPeakAndRespond(Uri ddstatsUri)
+	{
+		if (await GetDdstatsResponse(ddstatsUri) is not { } ddStatsRun)
 			return;
 
 		if (await IsError(!ddStatsRun.GameInfo.Spawnset.Equals("v3", StringComparison.OrdinalIgnoreCase), "It has to be a v3 run."))
@@ -79,26 +84,27 @@ public class PeakhomingModule : ExtendedModulebase<SocketCommandContext>
 
 		Embed updatedRolesEmbed = EmbedHelper.UpdateTopPeakRuns(userName, response.NewRun, response.OldRun, avatarUrl);
 		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
-	}
+		return;
 
-	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(Uri uri)
-	{
-		try
+		async Task<DdStatsFullRunResponse?> GetDdstatsResponse(Uri uri)
 		{
-			return await _webService.GetDdstatsResponse(uri);
-		}
-		catch (Exception ex)
-		{
-			string errorMsg = ex switch
+			try
 			{
-				ClubberException       => ex.Message,
-				HttpRequestException   => "Couldn't fetch run data. Either the provided run ID doesn't exist or ddstats servers are down.",
-				SerializationException => "Couldn't read ddstats run data.",
-				_                      => "Internal error.",
-			};
+				return await _webService.GetDdstatsResponse(uri);
+			}
+			catch (Exception ex)
+			{
+				string errorMsg = ex switch
+				{
+					ClubberException       => ex.Message,
+					HttpRequestException   => "Couldn't fetch run data. Either the provided run ID doesn't exist or ddstats servers are down.",
+					SerializationException => "Couldn't read ddstats run data.",
+					_                      => "Internal error.",
+				};
 
-			await InlineReplyAsync($"Failed to run command: {errorMsg}");
-			return null;
+				await InlineReplyAsync($"Failed to run command: {errorMsg}");
+				return null;
+			}
 		}
 	}
 }
