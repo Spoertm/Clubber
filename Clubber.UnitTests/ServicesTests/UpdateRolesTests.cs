@@ -14,7 +14,7 @@ public class UpdateRolesTests
 	private readonly UpdateRolesHelper _sut;
 	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
 	private readonly Mock<IWebService> _webserviceMock = new();
-	private static readonly ulong _topScoreRoleId = UpdateRolesHelper.ScoreRoles.MaxBy(s => s.Key).Value;
+	private static readonly ulong _topScoreRoleId = AppConfig.ScoreRoles.MaxBy(s => s.Key).Value;
 	private const ulong _sub100RoleId = 461203024128376832;
 	private const ulong _100RoleId = 399569183966363648;
 	private const ulong _300RoleId = 399569332532674562;

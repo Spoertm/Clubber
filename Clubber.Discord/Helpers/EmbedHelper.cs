@@ -1,4 +1,5 @@
 using Clubber.Discord.Models;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -234,8 +235,8 @@ public static class EmbedHelper
 	{
 		Embed[] embeds = new Embed[2];
 
-		ulong lowestScoreRoleId = UpdateRolesHelper.ScoreRoles.MinBy(sr => sr.Key).Value;
-		ulong highestScoreRoleId = UpdateRolesHelper.ScoreRoles.MaxBy(sr => sr.Key).Value;
+		ulong lowestScoreRoleId = AppConfig.ScoreRoles.MinBy(sr => sr.Key).Value;
+		ulong highestScoreRoleId = AppConfig.ScoreRoles.MaxBy(sr => sr.Key).Value;
 
 		string registerForRolesText =
 			$"""
