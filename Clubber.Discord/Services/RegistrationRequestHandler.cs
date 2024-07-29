@@ -20,18 +20,21 @@ public class RegistrationRequestHandler
 	private readonly RegistrationTracker _registrationTracker;
 	private readonly IWebService _webService;
 	private readonly IDiscordHelper _discordHelper;
+	private readonly IDatabaseHelper _databaseHelper;
 
 	public RegistrationRequestHandler(
 		IOptions<AppConfig> config,
 		RegistrationTracker registrationTracker,
 		IWebService webService,
 		IDiscordHelper discordHelper,
-		ClubberDiscordClient clubberDiscordClient)
+		ClubberDiscordClient clubberDiscordClient,
+		IDatabaseHelper databaseHelper)
 	{
 		_config = config.Value;
 		_registrationTracker = registrationTracker;
 		_webService = webService;
 		_discordHelper = discordHelper;
+		_databaseHelper = databaseHelper;
 
 		clubberDiscordClient.Ready += () =>
 		{
@@ -43,6 +46,11 @@ public class RegistrationRequestHandler
 	private async Task Handle(SocketMessage socketMessage)
 	{
 		if (!(socketMessage is SocketUserMessage { Source: MessageSource.User } message && message.Channel.Id == _config.RegisterChannelId))
+		{
+			return;
+		}
+
+		if (await _databaseHelper.FindRegisteredUser(message.Author.Id) != null)
 		{
 			return;
 		}
