@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Clubber.Domain.Models;
+using Discord;
 using Discord.WebSocket;
 
 namespace Clubber.Discord.Helpers;
@@ -12,4 +13,6 @@ public interface IDiscordHelper
 	SocketGuild? GetGuild(ulong guildId);
 
 	Task ClearChannelAsync(ITextChannel channel);
+
+	Task<Result> SendEmbedsEfficientlyAsync(Embed[] embeds, ulong channelId, string? message = null);
 }

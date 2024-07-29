@@ -12,26 +12,29 @@ namespace Clubber.Discord.Helpers;
 
 public static class EmbedHelper
 {
-	public static Embed UpdateRoles(UpdateRolesResponse.Full response)
+	public static Embed UpdateRoles(UserRoleUpdate userRoleUpdate)
 	{
-		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle($"Updated roles for {response.User.AvailableNameSanitized()}")
-			.WithDescription($"User: {response.User.Mention}")
-			.WithThumbnailUrl(response.User.GetDisplayAvatarUrl() ?? response.User.GetDefaultAvatarUrl());
+		IGuildUser user = userRoleUpdate.User;
+		RoleUpdate response = userRoleUpdate.RoleUpdate;
 
-		if (response.RolesRemoved.Any())
+		EmbedBuilder embed = new EmbedBuilder()
+			.WithTitle($"Updated roles for {user.AvailableNameSanitized()}")
+			.WithDescription($"User: {user.Mention}")
+			.WithThumbnailUrl(user.GetDisplayAvatarUrl() ?? user.GetDefaultAvatarUrl());
+
+		if (response.RolesToRemove.Count > 0)
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Removed:")
-				.WithValue(string.Join('\n', response.RolesRemoved.Select(rr => $"<@&{rr}>")))
+				.WithValue(string.Join('\n', response.RolesToRemove.Select(rr => $"<@&{rr}>")))
 				.WithIsInline(true));
 		}
 
-		if (response.RolesAdded.Any())
+		if (response.RolesToAdd.Count > 0)
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Added:")
-				.WithValue(string.Join('\n', response.RolesAdded.Select(ar => $"<@&{ar}>")))
+				.WithValue(string.Join('\n', response.RolesToAdd.Select(ar => $"<@&{ar}>")))
 				.WithIsInline(true));
 		}
 

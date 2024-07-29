@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Configuration;
+﻿using Clubber.Discord.Models;
+using Clubber.Domain.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -9,13 +10,13 @@ namespace Clubber.Discord.Services;
 public class MessageHandlerService
 {
 	private readonly AppConfig _config;
-	private readonly DiscordSocketClient _client;
+	private readonly ClubberDiscordClient _client;
 	private readonly CommandService _commands;
 	private readonly IServiceProvider _services;
 
 	public MessageHandlerService(
 		IOptions<AppConfig> config,
-		DiscordSocketClient client,
+		ClubberDiscordClient client,
 		CommandService commands,
 		IServiceProvider services)
 	{
@@ -23,9 +24,15 @@ public class MessageHandlerService
 		_client = client;
 		_commands = commands;
 		_services = services;
+
+		client.Ready += () =>
+		{
+			client.MessageReceived += message => Task.Run(() => OnMessageReceivedAsync(message));
+			return Task.CompletedTask;
+		};
 	}
 
-	public async Task OnMessageReceivedAsync(SocketMessage msg)
+	private async Task OnMessageReceivedAsync(SocketMessage msg)
 	{
 		if (msg is not SocketUserMessage { Source: MessageSource.User } message)
 			return;

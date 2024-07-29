@@ -1,7 +1,10 @@
 using Clubber.Discord.Helpers;
+using Clubber.Discord.Models;
 using Clubber.Discord.Services;
+using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
+using System.Diagnostics;
 
 namespace Clubber.Discord.Modules;
 
@@ -9,10 +12,12 @@ namespace Clubber.Discord.Modules;
 public class Owner : ExtendedModulebase<SocketCommandContext>
 {
 	private readonly ScoreRoleService _scoreRoleService;
+	private readonly IDiscordHelper _discordHelper;
 
-	public Owner(ScoreRoleService scoreRoleService)
+	public Owner(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper)
 	{
 		_scoreRoleService = scoreRoleService;
+		_discordHelper = discordHelper;
 	}
 
 	[Command("update database")]
@@ -22,11 +27,26 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 		const string checkingString = "Checking for role updates...";
 		IUserMessage msg = await ReplyAsync(checkingString);
 
-		(string message, Embed[] roleUpdateEmbeds) = await _scoreRoleService.UpdateRolesAndDb(Context.Guild.Users);
+		Stopwatch sw = Stopwatch.StartNew();
+		BulkUserRoleUpdates response = await _scoreRoleService.GetBulkUserRoleUpdates(Context.Guild.Users);
+		sw.Stop();
+
+		string message = response.UserRoleUpdates.Count > 0
+			? $"✅ Successfully updated database and {response.UserRoleUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
+			: $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
+
+		message += $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
 		await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{message}");
 
-		for (int i = 0; i < roleUpdateEmbeds.Length; i++)
-			await ReplyAsync(null, false, roleUpdateEmbeds[i]);
+		Embed[] roleUpdateEmbeds = response.UserRoleUpdates
+			.Select(EmbedHelper.UpdateRoles)
+			.ToArray();
+
+		Result result = await _discordHelper.SendEmbedsEfficientlyAsync(roleUpdateEmbeds, Context.Channel.Id);
+		if (result.IsFailure)
+		{
+			await InlineReplyAsync($"Failed to send embeds: {result.ErrorMsg}");
+		}
 	}
 
 	[Command("welcome")]

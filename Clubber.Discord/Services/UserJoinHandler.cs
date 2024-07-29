@@ -2,6 +2,7 @@ using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,11 +18,12 @@ public class UserJoinHandler
 	public UserJoinHandler(
 		IServiceScopeFactory services,
 		IOptions<AppConfig> config,
-		DiscordSocketClient client)
+		ClubberDiscordClient discordClient)
 	{
 		_services = services;
 		_config = config.Value;
-		client.UserJoined += OnUserJoined;
+
+		discordClient.UserJoined += OnUserJoined;
 	}
 
 	private async Task OnUserJoined(SocketGuildUser joiningUser)
@@ -47,15 +49,27 @@ public class UserJoinHandler
 	{
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
-		UpdateRolesResponse response = await scoreRoleService.UpdateUserRoles(joiningUser);
+		Result<RoleChangeResult> roleChangeResult = await scoreRoleService.GetRoleChange(joiningUser);
 
-		if (response is UpdateRolesResponse.Full fullResponse)
+		if (roleChangeResult.IsFailure || roleChangeResult.Value is not RoleUpdate roleUpdate)
 		{
-			ulong logChannelId = _config.DailyUpdateLoggingChannelId;
-			if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
-			{
-				await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(fullResponse)]);
-			}
+			return;
+		}
+
+		if (roleUpdate.RolesToAdd.Count > 0)
+		{
+			await joiningUser.AddRolesAsync(roleUpdate.RolesToAdd);
+		}
+
+		if (roleUpdate.RolesToRemove.Count > 0)
+		{
+			await joiningUser.RemoveRolesAsync(roleUpdate.RolesToRemove);
+		}
+
+		ulong logChannelId = _config.DailyUpdateLoggingChannelId;
+		if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
+		{
+			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new(joiningUser, roleUpdate))]);
 		}
 	}
 }

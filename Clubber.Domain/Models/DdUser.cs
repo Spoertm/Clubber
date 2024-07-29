@@ -2,15 +2,14 @@
 
 public record DdUser
 {
-	public DdUser(ulong discordId, uint lbId)
+	public DdUser(ulong DiscordId, uint LeaderboardId, string? TwitchUsername = null)
 	{
-		DiscordId = discordId;
-		LeaderboardId = lbId;
+		this.DiscordId = DiscordId;
+		this.LeaderboardId = LeaderboardId;
+		this.TwitchUsername = TwitchUsername;
 	}
 
-	public uint LeaderboardId { get; }
-
-	public ulong DiscordId { get; }
-
+	public ulong DiscordId { get; init; }
+	public uint LeaderboardId { get; init; }
 	public string? TwitchUsername { get; set; }
 }

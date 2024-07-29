@@ -1,4 +1,5 @@
 ﻿using Clubber.Discord.Helpers;
+using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
@@ -22,16 +23,19 @@ public class InteractionHandler
 		UserService userService,
 		IDatabaseHelper databaseHelper,
 		IDiscordHelper discordHelper,
-		RegistrationTracker registrationTracker)
+		RegistrationTracker registrationTracker,
+		ClubberDiscordClient discordClient)
 	{
 		_config = config.Value;
 		_userService = userService;
 		_databaseHelper = databaseHelper;
 		_discordHelper = discordHelper;
 		_registrationTracker = registrationTracker;
+
+		discordClient.ButtonExecuted += OnButtonExecuted;
 	}
 
-	public async Task OnButtonExecuted(SocketMessageComponent component)
+	private async Task OnButtonExecuted(SocketMessageComponent component)
 	{
 		if (component.HasResponded)
 		{

@@ -1,16 +1,19 @@
 ﻿using Clubber.Discord.Logging;
-using Clubber.Discord.Services;
+using Clubber.Discord.Modules;
 using Clubber.Domain.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Options;
+using System.Reflection;
 
 namespace Clubber.Discord.Models;
 
 public class ClubberDiscordClient : DiscordSocketClient
 {
 	private readonly AppConfig _config;
+	private readonly CommandService _commands;
+	private readonly IServiceProvider _services;
 	private static readonly DiscordSocketConfig _socketConfig = new()
 	{
 		LogLevel = LogSeverity.Warning,
@@ -20,36 +23,14 @@ public class ClubberDiscordClient : DiscordSocketClient
 						~GatewayIntents.GuildScheduledEvents,
 	};
 
-	public ClubberDiscordClient(
-		IOptions<AppConfig> options,
-		CommandService commands,
-		MessageHandlerService messageHandlerService,
-		InteractionHandler interactionHandler,
-		RegistrationRequestHandler registrationRequestHandler)
-		: base(_socketConfig)
+	public ClubberDiscordClient(IOptions<AppConfig> options, CommandService commands, IServiceProvider services) : base(_socketConfig)
 	{
+		_commands = commands;
+		_services = services;
 		_config = options.Value;
 
 		Log += DiscordLogHandler.Log;
 		commands.Log += DiscordLogHandler.Log;
-		ButtonExecuted += interactionHandler.OnButtonExecuted;
-
-		Ready += () =>
-		{
-			MessageReceived += message => Task.Run(() => messageHandlerService.OnMessageReceivedAsync(message));
-
-			MessageReceived += message =>
-			{
-				if (message is SocketUserMessage { Source: MessageSource.User } socketUserMsg && message.Channel.Id == _config.RegisterChannelId)
-				{
-					return Task.Run(() => registrationRequestHandler.Handle(socketUserMsg));
-				}
-
-				return Task.CompletedTask;
-			};
-
-			return Task.CompletedTask;
-		};
 	}
 
 	public async Task InitAsync()
@@ -58,5 +39,6 @@ public class ClubberDiscordClient : DiscordSocketClient
 		await LoginAsync(TokenType.Bot, _config.BotToken);
 		await StartAsync();
 		await SetGameAsync("your roles", null, ActivityType.Watching);
+		await _commands.AddModulesAsync(Assembly.GetAssembly(typeof(ExtendedModulebase<>)), _services);
 	}
 }

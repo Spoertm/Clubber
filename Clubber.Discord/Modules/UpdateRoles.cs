@@ -37,28 +37,44 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		UpdateRolesResponse response = await _scoreRoleService.UpdateUserRoles(user);
-		if (response is UpdateRolesResponse.Full fullResponse)
+		Result<RoleChangeResult> roleChangeResult = await _scoreRoleService.GetRoleChange(user);
+		if (roleChangeResult.IsFailure)
 		{
-			await ReplyAsync(embed: EmbedHelper.UpdateRoles(fullResponse), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+			await InlineReplyAsync(roleChangeResult.ErrorMsg);
+			return;
 		}
-		else if (response is UpdateRolesResponse.Partial partialResponse)
+
+		if (roleChangeResult.Value is RoleUpdate roleUpdate)
+		{
+			if (roleUpdate.RolesToAdd.Count > 0)
+			{
+				await user.AddRolesAsync(roleUpdate.RolesToAdd);
+			}
+
+			if (roleUpdate.RolesToRemove.Count > 0)
+			{
+				await user.RemoveRolesAsync(roleUpdate.RolesToRemove);
+			}
+
+			await ReplyAsync(embed: EmbedHelper.UpdateRoles(new(user, roleUpdate)), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+		}
+		else if (roleChangeResult.Value is RoleChangeResult.None noChangeResponse)
 		{
 			string msg = "No updates were needed.";
-			if (partialResponse.SecondsAwayFromNextRole == 0)
+			if (noChangeResponse.SecondsAwayFromNextRole == 0)
 			{
 				msg += "\n\nYou already have the highest role in the server!";
 			}
 			else
 			{
-				msg += $"\n\nYou're **{partialResponse.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(partialResponse.NextRoleId)}";
+				msg += $"\n\nYou're **{noChangeResponse.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(noChangeResponse.NextRoleId)}";
 			}
 
 			await InlineReplyAsync(msg);
 		}
 		else
 		{
-			throw new UnreachableException($"{nameof(UpdateRolesResponse)} isn't supposed to have a third state.");
+			throw new UnreachableException($"{nameof(RoleUpdate)} isn't supposed to have a third state.");
 		}
 	}
 }

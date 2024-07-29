@@ -1,4 +1,5 @@
 ﻿using Clubber.Discord.Helpers;
+using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
@@ -24,15 +25,31 @@ public class RegistrationRequestHandler
 		IOptions<AppConfig> config,
 		RegistrationTracker registrationTracker,
 		IWebService webService,
-		IDiscordHelper discordHelper)
+		IDiscordHelper discordHelper,
+		ClubberDiscordClient clubberDiscordClient)
 	{
 		_config = config.Value;
 		_registrationTracker = registrationTracker;
 		_webService = webService;
 		_discordHelper = discordHelper;
+
+		clubberDiscordClient.Ready += () =>
+		{
+			clubberDiscordClient.MessageReceived += message =>
+			{
+				if (message is SocketUserMessage { Source: MessageSource.User } socketUserMsg && message.Channel.Id == _config.RegisterChannelId)
+				{
+					return Task.Run(() => Handle(socketUserMsg));
+				}
+
+				return Task.CompletedTask;
+			};
+
+			return Task.CompletedTask;
+		};
 	}
 
-	public async Task Handle(SocketUserMessage message)
+	private async Task Handle(SocketUserMessage message)
 	{
 		if (message.Channel.Id != _config.RegisterChannelId)
 		{
