@@ -75,6 +75,15 @@ public class CollectionUtilsTests
 			new[] { _top1RoleId, _1230RoleId },
 			new[] { _uselessRole1 },
 		];
+
+		yield return
+		[
+			new ulong[] { 69, 420, _1230RoleId, _top10RoleId },
+			_allPossibleRoles,
+			new[] { _1230RoleId, _top10RoleId },
+			new ulong[] { },
+			new ulong[] { },
+		];
 	}
 
 	[Theory]
