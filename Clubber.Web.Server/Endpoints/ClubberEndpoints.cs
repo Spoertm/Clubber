@@ -61,6 +61,6 @@ public static class ClubberEndpoints
 
 	private static async Task<List<DdUser>> RegisteredUsers(IDatabaseHelper dbHelper)
 	{
-		return await dbHelper.GetEntireDatabase();
+		return await dbHelper.GetRegisteredUsers();
 	}
 }

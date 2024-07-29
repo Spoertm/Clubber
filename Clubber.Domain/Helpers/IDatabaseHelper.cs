@@ -6,7 +6,7 @@ namespace Clubber.Domain.Helpers;
 
 public interface IDatabaseHelper
 {
-	Task<List<DdUser>> GetEntireDatabase();
+	Task<List<DdUser>> GetRegisteredUsers();
 
 	Task<Result> RegisterUser(uint lbId, ulong discordId);
 

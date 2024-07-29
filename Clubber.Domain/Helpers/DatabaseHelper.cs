@@ -14,7 +14,7 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public DatabaseHelper(DbService dbContext) => _dbContext = dbContext;
 
-	public async Task<List<DdUser>> GetEntireDatabase()
+	public async Task<List<DdUser>> GetRegisteredUsers()
 	{
 		return await _dbContext.DdPlayers.AsNoTracking().ToListAsync();
 	}

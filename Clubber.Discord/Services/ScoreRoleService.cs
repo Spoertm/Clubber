@@ -29,7 +29,7 @@ public class ScoreRoleService
 
 	public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers)
 	{
-		List<DdUser> dbUsers = await _databaseHelper.GetEntireDatabase();
+		List<DdUser> dbUsers = await _databaseHelper.GetRegisteredUsers();
 		(DdUser ddUser, IGuildUser guildUser)[] registeredUsers = dbUsers.Join(
 				inner: guildUsers,
 				outerKeySelector: dbu => dbu.DiscordId,
