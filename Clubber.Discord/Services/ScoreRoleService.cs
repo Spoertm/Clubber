@@ -96,7 +96,7 @@ public class ScoreRoleService
 		ulong rankRoleToKeep = GetRankRoleToKeep(lbUser.Rank).Value;
 
 		List<ulong> rolesToKeep = [scoreRoleToKeep];
-		if (rankRoleToKeep == default)
+		if (rankRoleToKeep != default)
 		{
 			rolesToKeep.Add(rankRoleToKeep);
 		}
