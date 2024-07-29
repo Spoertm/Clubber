@@ -84,6 +84,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 		GetPlayerHistory? playerHistory = await playerHistoryTask;
 
 		Embed statsEmbed;
+		MessageComponent? components = null;
 		if (Context.Message.Content.StartsWith("+statsf", StringComparison.OrdinalIgnoreCase) ||
 			Context.Message.Content.StartsWith("+statsfull", StringComparison.OrdinalIgnoreCase) ||
 			Context.Message.Content.StartsWith("+mef", StringComparison.OrdinalIgnoreCase))
@@ -93,8 +94,18 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 		else
 		{
 			statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
+			if (user is not null)
+			{
+				ComponentBuilder cb = new();
+				cb.WithButton("Full stats", $"stats:{user.Id}:{lbId}");
+				components = cb.Build();
+			}
 		}
 
-		await ReplyAsync(embed: statsEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+		await ReplyAsync(
+			embed: statsEmbed,
+			components: components,
+			allowedMentions: AllowedMentions.None,
+			messageReference: new(Context.Message.Id));
 	}
 }

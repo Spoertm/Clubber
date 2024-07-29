@@ -3,6 +3,9 @@ using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
+using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
+using Clubber.Domain.Services;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Options;
@@ -17,6 +20,7 @@ public class InteractionHandler
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly RegistrationTracker _registrationTracker;
+	private readonly IWebService _webService;
 
 	public InteractionHandler(
 		IOptions<AppConfig> config,
@@ -24,13 +28,15 @@ public class InteractionHandler
 		IDatabaseHelper databaseHelper,
 		IDiscordHelper discordHelper,
 		RegistrationTracker registrationTracker,
-		ClubberDiscordClient discordClient)
+		ClubberDiscordClient discordClient,
+		IWebService webService)
 	{
 		_config = config.Value;
 		_userService = userService;
 		_databaseHelper = databaseHelper;
 		_discordHelper = discordHelper;
 		_registrationTracker = registrationTracker;
+		_webService = webService;
 
 		discordClient.ButtonExecuted += OnButtonExecuted;
 	}
@@ -50,6 +56,10 @@ public class InteractionHandler
 		{
 			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription("ℹ️ Interaction closed.").Build()]);
 			await ClearMessageComponents(component);
+		}
+		else if (component.Data.CustomId.StartsWith("stats"))
+		{
+			await HandleStats(component);
 		}
 	}
 
@@ -159,6 +169,31 @@ public class InteractionHandler
 		return Result.Success();
 	}
 
+	private async Task HandleStats(SocketMessageComponent component)
+	{
+		if (!component.GuildId.HasValue)
+		{
+			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription("❌ Internal error.").Build()]);
+			await ClearMessageComponents(component);
+			return;
+		}
+
+		StatsContext statsCtx = StatsContext.Parse(component.Data.CustomId);
+
+		Task<IReadOnlyList<EntryResponse>> playerEntryTask = _webService.GetLbPlayers([statsCtx.LeaderboardId]);
+		Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory(statsCtx.LeaderboardId);
+		await Task.WhenAll(playerEntryTask, playerHistoryTask);
+
+		EntryResponse playerEntry = (await playerEntryTask)[0];
+		GetPlayerHistory? playerHistory = await playerHistoryTask;
+
+		SocketGuildUser? user = _discordHelper.GetGuildUser(component.GuildId.Value, statsCtx.UserId);
+
+		Embed fullStatsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
+		await ClearMessageComponents(component);
+		await component.Message.ModifyAsync(m => m.Embeds = new([fullStatsEmbed]));
+	}
+
 	private record struct RegistrationContext(ulong UserId, int LeaderboardId, ulong RegisterMessageId)
 	{
 		// a:b:c:d
@@ -177,6 +212,22 @@ public class InteractionHandler
 			};
 
 			return regContext;
+		}
+	}
+
+	private record struct StatsContext(ulong UserId, uint LeaderboardId)
+	{
+		// stats:[Discord ID]:[Leaderboard ID]
+		public static StatsContext Parse(string input)
+		{
+			string[] data = input.Split(':');
+			StatsContext statsContext = new()
+			{
+				UserId = ulong.Parse(data[0]),
+				LeaderboardId = uint.Parse(data[1]),
+			};
+
+			return statsContext;
 		}
 	}
 }
