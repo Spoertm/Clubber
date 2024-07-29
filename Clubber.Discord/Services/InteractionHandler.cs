@@ -223,8 +223,8 @@ public class InteractionHandler
 			string[] data = input.Split(':');
 			StatsContext statsContext = new()
 			{
-				UserId = ulong.Parse(data[0]),
-				LeaderboardId = uint.Parse(data[1]),
+				UserId = ulong.Parse(data[1]),
+				LeaderboardId = uint.Parse(data[2]),
 			};
 
 			return statsContext;
