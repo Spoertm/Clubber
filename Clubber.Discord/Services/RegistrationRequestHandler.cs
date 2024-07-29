@@ -35,23 +35,14 @@ public class RegistrationRequestHandler
 
 		clubberDiscordClient.Ready += () =>
 		{
-			clubberDiscordClient.MessageReceived += message =>
-			{
-				if (message is SocketUserMessage { Source: MessageSource.User } socketUserMsg && message.Channel.Id == _config.RegisterChannelId)
-				{
-					return Task.Run(() => Handle(socketUserMsg));
-				}
-
-				return Task.CompletedTask;
-			};
-
+			clubberDiscordClient.MessageReceived += message => Task.Run(() => Handle(message));
 			return Task.CompletedTask;
 		};
 	}
 
-	private async Task Handle(SocketUserMessage message)
+	private async Task Handle(SocketMessage socketMessage)
 	{
-		if (message.Channel.Id != _config.RegisterChannelId)
+		if (!(socketMessage is SocketUserMessage { Source: MessageSource.User } message && message.Channel.Id == _config.RegisterChannelId))
 		{
 			return;
 		}
