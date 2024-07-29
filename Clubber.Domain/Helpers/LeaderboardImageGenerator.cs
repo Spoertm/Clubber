@@ -4,6 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using System.Globalization;
 
 namespace Clubber.Domain.Helpers;
 
@@ -22,7 +23,7 @@ public class LeaderboardImageGenerator
 	{
 		FontCollection collection = new();
 		string fontPath = Path.Combine(AppContext.BaseDirectory, "Data", "GoetheBold.ttf");
-		FontFamily family = collection.Add(fontPath);
+		FontFamily family = collection.Add(fontPath, CultureInfo.InvariantCulture);
 		_goetheBoldFont = family.CreateFont(_fontSize, FontStyle.Bold);
 	}
 

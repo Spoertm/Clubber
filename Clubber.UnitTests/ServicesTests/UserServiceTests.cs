@@ -1,8 +1,10 @@
-﻿using Clubber.Domain.Helpers;
+﻿using Clubber.Discord.Services;
+using Clubber.Domain.Configuration;
+using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
-using Clubber.Domain.Services;
 using Discord;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -21,7 +23,11 @@ public class UserServiceTests
 			.AddJsonFile("appsettings.Testing.json")
 			.Build();
 
-		_sut = new(configMock, _databaseHelperMock.Object);
+		AppConfig appConfig = new();
+		configMock.Bind(appConfig);
+		IOptions<AppConfig> options = Options.Create(appConfig);
+
+		_sut = new(options, _databaseHelperMock.Object);
 	}
 
 	[Theory]
@@ -60,7 +66,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.IsBot).Returns(false);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(default(DdUser));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
 		Assert.False(isValidForRegistrationResponse.IsFailure);
 	}
@@ -74,7 +80,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
 		Assert.True(isValidForRegistrationResponse.IsFailure);
 	}
@@ -88,7 +94,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
 		Result isValid = await _sut.IsValid(guildUser.Object, true);
 		Assert.False(isValid.IsFailure);
 	}
@@ -102,7 +108,7 @@ public class UserServiceTests
 		guildUser.SetupGet(user => user.Id).Returns(0);
 		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
 
-		_databaseHelperMock.Setup(dbhm => dbhm.GetDdUserBy(_exampleDiscordId).Result).Returns(default(DdUser));
+		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
 		Result isValid = await _sut.IsValid(guildUser.Object, true);
 		Assert.True(isValid.IsFailure);
 	}

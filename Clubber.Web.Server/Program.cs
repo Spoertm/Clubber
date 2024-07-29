@@ -1,19 +1,19 @@
+using Clubber.Discord.Helpers;
+using Clubber.Discord.Logging;
+using Clubber.Discord.Models;
+using Clubber.Discord.Services;
 using Clubber.Domain.BackgroundTasks;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models.Exceptions;
-using Clubber.Domain.Models.Logging;
 using Clubber.Domain.Models.Responses;
-using Clubber.Domain.Modules;
 using Clubber.Domain.Services;
+using Clubber.Web.Server.Configuration;
 using Clubber.Web.Server.Endpoints;
-using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using Serilog;
 using System.Globalization;
-using System.Reflection;
 
 namespace Clubber.Web.Server;
 
@@ -28,22 +28,12 @@ internal static class Program
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-		if (builder.Environment.IsProduction())
-		{
-			SetConfigFromDb(builder);
-		}
+		builder.ConfigureConfiguration();
 
-		ConfigureLogging(builder.Configuration);
+		AppConfig appConfig = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<AppConfig>>().Value;
+		builder.ConfigureLogging(appConfig);
+
 		Log.Information("Starting");
-
-		DiscordSocketClient client = new(new()
-		{
-			LogLevel = LogSeverity.Warning,
-			AlwaysDownloadUsers = true,
-			GatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers) &
-							~GatewayIntents.GuildInvites &
-							~GatewayIntents.GuildScheduledEvents,
-		});
 
 		CommandService commands = new(new()
 		{
@@ -51,19 +41,17 @@ internal static class Program
 			DefaultRunMode = RunMode.Async,
 		});
 
-		builder.Logging.ClearProviders();
-
 		builder.Services.AddRazorPages();
 		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddCors();
 
-		builder.Services.AddSingleton(client);
+		builder.Services.AddSingleton<ClubberDiscordClient>();
 		builder.Services.AddSingleton(commands);
 		builder.Services.AddSingleton<MessageHandlerService>();
 		builder.Services.AddSingleton<InteractionHandler>();
 		builder.Services.AddSingleton<RegistrationTracker>();
 
-		builder.Services.AddTransient<UpdateRolesHelper>();
+		builder.Services.AddTransient<ScoreRoleService>();
 		builder.Services.AddTransient<IDiscordHelper, DiscordHelper>();
 		builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
 		builder.Services.AddTransient<UserService>();
@@ -74,7 +62,8 @@ internal static class Program
 
 		if (builder.Environment.IsProduction())
 		{
-			builder.Services.AddSingleton<WelcomeMessage>();
+			builder.Services.AddSingleton<UserJoinHandler>();
+			builder.Services.AddSingleton<RegistrationRequestHandler>();
 			builder.Services.AddHostedService<DdNewsPostService>();
 			builder.Services.AddHostedService<DatabaseUpdateService>();
 			builder.Services.AddHostedService<KeepAppAliveService>();
@@ -89,9 +78,9 @@ internal static class Program
 				Version = "Main",
 				Title = "Clubber API",
 				Description = """
-				This is an API for getting information regarding registered users in the DD Pals Discord server.
-				Additional information regarding the best Devil Daggers splits and new 1000+ scores can also be obtained.
-				""",
+							This is an API for getting information regarding registered users in the DD Pals Discord server.
+							Additional information regarding the best Devil Daggers splits and new 1000+ scores can also be obtained.
+							""",
 			});
 		});
 
@@ -127,20 +116,17 @@ internal static class Program
 
 		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
 
+		// Initialize services
 		app.Services.GetRequiredService<MessageHandlerService>();
+		app.Services.GetRequiredService<RegistrationRequestHandler>();
+		app.Services.GetRequiredService<InteractionHandler>();
 
 		if (app.Environment.IsProduction())
 		{
-			app.Services.GetRequiredService<WelcomeMessage>();
+			app.Services.GetRequiredService<UserJoinHandler>();
 		}
 
-		await client.LoginAsync(TokenType.Bot, app.Configuration["BotToken"]);
-		await client.StartAsync();
-		await client.SetGameAsync("your roles", null, ActivityType.Watching);
-		await commands.AddModulesAsync(Assembly.GetAssembly(typeof(ExtendedModulebase<>)), app.Services);
-
-		// Give the Discord client some time to get ready
-		await Task.Delay(TimeSpan.FromSeconds(5));
+		await app.Services.GetRequiredService<ClubberDiscordClient>().InitAsync();
 
 		try
 		{
@@ -153,25 +139,19 @@ internal static class Program
 		finally
 		{
 			Log.Information("Shut-down complete");
-			Log.CloseAndFlush();
+			await Log.CloseAndFlushAsync();
 		}
 	}
 
-	private static void SetConfigFromDb(WebApplicationBuilder builder)
+	private static void ConfigureLogging(this WebApplicationBuilder builder, AppConfig config)
 	{
-		using DbService dbService = new();
-		string jsonConfig = dbService.ClubberConfig.AsNoTracking().First().JsonConfig;
-		string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DbConfig.json");
-		File.WriteAllText(configPath, jsonConfig);
-		builder.Configuration.AddJsonFile(configPath);
-	}
+		builder.Logging.ClearProviders();
 
-	private static void ConfigureLogging(IConfiguration config)
-	{
 		Log.Logger = new LoggerConfiguration()
+			.Enrich.FromLogContext()
 			.MinimumLevel.Information()
-			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}")
-			.WriteTo.Discord(config.GetValue<ulong>("ClubberLoggerId"), config["ClubberLoggerToken"] ?? throw new ConfigurationMissingException("ClubberLoggerToken"))
+			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}", formatProvider: CultureInfo.InvariantCulture)
+			.WriteTo.Discord(config.ClubberLoggerId, config.ClubberLoggerToken)
 			.CreateLogger();
 	}
 }

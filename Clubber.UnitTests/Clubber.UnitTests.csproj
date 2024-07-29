@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Clubber.Discord\Clubber.Discord.csproj" />
       <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj" />
     </ItemGroup>
 

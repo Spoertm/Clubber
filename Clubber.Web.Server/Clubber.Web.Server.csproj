@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Clubber.Discord\Clubber.Discord.csproj" />
     <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj" />
     <ProjectReference Include="..\Clubber.Web.Client\Clubber.Web.Client.csproj" />
   </ItemGroup>

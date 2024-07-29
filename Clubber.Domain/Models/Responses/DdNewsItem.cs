@@ -6,5 +6,4 @@ public record DdNewsItem(
 	EntryResponse NewEntry,
 	DateTimeOffset TimeOfOccurenceUtc,
 	int Nth,
-	int ItemId = 0
-);
+	int ItemId = 0);

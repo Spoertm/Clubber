@@ -1,23 +1,26 @@
 ﻿using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
-using Newtonsoft.Json;
 using Serilog;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Json;
 
 namespace Clubber.Domain.Services;
 
 public class WebService : IWebService
 {
-#pragma warning disable S1075
-	private const string _getMultipleUsersByIdUrl = "http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php";
-	private const string _getScoresUrl = "http://dd.hasmodai.com/dd3/get_scores.php";
-#pragma warning restore S1075
+	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
+	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
+	private readonly JsonSerializerOptions _serializerOptions = new()
+	{
+		PropertyNameCaseInsensitive = true,
+	};
 	private readonly IHttpClientFactory _httpClientFactory;
 
 	public WebService(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
-	public async Task<List<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
+	public async Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
 	{
 		try
 		{
@@ -27,7 +30,8 @@ public class WebService : IWebService
 			];
 
 			using FormUrlEncodedContent content = new(postValues);
-			HttpResponseMessage response = await _httpClientFactory.CreateClient().PostAsync(_getMultipleUsersByIdUrl, content);
+			using HttpClient client = _httpClientFactory.CreateClient();
+			using HttpResponseMessage response = await client.PostAsync(_getMultipleUsersByIdUri, content);
 			byte[] data = await response.Content.ReadAsByteArrayAsync();
 
 			int bytePosition = 19;
@@ -60,12 +64,12 @@ public class WebService : IWebService
 		}
 		catch (Exception e)
 		{
-			Log.Error(e, "{Class}.GetLbPlayers => Failed to fetch leaderboard players", GetType().Name);
-			throw new ClubberException("DD servers are experiencing issues atm. Try again later.", e);
+			Log.Error(e, "{Class}.GetLbPlayers => Failed to fetch leaderboard players", nameof(WebService));
+			throw new ClubberException("DD servers are experiencing issues atm.", e);
 		}
 	}
 
-	private string GetUserName(byte[] data, ref int bytePos)
+	private static string GetUserName(byte[] data, ref int bytePos)
 	{
 		short usernameLength = BitConverter.ToInt16(data, bytePos);
 		bytePos += 2;
@@ -77,7 +81,7 @@ public class WebService : IWebService
 		return Encoding.UTF8.GetString(usernameBytes);
 	}
 
-	public async Task<List<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
+	public async Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
 	{
 		List<EntryResponse> entries = [];
 		int rank = 1;
@@ -89,7 +93,7 @@ public class WebService : IWebService
 			}
 			catch (Exception e)
 			{
-				Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => failed to fetch LB entries", GetType().Name);
+				Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => failed to fetch LB entries", nameof(WebService));
 				throw;
 			}
 
@@ -105,8 +109,9 @@ public class WebService : IWebService
 	// Credit goes to Noah Stolk https://github.com/NoahStolk
 	private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 	{
-		using FormUrlEncodedContent content = new(new[] { new KeyValuePair<string?, string?>("offset", (rankStart - 1).ToString()) });
-		using HttpResponseMessage response = await _httpClientFactory.CreateClient().PostAsync(_getScoresUrl, content);
+		using FormUrlEncodedContent content = new([new("offset", (rankStart - 1).ToString())]);
+		using HttpClient client = _httpClientFactory.CreateClient();
+		using HttpResponseMessage response = await client.PostAsync(_getScoresUri, content);
 
 		MemoryStream ms = new();
 		await response.Content.CopyToAsync(ms);
@@ -161,39 +166,42 @@ public class WebService : IWebService
 
 	public async Task<string?> GetCountryCodeForplayer(int lbId)
 	{
-		string url = $"https://devildaggers.info/api/clubber/players/{lbId}/country-code";
-		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
-		return JsonConvert.DeserializeObject<dynamic>(responseStr)?.countryCode;
+		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/country-code");
+		using HttpClient client = _httpClientFactory.CreateClient();
+		await using Stream responseStream = await client.GetStreamAsync(uri);
+		using JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream);
+
+		return jsonDocument.RootElement.TryGetProperty("countryCode", out JsonElement countryCodeElement) ? countryCodeElement.GetString() : null;
 	}
 
-	public async Task<GetPlayerHistory?> GetPlayerHistory(int leaderboardId)
+	public async Task<GetPlayerHistory?> GetPlayerHistory(uint lbId)
 	{
-		string url = $"https://devildaggers.info/api/clubber/players/{leaderboardId}/history";
-		string responseStr = await _httpClientFactory.CreateClient().GetStringAsync(url);
-		return JsonConvert.DeserializeObject<GetPlayerHistory>(responseStr);
+		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
+		using HttpClient client = _httpClientFactory.CreateClient();
+		await using Stream responseStream = await client.GetStreamAsync(uri);
+		return await JsonSerializer.DeserializeAsync<GetPlayerHistory>(responseStream, _serializerOptions);
 	}
 
-	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(string url)
+	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri)
 	{
-		if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
-			throw new ClubberException("Invalid URL");
-
+		string uriStr = uri.ToString();
 		string runIdStr = string.Empty;
-		if (url.StartsWith("https://ddstats.com/games/"))
-			runIdStr = url[26..];
-		else if (url.StartsWith("https://www.ddstats.com/games/"))
-			runIdStr = url[30..];
-		else if (url.StartsWith("https://ddstats.com/api/v2/game/full"))
-			runIdStr = url[40..];
-		else if (url.StartsWith("https://www.ddstats.com/api/v2/game/full"))
-			runIdStr = url[44..];
+		if (uriStr.StartsWith("https://ddstats.com/games/"))
+			runIdStr = uriStr[26..];
+		else if (uriStr.StartsWith("https://www.ddstats.com/games/"))
+			runIdStr = uriStr[30..];
+		else if (uriStr.StartsWith("https://ddstats.com/api/v2/game/full"))
+			runIdStr = uriStr[40..];
+		else if (uriStr.StartsWith("https://www.ddstats.com/api/v2/game/full"))
+			runIdStr = uriStr[44..];
 
 		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
 		if (string.IsNullOrEmpty(runIdStr) || !successfulParse)
 			throw new ClubberException("Invalid ddstats URL.");
 
 		string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
-		string ddstatsResponseStr = await _httpClientFactory.CreateClient().GetStringAsync(fullRunReqUrl);
-		return JsonConvert.DeserializeObject<DdStatsFullRunResponse>(ddstatsResponseStr) ?? throw new JsonSerializationException();
+		using HttpClient client = _httpClientFactory.CreateClient();
+		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUrl);
+		return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
 	}
 }

@@ -36,5 +36,5 @@ public record struct LeaderboardResponse
 
 	public ushort TotalEntries { get; set; }
 
-	public List<EntryResponse> Entries { get; init; } = [];
+	public ICollection<EntryResponse> Entries { get; init; } = [];
 }

@@ -20,4 +20,4 @@ public class EntryResponse
 	public ulong DeathsTotal { get; set; }
 	public ulong DaggersHitTotal { get; set; }
 	public ulong DaggersFiredTotal { get; set; }
-};
+}

@@ -1,29 +1,26 @@
 ﻿using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
-using Discord.WebSocket;
 
 namespace Clubber.Domain.Helpers;
 
 public interface IDatabaseHelper
 {
-	Task<List<DdUser>> GetEntireDatabase();
+	Task<List<DdUser>> GetRegisteredUsers();
 
-	Task<Result> RegisterUser(uint lbId, SocketGuildUser user);
+	Task<Result> RegisterUser(uint lbId, ulong discordId);
 
 	Task<Result> RegisterTwitch(ulong userId, string twitchUsername);
 
 	Task<Result> UnregisterTwitch(ulong userId);
 
-	Task<bool> RemoveUser(SocketGuildUser user);
-
 	Task<bool> RemoveUser(ulong discordId);
 
-	Task<DdUser?> GetDdUserBy(int lbId);
+	Task<DdUser?> FindRegisteredUser(int lbId);
 
-	Task<DdUser?> GetDdUserBy(ulong discordId);
+	Task<DdUser?> FindRegisteredUser(ulong discordId);
 
-	Task UpdateLeaderboardCache(List<EntryResponse> newEntries);
+	Task UpdateLeaderboardCache(ICollection<EntryResponse> newEntries);
 
 	Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth);
 
@@ -31,7 +28,7 @@ public interface IDatabaseHelper
 
 	Task<bool> TwitchUsernameIsRegistered(string twitchUsername);
 
-	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(Split[] splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description);
+	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(IReadOnlyCollection<Split> splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description);
 
 	Task<BestSplit[]> GetBestSplits();
 
