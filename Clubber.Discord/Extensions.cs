@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Clubber.Discord;
@@ -17,5 +18,13 @@ public static class Extensions
 		}
 
 		return Format.Sanitize(guildUser.Nickname ?? guildUser.GlobalName ?? guildUser.Username);
+	}
+
+	public static async Task ClearMessageComponents(this SocketMessageComponent component)
+	{
+		if (await component.Channel.GetMessageAsync(component.Message.Id) is IUserMessage originalMessage)
+		{
+			await originalMessage.ModifyAsync(msg => msg.Components = new ComponentBuilder().Build());
+		}
 	}
 }

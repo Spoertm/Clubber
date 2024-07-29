@@ -55,7 +55,7 @@ public class InteractionHandler
 		else if (component.Data.CustomId == "deny_button")
 		{
 			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription("ℹ️ Interaction closed.").Build()]);
-			await ClearMessageComponents(component);
+			await component.ClearMessageComponents();
 		}
 		else if (component.Data.CustomId.StartsWith("stats"))
 		{
@@ -68,7 +68,7 @@ public class InteractionHandler
 		if (!component.GuildId.HasValue)
 		{
 			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription("❌ Internal error.").Build()]);
-			await ClearMessageComponents(component);
+			await component.ClearMessageComponents();
 			return;
 		}
 
@@ -78,7 +78,7 @@ public class InteractionHandler
 		if (guildUser is null) // User likely left the server
 		{
 			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription("⚠️ Couldn't find the user. They likely left the server.").Build()]);
-			await ClearMessageComponents(component);
+			await component.ClearMessageComponents();
 			return;
 		}
 
@@ -86,7 +86,7 @@ public class InteractionHandler
 		if (registrationResult.IsFailure)
 		{
 			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription($"{registrationResult.ErrorMsg}").Build()]);
-			await ClearMessageComponents(component);
+			await component.ClearMessageComponents();
 			return;
 		}
 
@@ -128,16 +128,8 @@ public class InteractionHandler
 			.WithDescription(modsSuccessEmbedDescription)
 			.Build();
 
-		await ClearMessageComponents(component);
+		await component.ClearMessageComponents();
 		await component.Channel.SendMessageAsync(embeds: [modsSuccessEmbed]);
-	}
-
-	private async Task ClearMessageComponents(SocketMessageComponent component)
-	{
-		if (await component.Channel.GetMessageAsync(component.Message.Id) is IUserMessage originalMessage)
-		{
-			await originalMessage.ModifyAsync(msg => msg.Components = new ComponentBuilder().Build());
-		}
 	}
 
 	private async Task<Result> CheckUserAndRegister(int lbId, SocketGuildUser user)
@@ -174,7 +166,7 @@ public class InteractionHandler
 		if (!component.GuildId.HasValue)
 		{
 			await component.Channel.SendMessageAsync(embeds: [new EmbedBuilder().WithDescription("❌ Internal error.").Build()]);
-			await ClearMessageComponents(component);
+			await component.ClearMessageComponents();
 			return;
 		}
 
@@ -190,7 +182,7 @@ public class InteractionHandler
 		SocketGuildUser? user = _discordHelper.GetGuildUser(component.GuildId.Value, statsCtx.UserId);
 
 		Embed fullStatsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
-		await ClearMessageComponents(component);
+		await component.ClearMessageComponents();
 		await component.Message.ModifyAsync(m => m.Embeds = new([fullStatsEmbed]));
 	}
 
