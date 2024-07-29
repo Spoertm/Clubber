@@ -116,7 +116,10 @@ internal static class Program
 
 		app.UseCors(policyBuilder => policyBuilder.AllowAnyOrigin());
 
+		// Initialize services
 		app.Services.GetRequiredService<MessageHandlerService>();
+		app.Services.GetRequiredService<RegistrationRequestHandler>();
+		app.Services.GetRequiredService<InteractionHandler>();
 
 		if (app.Environment.IsProduction())
 		{
