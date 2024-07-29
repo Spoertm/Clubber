@@ -174,7 +174,7 @@ public class WebService : IWebService
 		return jsonDocument.RootElement.TryGetProperty("countryCode", out JsonElement countryCodeElement) ? countryCodeElement.GetString() : null;
 	}
 
-	public async Task<GetPlayerHistory?> GetPlayerHistory(int lbId)
+	public async Task<GetPlayerHistory?> GetPlayerHistory(uint lbId)
 	{
 		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
 		using HttpClient client = _httpClientFactory.CreateClient();

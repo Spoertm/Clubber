@@ -77,7 +77,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	private async Task ShowStats(uint lbId, SocketGuildUser? user)
 	{
 		Task<IReadOnlyList<EntryResponse>> playerEntryTask = _webService.GetLbPlayers([lbId]);
-		Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory((int)lbId);
+		Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory(lbId);
 		await Task.WhenAll(playerEntryTask, playerHistoryTask);
 
 		EntryResponse playerEntry = (await playerEntryTask)[0];

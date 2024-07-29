@@ -11,7 +11,7 @@ public interface IWebService
 
 	Task<string?> GetCountryCodeForplayer(int lbId);
 
-	Task<GetPlayerHistory?> GetPlayerHistory(int lbId);
+	Task<GetPlayerHistory?> GetPlayerHistory(uint lbId);
 
 	Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri);
 }
