@@ -23,7 +23,7 @@ public class DatabaseHelper : IDatabaseHelper
 	{
 		try
 		{
-			DdUser newDdUser = new(discordId, lbId);
+			DdUser newDdUser = new(discordId, (int)lbId);
 
 			await _dbContext.AddAsync(newDdUser);
 			await _dbContext.SaveChangesAsync();

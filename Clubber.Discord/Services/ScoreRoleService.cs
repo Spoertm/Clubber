@@ -37,12 +37,12 @@ public class ScoreRoleService
 				resultSelector: (ddUser, guildUser) => (ddUser, guildUser))
 			.ToArray();
 
-		IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => ru.ddUser.LeaderboardId);
+		IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.ddUser.LeaderboardId);
 		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
 		(IGuildUser guildUser, EntryResponse lbPlayer)[] registeredDiscordLbPlayers = registeredUsers.Join(
 				inner: lbPlayers,
-				outerKeySelector: ru => ru.ddUser.LeaderboardId,
+				outerKeySelector: ru => (uint)ru.ddUser.LeaderboardId,
 				innerKeySelector: lbp => (uint)lbp.Id,
 				resultSelector: (ru, lbp) => (ru.guildUser, lbp))
 			.ToArray();
@@ -70,7 +70,7 @@ public class ScoreRoleService
 				return Result.Failure<RoleChangeResult>("User is not registered.")!;
 			}
 
-			uint lbId = ddUser.LeaderboardId;
+			uint lbId = (uint)ddUser.LeaderboardId;
 			IReadOnlyList<EntryResponse> lbPlayerList = await _webService.GetLbPlayers([lbId]);
 
 			return Result.Success(GetRoleChange(user.RoleIds, lbPlayerList[0]));

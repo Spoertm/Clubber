@@ -71,7 +71,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 			return;
 		}
 
-		await ShowStats(ddUser.LeaderboardId, user);
+		await ShowStats((uint)ddUser.LeaderboardId, user);
 	}
 
 	private async Task ShowStats(uint lbId, SocketGuildUser? user)

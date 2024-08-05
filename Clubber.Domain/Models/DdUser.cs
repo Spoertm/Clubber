@@ -2,7 +2,7 @@
 
 public record DdUser
 {
-	public DdUser(ulong DiscordId, uint LeaderboardId, string? TwitchUsername = null)
+	public DdUser(ulong DiscordId, int LeaderboardId, string? TwitchUsername = null)
 	{
 		this.DiscordId = DiscordId;
 		this.LeaderboardId = LeaderboardId;
@@ -10,6 +10,6 @@ public record DdUser
 	}
 
 	public ulong DiscordId { get; init; }
-	public uint LeaderboardId { get; init; }
+	public int LeaderboardId { get; init; }
 	public string? TwitchUsername { get; set; }
 }
