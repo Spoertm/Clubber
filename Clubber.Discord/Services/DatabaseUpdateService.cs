@@ -55,6 +55,19 @@ public class DatabaseUpdateService : ExactBackgroundService
 				message += $"\nℹ️ {bulkUpdateResponse.NonMemberCount} user(s) are registered but aren't in the server.";
 				await msg.ModifyAsync(m => m.Content = message);
 
+				foreach (UserRoleUpdate roleUpdate in bulkUpdateResponse.UserRoleUpdates)
+				{
+					if (roleUpdate.RoleUpdate.RolesToAdd.Count > 0)
+					{
+						await roleUpdate.User.AddRolesAsync(roleUpdate.RoleUpdate.RolesToAdd);
+					}
+
+					if (roleUpdate.RoleUpdate.RolesToRemove.Count > 0)
+					{
+						await roleUpdate.User.RemoveRolesAsync(roleUpdate.RoleUpdate.RolesToRemove);
+					}
+				}
+
 				Embed[] roleUpdateEmbeds = bulkUpdateResponse.UserRoleUpdates
 					.Select(EmbedHelper.UpdateRoles)
 					.ToArray();

@@ -38,6 +38,24 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 		message += $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
 		await msg.ModifyAsync(m => m.Content = $"{checkingString}\n{message}");
 
+		if (response.UserRoleUpdates.Count == 0)
+		{
+			return;
+		}
+
+		foreach (UserRoleUpdate roleUpdate in response.UserRoleUpdates)
+		{
+			if (roleUpdate.RoleUpdate.RolesToAdd.Count > 0)
+			{
+				await roleUpdate.User.AddRolesAsync(roleUpdate.RoleUpdate.RolesToAdd);
+			}
+
+			if (roleUpdate.RoleUpdate.RolesToRemove.Count > 0)
+			{
+				await roleUpdate.User.RemoveRolesAsync(roleUpdate.RoleUpdate.RolesToRemove);
+			}
+		}
+
 		Embed[] roleUpdateEmbeds = response.UserRoleUpdates
 			.Select(EmbedHelper.UpdateRoles)
 			.ToArray();
