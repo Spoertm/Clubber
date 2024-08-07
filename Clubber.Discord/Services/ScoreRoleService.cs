@@ -102,10 +102,10 @@ public class ScoreRoleService
 		}
 
 		CollectionChange<ulong> collectionChange = CollectionUtils.DetermineCollectionChanges(roleIds, _allPossibleRoles, rolesToKeep);
-		MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(lbUser.Time, AppConfig.ScoreRoles);
 
 		if (collectionChange.ItemsToAdd.Length == 0 && collectionChange.ItemsToRemove.Length == 0)
 		{
+			MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(lbUser.Time, AppConfig.ScoreRoles);
 			return RoleChangeResult.None.FromMileStoneInfo(milestoneInfo);
 		}
 
