@@ -10,7 +10,6 @@ using Clubber.Domain.Services;
 using Clubber.Web.Server.Configuration;
 using Clubber.Web.Server.Endpoints;
 using Discord.Commands;
-using Microsoft.Extensions.Options;
 using Npgsql;
 using Serilog;
 using System.Globalization;
@@ -30,23 +29,22 @@ internal static class Program
 
 		builder.ConfigureConfiguration();
 
-		AppConfig appConfig = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<AppConfig>>().Value;
+		AppConfig appConfig = builder.Configuration.Get<AppConfig>() ?? throw new InvalidOperationException("Missing configuration");
 		builder.ConfigureLogging(appConfig);
 
 		Log.Information("Starting");
-
-		CommandService commands = new(new()
-		{
-			IgnoreExtraArgs = true,
-			DefaultRunMode = RunMode.Async,
-		});
 
 		builder.Services.AddRazorPages();
 		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddCors();
 
 		builder.Services.AddSingleton<ClubberDiscordClient>();
-		builder.Services.AddSingleton(commands);
+		builder.Services.AddSingleton<CommandService>(_ => new(new()
+		{
+			IgnoreExtraArgs = true,
+			DefaultRunMode = RunMode.Async,
+		}));
+
 		builder.Services.AddSingleton<MessageHandlerService>();
 		builder.Services.AddSingleton<InteractionHandler>();
 		builder.Services.AddSingleton<RegistrationTracker>();
