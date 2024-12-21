@@ -72,7 +72,7 @@ public class UserService
 			return Result.Failure($"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
 		}
 
-		if (guildUser.RoleIds.All(rId => rId != _config.CheaterRoleId))
+		if (!guildUser.RoleIds.Contains(_config.CheaterRoleId))
 		{
 			return Result.Success();
 		}
