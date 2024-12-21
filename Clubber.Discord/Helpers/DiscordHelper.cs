@@ -20,10 +20,10 @@ public class DiscordHelper : IDiscordHelper
 		=> _client.GetChannel(channelId) as SocketTextChannel ?? throw new ClubberException($"No channel with ID {channelId} exists.");
 
 	public SocketGuildUser? GetGuildUser(ulong guildId, ulong userId)
-		=> _client.GetGuild(guildId)?.GetUser(userId);
+		=> GetGuild(guildId)?.GetUser(userId);
 
-	public SocketGuild? GetGuild(ulong guildId)
-		=> _client.GetGuild(guildId);
+	public SocketGuild GetGuild(ulong guildId)
+		=> _client.GetGuild(guildId) ?? throw new ClubberException($"No guild with ID {guildId} exists.");
 
 	public async Task ClearChannelAsync(ITextChannel channel)
 	{

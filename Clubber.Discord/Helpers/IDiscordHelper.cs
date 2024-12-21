@@ -10,7 +10,7 @@ public interface IDiscordHelper
 
 	SocketGuildUser? GetGuildUser(ulong guildId, ulong userId);
 
-	SocketGuild? GetGuild(ulong guildId);
+	SocketGuild GetGuild(ulong guildId);
 
 	Task ClearChannelAsync(ITextChannel channel);
 
