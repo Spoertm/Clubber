@@ -10,9 +10,9 @@ namespace Clubber.Domain.Helpers;
 
 public class DatabaseHelper : IDatabaseHelper
 {
-	private readonly DbService _dbContext;
+	private readonly ClubberContext _dbContext;
 
-	public DatabaseHelper(DbService dbContext) => _dbContext = dbContext;
+	public DatabaseHelper(ClubberContext dbContext) => _dbContext = dbContext;
 
 	public async Task<List<DdUser>> GetRegisteredUsers()
 	{

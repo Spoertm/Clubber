@@ -56,7 +56,7 @@ internal static class Program
 		builder.Services.AddTransient<IWebService, WebService>();
 
 		builder.Services.AddHttpClient();
-		builder.Services.AddDbContext<DbService>(ServiceLifetime.Transient);
+		builder.Services.AddDbContext<ClubberContext>(ServiceLifetime.Transient);
 
 		if (builder.Environment.IsProduction())
 		{

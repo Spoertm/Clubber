@@ -42,7 +42,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		await using ClubberContext dbContext = scope.ServiceProvider.GetRequiredService<ClubberContext>();
 		IWebService webService = scope.ServiceProvider.GetRequiredService<IWebService>();
 
 		await databaseHelper.CleanUpNewsItems();

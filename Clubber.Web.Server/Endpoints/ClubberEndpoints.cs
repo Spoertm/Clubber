@@ -27,35 +27,35 @@ public static class ClubberEndpoints
 	private static async Task<BestSplit?> BestSplitByName(string splitName, IServiceScopeFactory scopeFactory)
 	{
 		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		await using ClubberContext dbContext = scope.ServiceProvider.GetRequiredService<ClubberContext>();
 		return await dbContext.BestSplits.FindAsync(splitName);
 	}
 
 	private static async Task<List<BestSplit>> BestSplits(IServiceScopeFactory scopeFactory)
 	{
 		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		await using ClubberContext dbContext = scope.ServiceProvider.GetRequiredService<ClubberContext>();
 		return await dbContext.BestSplits.AsNoTracking().ToListAsync();
 	}
 
 	private static async Task<List<DdNewsItem>> DailyNews(IServiceScopeFactory scopeFactory)
 	{
 		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		await using ClubberContext dbContext = scope.ServiceProvider.GetRequiredService<ClubberContext>();
 		return await dbContext.DdNews.AsNoTracking().ToListAsync();
 	}
 
 	private static async Task<DdUser?> UserByDiscordId(ulong discordId, IServiceScopeFactory scopeFactory)
 	{
 		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		await using ClubberContext dbContext = scope.ServiceProvider.GetRequiredService<ClubberContext>();
 		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(user => user.DiscordId == discordId);
 	}
 
 	private static async Task<DdUser?> UserByLeaderboardId(int leaderboardId, IServiceScopeFactory scopeFactory)
 	{
 		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		await using ClubberContext dbContext = scope.ServiceProvider.GetRequiredService<ClubberContext>();
 		return await dbContext.DdPlayers.FindAsync(leaderboardId);
 	}
 
