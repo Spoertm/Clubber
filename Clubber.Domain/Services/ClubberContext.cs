@@ -13,14 +13,6 @@ public class ClubberContext : DbContext
 	public DbSet<BestSplit> BestSplits => Set<BestSplit>();
 	public DbSet<HomingPeakRun> TopHomingPeaks => Set<HomingPeakRun>();
 
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	{
-		string? postgresConnectionString = Environment.GetEnvironmentVariable("PostgresConnectionString");
-		ArgumentException.ThrowIfNullOrEmpty(postgresConnectionString);
-
-		optionsBuilder.UseNpgsql(postgresConnectionString);
-	}
-
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.Entity<DdNewsItem>().Property(ddni => ddni.OldEntry).HasColumnType("jsonb");

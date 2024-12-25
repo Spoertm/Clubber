@@ -10,6 +10,7 @@ using Clubber.Domain.Services;
 using Clubber.Web.Server.Configuration;
 using Clubber.Web.Server.Endpoints;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Serilog;
 using System.Globalization;
@@ -56,7 +57,13 @@ internal static class Program
 		builder.Services.AddTransient<IWebService, WebService>();
 
 		builder.Services.AddHttpClient();
-		builder.Services.AddDbContext<ClubberContext>(ServiceLifetime.Transient);
+		builder.Services.AddDbContext<ClubberContext>(optionsBuilder =>
+		{
+			string conString = builder.Configuration.GetConnectionString("DefaultConnection") ??
+								throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+			optionsBuilder.UseNpgsql(conString);
+		}, ServiceLifetime.Transient);
 
 		if (builder.Environment.IsProduction())
 		{
