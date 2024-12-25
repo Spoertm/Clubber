@@ -25,14 +25,14 @@ public static class CollectionUtils
 		int currentTime,
 		IReadOnlyDictionary<int, TKey> milestones)
 	{
-		(int score, _) = milestones.FirstOrDefault(m => m.Key <= currentTime / 10_000);
-		if (score == milestones.Keys.Max())
+		decimal currentScore = currentTime / 10_000M;
+		if (currentScore >= milestones.Keys.Max())
 		{
 			return default;
 		}
 
-		(int nextScore, TKey nextMilestoneId) = milestones.Last(m => m.Key > currentTime / 10_000);
-		decimal timeUntilNextMilestone = nextScore - currentTime / 10_000M;
+		(int nextScore, TKey nextMilestoneId) = milestones.OrderBy(sr => sr.Key).First(m => m.Key > currentScore);
+		decimal timeUntilNextMilestone = nextScore - currentScore;
 		return new(timeUntilNextMilestone, nextMilestoneId);
 	}
 }

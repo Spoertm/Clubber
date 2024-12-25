@@ -92,7 +92,7 @@ public class GameInfo
 	public int ReplayPlayerId { get; set; }
 
 	[JsonPropertyName("replay_player_name")]
-	public string ReplayPlayerName { get; set; } = null!;
+	public string? ReplayPlayerName { get; set; }
 
 	[JsonPropertyName("spawnset")]
 	public string Spawnset { get; set; } = null!;

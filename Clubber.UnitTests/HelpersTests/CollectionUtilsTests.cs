@@ -1,13 +1,15 @@
 ﻿using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
+using Microsoft.Extensions.Configuration;
+using System.Collections;
 using Xunit;
 
 namespace Clubber.UnitTests.HelpersTests;
 
 public class CollectionUtilsTests
 {
-	private static readonly ulong _topScoreRoleId = AppConfig.ScoreRoles.MaxBy(s => s.Key).Value;
+	private readonly AppConfig _appConfig;
 	private const ulong _sub100RoleId = 461203024128376832;
 	private const ulong _100RoleId = 399569183966363648;
 	private const ulong _300RoleId = 399569332532674562;
@@ -18,23 +20,21 @@ public class CollectionUtilsTests
 	private const ulong _top10RoleId = 556255819323277312;
 	private const ulong _uselessRole1 = 111;
 	private const ulong _uselessRole2 = 222;
-	private static readonly IReadOnlyList<ulong> _allPossibleRoles = new[]
+
+	public CollectionUtilsTests()
 	{
-		_topScoreRoleId,
-		_sub100RoleId,
-		_100RoleId,
-		_300RoleId,
-		_1230RoleId,
-		_900RoleId,
-		_top1RoleId,
-		_top3RoleId,
-		_top10RoleId,
-		_uselessRole1,
-		_uselessRole2,
-	};
+		IConfigurationRoot configuration = new ConfigurationBuilder()
+			.AddJsonFile("appsettings.Testing.json", optional: false)
+			.Build();
+
+		AppConfig appConfig = new();
+		configuration.Bind(appConfig);
+
+		_appConfig = appConfig;
+	}
 
 	[Theory]
-	[MemberData(nameof(DetermineRoleChangesTestData))]
+	[ClassData(typeof(DetermineRoleChangesTestData))]
 	public void DetermineRoleChanges_DetectsRoleInconsistency_ReturnsRolesToBeAddedAndRemoved(
 		IReadOnlyCollection<ulong> userRoles,
 		IReadOnlyCollection<ulong> allPossibleRoles,
@@ -47,52 +47,13 @@ public class CollectionUtilsTests
 		Assert.Equal(roleUpdate.ItemsToRemove, expectedRolesToBeRemoved);
 	}
 
-	public static IEnumerable<object[]> DetermineRoleChangesTestData()
-	{
-		yield return
-		[
-			new[] { _100RoleId, _300RoleId, _1230RoleId, _uselessRole1 },
-			_allPossibleRoles,
-			new[] { _100RoleId },
-			new ulong[] { },
-			new[] { _300RoleId, _1230RoleId, _uselessRole1 },
-		];
-
-		yield return
-		[
-			new ulong[] { },
-			_allPossibleRoles,
-			new[] { _top1RoleId },
-			new[] { _top1RoleId },
-			new ulong[] { },
-		];
-
-		yield return
-		[
-			new ulong[] { 69, 420, _uselessRole1 },
-			_allPossibleRoles,
-			new[] { _top1RoleId, _1230RoleId },
-			new[] { _top1RoleId, _1230RoleId },
-			new[] { _uselessRole1 },
-		];
-
-		yield return
-		[
-			new ulong[] { 69, 420, _1230RoleId, _top10RoleId },
-			_allPossibleRoles,
-			new[] { _1230RoleId, _top10RoleId },
-			new ulong[] { },
-			new ulong[] { },
-		];
-	}
-
 	[Theory]
 	[MemberData(nameof(TestData))]
 	public void GetSecondsAwayFromNextRoleAndNextRoleId_DetectsSecondsInconsistency_ReturnsSecondsAndRoleId(
 		decimal scoreInSeconds,
 		decimal? expectedSecondsAwayFromNextRole)
 	{
-		MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone((int)(scoreInSeconds * 10_000), AppConfig.ScoreRoles);
+		MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone((int)(scoreInSeconds * 10_000), _appConfig.BotConfig.ScoreRoles);
 		Assert.Equal(expectedSecondsAwayFromNextRole, milestoneInfo.TimeUntilNextMilestone);
 	}
 
@@ -106,4 +67,77 @@ public class CollectionUtilsTests
 		new object?[] { 532M, 68M },
 		new object?[] { 900M, 50M },
 	};
+
+	private class DetermineRoleChangesTestData : IEnumerable<object[]>
+	{
+		private readonly IReadOnlyList<ulong> _allPossibleRoles;
+
+		public DetermineRoleChangesTestData()
+		{
+			IConfigurationRoot configuration = new ConfigurationBuilder()
+				.AddJsonFile("appsettings.Testing.json", optional: false)
+				.Build();
+
+			AppConfig appConfig = new();
+			configuration.Bind(appConfig);
+
+			ulong topScoreRoleId = appConfig.BotConfig.ScoreRoles.MaxBy(s => s.Key).Value;
+
+			_allPossibleRoles =
+			[
+				topScoreRoleId,
+				_sub100RoleId,
+				_100RoleId,
+				_300RoleId,
+				_1230RoleId,
+				_900RoleId,
+				_top1RoleId,
+				_top3RoleId,
+				_top10RoleId,
+				_uselessRole1,
+				_uselessRole2,
+			];
+		}
+
+		public IEnumerator<object[]> GetEnumerator()
+		{
+			yield return
+			[
+				new[] { _100RoleId, _300RoleId, _1230RoleId, _uselessRole1 },
+				_allPossibleRoles,
+				new[] { _100RoleId },
+				new ulong[] { },
+				new[] { _300RoleId, _1230RoleId, _uselessRole1 },
+			];
+
+			yield return
+			[
+				new ulong[] { },
+				_allPossibleRoles,
+				new[] { _top1RoleId },
+				new[] { _top1RoleId },
+				new ulong[] { },
+			];
+
+			yield return
+			[
+				new ulong[] { 69, 420, _uselessRole1 },
+				_allPossibleRoles,
+				new[] { _top1RoleId, _1230RoleId },
+				new[] { _top1RoleId, _1230RoleId },
+				new[] { _uselessRole1 },
+			];
+
+			yield return
+			[
+				new ulong[] { 69, 420, _1230RoleId, _top10RoleId },
+				_allPossibleRoles,
+				new[] { _1230RoleId, _top10RoleId },
+				new ulong[] { },
+				new ulong[] { },
+			];
+		}
+
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+	}
 }

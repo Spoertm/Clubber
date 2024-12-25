@@ -14,17 +14,15 @@ namespace Clubber.Discord.Services;
 
 public class ScoreRoleService
 {
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;
-	private readonly IReadOnlyCollection<ulong> _allPossibleRoles;
 
-	public ScoreRoleService(IOptions<AppConfig> config, IDatabaseHelper databaseHelper, IWebService webService)
+	public ScoreRoleService(IOptionsMonitor<BotConfig> botConfig, IDatabaseHelper databaseHelper, IWebService webService)
 	{
+		_botConfig = botConfig;
 		_databaseHelper = databaseHelper;
 		_webService = webService;
-
-		IReadOnlyCollection<ulong> uselessRoles = [config.Value.UnregisteredRoleId, 458375331468935178, 994354086646399066];
-		_allPossibleRoles = [..AppConfig.ScoreRoles.Values, ..AppConfig.RankRoles.Values, ..uselessRoles];
 	}
 
 	public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers)
@@ -101,24 +99,42 @@ public class ScoreRoleService
 			rolesToKeep.Add(rankRoleToKeep);
 		}
 
-		CollectionChange<ulong> collectionChange = CollectionUtils.DetermineCollectionChanges(roleIds, _allPossibleRoles, rolesToKeep);
+		IReadOnlyCollection<ulong> allPossibleRoles =
+		[
+			.._botConfig.CurrentValue.ScoreRoles.Values,
+			.._botConfig.CurrentValue.RankRoles.Values,
+			_botConfig.CurrentValue.UnregisteredRoleId,
+			_botConfig.CurrentValue.NoScoreRoleId,
+			_botConfig.CurrentValue.NewPalRoleId,
+			_botConfig.CurrentValue.PendingPbRoleId,
+		];
+
+		CollectionChange<ulong> collectionChange = CollectionUtils.DetermineCollectionChanges(roleIds, allPossibleRoles, rolesToKeep);
 
 		if (collectionChange.ItemsToAdd.Length == 0 && collectionChange.ItemsToRemove.Length == 0)
 		{
-			MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(lbUser.Time, AppConfig.ScoreRoles);
+			MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(lbUser.Time, _botConfig.CurrentValue.ScoreRoles);
 			return RoleChangeResult.None.FromMileStoneInfo(milestoneInfo);
 		}
 
 		return RoleUpdate.FromCollectionChanges(collectionChange);
 	}
 
-	public static KeyValuePair<int, ulong> GetScoreRoleToKeep(int playerTime)
+	public KeyValuePair<int, ulong> GetScoreRoleToKeep(int playerTime)
 	{
-		return AppConfig.ScoreRoles.First(sr => sr.Key <= playerTime / 10_000);
+		return _botConfig
+			.CurrentValue
+			.ScoreRoles
+			.OrderByDescending(sr => sr.Key)
+			.First(sr => sr.Key <= playerTime / 10_000);
 	}
 
-	public static KeyValuePair<int, ulong> GetRankRoleToKeep(int playerRank)
+	public KeyValuePair<int, ulong> GetRankRoleToKeep(int playerRank)
 	{
-		return AppConfig.RankRoles.FirstOrDefault(rr => playerRank <= rr.Key);
+		return _botConfig
+			.CurrentValue
+			.RankRoles
+			.OrderBy(sr => sr.Key)
+			.FirstOrDefault(rr => playerRank <= rr.Key);
 	}
 }

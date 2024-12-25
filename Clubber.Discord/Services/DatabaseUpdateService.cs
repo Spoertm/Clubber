@@ -14,12 +14,12 @@ namespace Clubber.Discord.Services;
 
 public class DatabaseUpdateService : ExactBackgroundService
 {
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly IServiceScopeFactory _services;
 
-	public DatabaseUpdateService(IOptions<AppConfig> config, IServiceScopeFactory services)
+	public DatabaseUpdateService(IOptionsMonitor<BotConfig> botConfig, IServiceScopeFactory services)
 	{
-		_config = config.Value;
+		_botConfig = botConfig;
 		_services = services;
 	}
 
@@ -31,8 +31,8 @@ public class DatabaseUpdateService : ExactBackgroundService
 		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 
-		SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId);
-		SocketTextChannel dailyUpdateLoggingChannel = discordHelper.GetTextChannel(_config.DailyUpdateLoggingChannelId);
+		SocketGuild ddPals = discordHelper.GetGuild(_botConfig.CurrentValue.DdPalsId);
+		SocketTextChannel dailyUpdateLoggingChannel = discordHelper.GetTextChannel(_botConfig.CurrentValue.DailyUpdateLoggingChannelId);
 		IUserMessage msg = await dailyUpdateLoggingChannel.SendMessageAsync("Checking for role updates...");
 
 		int tries = 0;
@@ -79,7 +79,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 
 					Result dailyChannelResult = await discordHelper.SendEmbedsEfficientlyAsync(
 						roleUpdateEmbeds,
-						_config.DailyUpdateChannel,
+						_botConfig.CurrentValue.DailyUpdateChannelId,
 						dailyUpdateMessageStr);
 
 					if (dailyChannelResult.IsFailure)
@@ -89,7 +89,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 
 					Result loggingChannelResult = await discordHelper.SendEmbedsEfficientlyAsync(
 						roleUpdateEmbeds,
-						_config.DailyUpdateLoggingChannelId);
+						_botConfig.CurrentValue.DailyUpdateLoggingChannelId);
 
 					if (loggingChannelResult.IsFailure)
 					{

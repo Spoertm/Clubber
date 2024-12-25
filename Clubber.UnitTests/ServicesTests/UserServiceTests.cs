@@ -25,9 +25,11 @@ public class UserServiceTests
 
 		AppConfig appConfig = new();
 		configMock.Bind(appConfig);
-		IOptions<AppConfig> options = Options.Create(appConfig);
 
-		_sut = new(options, _databaseHelperMock.Object);
+		Mock<IOptionsMonitor<BotConfig>> mockConfig = new();
+		mockConfig.Setup(c => c.CurrentValue).Returns(appConfig.BotConfig);
+
+		_sut = new(mockConfig.Object, _databaseHelperMock.Object);
 	}
 
 	[Theory]

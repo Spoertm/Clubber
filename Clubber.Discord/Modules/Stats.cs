@@ -21,12 +21,14 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly UserService _userService;
 	private readonly IWebService _webService;
+	private readonly EmbedHelper _embedHelper;
 
-	public Stats(IDatabaseHelper databaseHelper, UserService userService, IWebService webService)
+	public Stats(IDatabaseHelper databaseHelper, UserService userService, IWebService webService, EmbedHelper embedHelper)
 	{
 		_databaseHelper = databaseHelper;
 		_userService = userService;
 		_webService = webService;
+		_embedHelper = embedHelper;
 	}
 
 	[Command]
@@ -89,7 +91,7 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 			Context.Message.Content.StartsWith("+statsfull", StringComparison.OrdinalIgnoreCase) ||
 			Context.Message.Content.StartsWith("+mef", StringComparison.OrdinalIgnoreCase))
 		{
-			statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
+			statsEmbed = _embedHelper.FullStats(playerEntry, user, playerHistory);
 		}
 		else
 		{

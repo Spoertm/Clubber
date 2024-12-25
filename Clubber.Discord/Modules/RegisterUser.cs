@@ -1,9 +1,11 @@
 ﻿using Clubber.Discord.Services;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Modules;
 
@@ -14,11 +16,13 @@ namespace Clubber.Discord.Modules;
 [RequireContext(ContextType.Guild)]
 public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 {
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly UserService _userService;
 
-	public RegisterUser(IDatabaseHelper databaseHelper, UserService userService)
+	public RegisterUser(IOptionsMonitor<BotConfig> botConfig, IDatabaseHelper databaseHelper, UserService userService)
 	{
+		_botConfig = botConfig;
 		_databaseHelper = databaseHelper;
 		_userService = userService;
 	}
@@ -55,10 +59,8 @@ public class RegisterUser : ExtendedModulebase<SocketCommandContext>
 		Result registrationResult = await _databaseHelper.RegisterUser(lbId, user.Id);
 		if (registrationResult.IsSuccess)
 		{
-			const ulong newPalRoleId = 728663492424499200;
-			const ulong pendingPbRoleId = 994354086646399066;
-			await user.RemoveRoleAsync(newPalRoleId);
-			await user.AddRoleAsync(pendingPbRoleId);
+			await user.RemoveRoleAsync(_botConfig.CurrentValue.NewPalRoleId);
+			await user.AddRoleAsync(_botConfig.CurrentValue.PendingPbRoleId);
 			await InlineReplyAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get assigned a role.");
 		}
 		else

@@ -9,18 +9,18 @@ namespace Clubber.Discord.Services;
 
 public class MessageHandlerService
 {
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly ClubberDiscordClient _client;
 	private readonly CommandService _commands;
 	private readonly IServiceProvider _services;
 
 	public MessageHandlerService(
-		IOptions<AppConfig> config,
+		IOptionsMonitor<BotConfig> botConfig,
 		ClubberDiscordClient client,
 		CommandService commands,
 		IServiceProvider services)
 	{
-		_config = config.Value;
+		_botConfig = botConfig;
 		_client = client;
 		_commands = commands;
 		_services = services;
@@ -38,7 +38,7 @@ public class MessageHandlerService
 			return;
 
 		int argumentPos = 0;
-		if (!message.HasStringPrefix(_config.Prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
+		if (!message.HasStringPrefix(_botConfig.CurrentValue.Prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
 			return;
 
 		SocketCommandContext context = new(_client, message);

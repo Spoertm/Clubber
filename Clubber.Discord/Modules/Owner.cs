@@ -13,11 +13,13 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 {
 	private readonly ScoreRoleService _scoreRoleService;
 	private readonly IDiscordHelper _discordHelper;
+	private readonly EmbedHelper _embedHelper;
 
-	public Owner(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper)
+	public Owner(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper, EmbedHelper embedHelper)
 	{
 		_scoreRoleService = scoreRoleService;
 		_discordHelper = discordHelper;
+		_embedHelper = embedHelper;
 	}
 
 	[Command("update database")]
@@ -69,5 +71,5 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 
 	[Command("welcome")]
 	[RequireContext(ContextType.Guild)]
-	public async Task PostWelcome() => await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
+	public async Task PostWelcome() => await Context.Channel.SendMessageAsync(embeds: _embedHelper.RegisterEmbeds());
 }

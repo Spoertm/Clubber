@@ -6,12 +6,20 @@ using Clubber.Domain.Models.Responses.DdInfo;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 using System.Text;
 
 namespace Clubber.Discord.Helpers;
 
-public static class EmbedHelper
+public class EmbedHelper
 {
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
+
+	public EmbedHelper(IOptionsMonitor<BotConfig> botConfig)
+	{
+		_botConfig = botConfig;
+	}
+
 	public static Embed UpdateRoles(UserRoleUpdate userRoleUpdate)
 	{
 		IGuildUser user = userRoleUpdate.User;
@@ -73,7 +81,7 @@ public static class EmbedHelper
 	/// <summary>
 	/// Returns full stats Embed. For the default stats Embed use <see cref="Stats" />.
 	/// </summary>
-	public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
+	public Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
 	{
 		GetPlayerHistoryScoreEntry? playerPb = playerHistory?.ScoreHistory.LastOrDefault();
 		string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
@@ -101,7 +109,7 @@ public static class EmbedHelper
 				🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 				🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
 				😵 Total deaths: {lbPlayer.DeathsTotal}
-				😵 Death type: {AppConfig.DeathTypes[lbPlayer.DeathType]}
+				😵 Death type: {_botConfig.CurrentValue.DeathTypes[lbPlayer.DeathType]}
 				{(playerPb is null ? null : "\u200B")}
 				""");
 
@@ -213,12 +221,12 @@ public static class EmbedHelper
 		return Format.Sanitize(formattedName);
 	}
 
-	public static Embed[] RegisterEmbeds()
+	public Embed[] RegisterEmbeds()
 	{
 		Embed[] embeds = new Embed[2];
 
-		ulong lowestScoreRoleId = AppConfig.ScoreRoles.MinBy(sr => sr.Key).Value;
-		ulong highestScoreRoleId = AppConfig.ScoreRoles.MaxBy(sr => sr.Key).Value;
+		ulong lowestScoreRoleId = _botConfig.CurrentValue.ScoreRoles.MinBy(sr => sr.Key).Value;
+		ulong highestScoreRoleId = _botConfig.CurrentValue.ScoreRoles.MaxBy(sr => sr.Key).Value;
 
 		string registerForRolesText =
 			$"""

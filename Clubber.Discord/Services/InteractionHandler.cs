@@ -15,28 +15,31 @@ namespace Clubber.Discord.Services;
 
 public class InteractionHandler
 {
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly UserService _userService;
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly RegistrationTracker _registrationTracker;
 	private readonly IWebService _webService;
+	private readonly EmbedHelper _embedHelper;
 
 	public InteractionHandler(
-		IOptions<AppConfig> config,
+		IOptionsMonitor<BotConfig> botConfig,
 		UserService userService,
 		IDatabaseHelper databaseHelper,
 		IDiscordHelper discordHelper,
 		RegistrationTracker registrationTracker,
 		ClubberDiscordClient discordClient,
-		IWebService webService)
+		IWebService webService,
+		EmbedHelper embedHelper)
 	{
-		_config = config.Value;
+		_botConfig = botConfig;
 		_userService = userService;
 		_databaseHelper = databaseHelper;
 		_discordHelper = discordHelper;
 		_registrationTracker = registrationTracker;
 		_webService = webService;
+		_embedHelper = embedHelper;
 
 		discordClient.ButtonExecuted += OnButtonExecuted;
 	}
@@ -95,7 +98,7 @@ public class InteractionHandler
 		SocketTextChannel? registerChannel = null;
 		try
 		{
-			registerChannel = _discordHelper.GetTextChannel(_config.RegisterChannelId);
+			registerChannel = _discordHelper.GetTextChannel(_botConfig.CurrentValue.RegisterChannelId);
 		}
 		catch (Exception e)
 		{
@@ -142,7 +145,7 @@ public class InteractionHandler
 
 		if (lbId < 0)
 		{
-			await user.AddRoleAsync(_config.NoScoreRoleId);
+			await user.AddRoleAsync(_botConfig.CurrentValue.NoScoreRoleId);
 		}
 		else
 		{
@@ -152,10 +155,8 @@ public class InteractionHandler
 				return Result.Failure($"❌ Failed to execute command: {registrationResult.ErrorMsg}");
 			}
 
-			const ulong newPalRoleId = 728663492424499200;
-			const ulong pendingPbRoleId = 994354086646399066;
-			await user.RemoveRoleAsync(newPalRoleId);
-			await user.AddRoleAsync(pendingPbRoleId);
+			await user.RemoveRoleAsync(_botConfig.CurrentValue.NewPalRoleId);
+			await user.AddRoleAsync(_botConfig.CurrentValue.PendingPbRoleId);
 		}
 
 		return Result.Success();
@@ -181,7 +182,7 @@ public class InteractionHandler
 
 		SocketGuildUser? user = _discordHelper.GetGuildUser(component.GuildId.Value, statsCtx.UserId);
 
-		Embed fullStatsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
+		Embed fullStatsEmbed = _embedHelper.FullStats(playerEntry, user, playerHistory);
 		await component.ClearMessageComponents();
 		await component.Message.ModifyAsync(m => m.Embeds = new([fullStatsEmbed]));
 	}

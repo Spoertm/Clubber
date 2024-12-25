@@ -13,22 +13,22 @@ namespace Clubber.Discord.Services;
 public class UserJoinHandler
 {
 	private readonly IServiceScopeFactory _services;
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 
 	public UserJoinHandler(
 		IServiceScopeFactory services,
-		IOptions<AppConfig> config,
+		IOptionsMonitor<BotConfig> botConfig,
 		ClubberDiscordClient discordClient)
 	{
 		_services = services;
-		_config = config.Value;
+		_botConfig = botConfig;
 
 		discordClient.UserJoined += OnUserJoined;
 	}
 
 	private async Task OnUserJoined(SocketGuildUser joiningUser)
 	{
-		if (joiningUser.Guild.Id != _config.DdPalsId || joiningUser.IsBot)
+		if (joiningUser.Guild.Id != _botConfig.CurrentValue.DdPalsId || joiningUser.IsBot)
 			return;
 
 		// User is registered
@@ -41,7 +41,7 @@ public class UserJoinHandler
 		}
 		else
 		{
-			await joiningUser.AddRoleAsync(_config.UnregisteredRoleId);
+			await joiningUser.AddRoleAsync(_botConfig.CurrentValue.UnregisteredRoleId);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class UserJoinHandler
 			await joiningUser.RemoveRolesAsync(roleUpdate.RolesToRemove);
 		}
 
-		ulong logChannelId = _config.DailyUpdateLoggingChannelId;
+		ulong logChannelId = _botConfig.CurrentValue.DailyUpdateLoggingChannelId;
 		if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
 		{
 			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new(joiningUser, roleUpdate))]);

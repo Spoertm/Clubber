@@ -16,25 +16,28 @@ namespace Clubber.Discord.Services;
 
 public class RegistrationRequestHandler
 {
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly RegistrationTracker _registrationTracker;
 	private readonly IWebService _webService;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IDatabaseHelper _databaseHelper;
+	private readonly EmbedHelper _embedHelper;
 
 	public RegistrationRequestHandler(
-		IOptions<AppConfig> config,
+		IOptionsMonitor<BotConfig> botConfig,
 		RegistrationTracker registrationTracker,
 		IWebService webService,
 		IDiscordHelper discordHelper,
 		ClubberDiscordClient clubberDiscordClient,
-		IDatabaseHelper databaseHelper)
+		IDatabaseHelper databaseHelper,
+		EmbedHelper embedHelper)
 	{
-		_config = config.Value;
+		_botConfig = botConfig;
 		_registrationTracker = registrationTracker;
 		_webService = webService;
 		_discordHelper = discordHelper;
 		_databaseHelper = databaseHelper;
+		_embedHelper = embedHelper;
 
 		clubberDiscordClient.Ready += () =>
 		{
@@ -45,7 +48,7 @@ public class RegistrationRequestHandler
 
 	private async Task Handle(SocketMessage socketMessage)
 	{
-		if (!(socketMessage is SocketUserMessage { Source: MessageSource.User } message && message.Channel.Id == _config.RegisterChannelId))
+		if (!(socketMessage is SocketUserMessage { Source: MessageSource.User } message && message.Channel.Id == _botConfig.CurrentValue.RegisterChannelId))
 		{
 			return;
 		}
@@ -72,7 +75,7 @@ public class RegistrationRequestHandler
 			string? description;
 			if (playerInfoResponse.IsSuccess)
 			{
-				Embed fullstatsEmbed = EmbedHelper.FullStats(playerInfoResponse.Value, null, null);
+				Embed fullstatsEmbed = _embedHelper.FullStats(playerInfoResponse.Value, null, null);
 				description = fullstatsEmbed.Description;
 			}
 			else
@@ -91,7 +94,7 @@ public class RegistrationRequestHandler
 		// User specified "no score"
 		else if (message.Content.Contains("no score", StringComparison.OrdinalIgnoreCase))
 		{
-			registerEmbed = EmbedHelper.GiveUserRoleModEmbed(message.Author.Mention, _config.NoScoreRoleId);
+			registerEmbed = EmbedHelper.GiveUserRoleModEmbed(message.Author.Mention, _botConfig.CurrentValue.NoScoreRoleId);
 
 			string buttonId = $"register:{message.Author.Id}:-1:{message.Id}";
 
@@ -105,7 +108,7 @@ public class RegistrationRequestHandler
 
 		_registrationTracker.FlagUser(message.Author.Id);
 
-		SocketTextChannel modsChannel = _discordHelper.GetTextChannel(_config.ModsChannelId);
+		SocketTextChannel modsChannel = _discordHelper.GetTextChannel(_botConfig.CurrentValue.ModsChannelId);
 		await modsChannel.SendMessageAsync(embed: registerEmbed, components: cb.Build());
 
 		const string notifMessage = "ℹ️ I've notified the mods. You'll be registered soon.";

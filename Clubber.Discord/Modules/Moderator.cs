@@ -13,13 +13,15 @@ namespace Clubber.Discord.Modules;
 [RequireContext(ContextType.Guild)]
 public class Moderator : ExtendedModulebase<SocketCommandContext>
 {
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly IDiscordHelper _discordHelper;
+	private readonly EmbedHelper _embedHelper;
 
-	public Moderator(IOptions<AppConfig> config, IDiscordHelper discordHelper)
+	public Moderator(IOptionsMonitor<BotConfig> botConfig, IDiscordHelper discordHelper, EmbedHelper embedHelper)
 	{
-		_config = config.Value;
+		_botConfig = botConfig;
 		_discordHelper = discordHelper;
+		_embedHelper = embedHelper;
 	}
 
 	[Command("editnewspost")]
@@ -31,7 +33,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 			return;
 
-		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.DdNewsChannelId);
+		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_botConfig.CurrentValue.DdNewsChannelId);
 		if (await ddnewsPostChannel.GetMessageAsync(messageId) is not IUserMessage messageToEdit)
 		{
 			await InlineReplyAsync("Could not find message.");
@@ -54,7 +56,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		if (await IsError(string.IsNullOrWhiteSpace(newMessage), "Message can't be empty."))
 			return;
 
-		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_config.DdNewsChannelId);
+		SocketTextChannel ddnewsPostChannel = _discordHelper.GetTextChannel(_botConfig.CurrentValue.DdNewsChannelId);
 		IEnumerable<IMessage> messages = await ddnewsPostChannel.GetMessagesAsync(5).FlattenAsync();
 		if (messages.Where(m => m.Author.Id == Context.Client.CurrentUser.Id).MaxBy(m => m.CreatedAt) is not IUserMessage messageToEdit)
 		{
@@ -71,7 +73,7 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 	[Remarks("clear")]
 	public async Task Clear()
 	{
-		ulong registerChannelId = _config.RegisterChannelId;
+		ulong registerChannelId = _botConfig.CurrentValue.RegisterChannelId;
 		if (Context.Channel is not SocketTextChannel channel || channel.Id != registerChannelId)
 		{
 			await ReplyAsync($"This command can only be run in <#{registerChannelId}>.");
@@ -79,6 +81,6 @@ public class Moderator : ExtendedModulebase<SocketCommandContext>
 		}
 
 		await _discordHelper.ClearChannelAsync(channel);
-		await channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
+		await channel.SendMessageAsync(embeds: _embedHelper.RegisterEmbeds());
 	}
 }

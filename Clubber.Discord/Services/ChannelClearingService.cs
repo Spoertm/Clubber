@@ -9,21 +9,23 @@ namespace Clubber.Discord.Services;
 
 public class ChannelClearingService : RepeatingBackgroundService
 {
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly IDiscordHelper _discordHelper;
+	private readonly EmbedHelper _embedHelper;
 	private static readonly TimeSpan _inactivityTime = TimeSpan.FromHours(8);
 
-	public ChannelClearingService(IOptions<AppConfig> config, IDiscordHelper discordHelper)
+	public ChannelClearingService(IOptionsMonitor<BotConfig> botConfig, IDiscordHelper discordHelper, EmbedHelper embedHelper)
 	{
-		_config = config.Value;
+		_botConfig = botConfig;
 		_discordHelper = discordHelper;
+		_embedHelper = embedHelper;
 	}
 
 	protected override TimeSpan TickInterval => TimeSpan.FromHours(1);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		SocketTextChannel registerChannel = _discordHelper.GetTextChannel(_config.RegisterChannelId);
+		SocketTextChannel registerChannel = _discordHelper.GetTextChannel(_botConfig.CurrentValue.RegisterChannelId);
 
 		IOrderedEnumerable<IMessage> messages = (await registerChannel.GetMessagesAsync(10).FlattenAsync()).OrderBy(x => x.Timestamp);
 
@@ -36,7 +38,7 @@ public class ChannelClearingService : RepeatingBackgroundService
 		if (messages.FirstOrDefault() is { } msg && DateTimeOffset.Now - msg.Timestamp >= _inactivityTime)
 		{
 			await _discordHelper.ClearChannelAsync(registerChannel);
-			await registerChannel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
+			await registerChannel.SendMessageAsync(embeds: _embedHelper.RegisterEmbeds());
 		}
 	}
 }

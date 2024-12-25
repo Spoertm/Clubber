@@ -17,7 +17,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 {
 	private const int _minimumScore = 930;
 
-	private readonly AppConfig _config;
+	private readonly IOptionsMonitor<BotConfig> _botConfig;
 	private readonly IServiceScopeFactory _services;
 
 	private readonly StringBuilder _sb = new();
@@ -26,10 +26,10 @@ public class DdNewsPostService : RepeatingBackgroundService
 	private SocketTextChannel? _ddNewsChannel;
 
 	public DdNewsPostService(
-		IOptions<AppConfig> config,
+		IOptionsMonitor<BotConfig> botConfig,
 		IServiceScopeFactory services)
 	{
-		_config = config.Value;
+		_botConfig = botConfig;
 		_services = services;
 	}
 
@@ -46,7 +46,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 		IWebService webService = scope.ServiceProvider.GetRequiredService<IWebService>();
 
 		await databaseHelper.CleanUpNewsItems();
-		_ddNewsChannel ??= discordHelper.GetTextChannel(_config.DdNewsChannelId);
+		_ddNewsChannel ??= discordHelper.GetTextChannel(_botConfig.CurrentValue.DdNewsChannelId);
 		EntryResponse[] oldEntries = await dbContext.LeaderboardCache.AsNoTracking().ToArrayAsync(stoppingToken);
 		ICollection<EntryResponse> newEntries = await webService.GetSufficientLeaderboardEntries(_minimumScore);
 
@@ -126,7 +126,7 @@ public class DdNewsPostService : RepeatingBackgroundService
 		int nth)
 	{
 		string userName = newEntry.Username;
-		if (await databaseHelper.FindRegisteredUser(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId) is { } guildUser)
+		if (await databaseHelper.FindRegisteredUser(newEntry.Id) is { } dbUser && discordHelper.GetGuildUser(_botConfig.CurrentValue.DdPalsId, dbUser.DiscordId) is { } guildUser)
 		{
 			userName = guildUser.Mention;
 		}
