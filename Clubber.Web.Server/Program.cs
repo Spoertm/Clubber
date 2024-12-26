@@ -164,12 +164,12 @@ internal static class Program
 
 		builder.Services
 			.AddOptions<AppConfig>()
-			.Bind(builder.Configuration)
+			.BindConfiguration("")
 			.ValidateDataAnnotations()
 			.ValidateOnStart();
 
 		builder.Services.AddOptions<BotConfig>()
-			.Bind(builder.Configuration.GetRequiredSection("BotConfig"))
+			.BindConfiguration("BotConfig")
 			.ValidateDataAnnotations()
 			.ValidateOnStart();
 	}
