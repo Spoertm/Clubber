@@ -7,19 +7,10 @@ namespace Clubber.Domain.Configuration;
 public class AppConfig
 {
 	[Required]
-	public ConnectionStrings ConnectionStrings { get; set; }
-
-	[Required]
 	public DevilDaggersEndpoints DevilDaggersEndpoints { get; set; }
 
 	[Required]
 	public BotConfig BotConfig { get; set; }
-}
-
-public class ConnectionStrings
-{
-	[Required]
-	public string DefaultConnection { get; set; }
 }
 
 public class DevilDaggersEndpoints
