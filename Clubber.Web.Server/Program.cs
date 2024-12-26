@@ -9,6 +9,7 @@ using Clubber.Web.Server.Endpoints;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Settings.Configuration;
 using System.Globalization;
 
 namespace Clubber.Web.Server;
@@ -76,6 +77,8 @@ internal static class Program
 
 		WebApplication app = builder.Build();
 
+		app.UseSerilogRequestLogging();
+
 		await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 		{
 			ClubberContext context = scope.ServiceProvider.GetRequiredService<ClubberContext>();
@@ -130,7 +133,7 @@ internal static class Program
 		}
 		catch (Exception ex)
 		{
-			Log.Error(ex, "Caught error in main application loop");
+			Log.Fatal(ex, "Caught error in main application loop");
 		}
 		finally
 		{
@@ -141,13 +144,12 @@ internal static class Program
 
 	private static void ConfigureLogging(this WebApplicationBuilder builder)
 	{
-		builder.Logging.ClearProviders();
-
+		ConfigurationReaderOptions options = new() { SectionName = "Logging:Serilog" };
 		Log.Logger = new LoggerConfiguration()
-			.Enrich.FromLogContext()
-			.MinimumLevel.Debug()
-			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}", formatProvider: CultureInfo.InvariantCulture)
+			.ReadFrom.Configuration(builder.Configuration, options)
 			.CreateLogger();
+
+		builder.Host.UseSerilog();
 	}
 
 	private static void ConfigureConfiguration(this WebApplicationBuilder builder)
