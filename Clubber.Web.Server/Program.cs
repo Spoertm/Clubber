@@ -154,8 +154,6 @@ internal static class Program
 
 	private static void ConfigureConfiguration(this WebApplicationBuilder builder)
 	{
-		ArgumentNullException.ThrowIfNull(builder);
-
 		if (builder.Environment.EnvironmentName == "Development")
 		{
 			builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true);
