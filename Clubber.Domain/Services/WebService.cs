@@ -1,6 +1,8 @@
-﻿using Clubber.Domain.Models.Exceptions;
+﻿using Clubber.Domain.Configuration;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Runtime.Serialization;
 using System.Text;
@@ -10,15 +12,18 @@ namespace Clubber.Domain.Services;
 
 public class WebService : IWebService
 {
-	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
-	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
 	private readonly JsonSerializerOptions _serializerOptions = new()
 	{
 		PropertyNameCaseInsensitive = true,
 	};
+	private readonly IOptionsMonitor<AppConfig> _appConfig;
 	private readonly IHttpClientFactory _httpClientFactory;
 
-	public WebService(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
+	public WebService(IOptionsMonitor<AppConfig> appConfig, IHttpClientFactory httpClientFactory)
+	{
+		_appConfig = appConfig;
+		_httpClientFactory = httpClientFactory;
+	}
 
 	public async Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
 	{
@@ -29,9 +34,11 @@ public class WebService : IWebService
 				new("uid", string.Join(',', ids)),
 			];
 
+			Uri getMultipleUsersByIdUri = new(_appConfig.CurrentValue.DevilDaggersEndpoints.GetMultipleUsersById);
+
 			using FormUrlEncodedContent content = new(postValues);
 			using HttpClient client = _httpClientFactory.CreateClient();
-			using HttpResponseMessage response = await client.PostAsync(_getMultipleUsersByIdUri, content);
+			using HttpResponseMessage response = await client.PostAsync(getMultipleUsersByIdUri, content);
 			byte[] data = await response.Content.ReadAsByteArrayAsync();
 
 			int bytePosition = 19;
@@ -109,9 +116,11 @@ public class WebService : IWebService
 	// Credit goes to Noah Stolk https://github.com/NoahStolk
 	private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 	{
+		Uri getScoresUri = new(_appConfig.CurrentValue.DevilDaggersEndpoints.GetScores);
+
 		using FormUrlEncodedContent content = new([new("offset", (rankStart - 1).ToString())]);
 		using HttpClient client = _httpClientFactory.CreateClient();
-		using HttpResponseMessage response = await client.PostAsync(_getScoresUri, content);
+		using HttpResponseMessage response = await client.PostAsync(getScoresUri, content);
 
 		MemoryStream ms = new();
 		await response.Content.CopyToAsync(ms);
