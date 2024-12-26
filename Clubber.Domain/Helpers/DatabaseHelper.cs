@@ -96,7 +96,15 @@ public class DatabaseHelper : IDatabaseHelper
 
 	public async Task AddDdNewsItem(EntryResponse oldEntry, EntryResponse newEntry, int nth)
 	{
-		DdNewsItem newItem = new(oldEntry.Id, oldEntry, newEntry, DateTime.UtcNow, nth);
+		DdNewsItem newItem = new()
+		{
+			LeaderboardId = oldEntry.Id,
+			OldEntry = oldEntry,
+			NewEntry = newEntry,
+			TimeOfOccurenceUtc = DateTime.UtcNow,
+			Nth = nth,
+		};
+
 		await _dbContext.DdNews.AddAsync(newItem);
 		await _dbContext.SaveChangesAsync();
 	}
