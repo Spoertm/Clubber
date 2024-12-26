@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Clubber.Domain.Database.Migrations
 {
     [DbContext(typeof(ClubberContext))]
-    [Migration("20241225213813_Initial")]
+    [Migration("20241226121618_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
