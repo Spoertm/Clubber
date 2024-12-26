@@ -120,7 +120,6 @@ internal static class Program
 			app.Services.GetRequiredService<RegistrationRequestHandler>();
 		}
 
-		app.Services.GetRequiredService<ConfigurationManager>();
 		app.Services.GetRequiredService<MessageHandlerService>();
 		app.Services.GetRequiredService<InteractionHandler>();
 
