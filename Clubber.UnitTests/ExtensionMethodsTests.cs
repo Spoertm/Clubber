@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Clubber.UnitTests;
 
-public class ExtentionMethodsTests
+public class ExtensionMethodsTests
 {
 	[Theory]
 	[InlineData(1, "st")]
