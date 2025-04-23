@@ -19,7 +19,7 @@ public class UserService
 
 	public async Task<Result> IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
-		Result result = IsBotOrCheater(guildUser, userUsedCommandForThemselves);
+		Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
 		if (result.IsFailure)
 		{
 			return Result.Failure(result.ErrorMsg);
@@ -35,7 +35,7 @@ public class UserService
 
 	public async Task<Result> IsValid(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
-		Result result = IsBotOrCheater(guildUser, userUsedCommandForThemselves);
+		Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
 		if (result.IsFailure)
 		{
 			return Result.Failure(result.ErrorMsg);
@@ -65,7 +65,7 @@ public class UserService
 		return Result.Failure(message);
 	}
 
-	public Result IsBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
+	public Result IsNotBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
 		if (guildUser.IsBot)
 		{

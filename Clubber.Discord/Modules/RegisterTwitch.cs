@@ -53,7 +53,7 @@ public class RegisterTwitch : ExtendedModulebase<SocketCommandContext>
 
 	private async Task CheckUserAndRegisterTwitch(IGuildUser user, string twitchUsername, bool selfCommand = false)
 	{
-		Result result = _userService.IsBotOrCheater(user, selfCommand);
+		Result result = _userService.IsNotBotOrCheater(user, selfCommand);
 		if (result.IsFailure)
 		{
 			await InlineReplyAsync(result.ErrorMsg);
