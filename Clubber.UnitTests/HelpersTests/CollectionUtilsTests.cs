@@ -18,8 +18,8 @@ public class CollectionUtilsTests
 	private const ulong _top10RoleId = 556255819323277312;
 	private const ulong _uselessRole1 = 111;
 	private const ulong _uselessRole2 = 222;
-	private static readonly IReadOnlyList<ulong> _allPossibleRoles = new[]
-	{
+	private static readonly IReadOnlyList<ulong> _allPossibleRoles =
+	[
 		_topScoreRoleId,
 		_sub100RoleId,
 		_100RoleId,
@@ -31,7 +31,7 @@ public class CollectionUtilsTests
 		_top10RoleId,
 		_uselessRole1,
 		_uselessRole2,
-	};
+	];
 
 	[Theory]
 	[MemberData(nameof(DetermineRoleChangesTestData))]

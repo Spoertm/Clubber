@@ -64,7 +64,7 @@ public class UserServiceTests
 		// Normal user (neither bot nor has cheaterRoleId)
 		Mock<IGuildUser> guildUser = new();
 		guildUser.SetupGet(user => user.IsBot).Returns(false);
-		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
+		guildUser.SetupGet(user => user.RoleIds).Returns([]);
 
 		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
@@ -78,7 +78,7 @@ public class UserServiceTests
 		Mock<IGuildUser> guildUser = new();
 		guildUser.SetupGet(user => user.IsBot).Returns(false);
 		guildUser.SetupGet(user => user.Id).Returns(0);
-		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
+		guildUser.SetupGet(user => user.RoleIds).Returns([]);
 
 		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
@@ -92,7 +92,7 @@ public class UserServiceTests
 		Mock<IGuildUser> guildUser = new();
 		guildUser.SetupGet(user => user.IsBot).Returns(false);
 		guildUser.SetupGet(user => user.Id).Returns(0);
-		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
+		guildUser.SetupGet(user => user.RoleIds).Returns([]);
 
 		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
 		Result isValid = await _sut.IsValid(guildUser.Object, true);
@@ -106,7 +106,7 @@ public class UserServiceTests
 		Mock<IGuildUser> guildUser = new();
 		guildUser.SetupGet(user => user.IsBot).Returns(false);
 		guildUser.SetupGet(user => user.Id).Returns(0);
-		guildUser.SetupGet(user => user.RoleIds).Returns(Array.Empty<ulong>());
+		guildUser.SetupGet(user => user.RoleIds).Returns([]);
 
 		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
 		Result isValid = await _sut.IsValid(guildUser.Object, true);
