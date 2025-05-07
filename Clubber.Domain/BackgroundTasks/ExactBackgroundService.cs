@@ -24,11 +24,11 @@ public abstract class ExactBackgroundService : BackgroundService
 			}
 			catch (Exception exception)
 			{
-				Log.Error(exception, "Caught exception in {ClassName}", nameof(RepeatingBackgroundService));
+				Log.Error(exception, "Caught exception in {ClassName}", nameof(ExactBackgroundService));
 			}
 		}
 
-		Log.Warning("{ClassName} => service cancelled", nameof(RepeatingBackgroundService));
+		Log.Warning("{ClassName} => service cancelled", nameof(ExactBackgroundService));
 	}
 
 	private async Task ExecuteIfOnTimeAsync(CancellationToken stoppingToken)
