@@ -335,7 +335,7 @@
 				<div class="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100 transition-colors duration-300"
 				     id="live-news">Loading...
 				</div>
-				<div class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Recent Records</div>
+				<div class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Recent Records (24h)</div>
 			</div>
 
 			<div
@@ -479,8 +479,8 @@
 		try {
 			const usersResponse = await fetch('/user-count');
 			const userCountText = await usersResponse.text();
-			const numberOfUsers = parseInt(userCountText);
-			animateCounter('live-users', numberOfUsers);
+			console.log('User count:', userCountText);
+			animateCounter('live-users', userCountText);
 
 			const newsResponse = await fetch('/dailynews');
 			const news = await newsResponse.json();
@@ -495,7 +495,7 @@
 		} catch (error) {
 			console.error('Error loading stats:', error);
 			animateCounter('live-users', 900, '+');
-			animateCounter('live-news', 25, '+');
+			animateCounter('live-news', 0);
 			animateCounter('live-splits', 14);
 			animateCounter('live-peaks', 15, '+');
 		}
