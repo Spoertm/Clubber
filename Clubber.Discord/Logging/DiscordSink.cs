@@ -34,7 +34,7 @@ public sealed class DiscordSink : ILogEventSink
 		}
 		catch (Exception ex)
 		{
-			// Last resort fallback if logging itself fails - this still uses an embed
+			// The last resort fallback if logging itself fails - this still uses an embed
 			try
 			{
 				EmbedBuilder errorEmbed = new();
@@ -60,7 +60,7 @@ public sealed class DiscordSink : ILogEventSink
 		EmbedBuilder embedBuilder = new();
 		string logMessage = logEvent.RenderMessage();
 
-		// Set embed properties based on log level
+		// Set embed properties based on the log level
 		SpecifyEmbedLevel(logEvent.Level, logMessage, embedBuilder);
 
 		// Add timestamp
@@ -118,7 +118,7 @@ public sealed class DiscordSink : ILogEventSink
 		// Add the full exception message
 		descriptionBuilder.AppendLine($"**Message:** {exception.Message}");
 
-		// Add stack trace in code block
+		// Add stack trace in the code block
 		if (exception.StackTrace != null)
 		{
 			descriptionBuilder.AppendLine("**Stack Trace:**");
@@ -167,7 +167,7 @@ public sealed class DiscordSink : ILogEventSink
 			}
 			else
 			{
-				// For deeper exceptions, just show type and message
+				// For deeper exceptions, show type and message
 				embedBuilder.AddField(fieldTitle,
 					$"{currentEx.GetType().Name}: {currentEx.Message}".Truncate(EmbedFieldBuilder.MaxFieldValueLength));
 			}
@@ -206,7 +206,7 @@ public sealed class DiscordSink : ILogEventSink
 		string title = exception.Message;
 		embedBuilder.WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength));
 
-		// Add exception type as a field
+		// Add the exception type as a field
 		string exceptionType = exception.GetType().FullName ?? "Unknown Exception Type";
 		embedBuilder.AddField("Type:", exceptionType.Truncate(EmbedFieldBuilder.MaxFieldValueLength), true);
 
@@ -247,18 +247,18 @@ public sealed class DiscordSink : ILogEventSink
 	}
 
 	/// <summary>
-	/// Configures the embed appearance based on log level
+	/// Configures the embed appearance based on the log level
 	/// </summary>
 	private static void SpecifyEmbedLevel(LogEventLevel level, string message, EmbedBuilder embedBuilder)
 	{
 		(embedBuilder.Color, embedBuilder.Description, string title) = level switch
 		{
-			LogEventLevel.Fatal   => (Color.DarkRed, string.Empty, "💥 FATAL ERROR"),
-			LogEventLevel.Error   => (Color.Red, string.Empty, "❌ ERROR"),
+			LogEventLevel.Fatal => (Color.DarkRed, string.Empty, "💥 FATAL ERROR"),
+			LogEventLevel.Error => (Color.Red, string.Empty, "❌ ERROR"),
 			LogEventLevel.Warning => (Color.Gold, message, "⚠️ WARNING"),
-			LogEventLevel.Debug   => (Color.Purple, message, "🔍 DEBUG"),
+			LogEventLevel.Debug => (Color.Purple, message, "🔍 DEBUG"),
 			LogEventLevel.Verbose => (Color.LightGrey, message, "📝 VERBOSE"),
-			_                     => (Color.Blue, message, "ℹ️ INFO"),
+			_ => (Color.Blue, message, "ℹ️ INFO"),
 		};
 
 		// Only set the title if we don't have an exception (which will set its own title)
