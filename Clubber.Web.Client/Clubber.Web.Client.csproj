@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>wwwroot\ClubberWhite.ico</ApplicationIcon>
-    <LangVersion>12</LangVersion>
+    <LangVersion>13</LangVersion>
     <AnalysisMode>All</AnalysisMode>
   </PropertyGroup>
 
