@@ -5,22 +5,23 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>12</LangVersion>
+    <InvariantGlobalization>true</InvariantGlobalization>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <AnalysisMode>All</AnalysisMode>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Clubber.Discord\Clubber.Discord.csproj" />
-    <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj" />
-    <ProjectReference Include="..\Clubber.Web.Client\Clubber.Web.Client.csproj" />
+    <ProjectReference Include="..\Clubber.Discord\Clubber.Discord.csproj"/>
+    <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj"/>
+    <ProjectReference Include="..\Clubber.Web.Client\Clubber.Web.Client.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.15" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.15"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.1"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.1"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1"/>
   </ItemGroup>
 
   <ItemGroup>

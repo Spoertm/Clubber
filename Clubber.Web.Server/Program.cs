@@ -22,7 +22,6 @@ internal static class Program
 {
 	public static async Task Main(string[] args)
 	{
-		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson([typeof(EntryResponse), typeof(GameInfo)]);
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
