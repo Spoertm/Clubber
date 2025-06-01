@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Clubber.UnitTests.ServicesTests;
 
-public class ScoreRoleServiceTests
+public sealed class ScoreRoleServiceTests
 {
 	[Theory]
 	[MemberData(nameof(GetScoreRoleToKeepTestData))]

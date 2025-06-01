@@ -4,7 +4,7 @@ using Discord.Commands;
 namespace Clubber.Discord.Models;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class RequireAdminOrRoleAttribute : PreconditionAttribute
+public sealed class RequireAdminOrRoleAttribute : PreconditionAttribute
 {
 	private readonly ulong _requiredRoleId;
 

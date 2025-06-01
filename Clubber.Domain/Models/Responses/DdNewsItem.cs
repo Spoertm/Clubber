@@ -1,6 +1,6 @@
 ﻿namespace Clubber.Domain.Models.Responses;
 
-public record DdNewsItem(
+public sealed record DdNewsItem(
 	int LeaderboardId,
 	EntryResponse OldEntry,
 	EntryResponse NewEntry,

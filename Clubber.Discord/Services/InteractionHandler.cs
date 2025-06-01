@@ -13,7 +13,7 @@ using Serilog;
 
 namespace Clubber.Discord.Services;
 
-public class InteractionHandler
+public sealed class InteractionHandler
 {
 	private readonly AppConfig _config;
 	private readonly UserService _userService;

@@ -8,7 +8,7 @@ using Serilog;
 
 namespace Clubber.Domain.Helpers;
 
-public class DatabaseHelper : IDatabaseHelper
+public sealed class DatabaseHelper : IDatabaseHelper
 {
 	private readonly DbService _dbContext;
 

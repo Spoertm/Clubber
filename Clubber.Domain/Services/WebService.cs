@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace Clubber.Domain.Services;
 
-public class WebService : IWebService
+public sealed class WebService : IWebService
 {
 	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
 	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");

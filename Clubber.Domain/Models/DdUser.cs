@@ -1,6 +1,6 @@
 ﻿namespace Clubber.Domain.Models;
 
-public record DdUser
+public sealed record DdUser
 {
 	public DdUser(ulong DiscordId, int LeaderboardId, string? TwitchUsername = null)
 	{

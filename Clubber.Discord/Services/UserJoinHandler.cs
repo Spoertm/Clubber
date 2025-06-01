@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Services;
 
-public class UserJoinHandler
+public sealed class UserJoinHandler
 {
 	private readonly IServiceScopeFactory _services;
 	private readonly AppConfig _config;

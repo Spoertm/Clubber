@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Services;
 
-public class MessageHandlerService
+public sealed class MessageHandlerService
 {
 	private readonly AppConfig _config;
 	private readonly ClubberDiscordClient _client;

@@ -27,9 +27,9 @@ public class Result
 	public static Result<T> Success<T>(T value) => new(value, true, string.Empty);
 }
 
-public class Result<T> : Result
+public sealed class Result<T> : Result
 {
-	protected internal Result(T value, bool isSuccess, string errorMsg)
+	internal Result(T value, bool isSuccess, string errorMsg)
 		: base(isSuccess, errorMsg)
 	{
 		Value = value;

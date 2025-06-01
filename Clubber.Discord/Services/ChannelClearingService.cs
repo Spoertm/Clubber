@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Services;
 
-public class ChannelClearingService : RepeatingBackgroundService
+public sealed class ChannelClearingService : RepeatingBackgroundService
 {
 	private readonly AppConfig _config;
 	private readonly IDiscordHelper _discordHelper;

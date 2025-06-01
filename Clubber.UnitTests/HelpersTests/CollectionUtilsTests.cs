@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Clubber.UnitTests.HelpersTests;
 
-public class CollectionUtilsTests
+public sealed class CollectionUtilsTests
 {
 	private static readonly ulong _topScoreRoleId = AppConfig.ScoreRoles.MaxBy(s => s.Key).Value;
 	private const ulong _sub100RoleId = 461203024128376832;

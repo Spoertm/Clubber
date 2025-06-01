@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Clubber.UnitTests.ServicesTests;
 
-public class UserServiceTests
+public sealed class UserServiceTests
 {
 	private readonly UserService _sut;
 	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();

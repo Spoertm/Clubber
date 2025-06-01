@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Clubber.Discord.Services;
 
-public class DdNewsPostService : RepeatingBackgroundService
+public sealed class DdNewsPostService : RepeatingBackgroundService
 {
 	private const int _minimumScore = 930;
 

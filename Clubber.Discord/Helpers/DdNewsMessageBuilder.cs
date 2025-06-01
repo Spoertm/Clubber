@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Clubber.Discord.Helpers;
 
-public class DdNewsMessageBuilder
+public sealed class DdNewsMessageBuilder
 {
 	private readonly StringBuilder _sb = new();
 

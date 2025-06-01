@@ -2,7 +2,7 @@
 
 namespace Clubber.Domain.Models.DdSplits;
 
-public class Split
+public sealed class Split
 {
 	public Split(string name, int time, int value)
 	{

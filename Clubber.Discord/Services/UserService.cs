@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Services;
 
-public class UserService
+public sealed class UserService
 {
 	private readonly AppConfig _config;
 	private readonly IDatabaseHelper _databaseHelper;

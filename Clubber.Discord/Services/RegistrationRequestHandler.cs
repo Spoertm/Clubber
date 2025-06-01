@@ -14,7 +14,7 @@ using System.Runtime.Serialization;
 
 namespace Clubber.Discord.Services;
 
-public class RegistrationRequestHandler
+public sealed class RegistrationRequestHandler
 {
 	private readonly AppConfig _config;
 	private readonly RegistrationTracker _registrationTracker;

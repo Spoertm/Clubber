@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace Clubber.Discord.Services;
 
-public class DatabaseUpdateService : ExactBackgroundService
+public sealed class DatabaseUpdateService : ExactBackgroundService
 {
 	private readonly AppConfig _config;
 	private readonly IServiceScopeFactory _services;

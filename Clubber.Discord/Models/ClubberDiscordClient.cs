@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Clubber.Discord.Models;
 
-public class ClubberDiscordClient : DiscordSocketClient
+public sealed class ClubberDiscordClient : DiscordSocketClient
 {
 	private readonly AppConfig _config;
 	private readonly CommandService _commands;

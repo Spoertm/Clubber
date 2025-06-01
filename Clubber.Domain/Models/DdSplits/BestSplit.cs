@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Clubber.Domain.Models.DdSplits;
 
-public class BestSplit
+public sealed class BestSplit
 {
 	[Key]
 	public string Name { get; set; } = null!;

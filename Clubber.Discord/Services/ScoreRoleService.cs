@@ -12,7 +12,7 @@ using System.Runtime.Serialization;
 
 namespace Clubber.Discord.Services;
 
-public class ScoreRoleService
+public sealed class ScoreRoleService
 {
 	private readonly IDatabaseHelper _databaseHelper;
 	private readonly IWebService _webService;

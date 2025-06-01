@@ -26,7 +26,7 @@ public abstract class RoleChangeResult
 	}
 }
 
-public class RoleUpdate : RoleChangeResult
+public sealed class RoleUpdate : RoleChangeResult
 {
 	private RoleUpdate(IReadOnlyCollection<ulong> rolesToAdd, IReadOnlyCollection<ulong> rolesToRemove)
 	{

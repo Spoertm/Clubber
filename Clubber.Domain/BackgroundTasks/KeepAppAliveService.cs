@@ -2,7 +2,7 @@ using Serilog;
 
 namespace Clubber.Domain.BackgroundTasks;
 
-public class KeepAppAliveService : RepeatingBackgroundService
+public sealed class KeepAppAliveService : RepeatingBackgroundService
 {
 	private readonly IHttpClientFactory _httpClientFactory;
 

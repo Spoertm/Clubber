@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Clubber.Discord.Logging;
 
-public class DiscordSink : ILogEventSink
+public sealed class DiscordSink : ILogEventSink
 {
 	private readonly LogEventLevel _minimumLogLevel;
 	private readonly DiscordWebhookClient _webHook;

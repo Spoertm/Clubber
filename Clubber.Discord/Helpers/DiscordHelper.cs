@@ -7,7 +7,7 @@ using Serilog;
 
 namespace Clubber.Discord.Helpers;
 
-public class DiscordHelper : IDiscordHelper
+public sealed class DiscordHelper : IDiscordHelper
 {
 	private readonly ClubberDiscordClient _client;
 

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Clubber.Domain.Configuration;
 
-public class AppConfig
+public sealed class AppConfig
 {
 	private static readonly Dictionary<int, ulong> _scoreRoles = new()
 	{
