@@ -106,6 +106,6 @@ public class Stats : ExtendedModulebase<SocketCommandContext>
 			embed: statsEmbed,
 			components: components,
 			allowedMentions: AllowedMentions.None,
-			messageReference: new(Context.Message.Id));
+			messageReference: new MessageReference(Context.Message.Id));
 	}
 }

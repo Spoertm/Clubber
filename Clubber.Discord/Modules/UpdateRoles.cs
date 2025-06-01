@@ -56,7 +56,7 @@ public class UpdateRoles : ExtendedModulebase<SocketCommandContext>
 				await user.RemoveRolesAsync(roleUpdate.RolesToRemove);
 			}
 
-			await ReplyAsync(embed: EmbedHelper.UpdateRoles(new(user, roleUpdate)), allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+			await ReplyAsync(embed: EmbedHelper.UpdateRoles(new UserRoleUpdate(user, roleUpdate)), allowedMentions: AllowedMentions.None, messageReference: new MessageReference(Context.Message.Id));
 		}
 		else if (roleChangeResult.Value is RoleChangeResult.None noChangeResponse)
 		{

@@ -69,7 +69,7 @@ public class UserJoinHandler
 		ulong logChannelId = _config.DailyUpdateLoggingChannelId;
 		if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
 		{
-			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new(joiningUser, roleUpdate))]);
+			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new UserRoleUpdate(joiningUser, roleUpdate))]);
 		}
 	}
 }

@@ -11,6 +11,7 @@ using Clubber.Web.Server.Configuration;
 using Clubber.Web.Server.Endpoints;
 using Discord.Commands;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
 using System.Globalization;
@@ -22,9 +23,7 @@ internal static class Program
 	public static async Task Main(string[] args)
 	{
 		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-#pragma warning disable CS0618 // Type or member is obsolete
 		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson([typeof(EntryResponse), typeof(GameInfo)]);
-#pragma warning restore CS0618 // Type or member is obsolete
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +34,7 @@ internal static class Program
 
 		Log.Information("Starting");
 
-		CommandService commands = new(new()
+		CommandService commands = new(new CommandServiceConfig
 		{
 			IgnoreExtraArgs = true,
 			DefaultRunMode = RunMode.Async,
@@ -73,14 +72,14 @@ internal static class Program
 		builder.Services.AddSwaggerGen(options =>
 		{
 			options.EnableAnnotations();
-			options.SwaggerDoc("Main", new()
+			options.SwaggerDoc("Main", new OpenApiInfo
 			{
 				Version = "Main",
 				Title = "Clubber API",
 				Description = """
-							This is an API for getting information regarding registered users in the DD Pals Discord server.
-							Additional information regarding the best Devil Daggers splits and new 1000+ scores can also be obtained.
-							""",
+				              This is an API for getting information regarding registered users in the DD Pals Discord server.
+				              Additional information regarding the best Devil Daggers splits and new 1000+ scores can also be obtained.
+				              """,
 			});
 		});
 
@@ -150,7 +149,8 @@ internal static class Program
 		Log.Logger = new LoggerConfiguration()
 			.Enrich.FromLogContext()
 			.MinimumLevel.Information()
-			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}", formatProvider: CultureInfo.InvariantCulture)
+			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}",
+				formatProvider: CultureInfo.InvariantCulture)
 			.WriteTo.Discord(config.ClubberLoggerId, config.ClubberLoggerToken)
 			.CreateLogger();
 	}

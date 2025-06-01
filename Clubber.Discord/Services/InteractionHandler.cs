@@ -183,7 +183,7 @@ public class InteractionHandler
 
 		Embed fullStatsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
 		await component.ClearMessageComponents();
-		await component.Message.ModifyAsync(m => m.Embeds = new([fullStatsEmbed]));
+		await component.Message.ModifyAsync(m => m.Embeds = new Optional<Embed[]>([fullStatsEmbed]));
 	}
 
 	private record struct RegistrationContext(ulong UserId, int LeaderboardId, ulong RegisterMessageId)

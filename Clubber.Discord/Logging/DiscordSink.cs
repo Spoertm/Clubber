@@ -18,7 +18,7 @@ public class DiscordSink : ILogEventSink
 
 	public DiscordSink(ulong webhookId, string webhookToken, LogEventLevel minimumLogLevel)
 	{
-		_webHook = new(webhookId, webhookToken);
+		_webHook = new DiscordWebhookClient(webhookId, webhookToken);
 		_minimumLogLevel = minimumLogLevel;
 	}
 

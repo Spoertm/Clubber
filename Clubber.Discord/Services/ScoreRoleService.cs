@@ -53,11 +53,11 @@ public class ScoreRoleService
 			RoleChangeResult roleChangeResult = GetRoleChange(guildUser.RoleIds, lbPlayer);
 			if (roleChangeResult is RoleUpdate roleUpdate)
 			{
-				roleUpdates.Add(new(guildUser, roleUpdate));
+				roleUpdates.Add(new UserRoleUpdate(guildUser, roleUpdate));
 			}
 		}
 
-		return new(dbUsers.Count - registeredUsers.Length, roleUpdates);
+		return new BulkUserRoleUpdates(dbUsers.Count - registeredUsers.Length, roleUpdates);
 	}
 
 	public async Task<Result<RoleChangeResult>> GetRoleChange(IGuildUser user)

@@ -102,7 +102,7 @@ public class SplitsModule : ExtendedModulebase<SocketCommandContext>
 		}
 
 		Embed updatedRolesEmbed = EmbedHelper.UpdatedSplits(response.OldBestSplits, response.UpdatedBestSplits);
-		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: new(Context.Message.Id));
+		await ReplyAsync(embed: updatedRolesEmbed, allowedMentions: AllowedMentions.None, messageReference: new MessageReference(Context.Message.Id));
 	}
 
 	private async Task<DdStatsFullRunResponse?> GetDdstatsResponse(Uri uri)

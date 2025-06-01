@@ -21,7 +21,7 @@ public static class ConfigurationSetup
 		}
 		else
 		{
-			string configJson = Environment.GetEnvironmentVariable("Configuration") ?? throw new("Configuration environment variable not set");
+			string configJson = Environment.GetEnvironmentVariable("Configuration") ?? throw new Exception("Configuration environment variable not set");
 
 			using MemoryStream stream = new(Encoding.UTF8.GetBytes(configJson));
 			builder.Configuration.AddJsonStream(stream);

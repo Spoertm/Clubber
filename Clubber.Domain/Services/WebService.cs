@@ -38,7 +38,7 @@ public class WebService : IWebService
 			List<EntryResponse> users = [];
 			while (bytePosition < data.Length)
 			{
-				users.Add(new()
+				users.Add(new EntryResponse
 				{
 					Username = GetUserName(data, ref bytePosition),
 					Rank = BitConverter.ToInt32(data, bytePosition),
@@ -109,7 +109,7 @@ public class WebService : IWebService
 	// Credit goes to Noah Stolk https://github.com/NoahStolk
 	private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 	{
-		using FormUrlEncodedContent content = new([new("offset", (rankStart - 1).ToString())]);
+		using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("offset", (rankStart - 1).ToString())]);
 		using HttpClient client = _httpClientFactory.CreateClient();
 		using HttpResponseMessage response = await client.PostAsync(_getScoresUri, content);
 

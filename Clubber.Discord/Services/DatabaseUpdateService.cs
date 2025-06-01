@@ -31,7 +31,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 
-		SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId) ?? throw new("DD Pals server not found with the provided ID.");
+		SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId) ?? throw new Exception("DD Pals server not found with the provided ID.");
 		SocketTextChannel dailyUpdateLoggingChannel = discordHelper.GetTextChannel(_config.DailyUpdateLoggingChannelId);
 		IUserMessage msg = await dailyUpdateLoggingChannel.SendMessageAsync("Checking for role updates...");
 
