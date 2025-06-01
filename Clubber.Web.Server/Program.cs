@@ -28,8 +28,9 @@ internal static class Program
 
 		builder.ConfigureConfiguration();
 
-		AppConfig appConfig = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<AppConfig>>().Value;
-		builder.ConfigureLogging(appConfig);
+		ulong clubberLoggerId = builder.Configuration.GetValue<ulong>("ClubberLoggerId");
+		string clubberLoggerToken = builder.Configuration.GetValue<string>("ClubberLoggerToken")!;
+		builder.ConfigureLogging(clubberLoggerId, clubberLoggerToken);
 
 		Log.Information("Starting");
 
@@ -141,7 +142,7 @@ internal static class Program
 		}
 	}
 
-	private static void ConfigureLogging(this WebApplicationBuilder builder, AppConfig config)
+	private static void ConfigureLogging(this WebApplicationBuilder builder, ulong clubberLoggerId, string clubberLoggerToken)
 	{
 		builder.Logging.ClearProviders();
 
@@ -150,7 +151,7 @@ internal static class Program
 			.MinimumLevel.Information()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}",
 				formatProvider: CultureInfo.InvariantCulture)
-			.WriteTo.Discord(config.ClubberLoggerId, config.ClubberLoggerToken)
+			.WriteTo.Discord(clubberLoggerId, clubberLoggerToken)
 			.CreateLogger();
 	}
 }
