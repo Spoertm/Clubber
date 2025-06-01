@@ -99,7 +99,11 @@
 		<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 			<div>
 				<div class="flex items-center space-x-3 mb-4">
-					<img src="~/images/ClubberWhite.ico" alt="Clubber" class="w-8 h-8">
+					<!-- Light mode image -->
+					<img src="~/images/Clubber.svg" alt="Clubber" class="w-8 h-8 dark:hidden">
+
+					<!-- Dark mode image -->
+					<img src="~/images/ClubberWhite.ico" alt="Clubber" class="w-8 h-8 hidden dark:inline">
 					<span class="text-lg font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">Clubber</span>
 				</div>
 				<p class="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">
