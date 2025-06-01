@@ -22,6 +22,8 @@ internal static class Program
 {
 	public static async Task Main(string[] args)
 	{
+		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+		CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 #pragma warning disable CS0618 // Type or member is obsolete
 		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson([typeof(EntryResponse), typeof(GameInfo)]);
 #pragma warning restore CS0618 // Type or member is obsolete
