@@ -4,7 +4,6 @@ module.exports = {
 		'./Views/**/*.cshtml',
 		'./wwwroot/js/**/*.js'
 	],
-	darkMode: 'class',
 	theme: {
 		extend: {
 			fontFamily: {

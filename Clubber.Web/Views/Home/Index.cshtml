@@ -1,482 +1,477 @@
 ﻿@{
-    ViewData["Title"] = "Home";
+	ViewData["Title"] = "Home";
 }
 
-<!-- Hero Section -->
 <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Background -->
-    <div class="absolute inset-0 hero-gradient"></div>
-    <!-- Optional overlay for better text readability -->
-    <div class="absolute inset-0 bg-black/10"></div>
-    
-    <!-- Content -->
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="animate-slide-up">
-            <div class="mb-12">
-                <div class="w-24 h-24 mx-auto mb-8">
-                    <img src="~/images/ClubberWhite.ico" alt="Clubber Logo" class="w-full h-full animate-pulse-soft">
-                </div>
-                <h1 class="text-5xl md:text-7xl font-bold text-white mb-6">
-                    Clubber
-                </h1>
-                <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-4xl mx-auto leading-relaxed">
-                    The most advanced Discord bot for the <span class="text-white font-semibold">Devil Daggers</span> community. 
-                    Automated role management, real-time statistics, and live leaderboard updates.
-                </p>
-            </div>
-            
-            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-                <!-- Fixed Discord button with proper contrast -->
-                <a href="https://discord.gg/jMRumVerj2" target="_blank" 
-                   class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <i class="fab fa-discord mr-3 text-xl"></i>
-                    Join DD Pals
-                </a>
-                <a href="https://ko-fi.com/chupacabra4129" target="_blank" 
-                   class="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-5 h-5 mr-3 inline">
-                    Support Development
-                </a>
-                <a href="#features" 
-                   class="px-8 py-4 glass-effect text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white/20">
-                    <i class="fas fa-arrow-down mr-3"></i>
-                    Explore Features
-                </a>
-            </div>
-            
-            <!-- Stats Preview with proper glass effect -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                <div class="glass-effect rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
-                    <div class="text-4xl font-bold text-white mb-3">1,200+</div>
-                    <div class="text-blue-100 text-lg">Registered Users</div>
-                    <div class="text-blue-200 text-sm mt-2">Active community members</div>
-                </div>
-                <div class="glass-effect rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
-                    <div class="text-4xl font-bold text-white mb-3">50+</div>
-                    <div class="text-blue-100 text-lg">Daily Updates</div>
-                    <div class="text-blue-200 text-sm mt-2">Automatic role syncing</div>
-                </div>
-                <div class="glass-effect rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
-                    <div class="text-4xl font-bold text-white mb-3">99.9%</div>
-                    <div class="text-blue-100 text-lg">Uptime</div>
-                    <div class="text-blue-200 text-sm mt-2">Reliable service</div>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="absolute inset-0 bg-[linear-gradient(135deg,_#1e40af_0%,_#3b82f6_50%,_#60a5fa_100%)]"></div>
+	<div class="absolute inset-0 bg-black/10"></div>
+
+	<div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+		<div class="animate-slide-up">
+			<div class="mb-12">
+				<div class="w-24 h-24 mx-auto mb-8">
+					<img src="~/images/ClubberWhite.ico" alt="Clubber Logo" class="w-full h-full animate-pulse">
+				</div>
+				<h1 class="text-5xl md:text-7xl font-bold text-white mb-6">
+					Clubber
+				</h1>
+				<p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-4xl mx-auto leading-relaxed">
+					The most advanced Discord bot for the <span class="text-white font-semibold">Devil Daggers</span>
+					community.
+					Automated role management, real-time statistics, and live leaderboard updates.
+				</p>
+			</div>
+
+			<div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+				<a href="https://discord.gg/jMRumVerj2" target="_blank"
+				   class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+					Join DD Pals
+				</a>
+				<a href="https://ko-fi.com/chupacabra4129" target="_blank"
+				   class="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+					<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-7 h-7 mr-3 inline">
+					Support Development
+				</a>
+				<a href="#features"
+				   class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white/20">
+					Explore Features
+				</a>
+			</div>
+
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+				<div
+					class="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
+					<div class="text-4xl font-bold text-white mb-3">1,200+</div>
+					<div class="text-blue-100 text-lg">Registered Users</div>
+					<div class="text-blue-200 text-sm mt-2">Active community members</div>
+				</div>
+				<div
+					class="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
+					<div class="text-4xl font-bold text-white mb-3">50+</div>
+					<div class="text-blue-100 text-lg">Daily Updates</div>
+					<div class="text-blue-200 text-sm mt-2">Automatic role syncing</div>
+				</div>
+				<div
+					class="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
+					<div class="text-4xl font-bold text-white mb-3">99.9%</div>
+					<div class="text-blue-100 text-lg">Uptime</div>
+					<div class="text-blue-200 text-sm mt-2">Reliable service</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
 
-<!-- Features Section (keep existing) -->
-<section id="features" class="py-20 bg-gray-50 dark:bg-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">
-                <i class="fas fa-star mr-3 text-primary-600"></i>
-                Powerful Features
-            </h2>
-            <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                Everything you need to manage your Devil Daggers community
-            </p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Role Management -->
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg card-hover border border-gray-200 dark:border-gray-700">
-                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-users-cog text-primary-600 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Auto Role Management</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    Automatically assigns Discord roles based on Devil Daggers scores. From newcomer to world record holder.
-                </p>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Score-based roles</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Rank-based roles</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Daily updates</li>
-                </ul>
-            </div>
-            
-            <!-- Live Statistics -->
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg card-hover border border-gray-200 dark:border-gray-700">
-                <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-chart-line text-green-600 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Live Statistics</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    Real-time player statistics including scores, ranks, accuracy, and historical data.
-                </p>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Real-time data</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Score tracking</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Performance metrics</li>
-                </ul>
-            </div>
-            
-            <!-- DD News -->
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg card-hover border border-gray-200 dark:border-gray-700">
-                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-newspaper text-purple-600 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">DD News</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    Automatic notifications for impressive scores with beautiful leaderboard screenshots.
-                </p>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>1000s+ announcements</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Custom images</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Country flags</li>
-                </ul>
-            </div>
-            
-            <!-- Best Splits -->
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg card-hover border border-gray-200 dark:border-gray-700">
-                <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-stopwatch text-red-600 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Best Splits Tracking</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    Track and update the best Devil Daggers splits from ddstats runs.
-                </p>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>V3 split analysis</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Auto updates</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Best calculations</li>
-                </ul>
-            </div>
-            
-            <!-- Homing Peaks -->
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg card-hover border border-gray-200 dark:border-gray-700">
-                <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fas fa-mountain text-yellow-600 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Homing Peak Records</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    Track the highest homing dagger counts achieved by players.
-                </p>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Peak tracking</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Record management</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Notifications</li>
-                </ul>
-            </div>
-            
-            <!-- Twitch Integration -->
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg card-hover border border-gray-200 dark:border-gray-700">
-                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-xl flex items-center justify-center mb-6">
-                    <i class="fab fa-twitch text-indigo-600 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Twitch Integration</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    Link Twitch accounts to player profiles on DDLIVE for community connection.
-                </p>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>DDLIVE integration</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Stream status</li>
-                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Community links</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+<section id="features" class="py-20 bg-gray-50">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center mb-16">
+			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+				<i class="mr-3 text-primary-600"></i>
+				Powerful Features
+			</h2>
+			<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+				Everything you need to manage your Devil Daggers community
+			</p>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+			<div
+				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
+				<div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+					<i class="text-primary-600 text-2xl"></i>
+				</div>
+				<h3 class="text-xl font-bold mb-4 text-gray-900">Auto Role Management</h3>
+				<p class="text-gray-600 mb-6">
+					Automatically assigns Discord roles based on Devil Daggers scores. From newcomer to world record
+					holder.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Score-based roles</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Rank-based roles</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Daily updates</li>
+				</ul>
+			</div>
+
+			<div
+				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
+				<div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+					<i class="text-green-600 text-2xl"></i>
+				</div>
+				<h3 class="text-xl font-bold mb-4 text-gray-900">Live Statistics</h3>
+				<p class="text-gray-600 mb-6">
+					Real-time player statistics including scores, ranks, accuracy, and historical data.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Real-time data</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Score tracking</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Performance metrics
+					</li>
+				</ul>
+			</div>
+
+			<div
+				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
+				<div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+					<i class="text-purple-600 text-2xl"></i>
+				</div>
+				<h3 class="text-xl font-bold mb-4 text-gray-900">DD News</h3>
+				<p class="text-gray-600 mb-6">
+					Automatic notifications for impressive scores with beautiful leaderboard screenshots.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>1000s+ announcements
+					</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Custom images</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Country flags</li>
+				</ul>
+			</div>
+
+			<div
+				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
+				<div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+					<i class="text-red-600 text-2xl"></i>
+				</div>
+				<h3 class="text-xl font-bold mb-4 text-gray-900">Best Splits Tracking</h3>
+				<p class="text-gray-600 mb-6">
+					Track and update the best Devil Daggers splits from ddstats runs.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Split analysis</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Auto updates</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Best calculations</li>
+				</ul>
+			</div>
+
+			<div
+				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
+				<div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
+					<i class="text-yellow-600 text-2xl"></i>
+				</div>
+				<h3 class="text-xl font-bold mb-4 text-gray-900">Homing Peak Records</h3>
+				<p class="text-gray-600 mb-6">
+					Track the highest homing dagger counts achieved by players.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Peak tracking</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Record management</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Notifications</li>
+				</ul>
+			</div>
+
+			<div
+				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
+				<div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+					<i class="fab fa-twitch text-indigo-600 text-2xl"></i>
+				</div>
+				<h3 class="text-xl font-bold mb-4 text-gray-900">Twitch Integration</h3>
+				<p class="text-gray-600 mb-6">
+					Link Twitch accounts to player profiles on DDLIVE for community connection.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>DDLIVE integration
+					</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Stream status</li>
+					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Community links</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 </section>
 
-<!-- API Section -->
-<section id="api" class="py-20 bg-white dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">
-                <i class="fas fa-code mr-3 text-primary-600"></i>
-                Developer API
-            </h2>
-            <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                Access Clubber's data through our REST API for your own applications
-            </p>
-        </div>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-                <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">API Endpoints</h3>
-                <div class="space-y-4">
-                    <!-- Enhanced API endpoints with better hover effects -->
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-primary-300 dark:hover:border-primary-500 hover:shadow-lg border border-gray-200 dark:border-gray-600 api-endpoint" data-endpoint="users">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="font-mono text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded">GET</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">/users</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300">Get all registered users</p>
-                        <div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
-                            <i class="fas fa-mouse-pointer text-primary-600 text-xs mr-1"></i>
-                            <span class="text-xs text-primary-600 dark:text-primary-400">Click to see example</span>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-primary-300 dark:hover:border-primary-500 hover:shadow-lg border border-gray-200 dark:border-gray-600 api-endpoint" data-endpoint="bestsplits">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="font-mono text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded">GET</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">/bestsplits</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300">Current best Devil Daggers splits</p>
-                        <div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
-                            <i class="fas fa-mouse-pointer text-primary-600 text-xs mr-1"></i>
-                            <span class="text-xs text-primary-600 dark:text-primary-400">Click to see example</span>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-primary-300 dark:hover:border-primary-500 hover:shadow-lg border border-gray-200 dark:border-gray-600 api-endpoint" data-endpoint="dailynews">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="font-mono text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded">GET</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">/dailynews</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300">Recent DD news items</p>
-                        <div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
-                            <i class="fas fa-mouse-pointer text-primary-600 text-xs mr-1"></i>
-                            <span class="text-xs text-primary-600 dark:text-primary-400">Click to see example</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-8">
-                    <a href="/swagger" target="_blank" 
-                       class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors duration-300">
-                        <img src="~/images/swagger-logo.svg" alt="Swagger" class="w-5 h-5 mr-2">
-                        View Documentation
-                    </a>
-                </div>
-            </div>
-            
-            <div class="bg-gray-900 rounded-2xl p-6 overflow-hidden border border-gray-700">
-                <div class="flex items-center mb-4">
-                    <div class="flex space-x-2">
-                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                    </div>
-                    <span class="ml-4 text-gray-400 text-sm">API Response</span>
-                </div>
-                <pre class="text-green-400 text-sm overflow-x-auto font-mono scrollbar-thin" id="api-response"><code>{
+<section id="api" class="py-20 bg-white">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center mb-16">
+			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+				<i class="mr-3 text-primary-600"></i>
+				Developer API
+			</h2>
+			<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+				Access Clubber's data through our REST API for your own applications
+			</p>
+		</div>
+
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+			<div>
+				<h3 class="text-2xl font-bold mb-6 text-gray-900">API Endpoints</h3>
+				<div class="space-y-4">
+					<div
+						class="bg-gray-50 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:border-primary-300 hover:shadow-lg border border-gray-200 api-endpoint"
+						data-endpoint="users">
+						<div class="flex items-center justify-between mb-2">
+							<span class="font-mono text-sm bg-green-100 text-green-800 px-3 py-1 rounded">GET</span>
+							<span class="text-sm text-gray-500 font-mono">/users</span>
+						</div>
+						<p class="text-gray-600">Get all registered users</p>
+						<div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
+							<i class="text-primary-600 text-xs mr-1"></i>
+							<span class="text-xs text-primary-600">Click to see example</span>
+						</div>
+					</div>
+
+					<div
+						class="bg-gray-50 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:border-primary-300 hover:shadow-lg border border-gray-200 api-endpoint"
+						data-endpoint="bestsplits">
+						<div class="flex items-center justify-between mb-2">
+							<span class="font-mono text-sm bg-green-100 text-green-800 px-3 py-1 rounded">GET</span>
+							<span class="text-sm text-gray-500 font-mono">/bestsplits</span>
+						</div>
+						<p class="text-gray-600">Current best Devil Daggers splits</p>
+						<div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
+							<i class="text-primary-600 text-xs mr-1"></i>
+							<span class="text-xs text-primary-600">Click to see example</span>
+						</div>
+					</div>
+
+					<div
+						class="bg-gray-50 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:border-primary-300 hover:shadow-lg border border-gray-200 api-endpoint"
+						data-endpoint="dailynews">
+						<div class="flex items-center justify-between mb-2">
+							<span class="font-mono text-sm bg-green-100 text-green-800 px-3 py-1 rounded">GET</span>
+							<span class="text-sm text-gray-500 font-mono">/dailynews</span>
+						</div>
+						<p class="text-gray-600">Recent DD news items</p>
+						<div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
+							<i class="text-primary-600 text-xs mr-1"></i>
+							<span class="text-xs text-primary-600">Click to see example</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-8">
+					<!-- px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white/20 -->
+					<a href="/swagger" target="_blank"
+					   class="inline-flex border border-black/20 backdrop-blur-md rounded-xl items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 font-semibold transition-all duration-300 transform hover:scale-105 hover:bg-white/20">
+						<img src="~/images/swagger-logo.svg" alt="Swagger" class="w-5 h-5 mr-2">
+						View Documentation
+					</a>
+				</div>
+			</div>
+
+			<div class="bg-gray-900 rounded-2xl p-6 overflow-hidden border border-gray-700">
+				<div class="flex items-center mb-4">
+					<div class="flex space-x-2">
+						<div class="w-3 h-3 bg-red-500 rounded-full"></div>
+						<div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+						<div class="w-3 h-3 bg-green-500 rounded-full"></div>
+					</div>
+					<span class="ml-4 text-gray-400 text-sm">API Response</span>
+				</div>
+				<pre class="text-green-400 text-sm overflow-x-auto font-mono scrollbar-thin" id="api-response"><code>{
   "leaderboardId": 118832,
   "discordId": "743431502842298368",
   "twitchUsername": "ClubberTTV"
 }</code></pre>
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	</div>
 </section>
 
-<!-- Live Stats Section -->
-<section id="stats" class="py-20 bg-gray-50 dark:bg-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">
-                <i class="fas fa-chart-bar mr-3 text-primary-600"></i>
-                Live Statistics
-            </h2>
-            <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                Real-time data from the Devil Daggers community
-            </p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="stats-container">
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700">
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-users text-primary-600 text-xl"></i>
-                </div>
-                <div class="text-3xl font-bold mb-2 text-gray-900 dark:text-white" id="live-users">Loading...</div>
-                <div class="text-gray-600 dark:text-gray-400">Registered Users</div>
-            </div>
-            
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700">
-                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-trophy text-green-600 text-xl"></i>
-                </div>
-                <div class="text-3xl font-bold mb-2 text-gray-900 dark:text-white" id="live-news">Loading...</div>
-                <div class="text-gray-600 dark:text-gray-400">Recent Records</div>
-            </div>
-            
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700">
-                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-stopwatch text-purple-600 text-xl"></i>
-                </div>
-                <div class="text-3xl font-bold mb-2 text-gray-900 dark:text-white" id="live-splits">Loading...</div>
-                <div class="text-gray-600 dark:text-gray-400">Best Splits</div>
-            </div>
-            
-            <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700">
-                <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-mountain text-red-600 text-xl"></i>
-                </div>
-                <div class="text-3xl font-bold mb-2 text-gray-900 dark:text-white" id="live-peaks">Loading...</div>
-                <div class="text-gray-600 dark:text-gray-400">Peak Records</div>
-            </div>
-        </div>
-    </div>
+<section id="stats" class="py-20 bg-gray-50">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center mb-16">
+			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+				<i class="mr-3 text-primary-600"></i>
+				Live Statistics
+			</h2>
+			<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+				Real-time data from the Devil Daggers community
+			</p>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="stats-container">
+			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+				<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+					<i class="text-primary-600 text-xl"></i>
+				</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-users">Loading...</div>
+				<div class="text-gray-600">Registered Users</div>
+			</div>
+
+			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+				<div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+					<i class="text-green-600 text-xl"></i>
+				</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-news">Loading...</div>
+				<div class="text-gray-600">Recent Records</div>
+			</div>
+
+			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+				<div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+					<i class="text-purple-600 text-xl"></i>
+				</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-splits">Loading...</div>
+				<div class="text-gray-600">Best Splits</div>
+			</div>
+
+			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
+				<div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+					<i class="text-red-600 text-xl"></i>
+				</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-peaks">Loading...</div>
+				<div class="text-gray-600">Peak Records</div>
+			</div>
+		</div>
+	</div>
 </section>
 
-<!-- Support Section -->
 <section class="py-20 bg-orange-500">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="mb-8">
-            <img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-12 h-12 mx-auto mb-4">
-            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
-                Support Development
-            </h2>
-            <p class="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
-                Help keep Clubber running and enable new features with your support
-            </p>
-        </div>
-        
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="https://ko-fi.com/chupacabra4129" target="_blank" 
-               class="px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
-                <img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-5 h-5 mr-2 inline">
-                Buy me a coffee
-            </a>
-            <a href="https://github.com/Spoertm/Clubber" target="_blank" 
-               class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-orange-600">
-                <img src="~/images/github-logo.svg" alt="GitHub" class="w-5 h-5 mr-2 inline">
-                Contribute
-            </a>
-        </div>
-    </div>
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+		<div class="mb-8">
+			<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-12 h-12 mx-auto mb-4">
+			<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+				Support Development
+			</h2>
+			<p class="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
+				Help keep Clubber running and enable new features with your support
+			</p>
+		</div>
+
+		<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+			<a href="https://ko-fi.com/chupacabra4129" target="_blank"
+			   class="px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
+				<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-7 h-7 mr-2 inline">
+				Buy me a coffee
+			</a>
+			<a href="https://github.com/Spoertm/Clubber" target="_blank"
+			   class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-orange-600">
+				<img src="~/images/github-logo.svg" alt="GitHub" class="w-7 h-7 mr-2 invert inline">
+				Contribute
+			</a>
+		</div>
+	</div>
 </section>
 
-<!-- CTA Section -->
 <section class="py-20 bg-primary-600">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Get Started?
-        </h2>
-        <p class="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Join the DD Pals Discord server and experience Clubber's features firsthand
-        </p>
-        
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="https://discord.gg/jMRumVerj2" target="_blank" 
-               class="px-8 py-4 bg-white text-primary-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
-                <i class="fab fa-discord mr-2 text-xl"></i>
-                Join DD Pals Discord
-            </a>
-            <a href="/Home/Privacy" 
-               class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-primary-600">
-                <i class="fas fa-shield-alt mr-2"></i>
-                Privacy Policy
-            </a>
-        </div>
-    </div>
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+		<h2 class="text-4xl md:text-5xl font-bold mb-6">
+			Ready to Get Started?
+		</h2>
+		<p class="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+			Join the DD Pals Discord server and experience Clubber's features firsthand
+		</p>
+
+		<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+			<a href="https://discord.gg/jMRumVerj2" target="_blank"
+			   class="px-8 py-4 bg-white text-primary-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
+				Join DD Pals Discord
+			</a>
+			<a href="/Home/Privacy"
+			   class="px-8 py-4 bg-transparent border-2 border-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-primary-600">
+				Privacy Policy
+			</a>
+		</div>
+	</div>
 </section>
 
 <script>
-    // API examples
-    const apiExamples = {
-        users: {
-            leaderboardId: 118832,
-            discordId: "743431502842298368",
-            twitchUsername: "ClubberTTV"
-        },
-        bestsplits: {
-            name: "1000",
-            time: 996,
-            value: 47,
-            description: "Spoertm 1083.7000"
-        },
-        dailynews: {
-            leaderboardId: 118832,
-            timeOfOccurenceUtc: "2024-01-15T14:30:00Z",
-            nth: 5
-        }
-    };
+	const apiExamples = {
+		users: {
+			leaderboardId: 118832,
+			discordId: "743431502842298368",
+			twitchUsername: "ClubberTTV"
+		},
+		bestsplits: {
+			name: "1000",
+			time: 996,
+			value: 47,
+			description: "Spoertm 1083.7000"
+		},
+		dailynews: {
+			leaderboardId: 118832,
+			timeOfOccurenceUtc: "2024-01-15T14:30:00Z",
+			nth: 5
+		}
+	};
 
-    // API endpoint clicks
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.api-endpoint').forEach(endpoint => {
-            endpoint.addEventListener('click', () => {
-                const endpointType = endpoint.dataset.endpoint;
-                const responseElement = document.getElementById('api-response');
-                
-                document.querySelectorAll('.api-endpoint').forEach(ep => {
-                    ep.classList.remove('border-primary-500', 'dark:border-primary-400');
-                });
-                
-                endpoint.classList.add('border-primary-500', 'dark:border-primary-400');
-                
-                const exampleData = apiExamples[endpointType];
-                responseElement.innerHTML = `<code>${JSON.stringify(exampleData, null, 2)}</code>`;
-            });
-        });
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('.api-endpoint').forEach(endpoint => {
+			endpoint.addEventListener('click', () => {
+				const endpointType = endpoint.dataset.endpoint;
+				const responseElement = document.getElementById('api-response');
 
-        // Lazy load stats
-        let statsLoaded = false;
-        
-        const statsObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !statsLoaded) {
-                    statsLoaded = true;
-                    loadLiveStats();
-                }
-            });
-        }, { threshold: 0.3 });
-        
-        const statsContainer = document.getElementById('stats-container');
-        if (statsContainer) {
-            statsObserver.observe(statsContainer);
-        }
-    });
+				document.querySelectorAll('.api-endpoint').forEach(ep => {
+					ep.classList.remove('border-primary-500');
+				});
 
-    async function loadLiveStats() {
-        try {
-            const usersResponse = await fetch('/users');
-            const users = await usersResponse.json();
-            animateCounter('live-users', users.length);
-            
-            const newsResponse = await fetch('/dailynews');
-            const news = await newsResponse.json();
-            animateCounter('live-news', news.length);
-            
-            const splitsResponse = await fetch('/bestsplits');
-            const splits = await splitsResponse.json();
-            animateCounter('live-splits', splits.length);
-            
-            animateCounter('live-peaks', 15, '+');
-            
-        } catch (error) {
-            console.error('Error loading stats:', error);
-            animateCounter('live-users', 1200, '+');
-            animateCounter('live-news', 25, '+');
-            animateCounter('live-splits', 14);
-            animateCounter('live-peaks', 15, '+');
-        }
-    }
+				endpoint.classList.add('border-primary-500');
 
-    function animateCounter(elementId, targetValue, suffix = '') {
-        const element = document.getElementById(elementId);
-        if (!element) return;
-        
-        let currentValue = 0;
-        const increment = Math.ceil(targetValue / 30);
-        const timer = setInterval(() => {
-            currentValue += increment;
-            if (currentValue >= targetValue) {
-                currentValue = targetValue;
-                clearInterval(timer);
-            }
-            element.textContent = currentValue.toLocaleString() + suffix;
-        }, 50);
-    }
-    
-    // Scroll animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate-slide-up');
-            }
-        });
-    }, observerOptions);
-    
-    document.querySelectorAll('.card-hover').forEach(card => {
-        observer.observe(card);
-    });
+				const exampleData = apiExamples[endpointType];
+				responseElement.innerHTML = `<code>${JSON.stringify(exampleData, null, 2)}</code>`;
+			});
+		});
+
+		let statsLoaded = false;
+
+		const statsObserver = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting && !statsLoaded) {
+					statsLoaded = true;
+					loadLiveStats();
+				}
+			});
+		}, {threshold: 0.3});
+
+		const statsContainer = document.getElementById('stats-container');
+		if (statsContainer) {
+			statsObserver.observe(statsContainer);
+		}
+	});
+
+	async function loadLiveStats() {
+		try {
+			const usersResponse = await fetch('/users');
+			const users = await usersResponse.json();
+			animateCounter('live-users', users.length);
+
+			const newsResponse = await fetch('/dailynews');
+			const news = await newsResponse.json();
+			animateCounter('live-news', news.length);
+
+			const splitsResponse = await fetch('/bestsplits');
+			const splits = await splitsResponse.json();
+			animateCounter('live-splits', splits.length);
+
+			animateCounter('live-peaks', 15, '+');
+
+		} catch (error) {
+			console.error('Error loading stats:', error);
+			animateCounter('live-users', 1200, '+');
+			animateCounter('live-news', 25, '+');
+			animateCounter('live-splits', 14);
+			animateCounter('live-peaks', 15, '+');
+		}
+	}
+
+	function animateCounter(elementId, targetValue, suffix = '') {
+		const element = document.getElementById(elementId);
+		if (!element) return;
+
+		let currentValue = 0;
+		const increment = Math.ceil(targetValue / 30);
+		const timer = setInterval(() => {
+			currentValue += increment;
+			if (currentValue >= targetValue) {
+				currentValue = targetValue;
+				clearInterval(timer);
+			}
+			element.textContent = currentValue.toLocaleString() + suffix;
+		}, 50);
+	}
+
+	const observerOptions = {
+		threshold: 0.1,
+		rootMargin: '0px 0px -50px 0px'
+	};
+
+	const observer = new IntersectionObserver((entries) => {
+		entries.forEach(entry => {
+			if (entry.isIntersecting) {
+				entry.target.classList.add('animate-slide-up');
+			}
+		});
+	}, observerOptions);
+
+	document.querySelectorAll('.bg-white.rounded-2xl').forEach(card => {
+		observer.observe(card);
+	});
 </script>

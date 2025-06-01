@@ -111,7 +111,7 @@ internal static class Program
 
 			options.AddServer(new OpenApiServer
 			{
-				Url = "https://clubberbot.azurewebsites.net",
+				Url = "https://clubber.up.railway.app/",
 				Description = "Production Server"
 			});
 
@@ -148,7 +148,7 @@ internal static class Program
 		app.UseSwagger();
 		app.UseSwaggerUI(options =>
 		{
-			options.SwaggerEndpoint("/swagger/v1/swagger.json", "Clubber API v1");
+			options.SwaggerEndpoint("/swagger/v1/swagger.json", "Main");
 			options.RoutePrefix = "swagger";
 			options.DocumentTitle = "Clubber API Documentation";
 		});
@@ -158,7 +158,6 @@ internal static class Program
 			name: "default",
 			pattern: "{controller=Home}/{action=Index}/{id?}");
 
-		// Map API endpoints
 		app.RegisterClubberEndpoints();
 
 		// Initialize Discord bot services
