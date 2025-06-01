@@ -1,42 +1,51 @@
-﻿<div class="min-h-screen py-20 bg-gray-50 flex items-center">
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
-            <div class="w-24 h-24 mx-auto bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6">
-                <i class="text-white text-3xl"></i>
-            </div>
-            
-            <h1 class="text-4xl font-bold mb-4 text-gray-900">
-                Oops! Something went wrong
-            </h1>
-            
-            <p class="text-xl text-gray-600 mb-8">
-                We encountered an unexpected error while processing your request.
-            </p>
-            
-            @if (Model.ShowRequestId == true)
-            {
-                <div class="bg-gray-100 rounded-xl p-4 mb-6">
-                    <p class="text-sm text-gray-600">
-                        <strong>Request ID:</strong> <code class="font-mono">@Model.RequestId</code>
-                    </p>
-                </div>
-            }
-            
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/" class="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
-                    <i class="mr-2"></i>
-                    Go Home
-                </a>
-                <a href="javascript:history.back()" class="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl transition-all duration-300">
-                    <i class="mr-2"></i>
-                    Go Back
-                </a>
-            </div>
-            
-            <div class="mt-8 text-sm text-gray-500">
-                If this problem persists, please contact us on the 
-                <a href="https://discord.gg/jMRumVerj2" target="_blank" class="text-red-500 hover:text-red-600">DD Pals Discord</a>
-            </div>
-        </div>
-    </div>
+﻿<div class="min-h-screen py-20 bg-gray-50 dark:bg-gray-900 flex items-center transition-colors duration-300">
+	<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+		<div
+			class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-200 dark:border-gray-700 transition-all duration-300">
+			<div
+				class="w-24 h-24 mx-auto bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300">
+				<i class="fas fa-exclamation-triangle text-white text-3xl"></i>
+			</div>
+
+			<h1 class="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+				Oops! Something went wrong
+			</h1>
+
+			<p class="text-xl text-gray-600 dark:text-gray-300 mb-8 transition-colors duration-300">
+				We encountered an unexpected error while processing your request.
+			</p>
+
+			@if (Model.ShowRequestId == true)
+			{
+				<div
+					class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-6 border border-gray-200 dark:border-gray-600 transition-all duration-300">
+					<p class="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+						<strong>Request ID:</strong> <code
+							class="font-mono bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded transition-colors duration-300">@Model.RequestId</code>
+					</p>
+				</div>
+			}
+
+			<div class="flex flex-col sm:flex-row gap-4 justify-center">
+				<a href="/"
+				   class="px-8 py-3 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
+					<i class="fas fa-home mr-2"></i>
+					Go Home
+				</a>
+				<a href="javascript:history.back()"
+				   class="px-8 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-semibold rounded-xl transition-all duration-300">
+					<i class="fas fa-arrow-left mr-2"></i>
+					Go Back
+				</a>
+			</div>
+
+			<div class="mt-8 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
+				If this problem persists, please contact us on the
+				<a href="https://discord.gg/jMRumVerj2" target="_blank"
+				   class="text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-500 transition-colors duration-200">
+					<i class="fab fa-discord mr-1"></i>DD Pals Discord
+				</a>
+			</div>
+		</div>
+	</div>
 </div>

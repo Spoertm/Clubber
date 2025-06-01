@@ -2,106 +2,169 @@
 	ViewData["Title"] = "Privacy Policy";
 }
 
-<div class="min-h-screen py-20 bg-gray-50">
+<div class="min-h-screen py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-			<h1 class="text-4xl font-bold mb-8">
+		<div
+			class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 md:p-12 border border-gray-200 dark:border-gray-700 transition-all duration-300">
+			<h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+				<i class="fas fa-shield-alt mr-3 text-blue-600 dark:text-blue-400"></i>
 				Privacy Policy
 			</h1>
 
 			<div class="prose prose-lg max-w-none">
-				<p class="text-gray-600 text-lg mb-8">
+				<p class="text-gray-600 dark:text-gray-300 text-lg mb-8 transition-colors duration-300">
 					Last updated: @DateTime.Now.ToString("MMMM dd, yyyy")
 				</p>
 
-				<h2 class="text-2xl font-bold mb-4">Information We Collect</h2>
-				<p class="mb-6">
+				<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+					Information We Collect</h2>
+				<p class="mb-6 text-gray-600 dark:text-gray-300 transition-colors duration-300">
 					Clubber collects and processes the following types of information:
 				</p>
 
-				<ul class="mb-8 space-y-2">
-					<li><strong>Discord User Data:</strong> Discord user IDs, usernames, and server roles</li>
-					<li><strong>Devil Daggers Data:</strong> Leaderboard IDs, scores, and statistics from public
-						leaderboards
+				<ul class="mb-8 space-y-2 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-start"><i class="fas fa-check text-green-500 mr-3 mt-1"></i><strong
+							class="mr-1">Discord
+							User Data:</strong> Discord user IDs, usernames, and server roles
 					</li>
-					<li><strong>Twitch Integration:</strong> Twitch usernames (only when voluntarily linked by users)
+					<li class="flex items-start"><i class="fas fa-check text-green-500 mr-3 mt-1"></i><strong
+							class="mr-1">Devil
+							Daggers Data:</strong> Leaderboard IDs, scores, and statistics from public leaderboards
 					</li>
-					<li><strong>Usage Data:</strong> Bot command usage and interaction logs for service improvement</li>
+					<li class="flex items-start"><i class="fas fa-check text-green-500 mr-3 mt-1"></i><strong
+							class="mr-1">Twitch
+							Integration:</strong> Twitch usernames (only when voluntarily linked by users)
+					</li>
+					<li class="flex items-start"><i class="fas fa-check text-green-500 mr-3 mt-1"></i><strong
+							class="mr-1">Usage
+							Data:</strong> Bot command usage and interaction logs for service improvement
+					</li>
 				</ul>
 
-				<h2 class="text-2xl font-bold mb-4">How We Use Your Information</h2>
-				<p class="mb-6">
+				<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">How
+					We Use Your Information</h2>
+				<p class="mb-6 text-gray-600 dark:text-gray-300 transition-colors duration-300">
 					The information collected is used to:
 				</p>
 
-				<ul class="mb-8 space-y-2">
-					<li>Provide automated role management based on Devil Daggers scores</li>
-					<li>Display player statistics and leaderboard information</li>
-					<li>Post community news about significant achievements</li>
-					<li>Maintain records of best splits and homing peaks</li>
-					<li>Enable Twitch integration features</li>
+				<ul class="mb-8 space-y-2 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-start"><i class="fas fa-arrow-right text-blue-500 mr-3 mt-1"></i>Provide
+						automated role management based on Devil Daggers scores
+					</li>
+					<li class="flex items-start"><i class="fas fa-arrow-right text-blue-500 mr-3 mt-1"></i>Display
+						player statistics and leaderboard information
+					</li>
+					<li class="flex items-start"><i class="fas fa-arrow-right text-blue-500 mr-3 mt-1"></i>Post
+						community news about significant achievements
+					</li>
+					<li class="flex items-start"><i class="fas fa-arrow-right text-blue-500 mr-3 mt-1"></i>Maintain
+						records of best splits and homing peaks
+					</li>
+					<li class="flex items-start"><i class="fas fa-arrow-right text-blue-500 mr-3 mt-1"></i>Enable Twitch
+						integration features
+					</li>
 				</ul>
 
-				<h2 class="text-2xl font-bold mb-4">Data Storage and Security</h2>
-				<p class="mb-6">
+				<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">Data
+					Storage and Security</h2>
+				<p class="mb-6 text-gray-600 dark:text-gray-300 transition-colors duration-300">
 					Your data is stored securely using industry-standard practices:
 				</p>
 
-				<ul class="mb-8 space-y-2">
-					<li>All data is stored in encrypted databases</li>
-					<li>Access to data is limited to essential bot operations</li>
-					<li>No sensitive personal information beyond Discord IDs is stored</li>
-					<li>Data is backed up regularly to prevent loss</li>
+				<ul class="mb-8 space-y-2 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-start"><i class="fas fa-lock text-green-500 mr-3 mt-1"></i>All data is stored
+						in encrypted databases
+					</li>
+					<li class="flex items-start"><i class="fas fa-lock text-green-500 mr-3 mt-1"></i>Access to data is
+						limited to essential bot operations
+					</li>
+					<li class="flex items-start"><i class="fas fa-lock text-green-500 mr-3 mt-1"></i>No sensitive
+						personal information beyond Discord IDs is stored
+					</li>
+					<li class="flex items-start"><i class="fas fa-lock text-green-500 mr-3 mt-1"></i>Data is backed up
+						regularly to prevent loss
+					</li>
 				</ul>
 
-				<h2 class="text-2xl font-bold mb-4">Data Sharing</h2>
-				<p class="mb-8">
+				<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">Data
+					Sharing</h2>
+				<p class="mb-8 text-gray-600 dark:text-gray-300 transition-colors duration-300">
 					We do not sell, trade, or otherwise transfer your data to third parties. Data may be shared only:
 				</p>
 
-				<ul class="mb-8 space-y-2">
-					<li>With the DD Pals Discord community for leaderboard and statistics purposes</li>
-					<li>When required by law or to protect our rights</li>
-					<li>In aggregated, anonymized form for community statistics</li>
+				<ul class="mb-8 space-y-2 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-start"><i class="fas fa-share text-blue-500 mr-3 mt-1"></i>With the DD Pals
+						Discord community for leaderboard and statistics purposes
+					</li>
+					<li class="flex items-start"><i class="fas fa-share text-blue-500 mr-3 mt-1"></i>When required by
+						law or to protect our rights
+					</li>
+					<li class="flex items-start"><i class="fas fa-share text-blue-500 mr-3 mt-1"></i>In aggregated,
+						anonymized form for community statistics
+					</li>
 				</ul>
 
-				<h2 class="text-2xl font-bold mb-4">Your Rights</h2>
-				<p class="mb-6">
+				<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">Your
+					Rights</h2>
+				<p class="mb-6 text-gray-600 dark:text-gray-300 transition-colors duration-300">
 					You have the right to:
 				</p>
 
-				<ul class="mb-8 space-y-2">
-					<li>Request removal of your data from our systems</li>
-					<li>Update or correct your stored information</li>
-					<li>Opt out of data collection by not using the bot</li>
-					<li>Access information about what data we store about you</li>
+				<ul class="mb-8 space-y-2 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-start"><i class="fas fa-user-shield text-purple-500 mr-3 mt-1"></i>Request
+						removal of your data from our systems
+					</li>
+					<li class="flex items-start"><i class="fas fa-user-shield text-purple-500 mr-3 mt-1"></i>Update or
+						correct your stored information
+					</li>
+					<li class="flex items-start"><i class="fas fa-user-shield text-purple-500 mr-3 mt-1"></i>Opt out of
+						data collection by not using the bot
+					</li>
+					<li class="flex items-start"><i class="fas fa-user-shield text-purple-500 mr-3 mt-1"></i>Access
+						information about what data we store about you
+					</li>
 				</ul>
 
-				<h2 class="text-2xl font-bold mb-4">Contact</h2>
-				<p class="mb-8">
+				<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+					Contact</h2>
+				<p class="mb-8 text-gray-600 dark:text-gray-300 transition-colors duration-300">
 					If you have questions about this Privacy Policy or want to exercise your rights, please contact us:
 				</p>
 
-				<ul class="mb-8 space-y-2">
-					<li><strong>Discord:</strong> Message Chupacabra#1513 on the DD Pals server</li>
-					<li><strong>GitHub:</strong> <a href="https://github.com/Spoertm/Clubber" target="_blank"
-					                                class="text-primary-500 hover:text-primary-600">https://github.com/Spoertm/Clubber</a>
+				<ul class="mb-8 space-y-2 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-start"><i class="fab fa-discord text-indigo-500 mr-3 mt-1"></i><strong
+							class="mr-1">Discord:</strong>
+						Message Chupacabra#1513 on the DD Pals server
 					</li>
-					<li><strong>Email:</strong> Open an issue on our GitHub repository</li>
+					<li class="flex items-start"><i
+							class="fab fa-github text-lg text-gray-900 dark:text-gray-100 mr-3 mt-1"></i><strong
+							class="mr-1">GitHub:</strong>
+						<a href="https://github.com/Spoertm/Clubber" target="_blank"
+						   class="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-500 transition-colors duration-200">https://github.com/Spoertm/Clubber</a>
+					</li>
+					<li class="flex items-start"><i
+							class="fas fa-envelope text-lg text-red-500 mr-3 mt-1"></i><strong
+							class="mr-1">Email:</strong> Open
+						an issue on
+						our GitHub repository
+					</li>
 				</ul>
 
-				<h2 class="text-2xl font-bold mb-4">Changes to This Policy</h2>
-				<p class="mb-8">
+				<h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+					Changes to This Policy</h2>
+				<p class="mb-8 text-gray-600 dark:text-gray-300 transition-colors duration-300">
 					We may update this Privacy Policy from time to time. Changes will be posted on this page with an
 					updated revision date.
 					Continued use of Clubber after changes indicates acceptance of the new terms.
 				</p>
 
-				<div class="bg-primary-50 border border-primary-200 rounded-xl p-6 mt-8">
-					<h3 class="text-lg font-semibold mb-2 text-primary-800">
+				<div
+					class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 mt-8 transition-all duration-300">
+					<h3 class="text-lg font-semibold mb-2 text-blue-800 dark:text-blue-200 transition-colors duration-300">
+						<i class="fas fa-info-circle mr-2"></i>
 						Important Note
 					</h3>
-					<p class="text-primary-700">
+					<p class="text-blue-700 dark:text-blue-300 transition-colors duration-300">
 						Clubber only processes publicly available Devil Daggers leaderboard data and Discord information
 						necessary for bot functionality.
 						We prioritize user privacy and data minimization in all our operations.

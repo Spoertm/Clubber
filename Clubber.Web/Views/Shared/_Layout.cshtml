@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth transition-colors duration-300">
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,63 +8,78 @@
 	      content="Clubber - Advanced Discord bot for Devil Daggers community with role management, statistics tracking, and live updates."/>
 
 	<link rel="icon" type="image/x-icon" href="~/images/ClubberWhite.ico">
-
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
 	      rel="stylesheet">
 </head>
-<body class="bg-gray-50 text-gray-900 transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
-<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+<nav
+	class="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
 			<div class="flex items-center">
 				<a href="/" class="flex items-center space-x-3">
 					<img src="~/images/Clubber.svg" alt="Clubber" class="w-8 h-8">
-					<span class="text-xl font-bold text-gray-900">Clubber</span>
+					<span class="text-xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">Clubber</span>
 				</a>
 			</div>
 
 			<div class="hidden md:flex items-center space-x-6">
 				<a href="#features"
-				   class="text-gray-600 hover:text-primary-600 transition-colors duration-200">Features</a>
+				   class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">Features</a>
 				<a href="#api"
-				   class="text-gray-600 hover:text-primary-600 transition-colors duration-200">API</a>
+				   class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">API</a>
 				<a href="#stats"
-				   class="text-gray-600 hover:text-primary-600 transition-colors duration-200">Stats</a>
+				   class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">Stats</a>
 				<a href="https://github.com/Spoertm/Clubber" target="_blank"
-				   class="flex items-center text-gray-600 hover:text-primary-600 transition-colors duration-200">
-					<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2">
+				   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+					<i class="fab fa-github mr-2"></i>
 					GitHub
 				</a>
+				<button id="theme-toggle"
+				        class="cursor-pointer p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+					<i class="fas fa-sun dark:hidden"></i>
+					<i class="fas fa-moon hidden dark:inline"></i>
+				</button>
 				<a href="https://ko-fi.com/chupacabra4129" target="_blank"
 				   class="flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200">
-					<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-5 h-5 mr-2">
+					<i class="fas fa-coffee mr-2"></i>
 					Support
 				</a>
 			</div>
 
-			<div class="md:hidden">
-				<button id="mobile-menu-button" class="p-2 rounded-lg text-gray-600">
+			<div class="md:hidden flex items-center space-x-2">
+				<button id="theme-toggle-mobile"
+				        class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+					<i class="fas fa-sun dark:hidden"></i>
+					<i class="fas fa-moon hidden dark:inline"></i>
+				</button>
+				<button id="mobile-menu-button" class="p-2 rounded-lg text-gray-600 dark:text-gray-300">
+					<i class="fas fa-bars"></i>
 				</button>
 			</div>
 		</div>
 	</div>
 
-	<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+	<div id="mobile-menu"
+	     class="hidden md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
 		<div class="px-4 py-4 space-y-3">
-			<a href="#features" class="block text-gray-600 hover:text-primary-600">Features</a>
-			<a href="#api" class="block text-gray-600 hover:text-primary-600">API</a>
-			<a href="#stats" class="block text-gray-600 hover:text-primary-600">Stats</a>
+			<a href="#features"
+			   class="block text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">Features</a>
+			<a href="#api"
+			   class="block text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">API</a>
+			<a href="#stats"
+			   class="block text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">Stats</a>
 			<a href="https://github.com/Spoertm/Clubber" target="_blank"
-			   class="flex items-center text-gray-600 hover:text-primary-600">
-				<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2">
+			   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+				<i class="fab fa-github mr-2"></i>
 				GitHub
 			</a>
 			<a href="https://ko-fi.com/chupacabra4129" target="_blank"
-			   class="flex items-center text-gray-600 hover:text-primary-600">
-				<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-4 h-4 mr-2">
+			   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+				<i class="fas fa-coffee mr-2"></i>
 				Support
 			</a>
 		</div>
@@ -75,69 +90,82 @@
 	@RenderBody()
 </main>
 
-<footer class="bg-white border-t border-gray-200">
+<footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 		<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 			<div>
 				<div class="flex items-center space-x-3 mb-4">
-					<img src="~/images/Clubber.svg" alt="Clubber" class="w-8 h-8">
-					<span class="text-lg font-bold text-gray-900">Clubber</span>
+					<img src="~/images/ClubberWhite.ico" alt="Clubber" class="w-8 h-8">
+					<span class="text-lg font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300">Clubber</span>
 				</div>
-				<p class="text-gray-600 text-sm">
+				<p class="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">
 					Advanced Discord bot for the Devil Daggers community with automated role management and live
 					statistics.
 				</p>
 			</div>
 
 			<div>
-				<h3 class="font-semibold mb-3 text-gray-900">Quick Links</h3>
+				<h3 class="font-semibold mb-3 text-gray-900 dark:text-gray-100 transition-colors duration-300">Quick
+					Links</h3>
 				<div class="space-y-2 text-sm">
 					<a href="/swagger"
-					   class="flex items-center text-gray-600 hover:text-primary-600">
-						<img src="~/images/swagger-logo.svg" alt="Swagger" class="w-4 h-4 mr-2">
+					   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+						<i class="fas fa-code mr-2"></i>
 						API Docs
 					</a>
 					<a href="https://discord.gg/jMRumVerj2" target="_blank"
-					   class="block text-gray-600 hover:text-primary-600">DD Pals Discord</a>
+					   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+						<i class="fab fa-discord mr-2"></i>
+						DD Pals Discord
+					</a>
 					<a href="https://ddstats.live/" target="_blank"
-					   class="block text-gray-600 hover:text-primary-600">DD Stats Live</a>
+					   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+						<i class="fas fa-chart-line mr-2"></i>
+						DD Stats Live
+					</a>
 				</div>
 			</div>
 
 			<div>
-				<h3 class="font-semibold mb-3 text-gray-900">Support</h3>
+				<h3 class="font-semibold mb-3 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+					Support</h3>
 				<div class="space-y-2 text-sm">
 					<a href="https://ko-fi.com/chupacabra4129" target="_blank"
-					   class="flex items-center text-gray-600 hover:text-primary-600">
-						<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-4 h-4 mr-2">
+					   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+						<i class="fas fa-coffee mr-2"></i>
 						Buy me a coffee
 					</a>
 					<a href="https://github.com/Spoertm/Clubber/issues" target="_blank"
-					   class="flex items-center text-gray-600 hover:text-primary-600">
-						<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2">
+					   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+						<i class="fas fa-bug mr-2"></i>
 						Report Issues
 					</a>
 					<a href="/Home/Privacy"
-					   class="block text-gray-600 hover:text-primary-600">Privacy Policy</a>
+					   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+						<i class="fas fa-shield-alt mr-2"></i>
+						Privacy Policy
+					</a>
 				</div>
 			</div>
 
 			<div>
-				<h3 class="font-semibold mb-3 text-gray-900">Open Source</h3>
-				<p class="text-sm text-gray-600 mb-3">
+				<h3 class="font-semibold mb-3 text-gray-900 dark:text-gray-100 transition-colors duration-300">Open
+					Source</h3>
+				<p class="text-sm text-gray-600 dark:text-gray-300 mb-3 transition-colors duration-300">
 					Clubber is open source and welcomes contributions.
 				</p>
 				<a href="https://github.com/Spoertm/Clubber" target="_blank"
-				   class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-200">
-					<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2">
+				   class="inline-flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-100 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors duration-200">
+					<i class="fab fa-github mr-2"></i>
 					View Source
 				</a>
 			</div>
 		</div>
 
-		<div class="border-t border-gray-200 mt-8 pt-8 text-center text-sm text-gray-600">
+		<div
+			class="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8 text-center text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
 			<p>&copy; @DateTime.Now.Year Clubber. Created by <a href="https://github.com/Spoertm" target="_blank"
-			                                                    class="text-primary-600 hover:underline">Spoertm</a>
+			                                                    class="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-200">Spoertm</a>
 			</p>
 		</div>
 	</div>
@@ -145,6 +173,26 @@
 
 <script>
 	document.addEventListener('DOMContentLoaded', function () {
+		// Theme toggle functionality
+		const themeToggle = document.getElementById('theme-toggle');
+		const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+
+		// Check for saved theme preference or default to light mode
+		const currentTheme = localStorage.getItem('theme') || 'light';
+
+		if (currentTheme === 'dark') {
+			document.documentElement.classList.add('dark');
+		}
+
+		function toggleTheme() {
+			document.documentElement.classList.toggle('dark');
+			localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+		}
+
+		themeToggle?.addEventListener('click', toggleTheme);
+		themeToggleMobile?.addEventListener('click', toggleTheme);
+
+		// Mobile menu functionality
 		const mobileMenuButton = document.getElementById('mobile-menu-button');
 		const mobileMenu = document.getElementById('mobile-menu');
 
@@ -154,6 +202,7 @@
 			});
 		}
 
+		// Smooth scrolling for anchor links
 		document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 			anchor.addEventListener('click', function (e) {
 				e.preventDefault();

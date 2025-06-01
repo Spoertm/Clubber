@@ -3,8 +3,9 @@
 }
 
 <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-	<div class="absolute inset-0 bg-[linear-gradient(135deg,_#1e40af_0%,_#3b82f6_50%,_#60a5fa_100%)]"></div>
-	<div class="absolute inset-0 bg-black/10"></div>
+	<div
+		class="absolute inset-0 bg-[linear-gradient(135deg,_#1e40af_0%,_#3b82f6_50%,_#60a5fa_100%)] dark:bg-[linear-gradient(135deg,_#0f172a_0%,_#1e293b_50%,_#334155_100%)] transition-all duration-300"></div>
+	<div class="absolute inset-0 bg-black/10 dark:bg-black/20 transition-all duration-300"></div>
 
 	<div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 		<div class="animate-slide-up">
@@ -12,10 +13,10 @@
 				<div class="w-24 h-24 mx-auto mb-8">
 					<img src="~/images/ClubberWhite.ico" alt="Clubber Logo" class="w-full h-full animate-pulse">
 				</div>
-				<h1 class="text-5xl md:text-7xl font-bold text-white mb-6">
+				<h1 class="text-5xl md:text-7xl font-bold text-white mb-6 transition-colors duration-300">
 					Clubber
 				</h1>
-				<p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-4xl mx-auto leading-relaxed">
+				<p class="text-xl md:text-2xl text-blue-100 dark:text-slate-200 mb-8 max-w-4xl mx-auto leading-relaxed transition-colors duration-300">
 					The most advanced Discord bot for the <span class="text-white font-semibold">Devil Daggers</span>
 					community.
 					Automated role management, real-time statistics, and live leaderboard updates.
@@ -24,230 +25,264 @@
 
 			<div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
 				<a href="https://discord.gg/jMRumVerj2" target="_blank"
-				   class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+				   class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+					<i class="fab fa-discord mr-2"></i>
 					Join DD Pals
 				</a>
 				<a href="https://ko-fi.com/chupacabra4129" target="_blank"
-				   class="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-					<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-7 h-7 mr-3 inline">
+				   class="px-8 py-4 bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+					<i class="fas fa-coffee mr-3"></i>
 					Support Development
 				</a>
 				<a href="#features"
-				   class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white/20">
+				   class="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white/20 dark:hover:bg-white/30">
+					<i class="fas fa-rocket mr-2"></i>
 					Explore Features
 				</a>
 			</div>
 
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
 				<div
-					class="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
+					class="bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20 dark:hover:bg-white/10">
 					<div class="text-4xl font-bold text-white mb-3">900+</div>
-					<div class="text-blue-100 text-lg">Registered Users</div>
-					<div class="text-blue-200 text-sm mt-2">Active community members</div>
+					<div class="text-blue-100 dark:text-slate-200 text-lg transition-colors duration-300">Registered
+						Users
+					</div>
+					<div class="text-blue-200 dark:text-slate-300 text-sm mt-2 transition-colors duration-300">Active
+						community members
+					</div>
 				</div>
 				<div
-					class="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
+					class="bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20 dark:hover:bg-white/10">
 					<div class="text-4xl font-bold text-white mb-3">50+</div>
-					<div class="text-blue-100 text-lg">Daily Updates</div>
-					<div class="text-blue-200 text-sm mt-2">Automatic role syncing</div>
+					<div class="text-blue-100 dark:text-slate-200 text-lg transition-colors duration-300">Daily
+						Updates
+					</div>
+					<div class="text-blue-200 dark:text-slate-300 text-sm mt-2 transition-colors duration-300">Automatic
+						role syncing
+					</div>
 				</div>
 				<div
-					class="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20">
+					class="bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/20 dark:hover:bg-white/10">
 					<div class="text-4xl font-bold text-white mb-3">99.9%</div>
-					<div class="text-blue-100 text-lg">Uptime</div>
-					<div class="text-blue-200 text-sm mt-2">Reliable service</div>
+					<div class="text-blue-100 dark:text-slate-200 text-lg transition-colors duration-300">Uptime</div>
+					<div class="text-blue-200 dark:text-slate-300 text-sm mt-2 transition-colors duration-300">Reliable
+						service
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
 
-<section id="features" class="py-20 bg-gray-50">
+<section id="features" class="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="text-center mb-16">
-			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-				<i class="mr-3 text-primary-600"></i>
+			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+				<i class="fas fa-cogs mr-3 text-blue-600 dark:text-blue-400"></i>
 				Powerful Features
 			</h2>
-			<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+			<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-300">
 				Everything you need to manage your Devil Daggers community
 			</p>
 		</div>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 			<div
-				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
-				<div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-					<i class="text-primary-600 text-2xl"></i>
+				class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+				<div
+					class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300">
+					<i class="fas fa-user-cog text-blue-600 dark:text-blue-400 text-2xl"></i>
 				</div>
-				<h3 class="text-xl font-bold mb-4 text-gray-900">Auto Role Management</h3>
-				<p class="text-gray-600 mb-6">
+				<h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">Auto
+					Role Management</h3>
+				<p class="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">
 					Automatically assigns Discord roles based on Devil Daggers scores. From newcomer to world record
 					holder.
 				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Score-based roles</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Rank-based roles</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Daily updates</li>
+				<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Score-based roles</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Rank-based roles</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Daily updates</li>
 				</ul>
 			</div>
 
 			<div
-				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
-				<div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-					<i class="text-green-600 text-2xl"></i>
+				class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+				<div
+					class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300">
+					<i class="fas fa-chart-bar text-green-600 dark:text-green-400 text-2xl"></i>
 				</div>
-				<h3 class="text-xl font-bold mb-4 text-gray-900">Live Statistics</h3>
-				<p class="text-gray-600 mb-6">
+				<h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">Live
+					Statistics</h3>
+				<p class="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">
 					Real-time player statistics including scores, ranks, accuracy, and historical data.
 				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Real-time data</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Score tracking</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Performance metrics
+				<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Real-time data</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Score tracking</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Performance metrics
 					</li>
 				</ul>
 			</div>
 
 			<div
-				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
-				<div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-					<i class="text-purple-600 text-2xl"></i>
+				class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+				<div
+					class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300">
+					<i class="fas fa-newspaper text-purple-600 dark:text-purple-400 text-2xl"></i>
 				</div>
-				<h3 class="text-xl font-bold mb-4 text-gray-900">DD News</h3>
-				<p class="text-gray-600 mb-6">
+				<h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">DD
+					News</h3>
+				<p class="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">
 					Automatic notifications for impressive scores with beautiful leaderboard screenshots.
 				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>1000s+ announcements
+				<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>1000s+ announcements
 					</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Custom images</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Country flags</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Custom images</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Country flags</li>
 				</ul>
 			</div>
 
 			<div
-				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
-				<div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mb-6">
-					<i class="text-red-600 text-2xl"></i>
+				class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+				<div
+					class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300">
+					<i class="fas fa-stopwatch text-red-600 dark:text-red-400 text-2xl"></i>
 				</div>
-				<h3 class="text-xl font-bold mb-4 text-gray-900">Best Splits Tracking</h3>
-				<p class="text-gray-600 mb-6">
+				<h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">Best
+					Splits Tracking</h3>
+				<p class="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">
 					Track and update the best Devil Daggers splits from ddstats runs.
 				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Split analysis</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Auto updates</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Best calculations</li>
+				<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Split analysis</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Auto updates</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Best calculations</li>
 				</ul>
 			</div>
 
 			<div
-				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
-				<div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
-					<i class="text-yellow-600 text-2xl"></i>
+				class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+				<div
+					class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300">
+					<i class="fas fa-mountain text-yellow-600 dark:text-yellow-400 text-2xl"></i>
 				</div>
-				<h3 class="text-xl font-bold mb-4 text-gray-900">Homing Peak Records</h3>
-				<p class="text-gray-600 mb-6">
+				<h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+					Homing Peak Records</h3>
+				<p class="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">
 					Track the highest homing dagger counts achieved by players.
 				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Peak tracking</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Record management</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Notifications</li>
+				<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Peak tracking</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Record management</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Notifications</li>
 				</ul>
 			</div>
 
 			<div
-				class="bg-white rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200">
-				<div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
-					<i class="fab fa-twitch text-indigo-600 text-2xl"></i>
+				class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+				<div
+					class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300">
+					<i class="fab fa-twitch text-indigo-600 dark:text-indigo-400 text-2xl"></i>
 				</div>
-				<h3 class="text-xl font-bold mb-4 text-gray-900">Twitch Integration</h3>
-				<p class="text-gray-600 mb-6">
+				<h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+					Twitch Integration</h3>
+				<p class="text-gray-600 dark:text-gray-300 mb-6 transition-colors duration-300">
 					Link Twitch accounts to player profiles on DDLIVE for community connection.
 				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>DDLIVE integration
+				<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>DDLIVE integration
 					</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Stream status</li>
-					<li class="flex items-center"><i class="text-green-500 mr-2"></i>Community links</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Stream status</li>
+					<li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Community links</li>
 				</ul>
 			</div>
 		</div>
 	</div>
 </section>
 
-<section id="api" class="py-20 bg-white">
+<section id="api" class="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="text-center mb-16">
-			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-				<i class="mr-3 text-primary-600"></i>
+			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+				<i class="fas fa-code mr-3 text-blue-600 dark:text-blue-400"></i>
 				Developer API
 			</h2>
-			<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+			<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-300">
 				Access Clubber's data through our REST API for your own applications
 			</p>
 		</div>
 
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 			<div>
-				<h3 class="text-2xl font-bold mb-6 text-gray-900">API Endpoints</h3>
+				<h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 transition-colors duration-300">API
+					Endpoints</h3>
 				<div class="space-y-4">
 					<div
-						class="bg-gray-50 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:border-primary-300 hover:shadow-lg border border-gray-200 api-endpoint"
+						class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg border border-gray-200 dark:border-gray-600 api-endpoint"
 						data-endpoint="users">
 						<div class="flex items-center justify-between mb-2">
-							<span class="font-mono text-sm bg-green-100 text-green-800 px-3 py-1 rounded">GET</span>
-							<span class="text-sm text-gray-500 font-mono">/users</span>
+							<span
+								class="font-mono text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 px-3 py-1 rounded transition-colors duration-300">GET</span>
+							<span
+								class="text-sm text-gray-500 dark:text-gray-400 font-mono transition-colors duration-300">/users</span>
 						</div>
-						<p class="text-gray-600">Get all registered users</p>
+						<p class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Get all registered
+							users</p>
 						<div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
-							<i class="text-primary-600 text-xs mr-1"></i>
-							<span class="text-xs text-primary-600">Click to see example</span>
+							<i class="fas fa-mouse-pointer text-blue-600 dark:text-blue-400 text-xs mr-1"></i>
+							<span class="text-xs text-blue-600 dark:text-blue-400">Click to see example</span>
 						</div>
 					</div>
 
 					<div
-						class="bg-gray-50 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:border-primary-300 hover:shadow-lg border border-gray-200 api-endpoint"
+						class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg border border-gray-200 dark:border-gray-600 api-endpoint"
 						data-endpoint="bestsplits">
 						<div class="flex items-center justify-between mb-2">
-							<span class="font-mono text-sm bg-green-100 text-green-800 px-3 py-1 rounded">GET</span>
-							<span class="text-sm text-gray-500 font-mono">/bestsplits</span>
+							<span
+								class="font-mono text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 px-3 py-1 rounded transition-colors duration-300">GET</span>
+							<span
+								class="text-sm text-gray-500 dark:text-gray-400 font-mono transition-colors duration-300">/bestsplits</span>
 						</div>
-						<p class="text-gray-600">Current best Devil Daggers splits</p>
+						<p class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Current best Devil
+							Daggers splits</p>
 						<div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
-							<i class="text-primary-600 text-xs mr-1"></i>
-							<span class="text-xs text-primary-600">Click to see example</span>
+							<i class="fas fa-mouse-pointer text-blue-600 dark:text-blue-400 text-xs mr-1"></i>
+							<span class="text-xs text-blue-600 dark:text-blue-400">Click to see example</span>
 						</div>
 					</div>
 
 					<div
-						class="bg-gray-50 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 hover:border-primary-300 hover:shadow-lg border border-gray-200 api-endpoint"
+						class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg border border-gray-200 dark:border-gray-600 api-endpoint"
 						data-endpoint="dailynews">
 						<div class="flex items-center justify-between mb-2">
-							<span class="font-mono text-sm bg-green-100 text-green-800 px-3 py-1 rounded">GET</span>
-							<span class="text-sm text-gray-500 font-mono">/dailynews</span>
+							<span
+								class="font-mono text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 px-3 py-1 rounded transition-colors duration-300">GET</span>
+							<span
+								class="text-sm text-gray-500 dark:text-gray-400 font-mono transition-colors duration-300">/dailynews</span>
 						</div>
-						<p class="text-gray-600">Recent DD news items</p>
+						<p class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Recent DD news
+							items</p>
 						<div class="mt-2 opacity-0 transition-opacity duration-300 hover:opacity-100">
-							<i class="text-primary-600 text-xs mr-1"></i>
-							<span class="text-xs text-primary-600">Click to see example</span>
+							<i class="fas fa-mouse-pointer text-blue-600 dark:text-blue-400 text-xs mr-1"></i>
+							<span class="text-xs text-blue-600 dark:text-blue-400">Click to see example</span>
 						</div>
 					</div>
 				</div>
 
 				<div class="mt-8">
-					<!-- px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white/20 -->
 					<a href="/swagger" target="_blank"
-					   class="inline-flex border border-black/20 backdrop-blur-md rounded-xl items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 font-semibold transition-all duration-300 transform hover:scale-105 hover:bg-white/20">
-						<img src="~/images/swagger-logo.svg" alt="Swagger" class="w-5 h-5 mr-2">
+					   class="inline-flex border border-gray-300 dark:border-gray-600 backdrop-blur-md rounded-xl items-center px-6 py-3 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold transition-all duration-300 transform hover:scale-105">
+						<i class="fas fa-book mr-2"></i>
 						View Documentation
 					</a>
 				</div>
 			</div>
 
-			<div class="bg-gray-900 rounded-2xl p-6 overflow-hidden border border-gray-700">
+			<div
+				class="bg-gray-900 dark:bg-gray-950 rounded-2xl p-6 overflow-hidden border border-gray-700 dark:border-gray-600 transition-colors duration-300">
 				<div class="flex items-center mb-4">
 					<div class="flex space-x-2">
 						<div class="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -266,97 +301,115 @@
 	</div>
 </section>
 
-<section id="stats" class="py-20 bg-gray-50">
+<section id="stats" class="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="text-center mb-16">
-			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-				<i class="mr-3 text-primary-600"></i>
+			<h2 class="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+				<i class="fas fa-chart-line mr-3 text-blue-600 dark:text-blue-400"></i>
 				Live Statistics
 			</h2>
-			<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+			<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto transition-colors duration-300">
 				Real-time data from the Devil Daggers community
 			</p>
 		</div>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="stats-container">
-			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-					<i class="text-primary-600 text-xl"></i>
+			<div
+				class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+				<div
+					class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+					<i class="fas fa-users text-blue-600 dark:text-blue-400 text-xl"></i>
 				</div>
-				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-users">Loading...</div>
-				<div class="text-gray-600">Registered Users</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+				     id="live-users">Loading...
+				</div>
+				<div class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Registered Users</div>
 			</div>
 
-			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-					<i class="text-green-600 text-xl"></i>
+			<div
+				class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+				<div
+					class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+					<i class="fas fa-trophy text-green-600 dark:text-green-400 text-xl"></i>
 				</div>
-				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-news">Loading...</div>
-				<div class="text-gray-600">Recent Records</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+				     id="live-news">Loading...
+				</div>
+				<div class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Recent Records</div>
 			</div>
 
-			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-					<i class="text-purple-600 text-xl"></i>
+			<div
+				class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+				<div
+					class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+					<i class="fas fa-stopwatch text-purple-600 dark:text-purple-400 text-xl"></i>
 				</div>
-				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-splits">Loading...</div>
-				<div class="text-gray-600">Best Splits</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+				     id="live-splits">Loading...
+				</div>
+				<div class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Best Splits</div>
 			</div>
 
-			<div class="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-200">
-				<div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-					<i class="text-red-600 text-xl"></i>
+			<div
+				class="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+				<div
+					class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+					<i class="fas fa-mountain text-red-600 dark:text-red-400 text-xl"></i>
 				</div>
-				<div class="text-3xl font-bold mb-2 text-gray-900" id="live-peaks">Loading...</div>
-				<div class="text-gray-600">Peak Records</div>
+				<div class="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100 transition-colors duration-300"
+				     id="live-peaks">Loading...
+				</div>
+				<div class="text-gray-600 dark:text-gray-300 transition-colors duration-300">Peak Records</div>
 			</div>
 		</div>
 	</div>
 </section>
 
-<section class="py-20 bg-orange-500">
+<section class="py-20 bg-orange-500 dark:bg-orange-600 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 		<div class="mb-8">
-			<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-12 h-12 mx-auto mb-4">
+			<i class="fas fa-coffee text-6xl text-white mb-4"></i>
 			<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
 				Support Development
 			</h2>
-			<p class="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
+			<p class="text-xl text-orange-100 dark:text-orange-50 mb-8 max-w-3xl mx-auto transition-colors duration-300">
 				Help keep Clubber running and enable new features with your support
 			</p>
 		</div>
 
 		<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
 			<a href="https://ko-fi.com/chupacabra4129" target="_blank"
-			   class="px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
-				<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-7 h-7 mr-2 inline">
+			   class="px-8 py-4 bg-white hover:bg-gray-100 text-orange-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
+				<i class="fas fa-coffee mr-2"></i>
 				Buy me a coffee
 			</a>
 			<a href="https://github.com/Spoertm/Clubber" target="_blank"
-			   class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-orange-600">
-				<img src="~/images/github-logo.svg" alt="GitHub" class="w-7 h-7 mr-2 invert inline">
+			   class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-orange-600 dark:hover:text-orange-600">
+				<i class="fab fa-github mr-2"></i>
 				Contribute
 			</a>
 		</div>
 	</div>
 </section>
 
-<section class="py-20 bg-primary-600">
+<section class="py-20 bg-blue-600 dark:bg-blue-700 transition-colors duration-300">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-		<h2 class="text-4xl md:text-5xl font-bold mb-6">
+		<h2 class="text-4xl md:text-5xl font-bold mb-6 text-white">
 			Ready to Get Started?
 		</h2>
-		<p class="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+		<p class="text-xl text-blue-100 dark:text-blue-50 mb-8 max-w-3xl mx-auto transition-colors duration-300">
 			Join the DD Pals Discord server and experience Clubber's features firsthand
 		</p>
 
 		<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
 			<a href="https://discord.gg/jMRumVerj2" target="_blank"
-			   class="px-8 py-4 bg-white text-primary-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
+			   class="px-8 py-4 bg-white hover:bg-gray-100 text-blue-600 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105">
+				<i class="fab fa-discord mr-2"></i>
 				Join DD Pals Discord
 			</a>
 			<a href="/Home/Privacy"
-			   class="px-8 py-4 bg-transparent border-2 border-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-primary-600">
+			   class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:bg-white hover:text-blue-600 dark:hover:text-blue-600">
+				<i class="fas fa-shield-alt mr-2"></i>
 				Privacy Policy
 			</a>
 		</div>
@@ -366,15 +419,20 @@
 <script>
 	const apiExamples = {
 		users: {
-			leaderboardId: 118832,
-			discordId: "743431502842298368",
+			leaderboardId: 312313,
+			discordId: "123456789",
 			twitchUsername: "ClubberTTV"
 		},
 		bestsplits: {
-			name: "1000",
-			time: 996,
-			value: 47,
-			description: "Spoertm 1083.7000"
+			"name": "800",
+			"time": 800,
+			"value": 176,
+			"description": "Chupacabra 944.6135",
+			"gameInfo": {
+				"player_name": null,
+				"id": 0,
+				"etc": "etc"
+			}
 		},
 		dailynews: {
 			leaderboardId: 118832,
@@ -390,10 +448,10 @@
 				const responseElement = document.getElementById('api-response');
 
 				document.querySelectorAll('.api-endpoint').forEach(ep => {
-					ep.classList.remove('border-primary-500');
+					ep.classList.remove('border-blue-500', 'dark:border-blue-400');
 				});
 
-				endpoint.classList.add('border-primary-500');
+				endpoint.classList.add('border-blue-500', 'dark:border-blue-400');
 
 				const exampleData = apiExamples[endpointType];
 				responseElement.innerHTML = `<code>${JSON.stringify(exampleData, null, 2)}</code>`;
@@ -419,9 +477,10 @@
 
 	async function loadLiveStats() {
 		try {
-			const usersResponse = await fetch('/users');
-			const users = await usersResponse.json();
-			animateCounter('live-users', users.length);
+			const usersResponse = await fetch('/user-count');
+			const userCountText = await usersResponse.text();
+			const numberOfUsers = parseInt(userCountText);
+			animateCounter('live-users', numberOfUsers);
 
 			const newsResponse = await fetch('/dailynews');
 			const news = await newsResponse.json();
@@ -471,7 +530,7 @@
 		});
 	}, observerOptions);
 
-	document.querySelectorAll('.bg-white.rounded-2xl').forEach(card => {
+	document.querySelectorAll('.bg-white.dark\\:bg-gray-800').forEach(card => {
 		observer.observe(card);
 	});
 </script>

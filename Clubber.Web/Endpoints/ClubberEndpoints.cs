@@ -13,6 +13,8 @@ internal static class ClubberEndpoints
 	{
 		app.MapGet("/users", RegisteredUsers).WithTags("Users");
 
+		app.MapGet("/user-count", RegisteredUserCount).WithTags("Users");
+
 		app.MapGet("/users/by-leaderboardId", UserByLeaderboardId).WithTags("Users");
 
 		app.MapGet("/users/by-discordId", UserByDiscordId).WithTags("Users");
@@ -62,5 +64,12 @@ internal static class ClubberEndpoints
 	private static async Task<List<DdUser>> RegisteredUsers(IDatabaseHelper dbHelper)
 	{
 		return await dbHelper.GetRegisteredUsers();
+	}
+
+	private static async Task<int> RegisteredUserCount(IServiceScopeFactory scopeFactory)
+	{
+		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
+		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
+		return await dbContext.DdPlayers.CountAsync();
 	}
 }
