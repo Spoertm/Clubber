@@ -133,7 +133,7 @@ public static class EmbedHelper
 			.WithThumbnailUrl(context.Client.CurrentUser.GetAvatarUrl())
 			.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
 
-		foreach (IGrouping<string, CommandInfo>? group in service.Commands.GroupBy(x => x.Module.Name))
+		foreach (IGrouping<string, CommandInfo> group in service.Commands.GroupBy(x => x.Module.Name))
 		{
 			string groupCommands = string.Join(", ", group
 				.Where(cmd => cmd.CheckPreconditionsAsync(context).Result.IsSuccess)

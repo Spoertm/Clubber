@@ -48,7 +48,7 @@ public sealed class ScoreRoleService
 			.ToArray();
 
 		List<UserRoleUpdate> roleUpdates = [];
-		foreach ((IGuildUser? guildUser, EntryResponse? lbPlayer) in registeredDiscordLbPlayers)
+		foreach ((IGuildUser guildUser, EntryResponse lbPlayer) in registeredDiscordLbPlayers)
 		{
 			RoleChangeResult roleChangeResult = GetRoleChange(guildUser.RoleIds, lbPlayer);
 			if (roleChangeResult is RoleUpdate roleUpdate)
