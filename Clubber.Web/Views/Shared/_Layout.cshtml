@@ -1,5 +1,4 @@
 ﻿<!DOCTYPE html>
-<!--suppress ALL -->
 <html lang="en" class="scroll-smooth">
 <head>
 	<meta charset="utf-8"/>
@@ -7,155 +6,53 @@
 	<title>@ViewData["Title"] - Clubber</title>
 	<meta name="description"
 	      content="Clubber - Advanced Discord bot for Devil Daggers community with role management, statistics tracking, and live updates."/>
-	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
 
-	<!-- Tailwind CSS -->
-	<script src="https://cdn.tailwindcss.com"></script>
-	<script>
-		tailwind.config = {
-			darkMode: 'class',
-			theme: {
-				extend: {
-					colors: {
-						primary: {
-							50: '#fef2f2',
-							100: '#fee2e2',
-							200: '#fecaca',
-							300: '#fca5a5',
-							400: '#f87171',
-							500: '#ef4444',
-							600: '#dc2626',
-							700: '#b91c1c',
-							800: '#991b1b',
-							900: '#7f1d1d',
-						},
-						dark: {
-							50: '#f8fafc',
-							100: '#f1f5f9',
-							200: '#e2e8f0',
-							300: '#cbd5e1',
-							400: '#94a3b8',
-							500: '#64748b',
-							600: '#475569',
-							700: '#334155',
-							800: '#1e293b',
-							900: '#0f172a',
-						}
-					},
-					fontFamily: {
-						'display': ['Inter', 'system-ui', 'sans-serif'],
-						'body': ['Inter', 'system-ui', 'sans-serif'],
-					},
-					animation: {
-						'fade-in': 'fadeIn 0.5s ease-in-out',
-						'slide-up': 'slideUp 0.6s ease-out',
-						'float': 'float 6s ease-in-out infinite',
-						'glow': 'glow 2s ease-in-out infinite alternate',
-					},
-					keyframes: {
-						fadeIn: {
-							'0%': {opacity: '0'},
-							'100%': {opacity: '1'},
-						},
-						slideUp: {
-							'0%': {opacity: '0', transform: 'translateY(30px)'},
-							'100%': {opacity: '1', transform: 'translateY(0)'},
-						},
-						float: {
-							'0%, 100%': {transform: 'translateY(0px)'},
-							'50%': {transform: 'translateY(-20px)'},
-						},
-						glow: {
-							'0%': {boxShadow: '0 0 20px rgba(239, 68, 68, 0.5)'},
-							'100%': {boxShadow: '0 0 30px rgba(239, 68, 68, 0.8)'},
-						}
-					}
-				}
-			}
-		}
-	</script>
+	<!-- Dynamic Favicon -->
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64," id="favicon">
+
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
 
 	<!-- Google Fonts -->
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
 	      rel="stylesheet">
-
-	<style>
-		body {
-			font-family: 'Inter', system-ui, sans-serif;
-		}
-
-		.gradient-bg {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		}
-
-		.dark-gradient-bg {
-			background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-		}
-
-		.glass-morphism {
-			background: rgba(255, 255, 255, 0.1);
-			backdrop-filter: blur(10px);
-			border: 1px solid rgba(255, 255, 255, 0.2);
-		}
-
-		.dark .glass-morphism {
-			background: rgba(0, 0, 0, 0.3);
-			border: 1px solid rgba(255, 255, 255, 0.1);
-		}
-
-		.scrollbar-hide {
-			-ms-overflow-style: none;
-			scrollbar-width: none;
-		}
-
-		.scrollbar-hide::-webkit-scrollbar {
-			display: none;
-		}
-
-		.custom-shadow {
-			box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-		}
-
-		.dark .custom-shadow {
-			box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-		}
-	</style>
 </head>
-<body class="bg-white dark:bg-dark-900 text-gray-900 dark:text-white transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
 
 <!-- Navigation -->
-<nav class="fixed top-0 w-full z-50 glass-morphism">
+<nav
+	class="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
 			<!-- Logo -->
 			<div class="flex items-center">
 				<a href="/" class="flex items-center space-x-3">
-					<div
-						class="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center animate-glow">
-						<i class="fas fa-robot text-white text-lg"></i>
-					</div>
-					<span
-						class="text-xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent">
-                            Clubber
-                        </span>
+					<img src="~/images/ClubberWhite.ico" alt="Clubber" class="w-8 h-8 invert dark:invert-0">
+					<span class="text-xl font-bold text-gray-900 dark:text-white">
+                        Clubber
+                    </span>
 				</a>
 			</div>
 
 			<!-- Navigation Links -->
-			<div class="hidden md:flex items-center space-x-8">
+			<div class="hidden md:flex items-center space-x-6">
 				<a href="#features"
-				   class="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors duration-200">Features</a>
+				   class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">Features</a>
 				<a href="#api"
-				   class="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors duration-200">API</a>
+				   class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">API</a>
 				<a href="#stats"
-				   class="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors duration-200">Live
-					Stats</a>
+				   class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">Stats</a>
 				<a href="https://github.com/Spoertm/Clubber" target="_blank"
-				   class="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors duration-200">
-					<i class="fab fa-github mr-2"></i>GitHub
+				   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+					<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2 invert-0 dark:invert">
+					GitHub
+				</a>
+				<a href="https://ko-fi.com/chupacabra4129" target="_blank"
+				   class="flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200">
+					<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-5 h-5 mr-2">
+					Support
 				</a>
 				<button id="theme-toggle"
-				        class="p-2 rounded-lg bg-gray-200 dark:bg-dark-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-dark-700 transition-colors duration-200">
+				        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
 					<i class="fas fa-moon dark:hidden"></i>
 					<i class="fas fa-sun hidden dark:inline"></i>
 				</button>
@@ -163,7 +60,7 @@
 
 			<!-- Mobile menu button -->
 			<div class="md:hidden">
-				<button id="mobile-menu-button" class="p-2 rounded-lg text-gray-700 dark:text-gray-300">
+				<button id="mobile-menu-button" class="p-2 rounded-lg text-gray-600 dark:text-gray-300">
 					<i class="fas fa-bars"></i>
 				</button>
 			</div>
@@ -171,14 +68,24 @@
 	</div>
 
 	<!-- Mobile menu -->
-	<div id="mobile-menu" class="hidden md:hidden glass-morphism border-t border-gray-200 dark:border-dark-700">
+	<div id="mobile-menu"
+	     class="hidden md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
 		<div class="px-4 py-4 space-y-3">
-			<a href="#features" class="block text-gray-700 dark:text-gray-300 hover:text-primary-500">Features</a>
-			<a href="#api" class="block text-gray-700 dark:text-gray-300 hover:text-primary-500">API</a>
-			<a href="#stats" class="block text-gray-700 dark:text-gray-300 hover:text-primary-500">Live Stats</a>
+			<a href="#features"
+			   class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Features</a>
+			<a href="#api"
+			   class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">API</a>
+			<a href="#stats"
+			   class="block text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Stats</a>
 			<a href="https://github.com/Spoertm/Clubber" target="_blank"
-			   class="block text-gray-700 dark:text-gray-300 hover:text-primary-500">
-				<i class="fab fa-github mr-2"></i>GitHub
+			   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+				<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2 invert dark:invert-0">
+				GitHub
+			</a>
+			<a href="https://ko-fi.com/chupacabra4129" target="_blank"
+			   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+				<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-4 h-4 mr-2">
+				Support
 			</a>
 		</div>
 	</div>
@@ -190,56 +97,73 @@
 </main>
 
 <!-- Footer -->
-<footer class="bg-gray-50 dark:bg-dark-800 border-t border-gray-200 dark:border-dark-700">
+<footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+		<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 			<div>
 				<div class="flex items-center space-x-3 mb-4">
-					<div
-						class="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-						<i class="fas fa-robot text-white text-sm"></i>
-					</div>
-					<span class="text-lg font-bold">Clubber</span>
+					<img src="~/images/Clubber.svg" alt="Clubber" class="w-8 h-8 invert dark:invert-0">
+					<span class="text-lg font-bold text-gray-900 dark:text-white">Clubber</span>
 				</div>
 				<p class="text-gray-600 dark:text-gray-400 text-sm">
-					Advanced Discord bot for the Devil Daggers community, providing automated role management,
-					statistics tracking, and live updates.
+					Advanced Discord bot for the Devil Daggers community with automated role management and live
+					statistics.
 				</p>
 			</div>
 
 			<div>
-				<h3 class="font-semibold mb-3">Quick Links</h3>
+				<h3 class="font-semibold mb-3 text-gray-900 dark:text-white">Quick Links</h3>
 				<div class="space-y-2 text-sm">
-					<a href="/swagger" class="block text-gray-600 dark:text-gray-400 hover:text-primary-500">API
-						Documentation</a>
+					<a href="/swagger"
+					   class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+						<img src="~/images/swagger-logo.svg" alt="Swagger" class="w-4 h-4 mr-2 invert dark:invert-0">
+						API Docs
+					</a>
 					<a href="https://discord.gg/jMRumVerj2" target="_blank"
-					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-500">DD Pals Discord</a>
+					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">DD
+						Pals Discord</a>
 					<a href="https://ddstats.live/" target="_blank"
-					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-500">DD Stats Live</a>
-					<a href="https://devildaggers.info/" target="_blank"
-					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-500">Devil Daggers Info</a>
+					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">DD
+						Stats Live</a>
 				</div>
 			</div>
 
 			<div>
-				<h3 class="font-semibold mb-3">Support</h3>
+				<h3 class="font-semibold mb-3 text-gray-900 dark:text-white">Support</h3>
 				<div class="space-y-2 text-sm">
 					<a href="https://ko-fi.com/chupacabra4129" target="_blank"
-					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-500">
-						<i class="fas fa-coffee mr-2"></i>Donate
+					   class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+						<img src="~/images/kofi-logo.svg" alt="Ko-fi" class="w-4 h-4 mr-2">
+						Buy me a coffee
 					</a>
 					<a href="https://github.com/Spoertm/Clubber/issues" target="_blank"
-					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-500">
-						<i class="fab fa-github mr-2"></i>Report Issues
+					   class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+						<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2 invert dark:invert-0">
+						Report Issues
 					</a>
+					<a href="/Home/Privacy"
+					   class="block text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Privacy
+						Policy</a>
 				</div>
+			</div>
+
+			<div>
+				<h3 class="font-semibold mb-3 text-gray-900 dark:text-white">Open Source</h3>
+				<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+					Clubber is open source and welcomes contributions.
+				</p>
+				<a href="https://github.com/Spoertm/Clubber" target="_blank"
+				   class="inline-flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors duration-200">
+					<img src="~/images/github-logo.svg" alt="GitHub" class="w-4 h-4 mr-2">
+					View Source
+				</a>
 			</div>
 		</div>
 
 		<div
-			class="border-t border-gray-200 dark:border-dark-700 mt-8 pt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+			class="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8 text-center text-sm text-gray-600 dark:text-gray-400">
 			<p>&copy; @DateTime.Now.Year Clubber. Created by <a href="https://github.com/Spoertm" target="_blank"
-			                                                    class="text-primary-500 hover:text-primary-600">Spoertm</a>
+			                                                    class="text-primary-600 dark:text-primary-400 hover:underline">Spoertm</a>
 			</p>
 		</div>
 	</div>
@@ -247,50 +171,75 @@
 
 <!-- Scripts -->
 <script>
-	// Dark mode toggle
-	const themeToggle = document.getElementById('theme-toggle');
-	const html = document.documentElement;
+	// Dynamic favicon
+	function updateFavicon() {
+		const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches ||
+			document.documentElement.classList.contains('dark');
 
-	// Check for saved theme preference or default to light mode
-	const currentTheme = localStorage.getItem('theme') || 'light';
-	html.classList.toggle('dark', currentTheme === 'dark');
+		const svgColor = isDark ? '#ffffff' : '#000000';
+		const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+			<rect width="100" height="100" fill="${svgColor}"/>
+			<text x="50" y="50" font-family="Arial" font-size="60" fill="${isDark ? '#000000' : '#ffffff'}" text-anchor="middle" dominant-baseline="middle">C</text>
+		</svg>`;
 
-	themeToggle.addEventListener('click', () => {
-		html.classList.toggle('dark');
-		const isDark = html.classList.contains('dark');
-		localStorage.setItem('theme', isDark ? 'dark' : 'light');
+		document.getElementById('favicon').href = `data:image/svg+xml;base64,${btoa(faviconSvg)}`;
+	}
+
+	// Initialize favicon
+	document.addEventListener('DOMContentLoaded', function () {
+		updateFavicon();
 	});
 
-	// Mobile menu toggle
-	const mobileMenuButton = document.getElementById('mobile-menu-button');
-	const mobileMenu = document.getElementById('mobile-menu');
+	window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
 
-	mobileMenuButton.addEventListener('click', () => {
-		mobileMenu.classList.toggle('hidden');
+	const observer = new MutationObserver(updateFavicon);
+	observer.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ['class']
 	});
 
-	// Smooth scrolling for anchor links
-	document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-		anchor.addEventListener('click', function (e) {
-			e.preventDefault();
-			const target = document.querySelector(this.getAttribute('href'));
-			if (target) {
-				target.scrollIntoView({
-					behavior: 'smooth',
-					block: 'start'
-				});
-			}
-		});
-	});
+	document.addEventListener('DOMContentLoaded', function () {
+		const themeToggle = document.getElementById('theme-toggle');
+		const html = document.documentElement;
 
-	// Add scroll effect to navigation
-	window.addEventListener('scroll', () => {
-		const nav = document.querySelector('nav');
-		if (window.scrollY > 10) {
-			nav.classList.add('shadow-lg');
-		} else {
-			nav.classList.remove('shadow-lg');
+		// Check for saved theme preference or default to light mode
+		const currentTheme = localStorage.getItem('theme') || 'light';
+		if (currentTheme === 'dark') {
+			html.classList.add('dark');
 		}
+
+		if (themeToggle) {
+			themeToggle.addEventListener('click', () => {
+				html.classList.toggle('dark');
+				const isDark = html.classList.contains('dark');
+				localStorage.setItem('theme', isDark ? 'dark' : 'light');
+				updateFavicon();
+			});
+		}
+
+		// Mobile menu
+		const mobileMenuButton = document.getElementById('mobile-menu-button');
+		const mobileMenu = document.getElementById('mobile-menu');
+
+		if (mobileMenuButton && mobileMenu) {
+			mobileMenuButton.addEventListener('click', () => {
+				mobileMenu.classList.toggle('hidden');
+			});
+		}
+
+		// Smooth scrolling
+		document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+			anchor.addEventListener('click', function (e) {
+				e.preventDefault();
+				const target = document.querySelector(this.getAttribute('href'));
+				if (target) {
+					target.scrollIntoView({
+						behavior: 'smooth',
+						block: 'start'
+					});
+				}
+			});
+		});
 	});
 </script>
 </body>

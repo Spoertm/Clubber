@@ -1,5 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @tailwind base;
 @tailwind components;
@@ -8,6 +7,45 @@
 @layer base {
 	body {
 		font-family: 'Inter', system-ui, sans-serif;
+	}
+
+	.glass-effect {
+		background: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+	}
+
+	.dark .glass-effect {
+		background: rgba(0, 0, 0, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+	}
+
+	.hero-gradient {
+		background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+	}
+
+	.card-hover {
+		transition: all 0.3s ease;
+	}
+
+	.card-hover:hover {
+		transform: translateY(-4px);
+	}
+
+	/* Additional glass morphism utilities */
+	.glass-card {
+		background: rgba(255, 255, 255, 0.05);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.dark .glass-card {
+		background: rgba(0, 0, 0, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
 }
 
@@ -19,5 +57,25 @@
 
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none;
+	}
+
+	/* Better scrollbar for code blocks */
+	.scrollbar-thin {
+		scrollbar-width: thin;
+		scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar {
+		height: 4px;
+		width: 4px;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		background-color: rgba(156, 163, 175, 0.5);
+		border-radius: 2px;
 	}
 }
