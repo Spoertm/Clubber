@@ -4,10 +4,7 @@ public class Result
 {
 	protected Result(bool isSuccess, string errorMsg)
 	{
-		if (isSuccess && !string.IsNullOrEmpty(errorMsg))
-			throw new InvalidOperationException();
-
-		if (!isSuccess && string.IsNullOrEmpty(errorMsg))
+		if (isSuccess ^ string.IsNullOrEmpty(errorMsg))
 			throw new InvalidOperationException();
 
 		IsSuccess = isSuccess;
