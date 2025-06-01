@@ -1,0 +1,187 @@
+﻿/* Swagger UI Dark Theme for Clubber */
+
+.swagger-ui {
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.swagger-ui .topbar {
+	background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+	border-bottom: 1px solid #374151;
+}
+
+.swagger-ui .info {
+	margin: 20px 0;
+}
+
+.swagger-ui .info .title {
+	color: #ef4444;
+	font-size: 2.5rem;
+	font-weight: 700;
+	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.swagger-ui .info .description {
+	color: #94a3b8;
+	font-size: 1.1rem;
+	line-height: 1.6;
+	margin-top: 1rem;
+}
+
+.swagger-ui .scheme-container {
+	background: #1e293b;
+	border: 1px solid #374151;
+	border-radius: 8px;
+	padding: 20px;
+	margin: 20px 0;
+}
+
+.swagger-ui .opblock.opblock-get {
+	background: rgba(34, 197, 94, 0.1);
+	border: 1px solid #22c55e;
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary {
+	border-color: #22c55e;
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+	background: #22c55e;
+	color: white;
+	font-weight: 600;
+}
+
+.swagger-ui .opblock.opblock-post {
+	background: rgba(59, 130, 246, 0.1);
+	border: 1px solid #3b82f6;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary {
+	border-color: #3b82f6;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+	background: #3b82f6;
+	color: white;
+	font-weight: 600;
+}
+
+.swagger-ui .opblock-summary-path {
+	color: #e2e8f0;
+	font-family: 'Fira Code', monospace;
+	font-weight: 500;
+}
+
+.swagger-ui .opblock-summary-description {
+	color: #94a3b8;
+}
+
+.swagger-ui .btn {
+	border-radius: 8px;
+	font-weight: 600;
+	transition: all 0.2s;
+}
+
+.swagger-ui .btn.execute {
+	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+	border: none;
+	color: white;
+	padding: 10px 20px;
+}
+
+.swagger-ui .btn.execute:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+}
+
+.swagger-ui .response-col_status {
+	font-family: 'Fira Code', monospace;
+	font-weight: 600;
+}
+
+.swagger-ui .response-col_status.response-undocumented {
+	color: #22c55e;
+}
+
+.swagger-ui .model {
+	background: #1e293b;
+	border: 1px solid #374151;
+	border-radius: 8px;
+}
+
+.swagger-ui .model-title {
+	color: #e2e8f0;
+	font-weight: 600;
+}
+
+.swagger-ui .prop-type {
+	color: #8b5cf6;
+	font-weight: 600;
+}
+
+.swagger-ui .prop-format {
+	color: #06b6d4;
+}
+
+.swagger-ui .parameter__name {
+	color: #e2e8f0;
+	font-weight: 600;
+}
+
+.swagger-ui .parameter__type {
+	color: #8b5cf6;
+	font-weight: 500;
+}
+
+.swagger-ui .parameter__in {
+	color: #94a3b8;
+	font-style: italic;
+}
+
+.swagger-ui textarea {
+	background: #374151;
+	border: 1px solid #4b5563;
+	color: #e2e8f0;
+	border-radius: 8px;
+	font-family: 'Fira Code', monospace;
+}
+
+.swagger-ui input[type="text"] {
+	background: #374151;
+	border: 1px solid #4b5563;
+	color: #e2e8f0;
+	border-radius: 8px;
+}
+
+.swagger-ui .highlight-code {
+	background: #1e293b;
+	border: 1px solid #374151;
+	border-radius: 8px;
+}
+
+.swagger-ui .microlight {
+	color: #e2e8f0;
+}
+
+/* Custom additions for better branding */
+.swagger-ui .info::before {
+	content: "🤖";
+	font-size: 3rem;
+	display: block;
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.swagger-ui .servers {
+	margin: 20px 0;
+}
+
+.swagger-ui .servers select {
+	background: #374151;
+	border: 1px solid #4b5563;
+	color: #e2e8f0;
+	border-radius: 8px;
+	padding: 8px 12px;
+}

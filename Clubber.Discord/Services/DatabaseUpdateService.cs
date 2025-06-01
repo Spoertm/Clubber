@@ -79,7 +79,7 @@ public sealed class DatabaseUpdateService : ExactBackgroundService
 
 					Result dailyChannelResult = await discordHelper.SendEmbedsEfficientlyAsync(
 						roleUpdateEmbeds,
-						_config.DailyUpdateChannel,
+						_config.DailyUpdateChannelId,
 						dailyUpdateMessageStr);
 
 					if (dailyChannelResult.IsFailure)

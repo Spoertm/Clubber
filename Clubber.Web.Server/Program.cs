@@ -22,15 +22,17 @@ internal static class Program
 {
 	public static async Task Main(string[] args)
 	{
+		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+#pragma warning disable CS0618 // Type or member is obsolete
 		NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson([typeof(EntryResponse), typeof(GameInfo)]);
+#pragma warning restore CS0618 // Type or member is obsolete
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 		builder.ConfigureConfiguration();
 
-		ulong clubberLoggerId = builder.Configuration.GetValue<ulong>("ClubberLoggerId");
-		string clubberLoggerToken = builder.Configuration.GetValue<string>("ClubberLoggerToken")!;
-		builder.ConfigureLogging(clubberLoggerId, clubberLoggerToken);
+		AppConfig appConfig = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<AppConfig>>().Value;
+		builder.ConfigureLogging(appConfig);
 
 		Log.Information("Starting");
 
@@ -142,7 +144,7 @@ internal static class Program
 		}
 	}
 
-	private static void ConfigureLogging(this WebApplicationBuilder builder, ulong clubberLoggerId, string clubberLoggerToken)
+	private static void ConfigureLogging(this WebApplicationBuilder builder, AppConfig config)
 	{
 		builder.Logging.ClearProviders();
 
@@ -151,7 +153,7 @@ internal static class Program
 			.MinimumLevel.Information()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}",
 				formatProvider: CultureInfo.InvariantCulture)
-			.WriteTo.Discord(clubberLoggerId, clubberLoggerToken)
+			.WriteTo.Discord(config.ClubberLoggerId, config.ClubberLoggerToken)
 			.CreateLogger();
 	}
 }

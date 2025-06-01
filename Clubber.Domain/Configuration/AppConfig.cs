@@ -120,7 +120,7 @@ public sealed class AppConfig
 
 	[Required]
 	[Range(1, ulong.MaxValue)]
-	public ulong DailyUpdateChannel { get; set; }
+	public ulong DailyUpdateChannelId { get; set; }
 
 	[Required]
 	[Range(1, ulong.MaxValue)]
