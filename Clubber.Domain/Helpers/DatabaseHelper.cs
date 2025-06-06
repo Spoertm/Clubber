@@ -19,6 +19,19 @@ public sealed class DatabaseHelper : IDatabaseHelper
 		return await _dbContext.DdPlayers.AsNoTracking().ToListAsync();
 	}
 
+	public async Task<List<DdUser>> GetRegisteredUsers(IEnumerable<ulong> discordIds)
+	{
+		return await _dbContext.DdPlayers
+			.AsNoTracking()
+			.Where(ddp => discordIds.Contains(ddp.DiscordId))
+			.ToListAsync();
+	}
+
+	public async Task<int> GetRegisteredUserCount()
+	{
+		return await _dbContext.DdPlayers.CountAsync();
+	}
+
 	public async Task<Result> RegisterUser(uint lbId, ulong discordId)
 	{
 		try
@@ -35,7 +48,7 @@ public sealed class DatabaseHelper : IDatabaseHelper
 			return ex switch
 			{
 				DbUpdateException => Result.Failure("Database error."),
-				_                 => Result.Failure("Internal error."),
+				_ => Result.Failure("Internal error."),
 			};
 		}
 	}
@@ -126,7 +139,8 @@ public sealed class DatabaseHelper : IDatabaseHelper
 	/// Updates the current best splits as necessary if the provided splits are superior.
 	/// </summary>
 	/// <returns>Tuple containing all the old best splits and the updated new splits.</returns>
-	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(IReadOnlyCollection<Split> splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
+	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(
+		IReadOnlyCollection<Split> splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
 	{
 		BestSplit[] currentBestSplits = await _dbContext.BestSplits.AsNoTracking().ToArrayAsync();
 		List<BestSplit> superiorNewSplits = [];
@@ -165,7 +179,8 @@ public sealed class DatabaseHelper : IDatabaseHelper
 
 	public async Task<(HomingPeakRun? OldRun, HomingPeakRun? NewRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked)
 	{
-		HomingPeakRun? oldRun = await _dbContext.TopHomingPeaks.AsNoTracking().FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
+		HomingPeakRun? oldRun = await _dbContext.TopHomingPeaks.AsNoTracking()
+			.FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
 		if (oldRun != null)
 		{
 			if (runToBeChecked.HomingPeak > oldRun.HomingPeak)

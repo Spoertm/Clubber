@@ -8,6 +8,10 @@ public interface IDatabaseHelper
 {
 	Task<List<DdUser>> GetRegisteredUsers();
 
+	Task<List<DdUser>> GetRegisteredUsers(IEnumerable<ulong> discordIds);
+
+	Task<int> GetRegisteredUserCount();
+
 	Task<Result> RegisterUser(uint lbId, ulong discordId);
 
 	Task<Result> RegisterTwitch(ulong userId, string twitchUsername);
@@ -28,7 +32,8 @@ public interface IDatabaseHelper
 
 	Task<bool> TwitchUsernameIsRegistered(string twitchUsername);
 
-	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(IReadOnlyCollection<Split> splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description);
+	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(IReadOnlyCollection<Split> splitsToBeChecked,
+		DdStatsFullRunResponse ddstatsRun, string description);
 
 	Task<BestSplit[]> GetBestSplits();
 

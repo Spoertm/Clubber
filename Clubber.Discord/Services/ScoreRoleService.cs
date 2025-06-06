@@ -29,23 +29,40 @@ public sealed class ScoreRoleService
 
 	public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers)
 	{
-		List<DdUser> dbUsers = await _databaseHelper.GetRegisteredUsers();
-		(DdUser ddUser, IGuildUser guildUser)[] registeredUsers = dbUsers.Join(
-				inner: guildUsers,
-				outerKeySelector: dbu => dbu.DiscordId,
-				innerKeySelector: gu => gu.Id,
-				resultSelector: (ddUser, guildUser) => (ddUser, guildUser))
-			.ToArray();
+		IEnumerable<ulong> guildUserIds = guildUsers.Select(gu => gu.Id);
 
-		IEnumerable<uint> lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.ddUser.LeaderboardId);
+		Task<int> allUsersTask = _databaseHelper.GetRegisteredUserCount();
+		Task<List<DdUser>> filteredUsersTask = _databaseHelper.GetRegisteredUsers(guildUserIds);
+
+		await Task.WhenAll(allUsersTask, filteredUsersTask);
+
+		int registeredUserCount = await allUsersTask;
+		List<DdUser> dbUsers = await filteredUsersTask;
+
+		Dictionary<ulong, IGuildUser> guildUserLookup = guildUsers.ToDictionary(gu => gu.Id);
+
+		List<(DdUser ddUser, IGuildUser guildUser)> registeredDiscordUsers = new(dbUsers.Count);
+		foreach (DdUser dbUser in dbUsers)
+		{
+			if (guildUserLookup.TryGetValue(dbUser.DiscordId, out IGuildUser? guildUser))
+			{
+				registeredDiscordUsers.Add((dbUser, guildUser));
+			}
+		}
+
+		IEnumerable<uint> lbIdsToRequest = registeredDiscordUsers.Select(ru => (uint)ru.ddUser.LeaderboardId);
 		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
-		(IGuildUser guildUser, EntryResponse lbPlayer)[] registeredDiscordLbPlayers = registeredUsers.Join(
-				inner: lbPlayers,
-				outerKeySelector: ru => (uint)ru.ddUser.LeaderboardId,
-				innerKeySelector: lbp => (uint)lbp.Id,
-				resultSelector: (ru, lbp) => (ru.guildUser, lbp))
-			.ToArray();
+		Dictionary<uint, EntryResponse> lbPlayerLookup = lbPlayers.ToDictionary(lbp => (uint)lbp.Id);
+
+		List<(IGuildUser guildUser, EntryResponse lbPlayer)> registeredDiscordLbPlayers = [];
+		foreach ((DdUser ddUser, IGuildUser guildUser) in registeredDiscordUsers)
+		{
+			if (lbPlayerLookup.TryGetValue((uint)ddUser.LeaderboardId, out EntryResponse? lbPlayer))
+			{
+				registeredDiscordLbPlayers.Add((guildUser, lbPlayer));
+			}
+		}
 
 		List<UserRoleUpdate> roleUpdates = [];
 		foreach ((IGuildUser guildUser, EntryResponse lbPlayer) in registeredDiscordLbPlayers)
@@ -57,7 +74,8 @@ public sealed class ScoreRoleService
 			}
 		}
 
-		return new BulkUserRoleUpdates(dbUsers.Count - registeredUsers.Length, roleUpdates);
+		int nonMemberCount = registeredUserCount - registeredDiscordUsers.Count;
+		return new BulkUserRoleUpdates(nonMemberCount, roleUpdates);
 	}
 
 	public async Task<Result<RoleChangeResult>> GetRoleChange(IGuildUser user)
@@ -79,10 +97,10 @@ public sealed class ScoreRoleService
 		{
 			string errorMsg = ex switch
 			{
-				ClubberException       => ex.Message,
-				HttpRequestException   => "Couldn't fetch player data. Ddinfo may be down.",
+				ClubberException => ex.Message,
+				HttpRequestException => "Couldn't fetch player data. Ddinfo may be down.",
 				SerializationException => "Couldn't read player data.",
-				_                      => "Internal error.",
+				_ => "Internal error.",
 			};
 
 			Log.Error(ex, "Error updating user roles");
