@@ -15,20 +15,45 @@ using System.Diagnostics;
 namespace Clubber.Discord.Modules;
 
 // ===== SLASH COMMANDS =====
-public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService userService, IWebService webService, ScoreRoleService scoreRoleService)
+public sealed class UserManagementCommands(
+	IDatabaseHelper databaseHelper,
+	UserService userService,
+	IWebService webService,
+	ScoreRoleService scoreRoleService)
 	: InteractionModuleBase<SocketInteractionContext>
 {
 	[SlashCommand("register", "Register a user with their Devil Daggers leaderboard ID")]
-	[RequireUserPermission(GuildPermission.ManageRoles)]
+	[DefaultMemberPermissions(GuildPermission.ManageRoles)]
 	public async Task Register(
 		[Summary("user", "User to register (leave empty for yourself)")]
 		SocketGuildUser user,
 		[Summary("leaderboard-id", "The user's Devil Daggers leaderboard ID")]
 		uint lbId)
 	{
+		await DeferAsync();
+
 		try
 		{
-			await CheckUserAndRegister(lbId, user);
+			Result result = await userService.IsValidForRegistration(user, user.Id == Context.User.Id);
+			if (result.IsFailure)
+			{
+				await RespondAsync(result.ErrorMsg, ephemeral: true);
+				return;
+			}
+
+			Result registrationResult = await databaseHelper.RegisterUser(lbId, user.Id);
+			if (registrationResult.IsSuccess)
+			{
+				const ulong newPalRoleId = 728663492424499200;
+				const ulong pendingPbRoleId = 994354086646399066;
+				await user.RemoveRoleAsync(newPalRoleId);
+				await user.AddRoleAsync(pendingPbRoleId);
+				await FollowupAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get assigned a role.");
+			}
+			else
+			{
+				await FollowupAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
+			}
 		}
 		catch (Exception ex)
 		{
@@ -42,17 +67,19 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 		[Summary("user", "User to unregister")]
 		SocketGuildUser? user = null)
 	{
+		await DeferAsync();
+
 		try
 		{
 			user ??= (SocketGuildUser)Context.User;
 
 			if (await databaseHelper.RemoveUser(user.Id))
 			{
-				await RespondAsync("✅ Successfully removed.", ephemeral: true);
+				await FollowupAsync("✅ Successfully removed.", ephemeral: true);
 			}
 			else
 			{
-				await RespondAsync("User not registered to begin with.", ephemeral: true);
+				await FollowupAsync("User not registered to begin with.", ephemeral: true);
 			}
 		}
 		catch (Exception ex)
@@ -68,6 +95,8 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 		[Summary("user", "User to link (leave empty for yourself)")]
 		SocketGuildUser? user = null)
 	{
+		await DeferAsync();
+
 		try
 		{
 			user ??= (SocketGuildUser)Context.User;
@@ -76,31 +105,31 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 			// Permission check for linking other users
 			if (!isSelfCommand && !((SocketGuildUser)Context.User).GuildPermissions.ManageRoles)
 			{
-				await RespondAsync("You can only link your own Twitch account, or you need ManageRoles permission to link others.", ephemeral: true);
+				await FollowupAsync("You can only link your own Twitch account, or you need ManageRoles permission to link others.", ephemeral: true);
 				return;
 			}
 
 			Result result = userService.IsNotBotOrCheater(user, isSelfCommand);
 			if (result.IsFailure)
 			{
-				await RespondAsync(result.ErrorMsg, ephemeral: true);
+				await FollowupAsync(result.ErrorMsg, ephemeral: true);
 				return;
 			}
 
 			if (await databaseHelper.TwitchUsernameIsRegistered(twitchUsername))
 			{
-				await RespondAsync("That Twitch username is already registered.", ephemeral: true);
+				await FollowupAsync("That Twitch username is already registered.", ephemeral: true);
 				return;
 			}
 
 			Result registrationResult = await databaseHelper.RegisterTwitch(user.Id, twitchUsername);
 			if (registrationResult.IsSuccess)
 			{
-				await RespondAsync("✅ Successfully linked Twitch.");
+				await FollowupAsync("✅ Successfully linked Twitch.");
 			}
 			else
 			{
-				await RespondAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
+				await FollowupAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
 			}
 		}
 		catch (Exception ex)
@@ -149,10 +178,45 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 		[Summary("full", "Show full detailed stats")]
 		bool full = false)
 	{
+		await DeferAsync();
+
 		try
 		{
 			user ??= (SocketGuildUser)Context.User;
-			await CheckUserAndShowStats(user, full);
+
+			DdUser? ddUser = await databaseHelper.FindRegisteredUser(user.Id);
+
+			if (ddUser is null)
+			{
+				Result userValidationResult = await userService.IsValid(user, user.Id == Context.User.Id);
+				await FollowupAsync(userValidationResult.ErrorMsg, ephemeral: true);
+				return;
+			}
+
+			uint leaderboardId = (uint)ddUser.LeaderboardId;
+			Task<IReadOnlyList<EntryResponse>> playerEntryTask = webService.GetLbPlayers([leaderboardId]);
+			Task<GetPlayerHistory?> playerHistoryTask = webService.GetPlayerHistory(leaderboardId);
+			await Task.WhenAll(playerEntryTask, playerHistoryTask);
+
+			EntryResponse playerEntry = (await playerEntryTask)[0];
+			GetPlayerHistory? playerHistory = await playerHistoryTask;
+
+			Embed statsEmbed;
+			MessageComponent? components = null;
+
+			if (full)
+			{
+				statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
+			}
+			else
+			{
+				statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
+				ComponentBuilder cb = new();
+				cb.WithButton("Full stats", $"stats:{user.Id}:{leaderboardId}");
+				components = cb.Build();
+			}
+
+			await FollowupAsync(embed: statsEmbed, components: components);
 		}
 		catch (Exception ex)
 		{
@@ -163,20 +227,22 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 	[SlashCommand("pb", "Update your Devil Daggers score roles")]
 	public async Task UpdateRoles()
 	{
+		await DeferAsync();
+
 		try
 		{
 			SocketGuildUser user = (SocketGuildUser)Context.User;
 			Result result = await userService.IsValid(user, true);
 			if (result.IsFailure)
 			{
-				await RespondAsync(result.ErrorMsg, ephemeral: true);
+				await FollowupAsync(result.ErrorMsg, ephemeral: true);
 				return;
 			}
 
 			Result<RoleChangeResult> roleChangeResult = await scoreRoleService.GetRoleChange(user);
 			if (roleChangeResult.IsFailure)
 			{
-				await RespondAsync(roleChangeResult.ErrorMsg, ephemeral: true);
+				await FollowupAsync(roleChangeResult.ErrorMsg, ephemeral: true);
 				return;
 			}
 
@@ -192,7 +258,7 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 					await user.RemoveRolesAsync(roleUpdate.RolesToRemove);
 				}
 
-				await RespondAsync(embed: EmbedHelper.UpdateRoles(new UserRoleUpdate(user, roleUpdate)));
+				await FollowupAsync(embed: EmbedHelper.UpdateRoles(new UserRoleUpdate(user, roleUpdate)));
 			}
 			else if (roleChangeResult.Value is RoleChangeResult.None noChangeResponse)
 			{
@@ -207,7 +273,7 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 						$"\n\nYou're **{noChangeResponse.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(noChangeResponse.NextRoleId)}";
 				}
 
-				await RespondAsync(msg);
+				await FollowupAsync(msg);
 			}
 			else
 			{
@@ -234,93 +300,6 @@ public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService u
 		{
 			// If we already responded, use followup
 			await FollowupAsync(errorMessage, ephemeral: true);
-		}
-	}
-
-	private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
-	{
-		Result result = await userService.IsValidForRegistration(user, user.Id == Context.User.Id);
-		if (result.IsFailure)
-		{
-			await RespondAsync(result.ErrorMsg, ephemeral: true);
-			return;
-		}
-
-		Result registrationResult = await databaseHelper.RegisterUser(lbId, user.Id);
-		if (registrationResult.IsSuccess)
-		{
-			const ulong newPalRoleId = 728663492424499200;
-			const ulong pendingPbRoleId = 994354086646399066;
-			await user.RemoveRoleAsync(newPalRoleId);
-			await user.AddRoleAsync(pendingPbRoleId);
-			await RespondAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get assigned a role.");
-		}
-		else
-		{
-			await RespondAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
-		}
-	}
-
-	private async Task CheckUserAndShowStats(SocketGuildUser user, bool fullStats)
-	{
-		// Defer early to give us more time for potentially slow operations
-		await DeferAsync();
-
-		try
-		{
-			DdUser? ddUser = await databaseHelper.FindRegisteredUser(user.Id);
-
-			if (ddUser is null)
-			{
-				Result userValidationResult = await userService.IsValid(user, user.Id == Context.User.Id);
-				await FollowupAsync(userValidationResult.ErrorMsg, ephemeral: true);
-				return;
-			}
-
-			await ShowStats((uint)ddUser.LeaderboardId, user, fullStats);
-		}
-		catch (Exception ex)
-		{
-			await FollowupAsync("An error occurred while fetching stats.", ephemeral: true);
-			Log.Error(ex, "CheckUserAndShowStats error");
-		}
-	}
-
-	private async Task ShowStats(uint lbId, SocketGuildUser? user, bool fullStats)
-	{
-		try
-		{
-			Task<IReadOnlyList<EntryResponse>> playerEntryTask = webService.GetLbPlayers([lbId]);
-			Task<GetPlayerHistory?> playerHistoryTask = webService.GetPlayerHistory(lbId);
-			await Task.WhenAll(playerEntryTask, playerHistoryTask);
-
-			EntryResponse playerEntry = (await playerEntryTask)[0];
-			GetPlayerHistory? playerHistory = await playerHistoryTask;
-
-			Embed statsEmbed;
-			MessageComponent? components = null;
-
-			if (fullStats)
-			{
-				statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
-			}
-			else
-			{
-				statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
-				if (user is not null)
-				{
-					ComponentBuilder cb = new();
-					cb.WithButton("Full stats", $"stats:{user.Id}:{lbId}");
-					components = cb.Build();
-				}
-			}
-
-			await FollowupAsync(embed: statsEmbed, components: components);
-		}
-		catch (Exception ex)
-		{
-			await FollowupAsync("Failed to fetch player statistics.", ephemeral: true);
-			Log.Error(ex, "ShowStats error");
 		}
 	}
 }

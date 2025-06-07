@@ -8,7 +8,6 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Clubber.Web.Configuration;
 using Clubber.Web.Endpoints;
-using Discord.Commands;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
@@ -36,12 +35,6 @@ internal static class Program
 
 		Log.Information("Starting Clubber Web Application");
 
-		using CommandService commands = new(new CommandServiceConfig
-		{
-			IgnoreExtraArgs = true,
-			DefaultRunMode = RunMode.Async,
-		});
-
 		// Add MVC and Razor Pages support
 		builder.Services.AddControllersWithViews();
 		builder.Services.AddEndpointsApiExplorer();
@@ -59,8 +52,6 @@ internal static class Program
 
 		// Discord Bot Services
 		builder.Services.AddSingleton<ClubberDiscordClient>();
-		builder.Services.AddSingleton(commands);
-		builder.Services.AddSingleton<MessageHandlerService>();
 		builder.Services.AddSingleton<InteractionHandler>();
 		builder.Services.AddSingleton<RegistrationTracker>();
 
@@ -162,7 +153,6 @@ internal static class Program
 
 		try
 		{
-			app.Services.GetRequiredService<MessageHandlerService>();
 			app.Services.GetRequiredService<InteractionHandler>();
 
 			if (app.Environment.IsProduction())
