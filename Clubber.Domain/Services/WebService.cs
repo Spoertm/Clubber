@@ -12,10 +12,12 @@ public sealed class WebService : IWebService
 {
 	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
 	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
+
 	private readonly JsonSerializerOptions _serializerOptions = new()
 	{
 		PropertyNameCaseInsensitive = true,
 	};
+
 	private readonly IHttpClientFactory _httpClientFactory;
 
 	public WebService(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
@@ -99,8 +101,7 @@ public sealed class WebService : IWebService
 
 			rank += 100;
 			await Task.Delay(2000);
-		}
-		while (entries[^1].Time / 10_000 >= minimumScore);
+		} while (entries[^1].Time / 10_000 >= minimumScore);
 
 		return entries;
 	}
