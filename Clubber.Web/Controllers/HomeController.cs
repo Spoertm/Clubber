@@ -4,6 +4,8 @@ using System.Diagnostics;
 
 namespace Clubber.Web.Controllers;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes",
+	Justification = "Used by ASP.NET Core MVC routing")]
 internal sealed class HomeController : Controller
 {
 	public IActionResult Index()
