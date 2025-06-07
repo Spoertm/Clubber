@@ -12,22 +12,15 @@ using System.Diagnostics;
 
 namespace Clubber.Discord.Services;
 
-public sealed class DatabaseUpdateService : ExactBackgroundService
+public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceScopeFactory services) : ExactBackgroundService
 {
-	private readonly AppConfig _config;
-	private readonly IServiceScopeFactory _services;
-
-	public DatabaseUpdateService(IOptions<AppConfig> config, IServiceScopeFactory services)
-	{
-		_config = config.Value;
-		_services = services;
-	}
+	private readonly AppConfig _config = config.Value;
 
 	protected override TimeOnly UtcTriggerTime => new(16, 00);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		await using AsyncServiceScope scope = _services.CreateAsyncScope();
+		await using AsyncServiceScope scope = services.CreateAsyncScope();
 		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 

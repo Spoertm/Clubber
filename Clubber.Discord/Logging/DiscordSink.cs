@@ -8,23 +8,16 @@ using System.Text;
 
 namespace Clubber.Discord.Logging;
 
-public sealed class DiscordSink : ILogEventSink
+public sealed class DiscordSink(ulong webhookId, string webhookToken, LogEventLevel minimumLogLevel) : ILogEventSink
 {
-	private readonly LogEventLevel _minimumLogLevel;
-	private readonly DiscordWebhookClient _webHook;
+	private readonly DiscordWebhookClient _webHook = new(webhookId, webhookToken);
 
 	// Maximum number of nested exceptions to include
 	private const int _maxExceptionDepth = 5;
 
-	public DiscordSink(ulong webhookId, string webhookToken, LogEventLevel minimumLogLevel)
-	{
-		_webHook = new DiscordWebhookClient(webhookId, webhookToken);
-		_minimumLogLevel = minimumLogLevel;
-	}
-
 	public void Emit(LogEvent logEvent)
 	{
-		if (logEvent.Level < _minimumLogLevel)
+		if (logEvent.Level < minimumLogLevel)
 			return;
 
 		try
