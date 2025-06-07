@@ -1,5 +1,4 @@
 ﻿using Clubber.Discord.Logging;
-using Clubber.Discord.Modules;
 using Clubber.Domain.Configuration;
 using Discord;
 using Discord.Interactions;
