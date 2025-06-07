@@ -13,25 +13,18 @@ using System.Text;
 
 namespace Clubber.Discord.Services;
 
-public sealed class DdNewsPostService : RepeatingBackgroundService
+public sealed class DdNewsPostService(
+	IOptions<AppConfig> config,
+	IServiceScopeFactory services) : RepeatingBackgroundService
 {
 	private const int _minimumScore = 930;
 
-	private readonly AppConfig _config;
-	private readonly IServiceScopeFactory _services;
+	private readonly AppConfig _config = config.Value;
 
 	private readonly StringBuilder _sb = new();
 	private readonly LeaderboardImageGenerator _imageGenerator = new();
 
 	private SocketTextChannel? _ddNewsChannel;
-
-	public DdNewsPostService(
-		IOptions<AppConfig> config,
-		IServiceScopeFactory services)
-	{
-		_config = config.Value;
-		_services = services;
-	}
 
 	protected override TimeSpan TickInterval => TimeSpan.FromMinutes(1);
 
@@ -39,7 +32,7 @@ public sealed class DdNewsPostService : RepeatingBackgroundService
 	{
 		Log.Debug("Executing {Class}", nameof(DdNewsPostService));
 
-		await using AsyncServiceScope scope = _services.CreateAsyncScope();
+		await using AsyncServiceScope scope = services.CreateAsyncScope();
 		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();

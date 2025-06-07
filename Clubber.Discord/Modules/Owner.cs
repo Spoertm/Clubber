@@ -9,17 +9,8 @@ using System.Diagnostics;
 namespace Clubber.Discord.Modules;
 
 [RequireOwner]
-public class Owner : ExtendedModulebase<SocketCommandContext>
+public class Owner(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper) : ExtendedModulebase<SocketCommandContext>
 {
-	private readonly ScoreRoleService _scoreRoleService;
-	private readonly IDiscordHelper _discordHelper;
-
-	public Owner(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper)
-	{
-		_scoreRoleService = scoreRoleService;
-		_discordHelper = discordHelper;
-	}
-
 	[Command("update database")]
 	[RequireContext(ContextType.Guild)]
 	public async Task UpdateDatabase()
@@ -28,7 +19,7 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 		IUserMessage msg = await ReplyAsync(checkingString);
 
 		Stopwatch sw = Stopwatch.StartNew();
-		BulkUserRoleUpdates response = await _scoreRoleService.GetBulkUserRoleUpdates(Context.Guild.Users);
+		BulkUserRoleUpdates response = await scoreRoleService.GetBulkUserRoleUpdates(Context.Guild.Users);
 		sw.Stop();
 
 		string message = response.UserRoleUpdates.Count > 0
@@ -60,7 +51,7 @@ public class Owner : ExtendedModulebase<SocketCommandContext>
 			.Select(EmbedHelper.UpdateRoles)
 			.ToArray();
 
-		Result result = await _discordHelper.SendEmbedsEfficientlyAsync(roleUpdateEmbeds, Context.Channel.Id);
+		Result result = await discordHelper.SendEmbedsEfficientlyAsync(roleUpdateEmbeds, Context.Channel.Id);
 		if (result.IsFailure)
 		{
 			await InlineReplyAsync($"Failed to send embeds: {result.ErrorMsg}");
