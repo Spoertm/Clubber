@@ -12,12 +12,10 @@ using Discord.Commands;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Clubber.Web;
 
-[SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 internal static class Program
 {
 	public static async Task Main(string[] args)
