@@ -1,0 +1,342 @@
+﻿using Clubber.Discord.Helpers;
+using Clubber.Discord.Models;
+using Clubber.Discord.Services;
+using Clubber.Domain.Helpers;
+using Clubber.Domain.Models;
+using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
+using Clubber.Domain.Services;
+using Discord;
+using Discord.Commands;
+using Discord.Interactions;
+using Discord.WebSocket;
+using Serilog;
+using System.Diagnostics;
+using ContextType = Discord.Commands.ContextType;
+using Summary = Discord.Interactions.SummaryAttribute;
+using RequireUserPermission = Discord.Interactions.RequireUserPermissionAttribute;
+
+namespace Clubber.Discord.Modules;
+
+// ===== SLASH COMMANDS =====
+public sealed class UserManagement : InteractionModuleBase<SocketInteractionContext>
+{
+	private readonly IDatabaseHelper _databaseHelper;
+	private readonly UserService _userService;
+	private readonly IWebService _webService;
+	private readonly ScoreRoleService _scoreRoleService;
+
+	public UserManagement(IDatabaseHelper databaseHelper, UserService userService, IWebService webService, ScoreRoleService scoreRoleService)
+	{
+		_databaseHelper = databaseHelper;
+		_userService = userService;
+		_webService = webService;
+		_scoreRoleService = scoreRoleService;
+	}
+
+	[SlashCommand("register", "Register a user with their Devil Daggers leaderboard ID")]
+	[RequireUserPermission(GuildPermission.ManageRoles)]
+	public async Task Register(
+		[Summary("user", "User to register (leave empty for yourself)")]
+		SocketGuildUser user,
+		[Summary("leaderboard-id", "The user's Devil Daggers leaderboard ID")]
+		uint lbId)
+	{
+		try
+		{
+			await CheckUserAndRegister(lbId, user);
+		}
+		catch (Exception ex)
+		{
+			await HandleSlashCommandError(ex);
+		}
+	}
+
+	[SlashCommand("unregister", "Remove a user from the database")]
+	[RequireUserPermission(GuildPermission.ManageRoles)]
+	public async Task Unregister(
+		[Summary("user", "User to unregister")]
+		SocketGuildUser? user = null)
+	{
+		try
+		{
+			user ??= (SocketGuildUser)Context.User;
+
+			if (await _databaseHelper.RemoveUser(user.Id))
+			{
+				await RespondAsync("✅ Successfully removed.", ephemeral: true);
+			}
+			else
+			{
+				await RespondAsync("User not registered to begin with.", ephemeral: true);
+			}
+		}
+		catch (Exception ex)
+		{
+			await HandleSlashCommandError(ex);
+		}
+	}
+
+	[SlashCommand("link-twitch", "Link a Twitch account to your Devil Daggers profile on DDLIVE")]
+	public async Task LinkTwitch(
+		[Summary("twitch-username", "Your Twitch username")]
+		string twitchUsername,
+		[Summary("user", "User to link (leave empty for yourself)")]
+		SocketGuildUser? user = null)
+	{
+		try
+		{
+			user ??= (SocketGuildUser)Context.User;
+			bool isSelfCommand = user.Id == Context.User.Id;
+
+			// Permission check for linking other users
+			if (!isSelfCommand && !((SocketGuildUser)Context.User).GuildPermissions.ManageRoles)
+			{
+				await RespondAsync("You can only link your own Twitch account, or you need ManageRoles permission to link others.", ephemeral: true);
+				return;
+			}
+
+			Result result = _userService.IsNotBotOrCheater(user, isSelfCommand);
+			if (result.IsFailure)
+			{
+				await RespondAsync(result.ErrorMsg, ephemeral: true);
+				return;
+			}
+
+			if (await _databaseHelper.TwitchUsernameIsRegistered(twitchUsername))
+			{
+				await RespondAsync("That Twitch username is already registered.", ephemeral: true);
+				return;
+			}
+
+			Result registrationResult = await _databaseHelper.RegisterTwitch(user.Id, twitchUsername);
+			if (registrationResult.IsSuccess)
+			{
+				await RespondAsync("✅ Successfully linked Twitch.");
+			}
+			else
+			{
+				await RespondAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
+			}
+		}
+		catch (Exception ex)
+		{
+			await HandleSlashCommandError(ex);
+		}
+	}
+
+	[SlashCommand("unlink-twitch", "Unlink your Twitch account")]
+	public async Task UnlinkTwitch(
+		[Summary("user", "User to unlink (leave empty for yourself)")]
+		SocketGuildUser? user = null)
+	{
+		try
+		{
+			user ??= (SocketGuildUser)Context.User;
+
+			// Permission check for unlinking other users
+			if (user.Id != Context.User.Id && !((SocketGuildUser)Context.User).GuildPermissions.ManageRoles)
+			{
+				await RespondAsync("You can only unlink your own Twitch account, or you need ManageRoles permission to unlink others.",
+					ephemeral: true);
+				return;
+			}
+
+			Result result = await _databaseHelper.UnregisterTwitch(user.Id);
+			if (result.IsSuccess)
+			{
+				await RespondAsync("✅ Successfully unlinked Twitch account.", ephemeral: true);
+			}
+			else
+			{
+				await RespondAsync($"Failed to execute command: {result.ErrorMsg}", ephemeral: true);
+			}
+		}
+		catch (Exception ex)
+		{
+			await HandleSlashCommandError(ex);
+		}
+	}
+
+	[SlashCommand("stats", "Get Devil Daggers statistics for a user")]
+	public async Task Stats(
+		[Summary("user", "User to get stats for (leave empty for yourself)")]
+		SocketGuildUser? user = null,
+		[Summary("full", "Show full detailed stats")]
+		bool full = false)
+	{
+		try
+		{
+			user ??= (SocketGuildUser)Context.User;
+			await CheckUserAndShowStats(user, full);
+		}
+		catch (Exception ex)
+		{
+			await HandleSlashCommandError(ex);
+		}
+	}
+
+	[SlashCommand("pb", "Update your Devil Daggers score roles")]
+	public async Task UpdateRoles()
+	{
+		try
+		{
+			SocketGuildUser user = (SocketGuildUser)Context.User;
+			Result result = await _userService.IsValid(user, true);
+			if (result.IsFailure)
+			{
+				await RespondAsync(result.ErrorMsg, ephemeral: true);
+				return;
+			}
+
+			Result<RoleChangeResult> roleChangeResult = await _scoreRoleService.GetRoleChange(user);
+			if (roleChangeResult.IsFailure)
+			{
+				await RespondAsync(roleChangeResult.ErrorMsg, ephemeral: true);
+				return;
+			}
+
+			if (roleChangeResult.Value is RoleUpdate roleUpdate)
+			{
+				if (roleUpdate.RolesToAdd.Count > 0)
+				{
+					await user.AddRolesAsync(roleUpdate.RolesToAdd);
+				}
+
+				if (roleUpdate.RolesToRemove.Count > 0)
+				{
+					await user.RemoveRolesAsync(roleUpdate.RolesToRemove);
+				}
+
+				await RespondAsync(embed: EmbedHelper.UpdateRoles(new UserRoleUpdate(user, roleUpdate)));
+			}
+			else if (roleChangeResult.Value is RoleChangeResult.None noChangeResponse)
+			{
+				string msg = "No updates were needed.";
+				if (noChangeResponse.SecondsAwayFromNextRole == 0)
+				{
+					msg += "\n\nYou already have the highest role in the server!";
+				}
+				else
+				{
+					msg +=
+						$"\n\nYou're **{noChangeResponse.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(noChangeResponse.NextRoleId)}";
+				}
+
+				await RespondAsync(msg);
+			}
+			else
+			{
+				throw new UnreachableException($"{nameof(RoleUpdate)} isn't supposed to have a third state.");
+			}
+		}
+		catch (Exception ex)
+		{
+			await HandleSlashCommandError(ex);
+		}
+	}
+
+	private async Task HandleSlashCommandError(Exception ex)
+	{
+		Log.Error(ex, "Slash command error");
+
+		// Try to respond if we haven't already
+		const string errorMessage = "An error occurred while processing your command.";
+		if (!Context.Interaction.HasResponded)
+		{
+			await RespondAsync(errorMessage, ephemeral: true);
+		}
+		else
+		{
+			// If we already responded, use followup
+			await FollowupAsync(errorMessage, ephemeral: true);
+		}
+	}
+
+	private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
+	{
+		Result result = await _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
+		if (result.IsFailure)
+		{
+			await RespondAsync(result.ErrorMsg, ephemeral: true);
+			return;
+		}
+
+		Result registrationResult = await _databaseHelper.RegisterUser(lbId, user.Id);
+		if (registrationResult.IsSuccess)
+		{
+			const ulong newPalRoleId = 728663492424499200;
+			const ulong pendingPbRoleId = 994354086646399066;
+			await user.RemoveRoleAsync(newPalRoleId);
+			await user.AddRoleAsync(pendingPbRoleId);
+			await RespondAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get assigned a role.");
+		}
+		else
+		{
+			await RespondAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
+		}
+	}
+
+	private async Task CheckUserAndShowStats(SocketGuildUser user, bool fullStats)
+	{
+		// Defer early to give us more time for potentially slow operations
+		await DeferAsync();
+
+		try
+		{
+			DdUser? ddUser = await _databaseHelper.FindRegisteredUser(user.Id);
+
+			if (ddUser is null)
+			{
+				Result userValidationResult = await _userService.IsValid(user, user.Id == Context.User.Id);
+				await FollowupAsync(userValidationResult.ErrorMsg, ephemeral: true);
+				return;
+			}
+
+			await ShowStats((uint)ddUser.LeaderboardId, user, fullStats);
+		}
+		catch (Exception ex)
+		{
+			await FollowupAsync("An error occurred while fetching stats.", ephemeral: true);
+			Log.Error(ex, "CheckUserAndShowStats error");
+		}
+	}
+
+	private async Task ShowStats(uint lbId, SocketGuildUser? user, bool fullStats)
+	{
+		try
+		{
+			Task<IReadOnlyList<EntryResponse>> playerEntryTask = _webService.GetLbPlayers([lbId]);
+			Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory(lbId);
+			await Task.WhenAll(playerEntryTask, playerHistoryTask);
+
+			EntryResponse playerEntry = (await playerEntryTask)[0];
+			GetPlayerHistory? playerHistory = await playerHistoryTask;
+
+			Embed statsEmbed;
+			MessageComponent? components = null;
+
+			if (fullStats)
+			{
+				statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
+			}
+			else
+			{
+				statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
+				if (user is not null)
+				{
+					ComponentBuilder cb = new();
+					cb.WithButton("Full stats", $"stats:{user.Id}:{lbId}");
+					components = cb.Build();
+				}
+			}
+
+			await FollowupAsync(embed: statsEmbed, components: components);
+		}
+		catch (Exception ex)
+		{
+			await FollowupAsync("Failed to fetch player statistics.", ephemeral: true);
+			Log.Error(ex, "ShowStats error");
+		}
+	}
+}
