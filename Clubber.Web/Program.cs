@@ -99,21 +99,6 @@ internal static class Program
 					Url = new Uri("https://github.com/Spoertm/Clubber")
 				}
 			});
-
-			options.AddServer(new OpenApiServer
-			{
-				Url = "https://clubber.up.railway.app/",
-				Description = "Production Server"
-			});
-
-			if (builder.Environment.IsDevelopment())
-			{
-				options.AddServer(new OpenApiServer
-				{
-					Url = "https://localhost:7187",
-					Description = "Development Server"
-				});
-			}
 		});
 
 		WebApplication app = builder.Build();
