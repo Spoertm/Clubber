@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Clubber.Web.Controllers;
 
-public sealed class HomeController : Controller
+internal sealed class HomeController : Controller
 {
 	public IActionResult Index()
 	{

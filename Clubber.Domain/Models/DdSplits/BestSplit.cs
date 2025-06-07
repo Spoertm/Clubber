@@ -11,6 +11,5 @@ public sealed class BestSplit
 	public int Time { get; set; }
 	public int Value { get; set; }
 	public string Description { get; set; } = null!;
-	[Column(TypeName = "jsonb")]
 	public GameInfo? GameInfo { get; set; }
 }

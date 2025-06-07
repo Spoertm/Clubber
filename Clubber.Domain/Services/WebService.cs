@@ -187,13 +187,13 @@ public sealed class WebService : IWebService
 	{
 		string uriStr = uri.ToString();
 		string runIdStr = string.Empty;
-		if (uriStr.StartsWith("https://ddstats.com/games/"))
+		if (uriStr.StartsWith("https://ddstats.com/games/", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[26..];
-		else if (uriStr.StartsWith("https://www.ddstats.com/games/"))
+		else if (uriStr.StartsWith("https://www.ddstats.com/games/", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[30..];
-		else if (uriStr.StartsWith("https://ddstats.com/api/v2/game/full"))
+		else if (uriStr.StartsWith("https://ddstats.com/api/v2/game/full", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[40..];
-		else if (uriStr.StartsWith("https://www.ddstats.com/api/v2/game/full"))
+		else if (uriStr.StartsWith("https://www.ddstats.com/api/v2/game/full", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[44..];
 
 		bool successfulParse = uint.TryParse(runIdStr, out uint runId);

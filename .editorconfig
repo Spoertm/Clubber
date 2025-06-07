@@ -243,3 +243,7 @@ dotnet_diagnostic.S3358.severity = none
 
 dotnet_diagnostic.RCS1090.severity = none
 dotnet_diagnostic.RCS1123.severity = none
+dotnet_diagnostic.SA1649.severity = suggestion
+dotnet_diagnostic.CA1031.severity = none
+dotnet_diagnostic.CA1062.severity = none
+dotnet_diagnostic.CA1305.severity = none
