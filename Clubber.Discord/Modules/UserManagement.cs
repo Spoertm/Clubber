@@ -7,33 +7,17 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Clubber.Domain.Services;
 using Discord;
-using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Serilog;
 using System.Diagnostics;
-using ContextType = Discord.Commands.ContextType;
-using Summary = Discord.Interactions.SummaryAttribute;
-using RequireUserPermission = Discord.Interactions.RequireUserPermissionAttribute;
 
 namespace Clubber.Discord.Modules;
 
 // ===== SLASH COMMANDS =====
-public sealed class UserManagement : InteractionModuleBase<SocketInteractionContext>
+public sealed class UserManagement(IDatabaseHelper databaseHelper, UserService userService, IWebService webService, ScoreRoleService scoreRoleService)
+	: InteractionModuleBase<SocketInteractionContext>
 {
-	private readonly IDatabaseHelper _databaseHelper;
-	private readonly UserService _userService;
-	private readonly IWebService _webService;
-	private readonly ScoreRoleService _scoreRoleService;
-
-	public UserManagement(IDatabaseHelper databaseHelper, UserService userService, IWebService webService, ScoreRoleService scoreRoleService)
-	{
-		_databaseHelper = databaseHelper;
-		_userService = userService;
-		_webService = webService;
-		_scoreRoleService = scoreRoleService;
-	}
-
 	[SlashCommand("register", "Register a user with their Devil Daggers leaderboard ID")]
 	[RequireUserPermission(GuildPermission.ManageRoles)]
 	public async Task Register(
@@ -62,7 +46,7 @@ public sealed class UserManagement : InteractionModuleBase<SocketInteractionCont
 		{
 			user ??= (SocketGuildUser)Context.User;
 
-			if (await _databaseHelper.RemoveUser(user.Id))
+			if (await databaseHelper.RemoveUser(user.Id))
 			{
 				await RespondAsync("✅ Successfully removed.", ephemeral: true);
 			}
@@ -96,20 +80,20 @@ public sealed class UserManagement : InteractionModuleBase<SocketInteractionCont
 				return;
 			}
 
-			Result result = _userService.IsNotBotOrCheater(user, isSelfCommand);
+			Result result = userService.IsNotBotOrCheater(user, isSelfCommand);
 			if (result.IsFailure)
 			{
 				await RespondAsync(result.ErrorMsg, ephemeral: true);
 				return;
 			}
 
-			if (await _databaseHelper.TwitchUsernameIsRegistered(twitchUsername))
+			if (await databaseHelper.TwitchUsernameIsRegistered(twitchUsername))
 			{
 				await RespondAsync("That Twitch username is already registered.", ephemeral: true);
 				return;
 			}
 
-			Result registrationResult = await _databaseHelper.RegisterTwitch(user.Id, twitchUsername);
+			Result registrationResult = await databaseHelper.RegisterTwitch(user.Id, twitchUsername);
 			if (registrationResult.IsSuccess)
 			{
 				await RespondAsync("✅ Successfully linked Twitch.");
@@ -142,7 +126,7 @@ public sealed class UserManagement : InteractionModuleBase<SocketInteractionCont
 				return;
 			}
 
-			Result result = await _databaseHelper.UnregisterTwitch(user.Id);
+			Result result = await databaseHelper.UnregisterTwitch(user.Id);
 			if (result.IsSuccess)
 			{
 				await RespondAsync("✅ Successfully unlinked Twitch account.", ephemeral: true);
@@ -182,14 +166,14 @@ public sealed class UserManagement : InteractionModuleBase<SocketInteractionCont
 		try
 		{
 			SocketGuildUser user = (SocketGuildUser)Context.User;
-			Result result = await _userService.IsValid(user, true);
+			Result result = await userService.IsValid(user, true);
 			if (result.IsFailure)
 			{
 				await RespondAsync(result.ErrorMsg, ephemeral: true);
 				return;
 			}
 
-			Result<RoleChangeResult> roleChangeResult = await _scoreRoleService.GetRoleChange(user);
+			Result<RoleChangeResult> roleChangeResult = await scoreRoleService.GetRoleChange(user);
 			if (roleChangeResult.IsFailure)
 			{
 				await RespondAsync(roleChangeResult.ErrorMsg, ephemeral: true);
@@ -255,14 +239,14 @@ public sealed class UserManagement : InteractionModuleBase<SocketInteractionCont
 
 	private async Task CheckUserAndRegister(uint lbId, SocketGuildUser user)
 	{
-		Result result = await _userService.IsValidForRegistration(user, user.Id == Context.User.Id);
+		Result result = await userService.IsValidForRegistration(user, user.Id == Context.User.Id);
 		if (result.IsFailure)
 		{
 			await RespondAsync(result.ErrorMsg, ephemeral: true);
 			return;
 		}
 
-		Result registrationResult = await _databaseHelper.RegisterUser(lbId, user.Id);
+		Result registrationResult = await databaseHelper.RegisterUser(lbId, user.Id);
 		if (registrationResult.IsSuccess)
 		{
 			const ulong newPalRoleId = 728663492424499200;
@@ -284,11 +268,11 @@ public sealed class UserManagement : InteractionModuleBase<SocketInteractionCont
 
 		try
 		{
-			DdUser? ddUser = await _databaseHelper.FindRegisteredUser(user.Id);
+			DdUser? ddUser = await databaseHelper.FindRegisteredUser(user.Id);
 
 			if (ddUser is null)
 			{
-				Result userValidationResult = await _userService.IsValid(user, user.Id == Context.User.Id);
+				Result userValidationResult = await userService.IsValid(user, user.Id == Context.User.Id);
 				await FollowupAsync(userValidationResult.ErrorMsg, ephemeral: true);
 				return;
 			}
@@ -306,8 +290,8 @@ public sealed class UserManagement : InteractionModuleBase<SocketInteractionCont
 	{
 		try
 		{
-			Task<IReadOnlyList<EntryResponse>> playerEntryTask = _webService.GetLbPlayers([lbId]);
-			Task<GetPlayerHistory?> playerHistoryTask = _webService.GetPlayerHistory(lbId);
+			Task<IReadOnlyList<EntryResponse>> playerEntryTask = webService.GetLbPlayers([lbId]);
+			Task<GetPlayerHistory?> playerHistoryTask = webService.GetPlayerHistory(lbId);
 			await Task.WhenAll(playerEntryTask, playerHistoryTask);
 
 			EntryResponse playerEntry = (await playerEntryTask)[0];
