@@ -162,7 +162,6 @@ internal static class Program
 
 		app.RegisterClubberEndpoints();
 
-		// Initialize Discord bot services
 		try
 		{
 			app.Services.GetRequiredService<MessageHandlerService>();
@@ -175,14 +174,7 @@ internal static class Program
 			}
 
 			await app.Services.GetRequiredService<ClubberDiscordClient>().InitAsync();
-		}
-		catch (Exception ex)
-		{
-			Log.Warning(ex, "Discord bot initialization failed - continuing without bot features");
-		}
 
-		try
-		{
 			Log.Information("Clubber Web Application started successfully");
 			await app.RunAsync();
 		}
