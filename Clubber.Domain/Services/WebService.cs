@@ -199,9 +199,9 @@ public sealed class WebService : IWebService
 		if (string.IsNullOrEmpty(runIdStr) || !successfulParse)
 			throw new ClubberException("Invalid ddstats URL.");
 
-		string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
+		Uri fullRunReqUri = new($"https://ddstats.com/api/v2/game/full?id={runId}");
 		using HttpClient client = _httpClientFactory.CreateClient();
-		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUrl);
+		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUri);
 		return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
 	}
 }
