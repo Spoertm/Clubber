@@ -1,7 +1,6 @@
 ﻿using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
-using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,7 +40,7 @@ internal static class ClubberEndpoints
 			.WithSummary("Get recent DD news")
 			.WithDescription(
 				"Returns recent Devil Daggers news items for scores above 1000s. News items are automatically cleaned up after 24 hours.")
-			.Produces<List<DdNewsItem>>();
+			.Produces<List<object>>();
 
 		app.MapGet("/bestsplits", BestSplits)
 			.WithTags("Splits")
@@ -72,11 +71,20 @@ internal static class ClubberEndpoints
 		return await dbContext.BestSplits.AsNoTracking().ToListAsync();
 	}
 
-	private static async Task<List<DdNewsItem>> DailyNews(IServiceScopeFactory scopeFactory)
+	private static async Task<object> DailyNews(IServiceScopeFactory scopeFactory)
 	{
 		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
 		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdNews.AsNoTracking().ToListAsync();
+		return await dbContext.DdNews.AsNoTracking()
+			.Select(item => new
+			{
+				item.LeaderboardId,
+				item.OldEntry,
+				item.NewEntry,
+				item.TimeOfOccurenceUtc,
+				item.Nth
+			})
+			.ToListAsync();
 	}
 
 	private static async Task<DdUser?> UserByDiscordId(ulong discordId, IServiceScopeFactory scopeFactory)
