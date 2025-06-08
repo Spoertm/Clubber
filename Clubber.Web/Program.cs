@@ -131,8 +131,8 @@ internal static class Program
 
 		// Map MVC routes FIRST
 		app.MapControllerRoute(
-			name: "default",
-			pattern: "{controller=Home}/{action=Index}/{id?}");
+			"default",
+			"{controller=Home}/{action=Index}/{id?}");
 
 		app.RegisterClubberEndpoints();
 
