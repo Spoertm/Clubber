@@ -1,6 +1,7 @@
 using Clubber.Discord.Helpers;
 using Clubber.Discord.Logging;
 using Clubber.Discord.Models;
+using Clubber.Discord.Modules;
 using Clubber.Discord.Services;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Helpers;
@@ -52,7 +53,7 @@ internal static class Program
 
 		// Discord Bot Services
 		builder.Services.AddSingleton<ClubberDiscordClient>();
-		builder.Services.AddSingleton<InteractionHandler>();
+		builder.Services.AddSingleton<ComponentInteractions>();
 		builder.Services.AddSingleton<RegistrationTracker>();
 
 		builder.Services.AddTransient<ScoreRoleService>();
@@ -138,8 +139,6 @@ internal static class Program
 
 		try
 		{
-			app.Services.GetRequiredService<InteractionHandler>();
-
 			if (app.Environment.IsProduction())
 			{
 				app.Services.GetRequiredService<RegistrationRequestHandler>();
