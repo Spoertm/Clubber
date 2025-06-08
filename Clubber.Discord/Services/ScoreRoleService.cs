@@ -6,6 +6,7 @@ using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Runtime.Serialization;
@@ -14,13 +15,13 @@ namespace Clubber.Discord.Services;
 
 public sealed class ScoreRoleService
 {
-	private readonly IDatabaseHelper _databaseHelper;
+	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly IWebService _webService;
 	private readonly IReadOnlyCollection<ulong> _allPossibleRoles;
 
-	public ScoreRoleService(IOptions<AppConfig> config, IDatabaseHelper databaseHelper, IWebService webService)
+	public ScoreRoleService(IOptions<AppConfig> config, IServiceScopeFactory serviceScopeFactory, IWebService webService)
 	{
-		_databaseHelper = databaseHelper;
+		_serviceScopeFactory = serviceScopeFactory;
 		_webService = webService;
 
 		IReadOnlyCollection<ulong> uselessRoles = [config.Value.UnregisteredRoleId, 458375331468935178, 994354086646399066];
@@ -31,38 +32,36 @@ public sealed class ScoreRoleService
 	{
 		IEnumerable<ulong> guildUserIds = guildUsers.Select(gu => gu.Id);
 
-		Task<int> allUsersTask = _databaseHelper.GetRegisteredUserCount();
-		Task<List<DdUser>> filteredUsersTask = _databaseHelper.GetRegisteredUsers(guildUserIds);
+		// Create separate scopes for concurrent database operations
+		Task<int> allUsersTask = GetRegisteredUserCountAsync();
+		Task<List<DdUser>> filteredUsersTask = GetRegisteredUsersAsync(guildUserIds);
 
 		await Task.WhenAll(allUsersTask, filteredUsersTask);
 
 		int registeredUserCount = await allUsersTask;
 		List<DdUser> dbUsers = await filteredUsersTask;
 
-		Dictionary<ulong, IGuildUser> guildUserLookup = guildUsers.ToDictionary(gu => gu.Id);
+		(DdUser ddUser, IGuildUser guildUser)[] registeredUsers = dbUsers.Join(
+				inner: guildUsers,
+				outerKeySelector: dbu => dbu.DiscordId,
+				innerKeySelector: gu => gu.Id,
+				resultSelector: (ddUser, guildUser) => (ddUser, guildUser))
+			.ToArray();
 
-		List<(DdUser ddUser, IGuildUser guildUser)> registeredDiscordUsers = new(dbUsers.Count);
-		foreach (DdUser dbUser in dbUsers)
-		{
-			if (guildUserLookup.TryGetValue(dbUser.DiscordId, out IGuildUser? guildUser))
-			{
-				registeredDiscordUsers.Add((dbUser, guildUser));
-			}
-		}
+		// Get unique leaderboard IDs to avoid duplicate API calls for alt accounts
+		IEnumerable<uint> lbIdsToRequest = registeredUsers
+			.Select(ru => (uint)ru.ddUser.LeaderboardId)
+			.Distinct();
 
-		IEnumerable<uint> lbIdsToRequest = registeredDiscordUsers.Select(ru => (uint)ru.ddUser.LeaderboardId);
 		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
-		Dictionary<uint, EntryResponse> lbPlayerLookup = lbPlayers.ToDictionary(lbp => (uint)lbp.Id);
-
-		List<(IGuildUser guildUser, EntryResponse lbPlayer)> registeredDiscordLbPlayers = [];
-		foreach ((DdUser ddUser, IGuildUser guildUser) in registeredDiscordUsers)
-		{
-			if (lbPlayerLookup.TryGetValue((uint)ddUser.LeaderboardId, out EntryResponse? lbPlayer))
-			{
-				registeredDiscordLbPlayers.Add((guildUser, lbPlayer));
-			}
-		}
+		// Join users with their leaderboard data (handles duplicates from alt accounts)
+		(IGuildUser guildUser, EntryResponse lbPlayer)[] registeredDiscordLbPlayers = registeredUsers.Join(
+				inner: lbPlayers,
+				outerKeySelector: ru => (uint)ru.ddUser.LeaderboardId,
+				innerKeySelector: lbp => (uint)lbp.Id,
+				resultSelector: (ru, lbp) => (ru.guildUser, lbp))
+			.ToArray();
 
 		List<UserRoleUpdate> roleUpdates = [];
 		foreach ((IGuildUser guildUser, EntryResponse lbPlayer) in registeredDiscordLbPlayers)
@@ -74,15 +73,32 @@ public sealed class ScoreRoleService
 			}
 		}
 
-		int nonMemberCount = registeredUserCount - registeredDiscordUsers.Count;
+		int nonMemberCount = registeredUserCount - registeredUsers.Length;
 		return new BulkUserRoleUpdates(nonMemberCount, roleUpdates);
+	}
+
+	private async Task<int> GetRegisteredUserCountAsync()
+	{
+		await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
+		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
+		return await databaseHelper.GetRegisteredUserCount();
+	}
+
+	private async Task<List<DdUser>> GetRegisteredUsersAsync(IEnumerable<ulong> discordIds)
+	{
+		await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
+		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
+		return await databaseHelper.GetRegisteredUsers(discordIds);
 	}
 
 	public async Task<Result<RoleChangeResult>> GetRoleChange(IGuildUser user)
 	{
 		try
 		{
-			DdUser? ddUser = await _databaseHelper.FindRegisteredUser(user.Id);
+			await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
+			IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
+
+			DdUser? ddUser = await databaseHelper.FindRegisteredUser(user.Id);
 			if (ddUser is null)
 			{
 				return Result.Failure<RoleChangeResult>("User is not registered.")!;
