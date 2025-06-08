@@ -179,7 +179,7 @@ internal static class Program
 
 		Log.Logger = new LoggerConfiguration()
 			.Enrich.FromLogContext()
-			.MinimumLevel.Information()
+			.MinimumLevel.Warning()
 			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}",
 				formatProvider: CultureInfo.InvariantCulture)
 			.WriteTo.Discord(clubberLoggerId, clubberLoggerToken)
