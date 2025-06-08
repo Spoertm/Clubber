@@ -82,6 +82,7 @@ public sealed class TextCommands(
 	}
 
 	[Command("stats")]
+	[Alias("statsf", "statsfull")]
 	[Summary("Get Devil Daggers statistics for a user")]
 	public async Task Stats(SocketGuildUser? user = null)
 	{
@@ -106,11 +107,19 @@ public sealed class TextCommands(
 			EntryResponse playerEntry = (await playerEntryTask)[0];
 			GetPlayerHistory? playerHistory = await playerHistoryTask;
 
-			Embed statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
-			ComponentBuilder cb = new();
-			cb.WithButton("Full stats", $"stats:{user.Id}:{leaderboardId}");
-
-			await ReplyAsync(embed: statsEmbed, components: cb.Build());
+			string userMsg = Context.Message.Content.Trim()[1..];
+			if (userMsg.StartsWith("statsf", StringComparison.OrdinalIgnoreCase))
+			{
+				Embed statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
+				await ReplyAsync(embed: statsEmbed);
+			}
+			else
+			{
+				Embed statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
+				ComponentBuilder cb = new();
+				cb.WithButton("Full stats", $"stats:{user.Id}:{leaderboardId}");
+				await ReplyAsync(embed: statsEmbed, components: cb.Build());
+			}
 		}
 		catch (Exception ex)
 		{
