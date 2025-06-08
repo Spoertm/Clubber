@@ -7,6 +7,7 @@ using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,7 @@ using System.Runtime.Serialization;
 
 namespace Clubber.Discord.Modules;
 
+[Name("🛡️ Moderator Commands")]
 [DefaultMemberPermissions(GuildPermission.ManageRoles)]
 public sealed class ModeratorCommands(
 	IOptions<AppConfig> config,
@@ -26,9 +28,9 @@ public sealed class ModeratorCommands(
 
 	[SlashCommand("edit-news", "Edit a DD news post made by the bot")]
 	public async Task EditNewsPost(
-		[Summary("message-id", "ID of the message to edit (leave empty for latest)")]
+		[global::Discord.Interactions.Summary("message-id", "ID of the message to edit (leave empty for latest)")]
 		string? messageId = null,
-		[Summary("content", "New content for the message")]
+		[global::Discord.Interactions.Summary("content", "New content for the message")]
 		string newContent = "")
 	{
 		if (string.IsNullOrWhiteSpace(newContent))
@@ -106,11 +108,11 @@ public sealed class ModeratorCommands(
 
 	[SlashCommand("check-splits", "Check if a ddstats run has better splits and update if necessary")]
 	public async Task CheckSplits(
-		[Summary("url-or-id", "ddstats URL or run ID")]
+		[global::Discord.Interactions.Summary("url-or-id", "ddstats URL or run ID")]
 		string urlOrId,
-		[Summary("split-name", "Specific split to check (e.g. 350, 700, etc.)")]
+		[global::Discord.Interactions.Summary("split-name", "Specific split to check (e.g. 350, 700, etc.)")]
 		int? splitName = null,
-		[Summary("description", "Description for the run")]
+		[global::Discord.Interactions.Summary("description", "Description for the run")]
 		string? description = null)
 	{
 		await DeferAsync();
@@ -209,7 +211,7 @@ public sealed class ModeratorCommands(
 
 	[SlashCommand("check-homing-peak", "Check if a ddstats run has better homing peak and update if necessary")]
 	public async Task CheckHomingPeak(
-		[Summary("url-or-id", "ddstats URL or run ID")]
+		[global::Discord.Interactions.Summary("url-or-id", "ddstats URL or run ID")]
 		string urlOrId)
 	{
 		await DeferAsync();

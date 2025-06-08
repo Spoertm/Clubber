@@ -7,6 +7,7 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Clubber.Domain.Services;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Serilog;
@@ -15,6 +16,7 @@ using System.Diagnostics;
 namespace Clubber.Discord.Modules;
 
 // ===== SLASH COMMANDS =====
+[Name("👤 User Commands")]
 public sealed class UserManagementCommands(
 	IDatabaseHelper databaseHelper,
 	UserService userService,
@@ -25,9 +27,9 @@ public sealed class UserManagementCommands(
 	[SlashCommand("register", "Register a user with their Devil Daggers leaderboard ID")]
 	[DefaultMemberPermissions(GuildPermission.ManageRoles)]
 	public async Task Register(
-		[Summary("user", "User to register (leave empty for yourself)")]
+		[global::Discord.Interactions.Summary("user", "User to register (leave empty for yourself)")]
 		SocketGuildUser user,
-		[Summary("leaderboard-id", "The user's Devil Daggers leaderboard ID")]
+		[global::Discord.Interactions.Summary("leaderboard-id", "The user's Devil Daggers leaderboard ID")]
 		uint lbId)
 	{
 		await DeferAsync();
@@ -62,9 +64,9 @@ public sealed class UserManagementCommands(
 	}
 
 	[SlashCommand("unregister", "Remove a user from the database")]
-	[RequireUserPermission(GuildPermission.ManageRoles)]
+	[global::Discord.Interactions.RequireUserPermission(GuildPermission.ManageRoles)]
 	public async Task Unregister(
-		[Summary("user", "User to unregister")]
+		[global::Discord.Interactions.Summary("user", "User to unregister")]
 		SocketGuildUser? user = null)
 	{
 		await DeferAsync();
@@ -90,9 +92,9 @@ public sealed class UserManagementCommands(
 
 	[SlashCommand("link-twitch", "Link a Twitch account to your Devil Daggers profile on DDLIVE")]
 	public async Task LinkTwitch(
-		[Summary("twitch-username", "Your Twitch username")]
+		[global::Discord.Interactions.Summary("twitch-username", "Your Twitch username")]
 		string twitchUsername,
-		[Summary("user", "User to link (leave empty for yourself)")]
+		[global::Discord.Interactions.Summary("user", "User to link (leave empty for yourself)")]
 		SocketGuildUser? user = null)
 	{
 		await DeferAsync();
@@ -140,7 +142,7 @@ public sealed class UserManagementCommands(
 
 	[SlashCommand("unlink-twitch", "Unlink your Twitch account")]
 	public async Task UnlinkTwitch(
-		[Summary("user", "User to unlink (leave empty for yourself)")]
+		[global::Discord.Interactions.Summary("user", "User to unlink (leave empty for yourself)")]
 		SocketGuildUser? user = null)
 	{
 		try
@@ -173,9 +175,9 @@ public sealed class UserManagementCommands(
 
 	[SlashCommand("stats", "Get Devil Daggers statistics for a user")]
 	public async Task Stats(
-		[Summary("user", "User to get stats for (leave empty for yourself)")]
+		[global::Discord.Interactions.Summary("user", "User to get stats for (leave empty for yourself)")]
 		SocketGuildUser? user = null,
-		[Summary("full", "Show full detailed stats")]
+		[global::Discord.Interactions.Summary("full", "Show full detailed stats")]
 		bool full = false)
 	{
 		await DeferAsync();

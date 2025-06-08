@@ -3,13 +3,15 @@ using Clubber.Discord.Models;
 using Clubber.Discord.Services;
 using Clubber.Domain.Models;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using System.Diagnostics;
 
 namespace Clubber.Discord.Modules;
 
-[RequireOwner]
+[Name("👑 Owner Commands")]
+[global::Discord.Interactions.RequireOwner]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
 public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper)
 	: InteractionModuleBase<SocketInteractionContext>

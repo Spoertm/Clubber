@@ -3,10 +3,14 @@ using Clubber.Discord.Models;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.DdSplits;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
+using ModuleInfo = Discord.Interactions.ModuleInfo;
+using PreconditionResult = Discord.Interactions.PreconditionResult;
 
 namespace Clubber.Discord.Modules;
 
+[Name("ℹ️ Information")]
 public sealed class InfoCommands(IDatabaseHelper databaseHelper, ClubberDiscordClient discordClient, IServiceProvider serviceProvider)
 	: InteractionModuleBase<SocketInteractionContext>
 {
@@ -22,14 +26,17 @@ public sealed class InfoCommands(IDatabaseHelper databaseHelper, ClubberDiscordC
 
 		Dictionary<string, List<SlashCommandInfo>> commandsByModule = new();
 		InteractionService interactionService = discordClient.GetInteractionService();
-		foreach (ModuleInfo? module in interactionService.Modules)
+		foreach (ModuleInfo module in interactionService.Modules)
 		{
 			foreach (SlashCommandInfo? command in module.SlashCommands)
 			{
 				PreconditionResult? preconditionResult = await command.CheckPreconditionsAsync(Context, serviceProvider);
 				if (preconditionResult.IsSuccess)
 				{
-					string moduleName = GetFriendlyModuleName(module.Name);
+					string moduleName = module.Attributes
+						.OfType<NameAttribute>()
+						.FirstOrDefault()?.Text ?? module.Name;
+
 					if (!commandsByModule.ContainsKey(moduleName))
 						commandsByModule[moduleName] = [];
 
@@ -38,41 +45,19 @@ public sealed class InfoCommands(IDatabaseHelper databaseHelper, ClubberDiscordC
 			}
 		}
 
-		foreach (KeyValuePair<string, List<SlashCommandInfo>> kvp in commandsByModule.OrderBy(x => GetModulePriority(x.Key)))
+		foreach (KeyValuePair<string, List<SlashCommandInfo>> kvp in commandsByModule)
 		{
 			if (kvp.Value.Count == 0) continue;
 
 			List<string> commandList = kvp.Value
 				.OrderBy(cmd => cmd.Name)
-				.Select(cmd => $"`/{cmd.Name}` - {cmd.Description}")
+				.Select(cmd => $"* `/{cmd.Name}` - {cmd.Description}")
 				.ToList();
 
-			if (commandList.Count > 0)
-			{
-				embed.AddField(kvp.Key, string.Join('\n', commandList));
-			}
+			embed.AddField(kvp.Key, string.Join('\n', commandList));
 		}
 
 		await RespondAsync(embed: embed.Build());
-		return;
-
-		static string GetFriendlyModuleName(string moduleName) => moduleName switch
-		{
-			"UserManagement" => "👤 User Commands",
-			"InfoCommands" => "ℹ️ Information",
-			"ModeratorCommands" => "🛡️ Moderator Commands",
-			"OwnerCommands" => "👑 Owner Commands",
-			_ => moduleName
-		};
-
-		static int GetModulePriority(string friendlyName) => friendlyName switch
-		{
-			"👤 User Commands" => 1,
-			"ℹ️ Information" => 2,
-			"🛡️ Moderator Commands" => 3,
-			"👑 Owner Commands" => 4,
-			_ => 999
-		};
 	}
 
 	[SlashCommand("bestsplits", "Get the current best Devil Daggers splits")]
