@@ -1,8 +1,10 @@
 ﻿using Clubber.Discord.Logging;
+using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
@@ -50,6 +52,9 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 		{
 			await _interactions.RegisterCommandsGloballyAsync();
 			Serilog.Log.Information("Slash commands registered globally");
+
+			TextCommandHandler textCommandHandler = _services.GetRequiredService<TextCommandHandler>();
+			await textCommandHandler.InstallCommandsAsync();
 		};
 
 		InteractionCreated += async (interaction) =>

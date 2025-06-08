@@ -9,6 +9,7 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Clubber.Web.Configuration;
 using Clubber.Web.Endpoints;
+using Discord.Commands;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
@@ -53,7 +54,18 @@ internal static class Program
 
 		// Discord Bot Services
 		builder.Services.AddSingleton<ClubberDiscordClient>();
+		builder.Services.AddSingleton<CommandService>(_ =>
+		{
+			CommandService commands = new(new CommandServiceConfig
+			{
+				IgnoreExtraArgs = true,
+				DefaultRunMode = RunMode.Async,
+			});
+
+			return commands;
+		});
 		builder.Services.AddSingleton<ComponentInteractions>();
+		builder.Services.AddSingleton<TextCommandHandler>();
 		builder.Services.AddSingleton<RegistrationTracker>();
 
 		builder.Services.AddTransient<ScoreRoleService>();
