@@ -5,5 +5,7 @@ public sealed record DdNewsItem(
 	EntryResponse OldEntry,
 	EntryResponse NewEntry,
 	DateTimeOffset TimeOfOccurenceUtc,
-	int Nth,
-	int ItemId = 0);
+	int Nth)
+{
+	public int ItemId { get; init; }
+}

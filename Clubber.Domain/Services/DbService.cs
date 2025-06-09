@@ -34,7 +34,9 @@ public class DbService : DbContext
 		modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
 
 		modelBuilder.Entity<DdNewsItem>().HasKey(dni => dni.ItemId);
-		modelBuilder.Entity<DdNewsItem>().Property(dni => dni.ItemId).UseIdentityAlwaysColumn();
+		modelBuilder.Entity<DdNewsItem>().Property(dni => dni.ItemId)
+			.ValueGeneratedOnAdd()
+			.UseIdentityAlwaysColumn();
 
 		modelBuilder.Entity<HomingPeakRun>().Property(hpr => hpr.Id).ValueGeneratedOnAdd();
 	}

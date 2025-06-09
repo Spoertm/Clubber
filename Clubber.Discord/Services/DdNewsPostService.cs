@@ -70,7 +70,8 @@ public sealed class DdNewsPostService(
 	{
 		Dictionary<int, int> oldLookup = oldEntries.ToDictionary(e => e.Id, e => e.Time);
 		return newEntries.Count != oldLookup.Count ||
-		       newEntries.Any(entry => !oldLookup.TryGetValue(entry.Id, out int oldTime) || oldTime != entry.Time);
+		       newEntries.Any(entry => !oldLookup.TryGetValue(entry.Id, out int oldTime) ||
+		                               oldTime != entry.Time);
 	}
 
 	private static IEnumerable<NewsUpdate> DetectNewsWorthyUpdates(LeaderboardSnapshot snapshot)
