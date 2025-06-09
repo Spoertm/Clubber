@@ -68,7 +68,7 @@ public sealed class TextCommands(
 						$"\n\nYou're **{noChangeResponse.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(noChangeResponse.NextRoleId)}";
 				}
 
-				await ReplyAsync(msg);
+				await ReplyAsync(msg, allowedMentions: AllowedMentions.None, messageReference: new MessageReference(Context.Message.Id));
 			}
 			else
 			{
