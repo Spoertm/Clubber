@@ -364,3 +364,6 @@ MigrationBackup/
 
 # SonarQube
 .sonarqube
+
+# Tailwindcss CLI exe
+**/tailwind*.exe

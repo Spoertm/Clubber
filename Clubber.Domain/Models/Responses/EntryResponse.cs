@@ -3,7 +3,7 @@
 
 namespace Clubber.Domain.Models.Responses;
 
-public class EntryResponse
+public sealed class EntryResponse
 {
 	public int Rank { get; set; }
 	public int Id { get; set; }

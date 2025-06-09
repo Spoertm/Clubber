@@ -1,11 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Frozen;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 
 namespace Clubber.Domain.Configuration;
 
-public class AppConfig
+public sealed class AppConfig
 {
-	private static readonly Dictionary<int, ulong> _scoreRoles = new()
+	public static ImmutableSortedDictionary<int, ulong> ScoreRoles { get; } = new Dictionary<int, ulong>
 	{
 		[1300] = 1046380614431019038,
 		[1295] = 1310208049956388964,
@@ -48,17 +49,17 @@ public class AppConfig
 		[200] = 399569259182948363,
 		[100] = 399569183966363648,
 		[0] = 461203024128376832,
-	};
+	}.ToImmutableSortedDictionary(Comparer<int>.Create((x, y) => y.CompareTo(x))); // Descending
 
-	private static readonly Dictionary<int, ulong> _rankRoles = new()
+	public static ImmutableSortedDictionary<int, ulong> RankRoles => new Dictionary<int, ulong>
 	{
 		[1] = 446688666325090310,
 		[3] = 472451008342261820,
 		[10] = 556255819323277312,
 		[25] = 992793365684949063,
-	};
+	}.ToImmutableSortedDictionary();
 
-	private static readonly Dictionary<int, string> _deathtypeDict = new()
+	public static FrozenDictionary<int, string> DeathTypes { get; } = new Dictionary<int, string>
 	{
 		[0] = "FALLEN",
 		[1] = "SWARMED",
@@ -77,13 +78,7 @@ public class AppConfig
 		[14] = "DISCARNATED",
 		[15] = "ENTANGLED",
 		[16] = "HAUNTED",
-	};
-
-	public static IReadOnlyDictionary<int, ulong> ScoreRoles { get; } = new ReadOnlyDictionary<int, ulong>(_scoreRoles);
-
-	public static IReadOnlyDictionary<int, ulong> RankRoles { get; } = new ReadOnlyDictionary<int, ulong>(_rankRoles);
-
-	public static Dictionary<int, string> DeathTypes { get; } = new(_deathtypeDict);
+	}.ToFrozenDictionary();
 
 	[Required]
 	public string Prefix { get; set; } = "+";
@@ -120,7 +115,7 @@ public class AppConfig
 
 	[Required]
 	[Range(1, ulong.MaxValue)]
-	public ulong DailyUpdateChannel { get; set; }
+	public ulong DailyUpdateChannelId { get; set; }
 
 	[Required]
 	[Range(1, ulong.MaxValue)]

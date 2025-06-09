@@ -8,17 +8,15 @@ using System.Text.Json;
 
 namespace Clubber.Domain.Services;
 
-public class WebService : IWebService
+public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebService
 {
 	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
 	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
+
 	private readonly JsonSerializerOptions _serializerOptions = new()
 	{
 		PropertyNameCaseInsensitive = true,
 	};
-	private readonly IHttpClientFactory _httpClientFactory;
-
-	public WebService(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
 	public async Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
 	{
@@ -30,7 +28,7 @@ public class WebService : IWebService
 			];
 
 			using FormUrlEncodedContent content = new(postValues);
-			using HttpClient client = _httpClientFactory.CreateClient();
+			using HttpClient client = httpClientFactory.CreateClient();
 			using HttpResponseMessage response = await client.PostAsync(_getMultipleUsersByIdUri, content);
 			byte[] data = await response.Content.ReadAsByteArrayAsync();
 
@@ -38,7 +36,7 @@ public class WebService : IWebService
 			List<EntryResponse> users = [];
 			while (bytePosition < data.Length)
 			{
-				users.Add(new()
+				users.Add(new EntryResponse
 				{
 					Username = GetUserName(data, ref bytePosition),
 					Rank = BitConverter.ToInt32(data, bytePosition),
@@ -99,8 +97,7 @@ public class WebService : IWebService
 
 			rank += 100;
 			await Task.Delay(2000);
-		}
-		while (entries[^1].Time / 10_000 >= minimumScore);
+		} while (entries[^1].Time / 10_000 >= minimumScore);
 
 		return entries;
 	}
@@ -109,8 +106,8 @@ public class WebService : IWebService
 	// Credit goes to Noah Stolk https://github.com/NoahStolk
 	private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
 	{
-		using FormUrlEncodedContent content = new([new("offset", (rankStart - 1).ToString())]);
-		using HttpClient client = _httpClientFactory.CreateClient();
+		using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("offset", (rankStart - 1).ToString())]);
+		using HttpClient client = httpClientFactory.CreateClient();
 		using HttpResponseMessage response = await client.PostAsync(_getScoresUri, content);
 
 		MemoryStream ms = new();
@@ -167,7 +164,7 @@ public class WebService : IWebService
 	public async Task<string?> GetCountryCodeForplayer(int lbId)
 	{
 		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/country-code");
-		using HttpClient client = _httpClientFactory.CreateClient();
+		using HttpClient client = httpClientFactory.CreateClient();
 		await using Stream responseStream = await client.GetStreamAsync(uri);
 		using JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream);
 
@@ -177,7 +174,7 @@ public class WebService : IWebService
 	public async Task<GetPlayerHistory?> GetPlayerHistory(uint lbId)
 	{
 		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
-		using HttpClient client = _httpClientFactory.CreateClient();
+		using HttpClient client = httpClientFactory.CreateClient();
 		await using Stream responseStream = await client.GetStreamAsync(uri);
 		return await JsonSerializer.DeserializeAsync<GetPlayerHistory>(responseStream, _serializerOptions);
 	}
@@ -186,22 +183,22 @@ public class WebService : IWebService
 	{
 		string uriStr = uri.ToString();
 		string runIdStr = string.Empty;
-		if (uriStr.StartsWith("https://ddstats.com/games/"))
+		if (uriStr.StartsWith("https://ddstats.com/games/", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[26..];
-		else if (uriStr.StartsWith("https://www.ddstats.com/games/"))
+		else if (uriStr.StartsWith("https://www.ddstats.com/games/", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[30..];
-		else if (uriStr.StartsWith("https://ddstats.com/api/v2/game/full"))
+		else if (uriStr.StartsWith("https://ddstats.com/api/v2/game/full", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[40..];
-		else if (uriStr.StartsWith("https://www.ddstats.com/api/v2/game/full"))
+		else if (uriStr.StartsWith("https://www.ddstats.com/api/v2/game/full", StringComparison.OrdinalIgnoreCase))
 			runIdStr = uriStr[44..];
 
 		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
 		if (string.IsNullOrEmpty(runIdStr) || !successfulParse)
 			throw new ClubberException("Invalid ddstats URL.");
 
-		string fullRunReqUrl = $"https://ddstats.com/api/v2/game/full?id={runId}";
-		using HttpClient client = _httpClientFactory.CreateClient();
-		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUrl);
+		Uri fullRunReqUri = new($"https://ddstats.com/api/v2/game/full?id={runId}");
+		using HttpClient client = httpClientFactory.CreateClient();
+		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUri);
 		return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
 	}
 }

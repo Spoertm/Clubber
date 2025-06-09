@@ -1,0 +1,16 @@
+{
+	"name": "clubber-web",
+	"version": "1.0.0",
+	"description": "Clubber Discord Bot Website",
+	"scripts": {
+		"build-css": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --watch",
+		"build-css-prod": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --minify"
+	},
+	"devDependencies": {
+		"@tailwindcss/typography": "^0.5.16",
+		"tailwindcss": "^4.1.8"
+	},
+	"dependencies": {
+		"@tailwindcss/cli": "^4.1.8"
+	}
+}

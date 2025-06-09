@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Clubber.UnitTests.HelpersTests;
 
-public class DdNewsMessageBuilderTests
+public sealed class DdNewsMessageBuilderTests
 {
 	private readonly DdNewsMessageBuilder _sut = new();
 

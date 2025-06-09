@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>13</LangVersion>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <AnalysisMode>All</AnalysisMode>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <DebuggerSupport>false</DebuggerSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <UseNativeHttpHandler>true</UseNativeHttpHandler>
+    <StartupHookSupport>false</StartupHookSupport>
+    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Clubber.Discord\Clubber.Discord.csproj"/>
+    <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.5"/>
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.4"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.4"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.4"/>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.4"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Remove unused client libraries -->
+    <Content Remove="wwwroot\lib\bootstrap\**"/>
+    <Content Remove="wwwroot\lib\jquery\**"/>
+    <Content Remove="wwwroot\lib\jquery-validation\**"/>
+    <Content Remove="wwwroot\lib\jquery-validation-unobtrusive\**"/>
+  </ItemGroup>
+
+</Project>

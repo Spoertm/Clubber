@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Services;
 
-public class UserJoinHandler
+public sealed class UserJoinHandler
 {
 	private readonly IServiceScopeFactory _services;
 	private readonly AppConfig _config;
@@ -69,7 +69,7 @@ public class UserJoinHandler
 		ulong logChannelId = _config.DailyUpdateLoggingChannelId;
 		if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
 		{
-			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new(joiningUser, roleUpdate))]);
+			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new UserRoleUpdate(joiningUser, roleUpdate))]);
 		}
 	}
 }

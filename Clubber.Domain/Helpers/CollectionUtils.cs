@@ -18,7 +18,7 @@ public static class CollectionUtils
 			.Except(itemsToRetain)
 			.ToArray();
 
-		return new(itemsToAdd, itemsToRemove);
+		return new CollectionChange<T>(itemsToAdd, itemsToRemove);
 	}
 
 	public static MilestoneInfo<TKey> GetNextMileStone<TKey>(
@@ -33,6 +33,6 @@ public static class CollectionUtils
 
 		(int nextScore, TKey nextMilestoneId) = milestones.Last(m => m.Key > currentTime / 10_000);
 		decimal timeUntilNextMilestone = nextScore - currentTime / 10_000M;
-		return new(timeUntilNextMilestone, nextMilestoneId);
+		return new MilestoneInfo<TKey>(timeUntilNextMilestone, nextMilestoneId);
 	}
 }

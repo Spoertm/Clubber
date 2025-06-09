@@ -4,7 +4,6 @@ using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 using System.Text;
 
@@ -55,18 +54,18 @@ public static class EmbedHelper
 			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
-				✏️ Leaderboard name: {sanitizedLbName}
-				🛂 Leaderboard ID: {lbPlayer.Id}
-				⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s {pbDateTimeFormatted}
-				🥇 Rank: {lbPlayer.Rank}
-				💀 Kills: {lbPlayer.Kills}
-				♦️ Gems: {lbPlayer.Gems}
-				🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+				 ✏️ Leaderboard name: {sanitizedLbName}
+				 🛂 Leaderboard ID: {lbPlayer.Id}
+				 ⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s {pbDateTimeFormatted}
+				 🥇 Rank: {lbPlayer.Rank}
+				 💀 Kills: {lbPlayer.Kills}
+				 ♦️ Gems: {lbPlayer.Gems}
+				 🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
 
-				• For full stats, use `statsf`.
+				 • For full stats, use `statsf`.
 
-				{Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
-				""")
+				 {Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
+				 """)
 			.Build();
 	}
 
@@ -85,25 +84,25 @@ public static class EmbedHelper
 			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
 			.WithDescription(
 				$"""
-				✏️ Leaderboard name: {sanitizedLbName}
-				🛂 Leaderboard ID: {lbPlayer.Id}
-				⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s
-				🥇 Rank: {lbPlayer.Rank} {peakRankFormatted}
-				💀 Kills: {lbPlayer.Kills}
-				💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
-				♦️ Gems: {lbPlayer.Gems}
-				♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
-				⏲️ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
-				🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
-				🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
-				🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
-				🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
-				🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
-				🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
-				😵 Total deaths: {lbPlayer.DeathsTotal}
-				😵 Death type: {AppConfig.DeathTypes[lbPlayer.DeathType]}
-				{(playerPb is null ? null : "\u200B")}
-				""");
+				 ✏️ Leaderboard name: {sanitizedLbName}
+				 🛂 Leaderboard ID: {lbPlayer.Id}
+				 ⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s
+				 🥇 Rank: {lbPlayer.Rank} {peakRankFormatted}
+				 💀 Kills: {lbPlayer.Kills}
+				 💀 Lifetime kills: {lbPlayer.KillsTotal:N0}
+				 ♦️ Gems: {lbPlayer.Gems}
+				 ♦️ Lifetime gems: {lbPlayer.GemsTotal:N0}
+				 ⏲️ Total time alive: {ts.TotalSeconds:N}s ({ts.TotalHours:F0}h {ts.Minutes:F0}m {ts.Seconds}s)
+				 🗡 Daggers hit: {lbPlayer.DaggersHit:N0}
+				 🗡 Daggers fired: {lbPlayer.DaggersFired:n0}
+				 🗡 Total daggers hit: {lbPlayer.DaggersHitTotal:N0}
+				 🗡 Total daggers fired: {lbPlayer.DaggersFiredTotal:N0}
+				 🎯 Accuracy: {(double)lbPlayer.DaggersHit / lbPlayer.DaggersFired * 100:0.00}%
+				 🎯 Lifetime accuracy: {(double)lbPlayer.DaggersHitTotal / lbPlayer.DaggersFiredTotal * 100:0.00}%
+				 😵 Total deaths: {lbPlayer.DeathsTotal}
+				 😵 Death type: {AppConfig.DeathTypes[lbPlayer.DeathType]}
+				 {(playerPb is null ? null : "\u200B")}
+				 """);
 
 		if (playerPb != null)
 		{
@@ -120,97 +119,10 @@ public static class EmbedHelper
 			embedBuilder.AddField("💤 Last active", $"{lastActivity.DateTime:yyyy-MM-dd}", true);
 		}
 
-		embedBuilder.AddField("\u200B", Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
+		embedBuilder.AddField("\u200B",
+			Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
 
 		return embedBuilder.Build();
-	}
-
-	public static Embed GenericHelp(ICommandContext context, CommandService service)
-	{
-		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle("List of commands")
-			.WithDescription("To check for role updates do `+pb`\nTo get stats do `+me`\n\n")
-			.WithThumbnailUrl(context.Client.CurrentUser.GetAvatarUrl())
-			.WithFooter("Mentioning the bot works as well as using the prefix.\nUse help <command> to get more info about a command.");
-
-		foreach (IGrouping<string, CommandInfo>? group in service.Commands.GroupBy(x => x.Module.Name))
-		{
-			string groupCommands = string.Join(", ", group
-				.Where(cmd => cmd.CheckPreconditionsAsync(context).Result.IsSuccess)
-				.Select(x => Format.Code(x.Aliases[0]))
-				.Distinct());
-
-			if (!string.IsNullOrEmpty(groupCommands))
-				embed.AddField(group.Key, groupCommands);
-		}
-
-		return embed.Build();
-	}
-
-	public static Embed CommandHelp(ICommandContext context, SearchResult result)
-	{
-		EmbedBuilder embedBuilder = new();
-		CommandInfo currentCommand = result.Commands[0].Command;
-
-		embedBuilder
-			.WithTitle(result.Commands[0].Alias)
-			.WithDescription(currentCommand.Summary ?? currentCommand.Module.Summary);
-
-		if (currentCommand.Aliases.Count > 1)
-			embedBuilder.AddField("Aliases", string.Join('\n', currentCommand.Aliases), true);
-
-		IEnumerable<CommandInfo> checkedCommands;
-
-		if (currentCommand.Module.Group is null)
-			checkedCommands = result.Commands.Where(c => c.CheckPreconditionsAsync(context).Result.IsSuccess).Select(c => c.Command);
-		else
-			checkedCommands = currentCommand.Module.Commands.Where(c => c.CheckPreconditionsAsync(context).Result.IsSuccess);
-
-		IEnumerable<CommandInfo> commandInfos = checkedCommands as CommandInfo[] ?? checkedCommands.ToArray();
-		if (commandInfos.Count() > 1 || commandInfos.Any(cc => cc.Parameters.Count > 0))
-		{
-			embedBuilder.AddField("Overloads", string.Join('\n', commandInfos.Select(GetCommandAndParameterString)), true);
-			embedBuilder.AddField("Examples", string.Join('\n', commandInfos.Select(cc => cc.Remarks)));
-		}
-
-		if (result.Commands.Any(c => c.Command.Parameters.Count > 0))
-			embedBuilder.WithFooter("[]: Required⠀⠀(): Optional\nText within \" \" will be counted as one argument.");
-
-		return embedBuilder.Build();
-	}
-
-	/// <summary>
-	/// Returns the command and its params in the format: commandName [requiredParam] (optionalParam).
-	/// </summary>
-	private static string GetCommandAndParameterString(CommandInfo cmd)
-	{
-		return $"{cmd.Aliases[0]} {string.Join(" ", cmd.Parameters.Select(p => p.IsOptional ? p.DefaultValue is null ? $"({p.Name})" : $"({p.Name} = {p.DefaultValue})" : $"[{p.Name}]"))}";
-	}
-
-	public static Embed MultipleMatches(IEnumerable<SocketGuildUser> userMatches, string search)
-	{
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle($"Found multiple matches for '{search.ToLower()}'")
-			.WithDescription("Specify their entire username, tag them, or specify their Discord ID in the format `+command id <the id>`.");
-
-		IEnumerable<SocketGuildUser> socketGuildUsers = userMatches as SocketGuildUser[] ?? userMatches.ToArray();
-		string userFieldValue = string.Join("\n", socketGuildUsers.Select(um => $"- {FormatUser(um)}"));
-		string discordIdFieldValue = string.Join("\n", socketGuildUsers.Select(um => $"- {um.Id}"));
-
-		if (userFieldValue.Length <= 1024 && discordIdFieldValue.Length <= 1024)
-		{
-			embedBuilder
-				.AddField("User", userFieldValue, inline: true)
-				.AddField("Discord ID", discordIdFieldValue, inline: true);
-		}
-
-		return embedBuilder.Build();
-	}
-
-	private static string FormatUser(IGuildUser user)
-	{
-		string formattedName = user.Nickname is null ? user.Username : $"{user.Username} ({user.Nickname})";
-		return Format.Sanitize(formattedName);
 	}
 
 	public static Embed[] RegisterEmbeds()
@@ -222,14 +134,14 @@ public static class EmbedHelper
 
 		string registerForRolesText =
 			$"""
-			This bot automatically syncs your roles with your Devil Daggers score. This server has roles corresponding to in-game scores, ranging from <@&{lowestScoreRoleId}> to <@&{highestScoreRoleId}>.
+			 This bot automatically syncs your roles with your Devil Daggers score. This server has roles corresponding to in-game scores, ranging from <@&{lowestScoreRoleId}> to <@&{highestScoreRoleId}>.
 
-			If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID (follow the GIF below).
+			 If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID (follow the GIF below).
 
-			If you don't play the game or simply don't want to be registered, post "`no score`".
+			 If you don't play the game or simply don't want to be registered, post "`no score`".
 
-			**After posting the message in this channel, a moderator will then soon register you**.
-			""";
+			 **After posting the message in this channel, a moderator will then soon register you**.
+			 """;
 
 		const string twitchText =
 			"""
@@ -256,25 +168,38 @@ public static class EmbedHelper
 
 	public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
 	{
-		StringBuilder sb = new($"`  {"Split",-9}{"Old",-8}New` Run");
+		Dictionary<string, BestSplit> oldSplitsDict = oldBestSplits.ToDictionary(s => s.Name);
+		Dictionary<string, BestSplit> newSplitsDict = updatedBestSplits.ToDictionary(s => s.Name);
 
-		foreach ((string Name, int Time) split in Split.V3Splits)
+		StringBuilder sb = new($"`  {"Split",-9}{"Old",-8}New` Run\n");
+		foreach ((string name, int _) in Split.V3Splits)
 		{
-			BestSplit? oldBestSplit = Array.Find(oldBestSplits, obs => obs.Name == split.Name);
-			BestSplit? newBestSplit = Array.Find(updatedBestSplits, ubs => ubs.Name == split.Name);
-			sb.Append((oldBestSplit, newBestSplit) switch
-			{
-				({ }, { })   => $"\n**`\u22c6 {split.Name,-7} {oldBestSplit.Value,4}  {newBestSplit.Value,6}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
-				({ }, null)  => $"\n`  {split.Name,-7} {oldBestSplit.Value,4}  {oldBestSplit.Value,6}` [{oldBestSplit.Description}]({oldBestSplit.GameInfo?.Url})",
-				(null, { })  => $"\n**`\u22c6 {split.Name,-7} {"N/A",4}  {newBestSplit.Value,6}` [{newBestSplit.Description}]({newBestSplit.GameInfo?.Url})**",
-				(null, null) => $"\n`  {split.Name,-7} {"N/A",4}  {"N/A",6}` N/A",
-			});
+			oldSplitsDict.TryGetValue(name, out BestSplit? oldSplit);
+			newSplitsDict.TryGetValue(name, out BestSplit? newSplit);
+
+			bool isUpdated = newSplit is not null;
+			string prefix = isUpdated ? "**`\u22c6 " : "`  ";
+			string suffix = isUpdated ? "`**" : "`";
+
+			string oldValue = oldSplit?.Value.ToString() ?? "N/A";
+			string newValue = newSplit?.Value.ToString() ?? (oldSplit?.Value.ToString() ?? "N/A");
+
+			string runLink = GetRunLink(newSplit ?? oldSplit);
+
+			sb.AppendLine($"{prefix}{name,-7} {oldValue,4}  {newValue,6}{suffix} {runLink}");
 		}
 
 		return new EmbedBuilder()
 			.WithTitle("Updated best splits")
 			.WithDescription(sb.ToString())
 			.Build();
+
+		static string GetRunLink(BestSplit? split)
+		{
+			return split is not null
+				? $"[{split.Description}]({split.GameInfo?.Url})"
+				: "N/A";
+		}
 	}
 
 	public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
@@ -338,8 +263,8 @@ public static class EmbedHelper
 			int homingDiff = newRun.HomingPeak - oldRun.HomingPeak;
 			embedBuilder.WithDescription(
 				$"""
-				## [{oldRun.HomingPeak}]({oldRun.Source}) → [{newRun.HomingPeak}]({newRun.Source}) (+{homingDiff})
-				"""
+				 ## [{oldRun.HomingPeak}]({oldRun.Source}) → [{newRun.HomingPeak}]({newRun.Source}) (+{homingDiff})
+				 """
 			);
 		}
 		else
@@ -371,11 +296,11 @@ public static class EmbedHelper
 		EmbedBuilder eb = new();
 		eb.WithDescription
 		($"""
-		## Register {userName} with ID `{foundId}`?
+		  ## Register {userName} with ID `{foundId}`?
 
-		### Info about ID {foundId} [from ddinfo](https://devildaggers.info/leaderboard/player/{foundId}):
-		{extraInfo}
-		""");
+		  ### Info about ID {foundId} [from ddinfo](https://devildaggers.info/leaderboard/player/{foundId}):
+		  {extraInfo}
+		  """);
 
 		return eb.Build();
 	}

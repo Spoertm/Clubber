@@ -1,12 +1,12 @@
 ﻿namespace Clubber.Domain.Models;
 
-public record DdUser
+public sealed record DdUser
 {
-	public DdUser(ulong DiscordId, int LeaderboardId, string? TwitchUsername = null)
+	public DdUser(ulong discordId, int leaderboardId, string? twitchUsername = null)
 	{
-		this.DiscordId = DiscordId;
-		this.LeaderboardId = LeaderboardId;
-		this.TwitchUsername = TwitchUsername;
+		DiscordId = discordId;
+		LeaderboardId = leaderboardId;
+		TwitchUsername = twitchUsername;
 	}
 
 	public ulong DiscordId { get; init; }

@@ -12,26 +12,19 @@ using System.Diagnostics;
 
 namespace Clubber.Discord.Services;
 
-public class DatabaseUpdateService : ExactBackgroundService
+public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceScopeFactory services) : ExactBackgroundService
 {
-	private readonly AppConfig _config;
-	private readonly IServiceScopeFactory _services;
-
-	public DatabaseUpdateService(IOptions<AppConfig> config, IServiceScopeFactory services)
-	{
-		_config = config.Value;
-		_services = services;
-	}
+	private readonly AppConfig _config = config.Value;
 
 	protected override TimeOnly UtcTriggerTime => new(16, 00);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		await using AsyncServiceScope scope = _services.CreateAsyncScope();
+		await using AsyncServiceScope scope = services.CreateAsyncScope();
 		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
 		IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
 
-		SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId) ?? throw new("DD Pals server not found with the provided ID.");
+		SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId) ?? throw new Exception("DD Pals server not found with the provided ID.");
 		SocketTextChannel dailyUpdateLoggingChannel = discordHelper.GetTextChannel(_config.DailyUpdateLoggingChannelId);
 		IUserMessage msg = await dailyUpdateLoggingChannel.SendMessageAsync("Checking for role updates...");
 
@@ -79,7 +72,7 @@ public class DatabaseUpdateService : ExactBackgroundService
 
 					Result dailyChannelResult = await discordHelper.SendEmbedsEfficientlyAsync(
 						roleUpdateEmbeds,
-						_config.DailyUpdateChannel,
+						_config.DailyUpdateChannelId,
 						dailyUpdateMessageStr);
 
 					if (dailyChannelResult.IsFailure)

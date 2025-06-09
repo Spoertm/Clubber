@@ -2,7 +2,7 @@
 
 namespace Clubber.Domain.Models.DdSplits;
 
-public class HomingPeakRun
+public sealed class HomingPeakRun
 {
 	[Key]
 	public int Id { get; set; }

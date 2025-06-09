@@ -2,15 +2,8 @@ using Serilog;
 
 namespace Clubber.Domain.BackgroundTasks;
 
-public class KeepAppAliveService : RepeatingBackgroundService
+public sealed class KeepAppAliveService(IHttpClientFactory httpClientFactory) : RepeatingBackgroundService
 {
-	private readonly IHttpClientFactory _httpClientFactory;
-
-	public KeepAppAliveService(IHttpClientFactory httpClientFactory)
-	{
-		_httpClientFactory = httpClientFactory;
-	}
-
 	protected override TimeSpan TickInterval => TimeSpan.FromMinutes(5);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
@@ -24,7 +17,7 @@ public class KeepAppAliveService : RepeatingBackgroundService
 
 		try
 		{
-			using HttpClient client = _httpClientFactory.CreateClient();
+			using HttpClient client = httpClientFactory.CreateClient();
 			await client.GetStringAsync(new Uri(appUrl), stoppingToken).ConfigureAwait(false);
 		}
 		catch (Exception e)

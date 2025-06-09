@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Clubber.UnitTests.ServicesTests;
 
-public class UserServiceTests
+public sealed class UserServiceTests
 {
 	private readonly UserService _sut;
 	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
@@ -27,7 +27,7 @@ public class UserServiceTests
 		configMock.Bind(appConfig);
 		IOptions<AppConfig> options = Options.Create(appConfig);
 
-		_sut = new(options, _databaseHelperMock.Object);
+		_sut = new UserService(options, _databaseHelperMock.Object);
 	}
 
 	[Theory]

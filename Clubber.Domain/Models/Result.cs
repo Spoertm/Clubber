@@ -4,10 +4,7 @@ public class Result
 {
 	protected Result(bool isSuccess, string errorMsg)
 	{
-		if (isSuccess && !string.IsNullOrEmpty(errorMsg))
-			throw new InvalidOperationException();
-
-		if (!isSuccess && string.IsNullOrEmpty(errorMsg))
+		if (isSuccess ^ string.IsNullOrEmpty(errorMsg))
 			throw new InvalidOperationException();
 
 		IsSuccess = isSuccess;
@@ -27,9 +24,9 @@ public class Result
 	public static Result<T> Success<T>(T value) => new(value, true, string.Empty);
 }
 
-public class Result<T> : Result
+public sealed class Result<T> : Result
 {
-	protected internal Result(T value, bool isSuccess, string errorMsg)
+	internal Result(T value, bool isSuccess, string errorMsg)
 		: base(isSuccess, errorMsg)
 	{
 		Value = value;

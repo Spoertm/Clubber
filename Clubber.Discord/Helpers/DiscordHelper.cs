@@ -7,23 +7,16 @@ using Serilog;
 
 namespace Clubber.Discord.Helpers;
 
-public class DiscordHelper : IDiscordHelper
+public sealed class DiscordHelper(ClubberDiscordClient client) : IDiscordHelper
 {
-	private readonly ClubberDiscordClient _client;
-
-	public DiscordHelper(ClubberDiscordClient client)
-	{
-		_client = client;
-	}
-
 	public SocketTextChannel GetTextChannel(ulong channelId)
-		=> _client.GetChannel(channelId) as SocketTextChannel ?? throw new ClubberException($"No channel with ID {channelId} exists.");
+		=> client.GetChannel(channelId) as SocketTextChannel ?? throw new ClubberException($"No channel with ID {channelId} exists.");
 
 	public SocketGuildUser? GetGuildUser(ulong guildId, ulong userId)
-		=> _client.GetGuild(guildId)?.GetUser(userId);
+		=> client.GetGuild(guildId)?.GetUser(userId);
 
 	public SocketGuild? GetGuild(ulong guildId)
-		=> _client.GetGuild(guildId);
+		=> client.GetGuild(guildId);
 
 	public async Task ClearChannelAsync(ITextChannel channel)
 	{

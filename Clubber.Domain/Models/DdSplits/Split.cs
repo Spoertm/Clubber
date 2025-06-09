@@ -2,19 +2,12 @@
 
 namespace Clubber.Domain.Models.DdSplits;
 
-public class Split
+public sealed class Split(string name, int time, int value)
 {
-	public Split(string name, int time, int value)
-	{
-		Name = name;
-		Time = time;
-		Value = value;
-	}
+	public string Name { get; } = name;
+	public int Time { get; } = time;
 
-	public string Name { get; }
-	public int Time { get; }
-
-	public int Value { get; set; }
+	public int Value { get; set; } = value;
 
 	[JsonIgnore]
 	public static IReadOnlyList<(string Name, int Time)> V3Splits =>

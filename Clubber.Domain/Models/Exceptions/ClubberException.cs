@@ -1,6 +1,6 @@
 ﻿namespace Clubber.Domain.Models.Exceptions;
 
-public class ClubberException : Exception
+public sealed class ClubberException : Exception
 {
 	public ClubberException()
 	{

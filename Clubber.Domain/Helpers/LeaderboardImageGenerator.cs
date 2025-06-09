@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace Clubber.Domain.Helpers;
 
-public class LeaderboardImageGenerator
+public sealed class LeaderboardImageGenerator
 {
 	private const int _imageWidth = 1100;
 	private const int _imageHeight = 84;

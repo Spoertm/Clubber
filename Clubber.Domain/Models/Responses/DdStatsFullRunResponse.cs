@@ -2,7 +2,7 @@
 
 namespace Clubber.Domain.Models.Responses;
 
-public class DdStatsFullRunResponse
+public sealed class DdStatsFullRunResponse
 {
 	[JsonPropertyName("game_info")]
 	public GameInfo GameInfo { get; set; } = null!;
@@ -41,7 +41,7 @@ public class State
 	public int GemsDespawned { get; set; }
 }
 
-public class GameInfo
+public sealed class GameInfo
 {
 	[JsonPropertyName("player_name")]
 	public string PlayerName { get; set; } = null!;

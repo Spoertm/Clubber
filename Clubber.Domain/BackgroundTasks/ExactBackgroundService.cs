@@ -18,9 +18,9 @@ public abstract class ExactBackgroundService : BackgroundService
 				await ExecuteIfOnTimeAsync(stoppingToken);
 				await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
 			}
-			catch (OperationCanceledException)
+			catch (OperationCanceledException operationCanceledException)
 			{
-				Log.Warning("{ClassName} => service cancellation requested", nameof(ExactBackgroundService));
+				Log.Warning(operationCanceledException, "{ClassName} => service cancellation requested", nameof(ExactBackgroundService));
 			}
 			catch (Exception exception)
 			{

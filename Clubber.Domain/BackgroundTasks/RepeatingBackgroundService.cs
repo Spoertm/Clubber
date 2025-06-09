@@ -22,9 +22,9 @@ public abstract class RepeatingBackgroundService : BackgroundService
 					await ExecuteTaskAsync(stoppingToken);
 				}
 			}
-			catch (OperationCanceledException)
+			catch (OperationCanceledException operationCanceledException)
 			{
-				Log.Warning("{ClassName} => service cancellation requested", nameof(RepeatingBackgroundService));
+				Log.Warning(operationCanceledException, "{ClassName} => service cancellation requested", nameof(RepeatingBackgroundService));
 			}
 			catch (Exception exception)
 			{

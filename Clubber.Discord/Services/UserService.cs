@@ -6,16 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Services;
 
-public class UserService
+public sealed class UserService(IOptions<AppConfig> config, IDatabaseHelper databaseHelper)
 {
-	private readonly AppConfig _config;
-	private readonly IDatabaseHelper _databaseHelper;
-
-	public UserService(IOptions<AppConfig> config, IDatabaseHelper databaseHelper)
-	{
-		_config = config.Value;
-		_databaseHelper = databaseHelper;
-	}
+	private readonly AppConfig _config = config.Value;
 
 	public async Task<Result> IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
 	{
@@ -25,7 +18,7 @@ public class UserService
 			return Result.Failure(result.ErrorMsg);
 		}
 
-		if (await _databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
+		if (await databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
 		{
 			return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
 		}
@@ -41,7 +34,7 @@ public class UserService
 			return Result.Failure(result.ErrorMsg);
 		}
 
-		if (await _databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
+		if (await databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
 		{
 			return Result.Success();
 		}

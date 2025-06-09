@@ -1,6 +1,6 @@
 ﻿namespace Clubber.Domain.Models.Responses.DdInfo;
 
-public record GetPlayerHistory
+public sealed record GetPlayerHistory
 {
 	public required int? BestRank { get; init; }
 

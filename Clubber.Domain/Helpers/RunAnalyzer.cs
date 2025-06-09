@@ -25,7 +25,7 @@ public static class RunAnalyzer
 				splitValue -= 105;
 
 			currentSplit = Split.V3Splits[i];
-			splits.Add(new(currentSplit.Name, currentSplit.Time, splitValue));
+			splits.Add(new Split(currentSplit.Name, currentSplit.Time, splitValue));
 		}
 
 		return splits.AsReadOnly();

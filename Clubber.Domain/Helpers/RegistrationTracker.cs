@@ -2,7 +2,7 @@
 
 namespace Clubber.Domain.Helpers;
 
-public class RegistrationTracker
+public sealed class RegistrationTracker
 {
 	private readonly ConcurrentDictionary<ulong, bool> _userRegistrations = new();
 

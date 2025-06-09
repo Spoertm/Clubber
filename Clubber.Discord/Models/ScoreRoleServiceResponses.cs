@@ -21,12 +21,12 @@ public abstract class RoleChangeResult
 
 		public static None FromMileStoneInfo(MilestoneInfo<ulong> milestoneInfo)
 		{
-			return new(milestoneInfo.TimeUntilNextMilestone, milestoneInfo.NextMilestoneId);
+			return new None(milestoneInfo.TimeUntilNextMilestone, milestoneInfo.NextMilestoneId);
 		}
 	}
 }
 
-public class RoleUpdate : RoleChangeResult
+public sealed class RoleUpdate : RoleChangeResult
 {
 	private RoleUpdate(IReadOnlyCollection<ulong> rolesToAdd, IReadOnlyCollection<ulong> rolesToRemove)
 	{
@@ -39,6 +39,6 @@ public class RoleUpdate : RoleChangeResult
 
 	public static RoleUpdate FromCollectionChanges(CollectionChange<ulong> changes)
 	{
-		return new(changes.ItemsToAdd, changes.ItemsToRemove);
+		return new RoleUpdate(changes.ItemsToAdd, changes.ItemsToRemove);
 	}
 }
