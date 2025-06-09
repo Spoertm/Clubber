@@ -23,8 +23,6 @@ public class DbService : DbContext
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
-		modelBuilder.HasDefaultSchema("clubber");
-
 		modelBuilder.Entity<DdNewsItem>().Property(ddni => ddni.OldEntry).HasColumnType("jsonb");
 		modelBuilder.Entity<DdNewsItem>().Property(ddni => ddni.NewEntry).HasColumnType("jsonb");
 
