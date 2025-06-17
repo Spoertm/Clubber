@@ -12,6 +12,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 {
 	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
 	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
+	private readonly Uri _getWorldRecordsUri = new("https://devildaggers.info/api/world-records");
 
 	private readonly JsonSerializerOptions _serializerOptions = new()
 	{
@@ -200,5 +201,13 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 		using HttpClient client = httpClientFactory.CreateClient();
 		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUri);
 		return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
+	}
+
+	public async Task<GetWorldRecordDataContainer> GetWorldRecords()
+	{
+		using HttpClient client = httpClientFactory.CreateClient();
+		await using Stream responseStream = await client.GetStreamAsync(_getWorldRecordsUri);
+		return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)
+		       ?? throw new SerializationException("Failed to deserialize world records data");
 	}
 }

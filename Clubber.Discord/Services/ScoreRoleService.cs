@@ -55,33 +55,20 @@ public sealed class ScoreRoleService
 		IEnumerable<uint> idsToRequest = lbIdsToRequest as uint[] ?? lbIdsToRequest.ToArray();
 		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(idsToRequest);
 
-		// Get player histories for Former WR checking
-		Dictionary<uint, GetPlayerHistory?> playerHistories = new();
-		foreach (uint lbId in idsToRequest)
-		{
-			try
-			{
-				playerHistories[lbId] = await _webService.GetPlayerHistory(lbId);
-				await Task.Delay(50);
-			}
-			catch (Exception ex)
-			{
-				Log.Warning(ex, "Failed to get player history for {LbId}", lbId);
-				playerHistories[lbId] = null;
-			}
-		}
+		GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
+		HashSet<int> formerWrPlayerIds = worldRecords.WorldRecordHolders.Select(wrh => wrh.Id).ToHashSet();
 
-		(IGuildUser guildUser, EntryResponse lbPlayer, GetPlayerHistory? playerHistory)[] registeredDiscordLbPlayers = registeredUsers.Join(
+		(IGuildUser guildUser, EntryResponse lbPlayer)[] registeredDiscordLbPlayers = registeredUsers.Join(
 				inner: lbPlayers,
 				outerKeySelector: ru => (uint)ru.ddUser.LeaderboardId,
 				innerKeySelector: lbp => (uint)lbp.Id,
-				resultSelector: (ru, lbp) => (ru.guildUser, lbp, playerHistories.GetValueOrDefault((uint)lbp.Id)))
+				resultSelector: (ru, lbp) => (ru.guildUser, lbp))
 			.ToArray();
 
 		List<UserRoleUpdate> roleUpdates = [];
-		foreach ((IGuildUser guildUser, EntryResponse lbPlayer, GetPlayerHistory? playerHistory) in registeredDiscordLbPlayers)
+		foreach ((IGuildUser guildUser, EntryResponse lbPlayer) in registeredDiscordLbPlayers)
 		{
-			RoleChangeResult roleChangeResult = GetRoleChange(guildUser.RoleIds, lbPlayer, playerHistory);
+			RoleChangeResult roleChangeResult = GetRoleChange(guildUser.RoleIds, lbPlayer, formerWrPlayerIds);
 			if (roleChangeResult is RoleUpdate roleUpdate)
 			{
 				roleUpdates.Add(new UserRoleUpdate(guildUser, roleUpdate));
@@ -122,10 +109,10 @@ public sealed class ScoreRoleService
 			uint lbId = (uint)ddUser.LeaderboardId;
 			IReadOnlyList<EntryResponse> lbPlayerList = await _webService.GetLbPlayers([lbId]);
 
-			// Check player history for former WR status
-			GetPlayerHistory? playerHistory = await _webService.GetPlayerHistory(lbId);
+			GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
+			HashSet<int> formerWrPlayerIds = worldRecords.WorldRecordHolders.Select(wrh => wrh.Id).ToHashSet();
 
-			return Result.Success(GetRoleChange(user.RoleIds, lbPlayerList[0], playerHistory));
+			return Result.Success(GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds));
 		}
 		catch (Exception ex)
 		{
@@ -142,7 +129,7 @@ public sealed class ScoreRoleService
 		}
 	}
 
-	private RoleChangeResult GetRoleChange(IReadOnlyCollection<ulong> roleIds, EntryResponse lbUser, GetPlayerHistory? playerHistory)
+	private RoleChangeResult GetRoleChange(IReadOnlyCollection<ulong> roleIds, EntryResponse lbUser, HashSet<int> formerWrPlayerIds)
 	{
 		ulong scoreRoleToKeep = GetScoreRoleToKeep(lbUser.Time).Value;
 		ulong rankRoleToKeep = GetRankRoleToKeep(lbUser.Rank).Value;
@@ -150,7 +137,7 @@ public sealed class ScoreRoleService
 		List<ulong> rolesToKeep = [scoreRoleToKeep];
 
 		bool isCurrentWr = lbUser.Rank == 1;
-		bool wasEverWr = playerHistory?.BestRank == 1;
+		bool wasEverWr = formerWrPlayerIds.Contains(lbUser.Id);
 
 		if (rankRoleToKeep != 0)
 		{

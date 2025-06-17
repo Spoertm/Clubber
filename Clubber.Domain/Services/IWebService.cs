@@ -14,4 +14,6 @@ public interface IWebService
 	Task<GetPlayerHistory?> GetPlayerHistory(uint lbId);
 
 	Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri);
+
+	Task<GetWorldRecordDataContainer> GetWorldRecords();
 }
