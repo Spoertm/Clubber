@@ -19,7 +19,27 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
 	[SlashCommand("update-database", "Force update the database and user roles")]
 	public async Task UpdateDatabase()
 	{
-		await DeferAsync();
+		// Defer immediately to prevent timeout issues
+		try
+		{
+			await DeferAsync();
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Error(ex, "Failed to defer interaction for update-database command");
+			// If we can't defer, try to respond directly instead
+			try
+			{
+				await RespondAsync("❌ Failed to start database update (interaction error). Please try again.", ephemeral: true);
+			}
+			catch
+			{
+				// If both defer and respond fail, there's nothing we can do
+				Serilog.Log.Error("Failed to respond to update-database command after defer failure");
+			}
+
+			return;
+		}
 
 		try
 		{
@@ -68,7 +88,14 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
 		catch (Exception ex)
 		{
 			Serilog.Log.Error(ex, "Error updating database");
-			await FollowupAsync("Failed to update database.", ephemeral: true);
+			try
+			{
+				await FollowupAsync("❌ Failed to update database. Check logs for details.", ephemeral: true);
+			}
+			catch (Exception followupEx)
+			{
+				Serilog.Log.Error(followupEx, "Failed to send error followup message");
+			}
 		}
 	}
 
@@ -77,13 +104,39 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
 	{
 		try
 		{
-			await RespondAsync("Posting welcome message...");
+			await DeferAsync();
+		}
+		catch (Exception ex)
+		{
+			Serilog.Log.Error(ex, "Failed to defer interaction for post-welcome command");
+			try
+			{
+				await RespondAsync("❌ Failed to start welcome post (interaction error). Please try again.", ephemeral: true);
+			}
+			catch
+			{
+				Serilog.Log.Error("Failed to respond to post-welcome command after defer failure");
+			}
+
+			return;
+		}
+
+		try
+		{
+			await FollowupAsync("Posting welcome message...");
 			await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
 		}
 		catch (Exception ex)
 		{
 			Serilog.Log.Error(ex, "Error posting welcome message");
-			await RespondAsync("Failed to post welcome message.", ephemeral: true);
+			try
+			{
+				await FollowupAsync("❌ Failed to post welcome message. Check logs for details.", ephemeral: true);
+			}
+			catch (Exception followupEx)
+			{
+				Serilog.Log.Error(followupEx, "Failed to send error followup message");
+			}
 		}
 	}
 }
