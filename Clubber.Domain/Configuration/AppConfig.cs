@@ -6,6 +6,8 @@ namespace Clubber.Domain.Configuration;
 
 public sealed class AppConfig
 {
+	public const ulong FormerWrRoleId = 1383750696754483200;
+
 	public static ImmutableSortedDictionary<int, ulong> ScoreRoles { get; } = new Dictionary<int, ulong>
 	{
 		[1300] = 1046380614431019038,
