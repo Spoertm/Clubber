@@ -27,12 +27,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.7" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0"/>
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
