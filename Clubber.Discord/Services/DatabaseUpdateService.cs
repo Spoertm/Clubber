@@ -4,6 +4,7 @@ using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Models;
 using Discord;
+using Discord.Net;
 using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,7 +55,6 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
 
 				foreach (UserRoleUpdate roleUpdate in bulkUpdateResponse.UserRoleUpdates)
 				{
-					// Refresh user data to ensure it's current before applying role changes
 					SocketGuildUser? refreshedUser = ddPals.GetUser(roleUpdate.User.Id);
 					if (refreshedUser == null)
 					{
@@ -64,18 +64,38 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
 						continue;
 					}
 
-					if (roleUpdate.RoleUpdate.RolesToAdd.Count > 0)
+					try
 					{
-						await refreshedUser.AddRolesAsync(roleUpdate.RoleUpdate.RolesToAdd);
-					}
+						if (roleUpdate.RoleUpdate.RolesToAdd.Count > 0)
+						{
+							await refreshedUser.AddRolesAsync(roleUpdate.RoleUpdate.RolesToAdd);
+						}
 
-					if (roleUpdate.RoleUpdate.RolesToRemove.Count > 0)
+						if (roleUpdate.RoleUpdate.RolesToRemove.Count > 0)
+						{
+							await refreshedUser.RemoveRolesAsync(roleUpdate.RoleUpdate.RolesToRemove);
+						}
+
+						successfulUpdates.Add(roleUpdate with { User = refreshedUser });
+					}
+					catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.UnknownMember)
 					{
-						await refreshedUser.RemoveRolesAsync(roleUpdate.RoleUpdate.RolesToRemove);
+						Log.Information(ex, "Skipping role update for user {UserId} ({Username}) - user left server during update",
+							roleUpdate.User.Id, roleUpdate.User.AvailableNameSanitized());
+						skippedUsers++;
 					}
-
-					// Use the refreshed user for the embed
-					successfulUpdates.Add(roleUpdate with { User = refreshedUser });
+					catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.MissingPermissions)
+					{
+						Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - missing permissions",
+							roleUpdate.User.Id, roleUpdate.User.AvailableNameSanitized());
+						skippedUsers++;
+					}
+					catch (HttpException ex)
+					{
+						Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - Discord API error: {ErrorCode}",
+							roleUpdate.User.Id, roleUpdate.User.AvailableNameSanitized(), ex.DiscordCode);
+						skippedUsers++;
+					}
 				}
 
 				if (skippedUsers > 0)
