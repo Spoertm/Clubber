@@ -8,21 +8,33 @@ public sealed class KeepAppAliveService(IHttpClientFactory httpClientFactory) : 
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		const string envVarName = "AppUrl";
-		if (Environment.GetEnvironmentVariable(envVarName) is not { } appUrl)
+		const string envVarName = "AppUrls";
+		if (Environment.GetEnvironmentVariable(envVarName) is not { } appUrlsRaw || string.IsNullOrWhiteSpace(appUrlsRaw))
 		{
 			Log.Warning("{EnvVarName} environment variable not set", envVarName);
 			return;
 		}
 
-		try
+		string[] urls = appUrlsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+		if (urls.Length == 0)
 		{
-			using HttpClient client = httpClientFactory.CreateClient();
-			await client.GetStringAsync(new Uri(appUrl), stoppingToken).ConfigureAwait(false);
+			Log.Warning("No URLs found in {EnvVarName}", envVarName);
+			return;
 		}
-		catch (Exception e)
+
+		IEnumerable<Task> tasks = urls.Select(async url =>
 		{
-			Log.Error(e, "Failed to ping {AppUrl}", appUrl);
-		}
+			try
+			{
+				using HttpClient client = httpClientFactory.CreateClient();
+				await client.GetStringAsync(new Uri(url), stoppingToken).ConfigureAwait(false);
+			}
+			catch (Exception e)
+			{
+				Log.Error(e, "Failed to ping {AppUrl}", url);
+			}
+		});
+
+		await Task.WhenAll(tasks);
 	}
 }
