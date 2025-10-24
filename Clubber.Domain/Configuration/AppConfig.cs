@@ -90,13 +90,6 @@ public sealed class AppConfig
 
 	[Required]
 	[Range(1, ulong.MaxValue)]
-	public ulong ClubberLoggerId { get; set; }
-
-	[Required]
-	public string ClubberLoggerToken { get; set; } = string.Empty;
-
-	[Required]
-	[Range(1, ulong.MaxValue)]
 	public ulong RegisterChannelId { get; set; }
 
 	[Required]

@@ -1,5 +1,4 @@
 using Clubber.Discord.Helpers;
-using Clubber.Discord.Logging;
 using Clubber.Discord.Models;
 using Clubber.Discord.Modules;
 using Clubber.Discord.Services;
@@ -31,9 +30,8 @@ internal static class Program
 
 		builder.ConfigureConfiguration();
 
-		ulong clubberLoggerId = builder.Configuration.GetValue<ulong>("ClubberLoggerId");
-		string clubberLoggerToken = builder.Configuration.GetValue<string>("ClubberLoggerToken")!;
-		builder.ConfigureLogging(clubberLoggerId, clubberLoggerToken);
+		Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
+		builder.Host.UseSerilog();
 
 		Log.Information("Starting Clubber Web Application");
 
@@ -171,20 +169,5 @@ internal static class Program
 			Log.Information("Clubber Web Application shutdown complete");
 			await Log.CloseAndFlushAsync();
 		}
-	}
-
-	private static void ConfigureLogging(this WebApplicationBuilder builder, ulong clubberLoggerId, string clubberLoggerToken)
-	{
-		builder.Logging.ClearProviders();
-
-		Log.Logger = new LoggerConfiguration()
-			.Enrich.FromLogContext()
-			.MinimumLevel.Warning()
-			.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u4}] {Message:lj}{NewLine}{Exception}",
-				formatProvider: CultureInfo.InvariantCulture)
-			.WriteTo.Discord(clubberLoggerId, clubberLoggerToken)
-			.CreateLogger();
-
-		builder.Host.UseSerilog();
 	}
 }
