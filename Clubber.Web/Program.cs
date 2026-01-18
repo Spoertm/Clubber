@@ -9,10 +9,10 @@ using Clubber.Domain.Services;
 using Clubber.Web.Configuration;
 using Clubber.Web.Endpoints;
 using Discord.Commands;
-using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
 using System.Globalization;
+using Microsoft.OpenApi;
 
 namespace Clubber.Web;
 
