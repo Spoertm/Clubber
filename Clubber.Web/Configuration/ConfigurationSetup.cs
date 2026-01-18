@@ -10,8 +10,7 @@ internal static class ConfigurationSetup
 		if (builder.Environment.IsDevelopment())
 		{
 			// Development: use file-based config
-			builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-			builder.Configuration.AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+			builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true);
 		}
 		else
 		{
