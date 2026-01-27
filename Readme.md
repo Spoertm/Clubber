@@ -8,10 +8,10 @@ Clubber is a bot for the [DD Pals Discord server](https://discord.gg/jMRumVerj2)
 * Personal stats: The `stats` command shows more detailed information about the player, including score, leaderboard ID, rank, number of kills, and more.
 
 ### Framework
-- .NET 8.0
+- .NET 10.0
 
 ### Language
-- C# 12.0
+- C# 14.0
 
 ### Architecture
 There was an attempt at following [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), where:
@@ -19,7 +19,7 @@ There was an attempt at following [Clean Architecture](https://blog.cleancoder.c
 * [Clubber.Domain](Clubber.Domain) represents the core logic of the application, this includes communication with Discord, Sorath servers, [ddinfo API](http://devildaggers.info/), and the database.
 
 
-* [Clubber.Web.Client](Clubber.Web.Client) represents the Web/UI part that the user interacts with. It is a Blazor WebAssembly project built with [tailwindcss](https://tailwindcss.com/).
+* [Clubber.Discord](Clubber.Discord) contains the Discord bot implementation, including commands, services, and modules.
 
 
-* [Clubber.Web.Server](Clubber.Web.Server) is where the API is defined and can be regarded as the application's entry point.
+* [Clubber.Web](Clubber.Web) is the web application, providing both a UI and an API, acting as the entry point.
