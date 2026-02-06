@@ -43,13 +43,6 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
 				BulkUserRoleUpdates bulkUpdateResponse = await scoreRoleService.GetBulkUserRoleUpdates(ddPals.Users);
 				sw.Stop();
 
-				string message = bulkUpdateResponse.UserRoleUpdates.Count > 0
-					? $"✅ Successfully updated database and {bulkUpdateResponse.UserRoleUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
-					: $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
-
-				message += $"\nℹ️ {bulkUpdateResponse.NonMemberCount} user(s) are registered but aren't in the server.";
-				await msg.ModifyAsync(m => m.Content = message);
-
 				List<UserRoleUpdate> successfulUpdates = [];
 				int skippedUsers = 0;
 
@@ -98,12 +91,18 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
 					}
 				}
 
+				string message = successfulUpdates.Count > 0
+					? $"✅ Successfully updated database and {successfulUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
+					: $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
+
+				message += $"\nℹ️ {bulkUpdateResponse.NonMemberCount} user(s) are registered but aren't in the server.";
+
 				if (skippedUsers > 0)
 				{
-					string updatedMessage =
-						message + $"\n⚠️ Skipped {skippedUsers} user(s) due to errors (users left server, permission issues, etc.)";
-					await msg.ModifyAsync(m => m.Content = updatedMessage);
+					message += $"\n⚠️ Skipped {skippedUsers} user(s) due to errors (users left server, permission issues, etc.)";
 				}
+
+				await msg.ModifyAsync(m => m.Content = message);
 
 				Embed[] roleUpdateEmbeds = successfulUpdates
 					.Select(EmbedHelper.UpdateRoles)

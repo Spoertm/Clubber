@@ -5,6 +5,7 @@ using Clubber.Domain.Models;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
+using Discord.Net;
 using Discord.WebSocket;
 using System.Diagnostics;
 
@@ -49,33 +50,76 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
 			BulkUserRoleUpdates response = await scoreRoleService.GetBulkUserRoleUpdates(guild.Users);
 			sw.Stop();
 
-			string message = response.UserRoleUpdates.Count > 0
-				? $"✅ Successfully updated database and {response.UserRoleUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
+			if (response.UserRoleUpdates.Count == 0)
+			{
+				string noUpdatesMessage = $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms." +
+										$"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
+				await FollowupAsync(noUpdatesMessage);
+				return;
+			}
+
+			List<UserRoleUpdate> successfulUpdates = [];
+			int skippedUsers = 0;
+
+			foreach (UserRoleUpdate roleUpdate in response.UserRoleUpdates)
+			{
+				SocketGuildUser? refreshedUser = guild.GetUser(roleUpdate.User.Id);
+				if (refreshedUser == null)
+				{
+					Serilog.Log.Information("Skipping role update for user {UserId} ({Username}) - user no longer found in server",
+						roleUpdate.User.Id, roleUpdate.User.Username);
+					skippedUsers++;
+					continue;
+				}
+
+				try
+				{
+					if (roleUpdate.RoleUpdate.RolesToAdd.Count > 0)
+					{
+						await refreshedUser.AddRolesAsync(roleUpdate.RoleUpdate.RolesToAdd);
+					}
+
+					if (roleUpdate.RoleUpdate.RolesToRemove.Count > 0)
+					{
+						await refreshedUser.RemoveRolesAsync(roleUpdate.RoleUpdate.RolesToRemove);
+					}
+
+					successfulUpdates.Add(roleUpdate with { User = refreshedUser });
+				}
+				catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.UnknownMember)
+				{
+					Serilog.Log.Information(ex, "Skipping role update for user {UserId} ({Username}) - user left server during update",
+						roleUpdate.User.Id, roleUpdate.User.Username);
+					skippedUsers++;
+				}
+				catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.MissingPermissions)
+				{
+					Serilog.Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - missing permissions",
+						roleUpdate.User.Id, roleUpdate.User.Username);
+					skippedUsers++;
+				}
+				catch (HttpException ex)
+				{
+					Serilog.Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - Discord API error: {ErrorCode}",
+						roleUpdate.User.Id, roleUpdate.User.Username, ex.DiscordCode);
+					skippedUsers++;
+				}
+			}
+
+			string message = successfulUpdates.Count > 0
+				? $"✅ Successfully updated database and {successfulUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
 				: $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
 
 			message += $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
 
+			if (skippedUsers > 0)
+			{
+				message += $"\n⚠️ Skipped {skippedUsers} user(s) due to errors (users left server, permission issues, etc.)";
+			}
+
 			await FollowupAsync(message);
 
-			if (response.UserRoleUpdates.Count == 0)
-			{
-				return;
-			}
-
-			foreach (UserRoleUpdate roleUpdate in response.UserRoleUpdates)
-			{
-				if (roleUpdate.RoleUpdate.RolesToAdd.Count > 0)
-				{
-					await roleUpdate.User.AddRolesAsync(roleUpdate.RoleUpdate.RolesToAdd);
-				}
-
-				if (roleUpdate.RoleUpdate.RolesToRemove.Count > 0)
-				{
-					await roleUpdate.User.RemoveRolesAsync(roleUpdate.RoleUpdate.RolesToRemove);
-				}
-			}
-
-			Embed[] roleUpdateEmbeds = response.UserRoleUpdates
+			Embed[] roleUpdateEmbeds = successfulUpdates
 				.Select(EmbedHelper.UpdateRoles)
 				.ToArray();
 
