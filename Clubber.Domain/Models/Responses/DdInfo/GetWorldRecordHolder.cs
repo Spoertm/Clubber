@@ -4,7 +4,7 @@ public record GetWorldRecordHolder
 {
 	public required int Id { get; init; }
 
-	public required List<string> Usernames { get; init; }
+	public required IReadOnlyCollection<string> Usernames { get; init; }
 
 	public required TimeSpan TotalTimeHeld { get; init; }
 
