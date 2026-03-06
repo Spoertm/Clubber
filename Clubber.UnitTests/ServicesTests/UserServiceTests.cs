@@ -5,7 +5,7 @@ using Clubber.Domain.Models;
 using Discord;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Clubber.UnitTests.ServicesTests;
@@ -13,7 +13,7 @@ namespace Clubber.UnitTests.ServicesTests;
 public sealed class UserServiceTests
 {
 	private readonly UserService _sut;
-	private readonly Mock<IDatabaseHelper> _databaseHelperMock = new();
+	private readonly IDatabaseHelper _databaseHelperMock = Substitute.For<IDatabaseHelper>();
 	private const ulong _cheaterRoleId = 666;
 	private const ulong _exampleDiscordId = 0;
 
@@ -27,7 +27,7 @@ public sealed class UserServiceTests
 		configMock.Bind(appConfig);
 		IOptions<AppConfig> options = Options.Create(appConfig);
 
-		_sut = new UserService(options, _databaseHelperMock.Object);
+		_sut = new UserService(options, _databaseHelperMock);
 	}
 
 	[Theory]
@@ -36,11 +36,11 @@ public sealed class UserServiceTests
 	[InlineData(false, new ulong[] { 1, 2, 3, _cheaterRoleId })]
 	public async Task IsValidForRegistration_DetectsBotAndOrCheater_ReturnsError(bool isBot, IReadOnlyCollection<ulong> roleIds)
 	{
-		Mock<IGuildUser> guildUser = new();
-		guildUser.SetupGet(user => user.IsBot).Returns(isBot);
-		guildUser.SetupGet(user => user.RoleIds).Returns(roleIds);
+		IGuildUser guildUser = Substitute.For<IGuildUser>();
+		guildUser.IsBot.Returns(isBot);
+		guildUser.RoleIds.Returns(roleIds);
 
-		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
+		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
 		Assert.True(isValidForRegistrationResponse.IsFailure);
 	}
 
@@ -50,11 +50,11 @@ public sealed class UserServiceTests
 	[InlineData(false, new ulong[] { 1, 2, 3, _cheaterRoleId })]
 	public async Task IsValid_DetectsBotAndOrCheater_ReturnsError(bool isBot, IReadOnlyCollection<ulong> roleIds)
 	{
-		Mock<IGuildUser> guildUser = new();
-		guildUser.SetupGet(user => user.IsBot).Returns(isBot);
-		guildUser.SetupGet(user => user.RoleIds).Returns(roleIds);
+		IGuildUser guildUser = Substitute.For<IGuildUser>();
+		guildUser.IsBot.Returns(isBot);
+		guildUser.RoleIds.Returns(roleIds);
 
-		Result isValidResponse = await _sut.IsValid(guildUser.Object, true);
+		Result isValidResponse = await _sut.IsValid(guildUser, true);
 		Assert.True(isValidResponse.IsFailure);
 	}
 
@@ -62,12 +62,12 @@ public sealed class UserServiceTests
 	public async Task IsValidForRegistration_DetectsValidUser_ReturnsNoError()
 	{
 		// Normal user (neither bot nor has cheaterRoleId)
-		Mock<IGuildUser> guildUser = new();
-		guildUser.SetupGet(user => user.IsBot).Returns(false);
-		guildUser.SetupGet(user => user.RoleIds).Returns([]);
+		IGuildUser guildUser = Substitute.For<IGuildUser>();
+		guildUser.IsBot.Returns(false);
+		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
-		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
+		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(default(DdUser));
+		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
 		Assert.False(isValidForRegistrationResponse.IsFailure);
 	}
 
@@ -75,13 +75,13 @@ public sealed class UserServiceTests
 	public async Task IsValidForRegistration_DetectsAlreadyRegisteredUser_ReturnsError()
 	{
 		// Normal user (neither bot nor has cheaterRoleId)
-		Mock<IGuildUser> guildUser = new();
-		guildUser.SetupGet(user => user.IsBot).Returns(false);
-		guildUser.SetupGet(user => user.Id).Returns(0);
-		guildUser.SetupGet(user => user.RoleIds).Returns([]);
+		IGuildUser guildUser = Substitute.For<IGuildUser>();
+		guildUser.IsBot.Returns(false);
+		guildUser.Id.Returns(0ul);
+		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
-		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser.Object, true);
+		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(new DdUser(0, 0));
+		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
 		Assert.True(isValidForRegistrationResponse.IsFailure);
 	}
 
@@ -89,13 +89,13 @@ public sealed class UserServiceTests
 	public async Task IsValid_DetectsRegisteredUser_ReturnsNoError()
 	{
 		// Normal user (neither bot nor has cheaterRoleId)
-		Mock<IGuildUser> guildUser = new();
-		guildUser.SetupGet(user => user.IsBot).Returns(false);
-		guildUser.SetupGet(user => user.Id).Returns(0);
-		guildUser.SetupGet(user => user.RoleIds).Returns([]);
+		IGuildUser guildUser = Substitute.For<IGuildUser>();
+		guildUser.IsBot.Returns(false);
+		guildUser.Id.Returns(0ul);
+		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(new DdUser(0, 0));
-		Result isValid = await _sut.IsValid(guildUser.Object, true);
+		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(new DdUser(0, 0));
+		Result isValid = await _sut.IsValid(guildUser, true);
 		Assert.False(isValid.IsFailure);
 	}
 
@@ -103,13 +103,13 @@ public sealed class UserServiceTests
 	public async Task IsValid_DetectsUnregisteredNormalUser_ReturnsError()
 	{
 		// Normal user (neither bot nor has cheaterRoleId)
-		Mock<IGuildUser> guildUser = new();
-		guildUser.SetupGet(user => user.IsBot).Returns(false);
-		guildUser.SetupGet(user => user.Id).Returns(0);
-		guildUser.SetupGet(user => user.RoleIds).Returns([]);
+		IGuildUser guildUser = Substitute.For<IGuildUser>();
+		guildUser.IsBot.Returns(false);
+		guildUser.Id.Returns(0ul);
+		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.Setup(dbhm => dbhm.FindRegisteredUser(_exampleDiscordId).Result).Returns(default(DdUser));
-		Result isValid = await _sut.IsValid(guildUser.Object, true);
+		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(default(DdUser));
+		Result isValid = await _sut.IsValid(guildUser, true);
 		Assert.True(isValid.IsFailure);
 	}
 }
