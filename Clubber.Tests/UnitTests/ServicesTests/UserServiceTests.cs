@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
-namespace Clubber.UnitTests.ServicesTests;
+namespace Clubber.Tests.UnitTests.ServicesTests;
 
 public sealed class UserServiceTests
 {

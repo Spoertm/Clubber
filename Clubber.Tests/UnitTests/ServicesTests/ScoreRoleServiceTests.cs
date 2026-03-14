@@ -1,9 +1,9 @@
 ﻿using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
-using Clubber.UnitTests.ServicesTests.TestCaseModels;
+using Clubber.Tests.UnitTests.ServicesTests.TestCaseModels;
 using Xunit;
 
-namespace Clubber.UnitTests.ServicesTests;
+namespace Clubber.Tests.UnitTests.ServicesTests;
 
 public sealed class ScoreRoleServiceTests
 {

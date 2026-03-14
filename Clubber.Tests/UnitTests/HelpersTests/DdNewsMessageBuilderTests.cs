@@ -1,7 +1,7 @@
 ﻿using Clubber.Discord.Helpers;
 using Xunit;
 
-namespace Clubber.UnitTests.HelpersTests;
+namespace Clubber.Tests.UnitTests.HelpersTests;
 
 public sealed class DdNewsMessageBuilderTests
 {

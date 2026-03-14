@@ -94,10 +94,17 @@ The ASP.NET Core web application that hosts both the web UI and the Discord bot.
 - `GET /bestsplits` - All best splits
 - `GET /bestsplits/by-splitname` - Best split by name
 
-### 4. Clubber.UnitTests (Test Layer)
-Location: `Clubber.UnitTests/`
+### 4. Clubber.Tests (Test Layer)
+Location: `Clubber.Tests/`
 
-Unit tests using xUnit framework with NSubstitute for mocking.
+Test project containing both unit tests and integration tests using xUnit framework with NSubstitute for mocking.
+
+| Folder | Purpose |
+|--------|---------|
+| `UnitTests/` | Unit tests for isolated component testing |
+| `IntegrationTests/` | Integration tests for end-to-end testing |
+
+**Unit Tests:**
 
 | Test File | Coverage |
 |-----------|----------|

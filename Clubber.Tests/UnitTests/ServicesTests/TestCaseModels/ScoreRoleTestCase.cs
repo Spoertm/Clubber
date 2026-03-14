@@ -1,6 +1,6 @@
 ﻿using Xunit.Abstractions;
 
-namespace Clubber.UnitTests.ServicesTests.TestCaseModels;
+namespace Clubber.Tests.UnitTests.ServicesTests.TestCaseModels;
 
 public sealed record ScoreRoleTestCase : IXunitSerializable
 {

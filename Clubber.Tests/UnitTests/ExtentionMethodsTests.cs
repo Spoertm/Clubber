@@ -1,7 +1,7 @@
 using Clubber.Domain.Extensions;
 using Xunit;
 
-namespace Clubber.UnitTests;
+namespace Clubber.Tests.UnitTests;
 
 public sealed class ExtentionMethodsTests
 {

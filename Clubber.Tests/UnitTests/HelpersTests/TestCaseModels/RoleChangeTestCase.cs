@@ -1,6 +1,6 @@
 ﻿using Xunit.Abstractions;
 
-namespace Clubber.UnitTests.HelpersTests.TestCaseModels;
+namespace Clubber.Tests.UnitTests.HelpersTests.TestCaseModels;
 
 public sealed record RoleChangeTestCase : IXunitSerializable
 {

@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CA79BB09
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Domain", "Clubber.Domain\Clubber.Domain.csproj", "{97373321-AEA7-4B88-AE56-B2225EEA7B70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.UnitTests", "Clubber.UnitTests\Clubber.UnitTests.csproj", "{8306CD11-D242-4EEE-A536-A8F8CC5E5616}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Tests", "Clubber.Tests\Clubber.Tests.csproj", "{8306CD11-D242-4EEE-A536-A8F8CC5E5616}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clubber.Discord", "Clubber.Discord\Clubber.Discord.csproj", "{E1059DA1-E872-49A1-B73A-6596CB861E89}"
 EndProject

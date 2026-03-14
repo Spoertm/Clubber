@@ -1,10 +1,10 @@
 ﻿using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
-using Clubber.UnitTests.HelpersTests.TestCaseModels;
+using Clubber.Tests.UnitTests.HelpersTests.TestCaseModels;
 using Xunit;
 
-namespace Clubber.UnitTests.HelpersTests;
+namespace Clubber.Tests.UnitTests.HelpersTests;
 
 public sealed class CollectionUtilsTests
 {
