@@ -9,14 +9,11 @@ public static class CollectionUtils
 		IReadOnlyCollection<T> referenceCollection,
 		IReadOnlyCollection<T> itemsToRetain)
 	{
-		T[] itemsToAdd = itemsToRetain
-			.Where(item => !sourceCollection.Contains(item) && referenceCollection.Contains(item))
-			.ToArray();
+		T[] itemsToAdd = [.. itemsToRetain.Where(item => !sourceCollection.Contains(item) && referenceCollection.Contains(item))];
 
-		T[] itemsToRemove = sourceCollection
+		T[] itemsToRemove = [.. sourceCollection
 			.Intersect(referenceCollection)
-			.Except(itemsToRetain)
-			.ToArray();
+			.Except(itemsToRetain)];
 
 		return new CollectionChange<T>(itemsToAdd, itemsToRemove);
 	}

@@ -26,7 +26,7 @@ public sealed class ScoreRoleService
 		_webService = webService;
 
 		IReadOnlyCollection<ulong> uselessRoles = [config.Value.UnregisteredRoleId, 458375331468935178, 994354086646399066];
-		_allPossibleRoles = [..AppConfig.ScoreRoles.Values, ..AppConfig.RankRoles.Values, AppConfig.FormerWrRoleId, ..uselessRoles];
+		_allPossibleRoles = [.. AppConfig.ScoreRoles.Values, .. AppConfig.RankRoles.Values, AppConfig.FormerWrRoleId, .. uselessRoles];
 	}
 
 	public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers)
@@ -41,29 +41,27 @@ public sealed class ScoreRoleService
 		int registeredUserCount = await allUsersTask;
 		List<DdUser> dbUsers = await filteredUsersTask;
 
-		(DdUser ddUser, IGuildUser guildUser)[] registeredUsers = dbUsers.Join(
+		(DdUser ddUser, IGuildUser guildUser)[] registeredUsers = [.. dbUsers.Join(
 				inner: guildUsers,
 				outerKeySelector: dbu => dbu.DiscordId,
 				innerKeySelector: gu => gu.Id,
-				resultSelector: (ddUser, guildUser) => (ddUser, guildUser))
-			.ToArray();
+				resultSelector: (ddUser, guildUser) => (ddUser, guildUser))];
 
 		IEnumerable<uint> lbIdsToRequest = registeredUsers
 			.Select(ru => (uint)ru.ddUser.LeaderboardId)
 			.Distinct();
 
-		IEnumerable<uint> idsToRequest = lbIdsToRequest as uint[] ?? lbIdsToRequest.ToArray();
+		IEnumerable<uint> idsToRequest = lbIdsToRequest as uint[] ?? [.. lbIdsToRequest];
 		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(idsToRequest);
 
 		GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
-		HashSet<int> formerWrPlayerIds = worldRecords.WorldRecordHolders.Select(wrh => wrh.Id).ToHashSet();
+		HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
 
-		(IGuildUser guildUser, EntryResponse lbPlayer)[] registeredDiscordLbPlayers = registeredUsers.Join(
+		(IGuildUser guildUser, EntryResponse lbPlayer)[] registeredDiscordLbPlayers = [.. registeredUsers.Join(
 				inner: lbPlayers,
 				outerKeySelector: ru => (uint)ru.ddUser.LeaderboardId,
 				innerKeySelector: lbp => (uint)lbp.Id,
-				resultSelector: (ru, lbp) => (ru.guildUser, lbp))
-			.ToArray();
+				resultSelector: (ru, lbp) => (ru.guildUser, lbp))];
 
 		List<UserRoleUpdate> roleUpdates = [];
 		foreach ((IGuildUser guildUser, EntryResponse lbPlayer) in registeredDiscordLbPlayers)
@@ -110,7 +108,7 @@ public sealed class ScoreRoleService
 			IReadOnlyList<EntryResponse> lbPlayerList = await _webService.GetLbPlayers([lbId]);
 
 			GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
-			HashSet<int> formerWrPlayerIds = worldRecords.WorldRecordHolders.Select(wrh => wrh.Id).ToHashSet();
+			HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
 
 			return Result.Success(GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds));
 		}

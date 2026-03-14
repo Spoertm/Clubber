@@ -49,10 +49,9 @@ public sealed class InfoCommands(IDatabaseHelper databaseHelper, ClubberDiscordC
 		{
 			if (kvp.Value.Count == 0) continue;
 
-			List<string> commandList = kvp.Value
+			List<string> commandList = [.. kvp.Value
 				.OrderBy(cmd => cmd.Name)
-				.Select(cmd => $"* `/{cmd.Name}` - {cmd.Description}")
-				.ToList();
+				.Select(cmd => $"* `/{cmd.Name}` - {cmd.Description}")];
 
 			embed.AddField(kvp.Key, string.Join('\n', commandList));
 		}

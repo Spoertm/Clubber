@@ -104,9 +104,7 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
 
 				await msg.ModifyAsync(m => m.Content = message);
 
-				Embed[] roleUpdateEmbeds = successfulUpdates
-					.Select(EmbedHelper.UpdateRoles)
-					.ToArray();
+				Embed[] roleUpdateEmbeds = [.. successfulUpdates.Select(EmbedHelper.UpdateRoles)];
 
 				if (roleUpdateEmbeds.Length > 0)
 				{

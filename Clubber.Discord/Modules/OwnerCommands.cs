@@ -119,9 +119,7 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
 
 			await FollowupAsync(message);
 
-			Embed[] roleUpdateEmbeds = successfulUpdates
-				.Select(EmbedHelper.UpdateRoles)
-				.ToArray();
+			Embed[] roleUpdateEmbeds = [.. successfulUpdates.Select(EmbedHelper.UpdateRoles)];
 
 			Result result = await discordHelper.SendEmbedsEfficientlyAsync(roleUpdateEmbeds, Context.Channel.Id);
 			if (result.IsFailure)
