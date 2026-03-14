@@ -22,19 +22,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Clubber.Discord\Clubber.Discord.csproj"/>
-    <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj"/>
+    <ProjectReference Include="..\Clubber.Discord\Clubber.Discord.csproj" />
+    <ProjectReference Include="..\Clubber.Domain\Clubber.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.1.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.1.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,10 +45,10 @@
 
   <ItemGroup>
     <!-- Remove unused client libraries -->
-    <Content Remove="wwwroot\lib\bootstrap\**"/>
-    <Content Remove="wwwroot\lib\jquery\**"/>
-    <Content Remove="wwwroot\lib\jquery-validation\**"/>
-    <Content Remove="wwwroot\lib\jquery-validation-unobtrusive\**"/>
+    <Content Remove="wwwroot\lib\bootstrap\**" />
+    <Content Remove="wwwroot\lib\jquery\**" />
+    <Content Remove="wwwroot\lib\jquery-validation\**" />
+    <Content Remove="wwwroot\lib\jquery-validation-unobtrusive\**" />
   </ItemGroup>
 
 </Project>
