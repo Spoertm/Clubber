@@ -5,10 +5,10 @@ public static class ExtensionMethods
 	public static string OrdinalNumeral(this int number) => (number % 100, number % 10) switch
 	{
 		(11 or 12 or 13, _) => "th",
-		(_, 1)              => "st",
-		(_, 2)              => "nd",
-		(_, 3)              => "rd",
-		_                   => "th",
+		(_, 1) => "st",
+		(_, 2) => "nd",
+		(_, 3) => "rd",
+		_ => "th",
 	};
 
 	public static string Truncate(this string value, int maxChars)
@@ -43,8 +43,7 @@ public static class ExtensionMethods
 			return -1;
 		}
 
-		string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-		foreach (string part in parts)
+		foreach (string part in input.Split(' ', StringSplitOptions.RemoveEmptyEntries))
 		{
 			if (int.TryParse(part, out int result))
 			{
