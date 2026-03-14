@@ -17,7 +17,7 @@ public class Result
 
 	public static Result Failure(string message) => new(false, message);
 
-	public static Result<T?> Failure<T>(string message) => new(default, false, message);
+	public static Result<T> Failure<T>(string message) => new(default!, false, message);
 
 	public static Result Success() => new(true, string.Empty);
 

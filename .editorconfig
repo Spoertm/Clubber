@@ -195,6 +195,18 @@ csharp_preserve_single_line_statements = true
 # StyleCop Analyzers
 dotnet_diagnostic.SA0001.severity = none
 dotnet_diagnostic.SA1000.severity = none
+# SA1008: Opening parenthesis should not be preceded by a space
+# Suppressed because it incorrectly fires on range expressions (e.g., `array[..(start + end)]`)
+# Can be removed when StyleCop.Analyzers fixes this false positive
+# SA1009: Closing parenthesis should not be followed by a space
+# Suppressed because it incorrectly fires on primary constructors with base class calls (e.g., `class MyClass() : BaseClass`)
+# Can be removed when StyleCop.Analyzers fixes this false positive
+dotnet_diagnostic.SA1009.severity = none
+dotnet_diagnostic.SA1008.severity = none
+# SA1010: Opening square brackets should not be preceded by a space
+# Suppressed because it incorrectly fires on collection initializers with index assignments (e.g., `new List<int> { [0] = 1 }`)
+# Can be removed when StyleCop.Analyzers fixes this false positive
+dotnet_diagnostic.SA1010.severity = none
 dotnet_diagnostic.SA1025.severity = none
 dotnet_diagnostic.SA1027.severity = none
 dotnet_diagnostic.SA1101.severity = none
@@ -240,3 +252,6 @@ dotnet_diagnostic.S3358.severity = none
 # Roslynator
 dotnet_diagnostic.RCS1090.severity = none
 dotnet_diagnostic.RCS1123.severity = none
+
+# Make code style suggestions visible as warnings
+dotnet_diagnostic.IDE0090.severity = warning

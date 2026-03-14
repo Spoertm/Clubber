@@ -1,9 +1,9 @@
-using System.Text.Json;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
 
 namespace Clubber.Domain.Services;
 
@@ -50,11 +50,11 @@ public class DbService : DbContext
 
 		// Configure value converters for complex types to support SQLite/InMemory testing
 		// PostgreSQL uses jsonb type which handles JSON automatically
-		var entryResponseConverter = new ValueConverter<EntryResponse, string>(
+		ValueConverter<EntryResponse, string> entryResponseConverter = new(
 			v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
 			v => JsonSerializer.Deserialize<EntryResponse>(v, (JsonSerializerOptions)null!)!);
 
-		var gameInfoConverter = new ValueConverter<GameInfo, string>(
+		ValueConverter<GameInfo?, string> gameInfoConverter = new(
 			v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
 			v => JsonSerializer.Deserialize<GameInfo>(v, (JsonSerializerOptions)null!)!);
 
