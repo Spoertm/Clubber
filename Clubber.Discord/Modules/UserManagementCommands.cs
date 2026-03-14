@@ -11,7 +11,6 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Serilog;
-using System.Diagnostics;
 
 namespace Clubber.Discord.Modules;
 
@@ -241,45 +240,37 @@ public sealed class UserManagementCommands(
 				return;
 			}
 
-			Result<RoleChangeResult> roleChangeResult = await scoreRoleService.GetRoleChange(user);
+			Result<RoleChange> roleChangeResult = await scoreRoleService.GetRoleChange(user);
 			if (roleChangeResult.IsFailure)
 			{
 				await FollowupAsync(roleChangeResult.ErrorMsg, ephemeral: true);
 				return;
 			}
 
-			if (roleChangeResult.Value is RoleUpdate roleUpdate)
+			RoleChange change = roleChangeResult.Value;
+			if (change.HasChanges)
 			{
-				if (roleUpdate.RolesToAdd.Count > 0)
-				{
-					await user.AddRolesAsync(roleUpdate.RolesToAdd);
-				}
+				if (change.RolesToAdd.Count > 0)
+					await user.AddRolesAsync(change.RolesToAdd);
 
-				if (roleUpdate.RolesToRemove.Count > 0)
-				{
-					await user.RemoveRolesAsync(roleUpdate.RolesToRemove);
-				}
+				if (change.RolesToRemove.Count > 0)
+					await user.RemoveRolesAsync(change.RolesToRemove);
 
-				await FollowupAsync(embed: EmbedHelper.UpdateRoles(new UserRoleUpdate(user, roleUpdate)));
+				await FollowupAsync(embed: EmbedHelper.UpdateRoles(new UserRoleUpdate(user, change)));
 			}
-			else if (roleChangeResult.Value is RoleChangeResult.None noChangeResponse)
+			else
 			{
 				string msg = "No updates were needed.";
-				if (noChangeResponse.SecondsAwayFromNextRole == 0)
+				if (change.SecondsToNextMilestone == 0)
 				{
 					msg += "\n\nYou already have the highest role in the server!";
 				}
 				else
 				{
-					msg +=
-						$"\n\nYou're **{noChangeResponse.SecondsAwayFromNextRole:0.0000}s** away from the next role: {MentionUtils.MentionRole(noChangeResponse.NextRoleId)}";
+					msg += $"\n\nYou're **{change.SecondsToNextMilestone:0.0000}s** away from the next role: {MentionUtils.MentionRole(change.NextRoleId!.Value)}";
 				}
 
 				await FollowupAsync(msg);
-			}
-			else
-			{
-				throw new UnreachableException($"{nameof(RoleUpdate)} isn't supposed to have a third state.");
 			}
 		}
 		catch (Exception ex)

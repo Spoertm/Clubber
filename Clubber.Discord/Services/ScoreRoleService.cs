@@ -14,94 +14,81 @@ using System.Runtime.Serialization;
 
 namespace Clubber.Discord.Services;
 
-public sealed class ScoreRoleService
+public sealed class ScoreRoleService(
+	IOptions<AppConfig> config,
+	IServiceScopeFactory serviceScopeFactory,
+	IWebService webService,
+	IDatabaseHelper databaseHelper)
 {
-	private readonly IServiceScopeFactory _serviceScopeFactory;
-	private readonly IWebService _webService;
-	private readonly IReadOnlyCollection<ulong> _allPossibleRoles;
+	private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+	private readonly IWebService _webService = webService;
+	private readonly IDatabaseHelper _databaseHelper = databaseHelper;
+	private readonly IReadOnlyCollection<ulong> _allPossibleRoles = GetAllPossibleRoles(config.Value);
 
-	public ScoreRoleService(IOptions<AppConfig> config, IServiceScopeFactory serviceScopeFactory, IWebService webService)
+	private static IReadOnlyCollection<ulong> GetAllPossibleRoles(AppConfig cfg)
 	{
-		_serviceScopeFactory = serviceScopeFactory;
-		_webService = webService;
-
-		IReadOnlyCollection<ulong> uselessRoles = [config.Value.UnregisteredRoleId, 458375331468935178, 994354086646399066];
-		_allPossibleRoles = [.. AppConfig.ScoreRoles.Values, .. AppConfig.RankRoles.Values, AppConfig.FormerWrRoleId, .. uselessRoles];
+		IReadOnlyCollection<ulong> uselessRoles = [cfg.UnregisteredRoleId, 458375331468935178, 994354086646399066];
+		return [.. AppConfig.ScoreRoles.Values, .. AppConfig.RankRoles.Values, AppConfig.FormerWrRoleId, .. uselessRoles];
 	}
 
 	public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers)
 	{
-		IEnumerable<ulong> guildUserIds = guildUsers.Select(gu => gu.Id);
+		// Single DB call to get registered users
+		List<DdUser> dbUsers = await _databaseHelper.GetRegisteredUsers(guildUsers.Select(gu => gu.Id));
 
-		Task<int> allUsersTask = GetRegisteredUserCountAsync();
-		Task<List<DdUser>> filteredUsersTask = GetRegisteredUsersAsync(guildUserIds);
+		// Build a dictionary for O(1) lookup
+		Dictionary<ulong, IGuildUser> guildUserById = guildUsers.ToDictionary(gu => gu.Id);
 
-		await Task.WhenAll(allUsersTask, filteredUsersTask);
+		// Join in memory using dictionary
+		var registeredUsers = dbUsers
+			.Select(ddu => new { DdUser = ddu, GuildUser = guildUserById.GetValueOrDefault(ddu.DiscordId) })
+			.Where(x => x.GuildUser != null)
+			.ToList();
 
-		int registeredUserCount = await allUsersTask;
-		List<DdUser> dbUsers = await filteredUsersTask;
+		// Fetch leaderboard data
+		uint[] lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId).Distinct().ToArray();
+		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
-		(DdUser ddUser, IGuildUser guildUser)[] registeredUsers = [.. dbUsers.Join(
-				inner: guildUsers,
-				outerKeySelector: dbu => dbu.DiscordId,
-				innerKeySelector: gu => gu.Id,
-				resultSelector: (ddUser, guildUser) => (ddUser, guildUser))];
-
-		IEnumerable<uint> lbIdsToRequest = registeredUsers
-			.Select(ru => (uint)ru.ddUser.LeaderboardId)
-			.Distinct();
-
-		IEnumerable<uint> idsToRequest = lbIdsToRequest as uint[] ?? [.. lbIdsToRequest];
-		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(idsToRequest);
-
+		// Fetch world records
 		GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
 		HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
 
-		(IGuildUser guildUser, EntryResponse lbPlayer)[] registeredDiscordLbPlayers = [.. registeredUsers.Join(
-				inner: lbPlayers,
-				outerKeySelector: ru => (uint)ru.ddUser.LeaderboardId,
-				innerKeySelector: lbp => (uint)lbp.Id,
-				resultSelector: (ru, lbp) => (ru.guildUser, lbp))];
+		// Build dictionary for leaderboard players
+		Dictionary<uint, EntryResponse> lbPlayerById = lbPlayers.ToDictionary(lbp => (uint)lbp.Id);
 
+		// Calculate role changes
 		List<UserRoleUpdate> roleUpdates = [];
-		foreach ((IGuildUser guildUser, EntryResponse lbPlayer) in registeredDiscordLbPlayers)
+		foreach (var ru in registeredUsers)
 		{
-			RoleChangeResult roleChangeResult = GetRoleChange(guildUser.RoleIds, lbPlayer, formerWrPlayerIds);
-			if (roleChangeResult is RoleUpdate roleUpdate)
+			if (ru.GuildUser == null)
+				continue;
+
+			if (!lbPlayerById.TryGetValue((uint)ru.DdUser.LeaderboardId, out EntryResponse? lbPlayer))
+				continue;
+
+			RoleChange change = GetRoleChange(ru.GuildUser.RoleIds, lbPlayer, formerWrPlayerIds);
+			if (change.HasChanges)
 			{
-				roleUpdates.Add(new UserRoleUpdate(guildUser, roleUpdate));
+				roleUpdates.Add(new UserRoleUpdate(ru.GuildUser, change));
 			}
 		}
 
-		int nonMemberCount = registeredUserCount - registeredUsers.Length;
+		int totalRegistered = await _databaseHelper.GetRegisteredUserCount();
+		int nonMemberCount = totalRegistered - registeredUsers.Count;
 		return new BulkUserRoleUpdates(nonMemberCount, roleUpdates);
 	}
 
-	private async Task<int> GetRegisteredUserCountAsync()
-	{
-		await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
-		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
-		return await databaseHelper.GetRegisteredUserCount();
-	}
-
-	private async Task<List<DdUser>> GetRegisteredUsersAsync(IEnumerable<ulong> discordIds)
-	{
-		await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
-		IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
-		return await databaseHelper.GetRegisteredUsers(discordIds);
-	}
-
-	public async Task<Result<RoleChangeResult>> GetRoleChange(IGuildUser user)
+	public async Task<Result<RoleChange>> GetRoleChange(IGuildUser user)
 	{
 		try
 		{
 			await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
-			IDatabaseHelper databaseHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
+			IDatabaseHelper dbHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
 
-			DdUser? ddUser = await databaseHelper.FindRegisteredUser(user.Id);
+			DdUser? ddUser = await dbHelper.FindRegisteredUser(user.Id);
 			if (ddUser is null)
 			{
-				return Result.Failure<RoleChangeResult>("User is not registered.")!;
+				return Result.Failure<RoleChange>("User is not registered.");
 			}
 
 			uint lbId = (uint)ddUser.LeaderboardId;
@@ -110,7 +97,8 @@ public sealed class ScoreRoleService
 			GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
 			HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
 
-			return Result.Success(GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds));
+			RoleChange change = GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds);
+			return Result.Success(change);
 		}
 		catch (Exception ex)
 		{
@@ -123,11 +111,11 @@ public sealed class ScoreRoleService
 			};
 
 			Log.Error(ex, "Error updating user roles");
-			return Result.Failure<RoleChangeResult>(errorMsg)!;
+			return Result.Failure<RoleChange>(errorMsg);
 		}
 	}
 
-	private RoleChangeResult GetRoleChange(IReadOnlyCollection<ulong> roleIds, EntryResponse lbUser, HashSet<int> formerWrPlayerIds)
+	private RoleChange GetRoleChange(IReadOnlyCollection<ulong> roleIds, EntryResponse lbUser, HashSet<int> formerWrPlayerIds)
 	{
 		ulong scoreRoleToKeep = GetScoreRoleToKeep(lbUser.Time).Value;
 		ulong rankRoleToKeep = GetRankRoleToKeep(lbUser.Rank).Value;
@@ -152,10 +140,10 @@ public sealed class ScoreRoleService
 		if (collectionChange.ItemsToAdd.Count == 0 && collectionChange.ItemsToRemove.Count == 0)
 		{
 			MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(lbUser.Time, AppConfig.ScoreRoles);
-			return RoleChangeResult.None.FromMileStoneInfo(milestoneInfo);
+			return RoleChange.None(milestoneInfo.TimeUntilNextMilestone, milestoneInfo.NextMilestoneId);
 		}
 
-		return RoleUpdate.FromCollectionChanges(collectionChange);
+		return new RoleChange(collectionChange.ItemsToAdd, collectionChange.ItemsToRemove);
 	}
 
 	public static KeyValuePair<int, ulong> GetScoreRoleToKeep(int playerTime)

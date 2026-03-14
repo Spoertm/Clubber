@@ -49,27 +49,28 @@ public sealed class UserJoinHandler
 	{
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
 		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
-		Result<RoleChangeResult> roleChangeResult = await scoreRoleService.GetRoleChange(joiningUser);
+		Result<RoleChange> roleChangeResult = await scoreRoleService.GetRoleChange(joiningUser);
 
-		if (roleChangeResult.IsFailure || roleChangeResult.Value is not RoleUpdate roleUpdate)
+		if (roleChangeResult.IsFailure || !roleChangeResult.Value.HasChanges)
 		{
 			return;
 		}
 
-		if (roleUpdate.RolesToAdd.Count > 0)
+		RoleChange change = roleChangeResult.Value;
+		if (change.RolesToAdd.Count > 0)
 		{
-			await joiningUser.AddRolesAsync(roleUpdate.RolesToAdd);
+			await joiningUser.AddRolesAsync(change.RolesToAdd);
 		}
 
-		if (roleUpdate.RolesToRemove.Count > 0)
+		if (change.RolesToRemove.Count > 0)
 		{
-			await joiningUser.RemoveRolesAsync(roleUpdate.RolesToRemove);
+			await joiningUser.RemoveRolesAsync(change.RolesToRemove);
 		}
 
 		ulong logChannelId = _config.DailyUpdateLoggingChannelId;
 		if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
 		{
-			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new UserRoleUpdate(joiningUser, roleUpdate))]);
+			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new UserRoleUpdate(joiningUser, change))]);
 		}
 	}
 }

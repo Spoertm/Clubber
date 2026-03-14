@@ -74,14 +74,14 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
 
 				try
 				{
-					if (roleUpdate.RoleUpdate.RolesToAdd.Count > 0)
+					if (roleUpdate.RoleChange.RolesToAdd.Count > 0)
 					{
-						await refreshedUser.AddRolesAsync(roleUpdate.RoleUpdate.RolesToAdd);
+						await refreshedUser.AddRolesAsync(roleUpdate.RoleChange.RolesToAdd);
 					}
 
-					if (roleUpdate.RoleUpdate.RolesToRemove.Count > 0)
+					if (roleUpdate.RoleChange.RolesToRemove.Count > 0)
 					{
-						await refreshedUser.RemoveRolesAsync(roleUpdate.RoleUpdate.RolesToRemove);
+						await refreshedUser.RemoveRolesAsync(roleUpdate.RoleChange.RolesToRemove);
 					}
 
 					successfulUpdates.Add(roleUpdate with { User = refreshedUser });

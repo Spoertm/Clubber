@@ -14,26 +14,26 @@ public static class EmbedHelper
 	public static Embed UpdateRoles(UserRoleUpdate userRoleUpdate)
 	{
 		IGuildUser user = userRoleUpdate.User;
-		RoleUpdate response = userRoleUpdate.RoleUpdate;
+		RoleChange change = userRoleUpdate.RoleChange;
 
 		EmbedBuilder embed = new EmbedBuilder()
 			.WithTitle($"Updated roles for {user.AvailableNameSanitized()}")
 			.WithDescription($"User: {user.Mention}")
 			.WithThumbnailUrl(user.GetDisplayAvatarUrl() ?? user.GetDefaultAvatarUrl());
 
-		if (response.RolesToRemove.Count > 0)
+		if (change.RolesToRemove.Count > 0)
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Removed:")
-				.WithValue(string.Join('\n', response.RolesToRemove.Select(rr => $"<@&{rr}>")))
+				.WithValue(string.Join('\n', change.RolesToRemove.Select(rr => $"<@&{rr}>")))
 				.WithIsInline(true));
 		}
 
-		if (response.RolesToAdd.Count > 0)
+		if (change.RolesToAdd.Count > 0)
 		{
 			embed.AddField(new EmbedFieldBuilder()
 				.WithName("Added:")
-				.WithValue(string.Join('\n', response.RolesToAdd.Select(ar => $"<@&{ar}>")))
+				.WithValue(string.Join('\n', change.RolesToAdd.Select(ar => $"<@&{ar}>")))
 				.WithIsInline(true));
 		}
 
