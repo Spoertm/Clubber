@@ -193,7 +193,7 @@ public sealed class DdNewsPostService(
 		bool HasChanges)
 	{
 		public bool IsEmpty => NewEntries.Count == 0;
-		public static LeaderboardSnapshot Empty => new(new Dictionary<int, EntryResponse>(), [], false);
+		public static LeaderboardSnapshot Empty => new(new Dictionary<int, EntryResponse>(), Array.Empty<EntryResponse>(), false);
 	}
 
 	private readonly record struct NewsUpdate(
