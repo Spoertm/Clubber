@@ -8,53 +8,82 @@ using System.Text;
 
 namespace Clubber.Discord.Logging;
 
-public sealed class DiscordSink(ulong webhookId, string webhookToken, LogEventLevel minimumLogLevel) : ILogEventSink
+public sealed class DiscordSink(ulong webhookId, string webhookToken, LogEventLevel minimumLogLevel) : ILogEventSink, IDisposable
 {
 	private readonly DiscordWebhookClient _webHook = new(webhookId, webhookToken);
 
-	// Maximum number of nested exceptions to include
 	private const int _maxExceptionDepth = 5;
+
+	// Simple rate limiting protection - Discord allows 10 requests per second
+	private static readonly SemaphoreSlim _rateLimitSemaphore = new(1, 1);
+	private static DateTime _lastRequestTime = DateTime.MinValue;
+	private static readonly TimeSpan _minInterval = TimeSpan.FromMilliseconds(100);
 
 	public void Emit(LogEvent logEvent)
 	{
 		if (logEvent.Level < minimumLogLevel)
 			return;
 
-		try
+		// Fire-and-forget with proper async handling
+		_ = Task.Run(async () =>
 		{
-			// Send all logs as embeds
-			SendEmbedLog(logEvent);
-		}
-		catch (Exception ex)
-		{
-			// The last resort fallback if logging itself fails - this still uses an embed
 			try
 			{
-				EmbedBuilder errorEmbed = new();
-				errorEmbed.WithTitle("❌ LOGGING FAILURE".Truncate(EmbedBuilder.MaxTitleLength));
-				errorEmbed.WithColor(Color.DarkRed);
-				errorEmbed.WithDescription($"Failed to log message: {ex.Message}".Truncate(EmbedBuilder.MaxDescriptionLength));
-				errorEmbed.WithTimestamp(DateTimeOffset.Now);
-
-				_webHook.SendMessageAsync(embeds: [errorEmbed.Build()]).GetAwaiter().GetResult();
+				await SendEmbedLogAsync(logEvent);
 			}
-			catch
+			catch (Exception ex)
 			{
-				// Nothing more we can do if this fails
+				// The last resort fallback if logging itself fails
+				try
+				{
+					EmbedBuilder errorEmbed = new();
+					errorEmbed.WithTitle("❌ LOGGING FAILURE".Truncate(EmbedBuilder.MaxTitleLength));
+					errorEmbed.WithColor(Color.DarkRed);
+					errorEmbed.WithDescription($"Failed to log message: {ex.Message}".Truncate(EmbedBuilder.MaxDescriptionLength));
+					errorEmbed.WithTimestamp(DateTimeOffset.Now);
+
+					await _webHook.SendMessageAsync(embeds: [errorEmbed.Build()]);
+				}
+				catch
+				{
+					// Nothing more we can do if this fails
+				}
 			}
-		}
+		});
+	}
+
+	public void Dispose()
+	{
+		_webHook?.Dispose();
+		_rateLimitSemaphore?.Dispose();
 	}
 
 	/// <summary>
 	/// Sends a log as an embed
 	/// </summary>
-	private void SendEmbedLog(LogEvent logEvent)
+	private async Task SendEmbedLogAsync(LogEvent logEvent)
 	{
+		// Basic rate limiting
+		await _rateLimitSemaphore.WaitAsync();
+		try
+		{
+			TimeSpan timeSinceLastRequest = DateTime.UtcNow - _lastRequestTime;
+			if (timeSinceLastRequest < _minInterval)
+			{
+				await Task.Delay(_minInterval - timeSinceLastRequest);
+			}
+			_lastRequestTime = DateTime.UtcNow;
+		}
+		finally
+		{
+			_rateLimitSemaphore.Release();
+		}
+
 		EmbedBuilder embedBuilder = new();
 		string logMessage = logEvent.RenderMessage();
 
 		// Set embed properties based on the log level
-		SpecifyEmbedLevel(logEvent.Level, logMessage, embedBuilder);
+		SpecifyEmbedLevel(logEvent, logMessage, embedBuilder);
 
 		// Add timestamp
 		embedBuilder.WithTimestamp(DateTimeOffset.Now);
@@ -90,7 +119,7 @@ public sealed class DiscordSink(ulong webhookId, string webhookToken, LogEventLe
 
 		// Build and send the embed
 		Embed embed = embedBuilder.Build();
-		_webHook.SendMessageAsync(embeds: [embed]).GetAwaiter().GetResult();
+		await _webHook.SendMessageAsync(embeds: [embed]);
 	}
 
 	/// <summary>
@@ -107,9 +136,6 @@ public sealed class DiscordSink(ulong webhookId, string webhookToken, LogEventLe
 
 		// Start with the exception type
 		descriptionBuilder.AppendLine($"**Exception Type:** {exception.GetType().Name}");
-
-		// Add the full exception message
-		descriptionBuilder.AppendLine($"**Message:** {exception.Message}");
 
 		// Calculate remaining space for stack trace (leave room for the other content)
 		int usedSpace = descriptionBuilder.Length;
@@ -271,9 +297,9 @@ public sealed class DiscordSink(ulong webhookId, string webhookToken, LogEventLe
 	/// <summary>
 	/// Configures the embed appearance based on the log level
 	/// </summary>
-	private static void SpecifyEmbedLevel(LogEventLevel level, string message, EmbedBuilder embedBuilder)
+	private static void SpecifyEmbedLevel(LogEvent logEvent, string message, EmbedBuilder embedBuilder)
 	{
-		(embedBuilder.Color, embedBuilder.Description, string title) = level switch
+		(embedBuilder.Color, embedBuilder.Description, string title) = logEvent.Level switch
 		{
 			LogEventLevel.Fatal => (Color.DarkRed, string.Empty, "💥 FATAL ERROR"),
 			LogEventLevel.Error => (Color.Red, string.Empty, "❌ ERROR"),
@@ -283,8 +309,8 @@ public sealed class DiscordSink(ulong webhookId, string webhookToken, LogEventLe
 			_ => (Color.Blue, message.Truncate(EmbedBuilder.MaxDescriptionLength), "ℹ️ INFO"),
 		};
 
-		// Only set the title if we don't have an exception (which will set its own title)
-		if (string.IsNullOrEmpty(embedBuilder.Title))
+		// Set the title for non-exception logs (exceptions set their own title)
+		if (logEvent.Exception is null)
 		{
 			embedBuilder.WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength));
 		}
