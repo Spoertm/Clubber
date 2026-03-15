@@ -23,7 +23,7 @@ internal static class ConfigurationSetup
 		}
 
 		builder.Services.AddOptions<AppConfig>()
-			.Bind(builder.Configuration)
+			.Bind(builder.Configuration.GetSection("BotConfig"))
 			.ValidateDataAnnotations()
 			.ValidateOnStart();
 	}

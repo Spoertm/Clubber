@@ -171,18 +171,23 @@ In development, the app uses `appsettings.Development.json`:
 
 ```json
 {
-  "Prefix": "+",
-  "BotToken": "your-discord-bot-token",
-  "RegisterChannelId": 123456789,
-  "RoleAssignerRoleId": 123456789,
-  "CheaterRoleId": 123456789,
-  "DdPalsId": 123456789,
-  "UnregisteredRoleId": 123456789,
-  "DailyUpdateChannelId": 123456789,
-  "DailyUpdateLoggingChannelId": 123456789,
-  "DdNewsChannelId": 123456789,
-  "ModsChannelId": 123456789,
-  "NoScoreRoleId": 123456789,
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=postgres;"
+  },
+  "BotConfig": {
+    "Prefix": "+",
+    "BotToken": "your-discord-bot-token",
+    "RegisterChannelId": 123456789,
+    "RoleAssignerRoleId": 123456789,
+    "CheaterRoleId": 123456789,
+    "DdPalsId": 123456789,
+    "UnregisteredRoleId": 123456789,
+    "DailyUpdateChannelId": 123456789,
+    "DailyUpdateLoggingChannelId": 123456789,
+    "DdNewsChannelId": 123456789,
+    "ModsChannelId": 123456789,
+    "NoScoreRoleId": 123456789
+  },
   "Serilog": {
     "MinimumLevel": "Debug"
   }

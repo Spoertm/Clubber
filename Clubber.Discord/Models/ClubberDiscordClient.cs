@@ -21,8 +21,8 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 		LogLevel = LogSeverity.Warning,
 		AlwaysDownloadUsers = true,
 		GatewayIntents = (GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent | GatewayIntents.GuildMembers) &
-		                 ~GatewayIntents.GuildInvites &
-		                 ~GatewayIntents.GuildScheduledEvents,
+						 ~GatewayIntents.GuildInvites &
+						 ~GatewayIntents.GuildScheduledEvents,
 	};
 
 	public ClubberDiscordClient(IOptions<AppConfig> options, IServiceScopeFactory scopeFactory) : base(_socketConfig)

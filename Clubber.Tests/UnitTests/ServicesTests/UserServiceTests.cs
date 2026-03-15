@@ -24,7 +24,7 @@ public sealed class UserServiceTests
 			.Build();
 
 		AppConfig appConfig = new();
-		configMock.Bind(appConfig);
+		configMock.GetSection("BotConfig").Bind(appConfig);
 		IOptions<AppConfig> options = Options.Create(appConfig);
 
 		_sut = new UserService(options, _userRepositoryMock);
