@@ -5,6 +5,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
@@ -14,6 +15,7 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 {
 	private readonly AppConfig _config;
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly IHostEnvironment _environment;
 	private readonly InteractionService _interactions;
 
 	private static readonly DiscordSocketConfig _socketConfig = new()
@@ -25,10 +27,11 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 						 ~GatewayIntents.GuildScheduledEvents,
 	};
 
-	public ClubberDiscordClient(IOptions<AppConfig> options, IServiceScopeFactory scopeFactory) : base(_socketConfig)
+	public ClubberDiscordClient(IOptions<AppConfig> options, IServiceScopeFactory scopeFactory, IHostEnvironment environment) : base(_socketConfig)
 	{
 		_scopeFactory = scopeFactory;
 		_config = options.Value;
+		_environment = environment;
 
 		_interactions = new InteractionService(this, new InteractionServiceConfig
 		{
@@ -60,6 +63,13 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 			TextCommandHandler textCommandHandler = scope.ServiceProvider.GetRequiredService<TextCommandHandler>();
 			await textCommandHandler.InstallCommandsAsync();
 		};
+
+		if (_environment.IsProduction())
+		{
+			using IServiceScope scope = _scopeFactory.CreateScope();
+			await scope.ServiceProvider.GetRequiredService<RegistrationRequestHandler>().InitializeAsync();
+			await scope.ServiceProvider.GetRequiredService<UserJoinHandler>().InitializeAsync();
+		}
 
 		InteractionCreated += async (interaction) =>
 		{

@@ -154,12 +154,6 @@ internal static class Program
 
 		try
 		{
-			if (app.Environment.IsProduction())
-			{
-				app.Services.GetRequiredService<RegistrationRequestHandler>();
-				app.Services.GetRequiredService<UserJoinHandler>();
-			}
-
 			await app.Services.GetRequiredService<ClubberDiscordClient>().InitAsync();
 
 			Log.Information("Clubber Web Application started successfully");

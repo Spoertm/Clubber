@@ -14,6 +14,7 @@ public sealed class UserJoinHandler
 {
 	private readonly IServiceScopeFactory _services;
 	private readonly AppConfig _config;
+	private readonly ClubberDiscordClient _discordClient;
 
 	public UserJoinHandler(
 		IServiceScopeFactory services,
@@ -22,8 +23,13 @@ public sealed class UserJoinHandler
 	{
 		_services = services;
 		_config = config.Value;
+		_discordClient = discordClient;
+	}
 
-		discordClient.UserJoined += OnUserJoined;
+	public Task InitializeAsync()
+	{
+		_discordClient.UserJoined += OnUserJoined;
+		return Task.CompletedTask;
 	}
 
 	private async Task OnUserJoined(SocketGuildUser joiningUser)

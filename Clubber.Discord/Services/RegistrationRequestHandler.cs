@@ -22,6 +22,7 @@ public sealed class RegistrationRequestHandler
 	private readonly IWebService _webService;
 	private readonly IDiscordHelper _discordHelper;
 	private readonly IUserRepository _userRepository;
+	private readonly ClubberDiscordClient _discordClient;
 
 	public RegistrationRequestHandler(
 		IOptions<AppConfig> config,
@@ -36,12 +37,13 @@ public sealed class RegistrationRequestHandler
 		_webService = webService;
 		_discordHelper = discordHelper;
 		_userRepository = userRepository;
+		_discordClient = clubberDiscordClient;
+	}
 
-		clubberDiscordClient.Ready += () =>
-		{
-			clubberDiscordClient.MessageReceived += message => Task.Run(() => Handle(message));
-			return Task.CompletedTask;
-		};
+	public Task InitializeAsync()
+	{
+		_discordClient.MessageReceived += message => Task.Run(() => Handle(message));
+		return Task.CompletedTask;
 	}
 
 	private async Task Handle(SocketMessage socketMessage)
