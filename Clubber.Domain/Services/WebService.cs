@@ -136,7 +136,9 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 		for (int i = 0; i < leaderboard.TotalEntries; i++)
 		{
 			short usernameLength = br.ReadInt16();
+#pragma warning disable IDE0017 // Simplify object initialization
 			EntryResponse entry = new();
+#pragma warning restore IDE0017 // Simplify object initialization
 			entry.Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength));
 			entry.Rank = br.ReadInt32();
 			entry.Id = br.ReadInt32();
@@ -208,6 +210,6 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 		using HttpClient client = httpClientFactory.CreateClient();
 		await using Stream responseStream = await client.GetStreamAsync(_getWorldRecordsUri);
 		return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)
-		       ?? throw new SerializationException("Failed to deserialize world records data");
+			   ?? throw new SerializationException("Failed to deserialize world records data");
 	}
 }

@@ -209,9 +209,9 @@ public static class EmbedHelper
 			.AppendLine(GetTheoreticalBestPeak(currentBestSplits).ToString())
 			.Append($"\n`{"Name",-7}{"Time",-7}{"Split",-5}` Run");
 
-		foreach ((string Name, int Time) split in Split.V3Splits)
+		foreach ((string Name, int Time) in Split.V3Splits)
 		{
-			BestSplit? currentBestSplit = Array.Find(currentBestSplits, obs => obs.Name == split.Name);
+			BestSplit? currentBestSplit = Array.Find(currentBestSplits, obs => obs.Name == Name);
 
 			string value = "N/A";
 			string desc = currentBestSplit?.Description ?? "N/A";
@@ -220,7 +220,7 @@ public static class EmbedHelper
 			if (currentBestSplit is not null)
 				value = currentBestSplit.Name == "350" ? (currentBestSplit.Value - 105).ToString() : currentBestSplit.Value.ToString();
 
-			sb.Append($"\n`{split.Name,-7}{split.Time,4}  {value,6}` {descUrl}");
+			sb.Append($"\n`{Name,-7}{Time,4}  {value,6}` {descUrl}");
 		}
 
 		return new EmbedBuilder()

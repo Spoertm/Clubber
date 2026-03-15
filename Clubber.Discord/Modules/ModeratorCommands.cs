@@ -258,8 +258,8 @@ public sealed class ModeratorCommands(
 				Source = $"https://ddstats.com/games/{ddStatsRun.GameInfo.Id}",
 			};
 
-			(HomingPeakRun? OldRun, HomingPeakRun? NewRun) response = await databaseHelper.UpdateTopHomingPeaksIfNeeded(possibleNewTopPeakRun);
-			if (response.NewRun is null)
+			(HomingPeakRun? OldRun, HomingPeakRun? NewRun) = await databaseHelper.UpdateTopHomingPeaksIfNeeded(possibleNewTopPeakRun);
+			if (NewRun is null)
 			{
 				await FollowupAsync("No updates were needed.");
 				return;
@@ -274,7 +274,7 @@ public sealed class ModeratorCommands(
 				avatarUrl = user.GetDisplayAvatarUrl() ?? user.GetDefaultAvatarUrl();
 			}
 
-			Embed updatedPeakEmbed = EmbedHelper.UpdateTopPeakRuns(userName, response.NewRun, response.OldRun, avatarUrl);
+			Embed updatedPeakEmbed = EmbedHelper.UpdateTopPeakRuns(userName, NewRun, OldRun, avatarUrl);
 			await FollowupAsync(embed: updatedPeakEmbed);
 		}
 		catch (Exception ex)
