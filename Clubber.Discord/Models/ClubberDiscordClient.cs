@@ -32,7 +32,7 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 
 		_interactions = new InteractionService(this, new InteractionServiceConfig
 		{
-			DefaultRunMode = RunMode.Async,
+			DefaultRunMode = RunMode.Sync,
 		});
 
 		Log += DiscordLogHandler.Log;
@@ -53,7 +53,7 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 
 		Ready += async () =>
 		{
-			await _interactions.RegisterCommandsGloballyAsync();
+			await _interactions.RegisterCommandsGloballyAsync(deleteMissing: true);
 			Serilog.Log.Information("Slash commands registered globally");
 
 			using IServiceScope scope = _scopeFactory.CreateScope();

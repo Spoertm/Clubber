@@ -17,6 +17,8 @@ public sealed class InfoCommands(ILeaderboardRepository leaderboardRepository, C
 	[SlashCommand("help", "Get help information about available commands")]
 	public async Task Help()
 	{
+		await DeferAsync();
+
 		EmbedBuilder embed = new EmbedBuilder()
 			.WithTitle("Clubber Slash Commands")
 			.WithDescription("Here are the available slash commands:")
@@ -56,7 +58,7 @@ public sealed class InfoCommands(ILeaderboardRepository leaderboardRepository, C
 			embed.AddField(kvp.Key, string.Join('\n', commandList));
 		}
 
-		await RespondAsync(embed: embed.Build());
+		await FollowupAsync(embed: embed.Build());
 	}
 
 	[SlashCommand("bestsplits", "Get the current best Devil Daggers splits")]
