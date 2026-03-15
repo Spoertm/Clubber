@@ -4,6 +4,7 @@ using Clubber.Discord.Modules;
 using Clubber.Discord.Services;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Clubber.Web.Configuration;
@@ -68,7 +69,9 @@ internal static class Program
 
 		builder.Services.AddTransient<ScoreRoleService>();
 		builder.Services.AddTransient<IDiscordHelper, DiscordHelper>();
-		builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
+		builder.Services.AddTransient<IUserRepository, UserRepository>();
+		builder.Services.AddTransient<INewsRepository, NewsRepository>();
+		builder.Services.AddTransient<ILeaderboardRepository, LeaderboardRepository>();
 		builder.Services.AddTransient<UserService>();
 		builder.Services.AddTransient<IWebService, WebService>();
 

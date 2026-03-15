@@ -3,6 +3,7 @@ using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Extensions;
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
@@ -20,7 +21,7 @@ public sealed class RegistrationRequestHandler
 	private readonly RegistrationTracker _registrationTracker;
 	private readonly IWebService _webService;
 	private readonly IDiscordHelper _discordHelper;
-	private readonly IDatabaseHelper _databaseHelper;
+	private readonly IUserRepository _userRepository;
 
 	public RegistrationRequestHandler(
 		IOptions<AppConfig> config,
@@ -28,13 +29,13 @@ public sealed class RegistrationRequestHandler
 		IWebService webService,
 		IDiscordHelper discordHelper,
 		ClubberDiscordClient clubberDiscordClient,
-		IDatabaseHelper databaseHelper)
+		IUserRepository userRepository)
 	{
 		_config = config.Value;
 		_registrationTracker = registrationTracker;
 		_webService = webService;
 		_discordHelper = discordHelper;
-		_databaseHelper = databaseHelper;
+		_userRepository = userRepository;
 
 		clubberDiscordClient.Ready += () =>
 		{
@@ -50,7 +51,7 @@ public sealed class RegistrationRequestHandler
 			return;
 		}
 
-		if (await _databaseHelper.FindRegisteredUser(message.Author.Id) != null)
+		if (await _userRepository.FindAsync(message.Author.Id) != null)
 		{
 			return;
 		}

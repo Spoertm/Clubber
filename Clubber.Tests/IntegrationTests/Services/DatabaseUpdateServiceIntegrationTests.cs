@@ -2,7 +2,7 @@ using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Tests.IntegrationTests.Infrastructure;
 using Discord;
@@ -22,11 +22,11 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
 	public DatabaseUpdateServiceIntegrationTests(IntegrationTestFixture fixture)
 	{
 		_fixture = fixture;
-		IDatabaseHelper databaseHelper = new DatabaseHelper(_fixture.DbContext);
+		IUserRepository userRepository = new UserRepository(_fixture.DbContext);
 		IOptions<AppConfig> appConfig = _fixture.ServiceProvider.GetRequiredService<IOptions<AppConfig>>();
 		IServiceScopeFactory scopeFactory = _fixture.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
 
-		_scoreRoleService = new ScoreRoleService(appConfig, scopeFactory, _fixture.WebService, databaseHelper);
+		_scoreRoleService = new ScoreRoleService(appConfig, scopeFactory, _fixture.WebService, userRepository);
 		Substitute.For<IDiscordHelper>();
 	}
 

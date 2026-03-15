@@ -1,6 +1,6 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models.DdSplits;
 using Discord;
 using Discord.Commands;
@@ -11,7 +11,7 @@ using PreconditionResult = Discord.Interactions.PreconditionResult;
 namespace Clubber.Discord.Modules;
 
 [Name("ℹ️ Information")]
-public sealed class InfoCommands(IDatabaseHelper databaseHelper, ClubberDiscordClient discordClient, IServiceProvider serviceProvider)
+public sealed class InfoCommands(ILeaderboardRepository leaderboardRepository, ClubberDiscordClient discordClient, IServiceProvider serviceProvider)
 	: InteractionModuleBase<SocketInteractionContext>
 {
 	[SlashCommand("help", "Get help information about available commands")]
@@ -66,7 +66,7 @@ public sealed class InfoCommands(IDatabaseHelper databaseHelper, ClubberDiscordC
 
 		try
 		{
-			BestSplit[] bestSplits = await databaseHelper.GetBestSplits();
+			BestSplit[] bestSplits = await leaderboardRepository.GetBestSplitsAsync();
 			Embed bestSplitsEmbed = EmbedHelper.CurrentBestSplits(bestSplits);
 			await FollowupAsync(embed: bestSplitsEmbed);
 		}
@@ -84,7 +84,7 @@ public sealed class InfoCommands(IDatabaseHelper databaseHelper, ClubberDiscordC
 
 		try
 		{
-			HomingPeakRun[] topHomingPeaks = await databaseHelper.GetTopHomingPeaks();
+			HomingPeakRun[] topHomingPeaks = await leaderboardRepository.GetTopHomingPeaksAsync();
 			Embed topPeaksEmbed = EmbedHelper.CurrentTopPeakRuns(topHomingPeaks);
 			await FollowupAsync(embed: topPeaksEmbed);
 		}

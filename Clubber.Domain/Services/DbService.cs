@@ -61,5 +61,11 @@ public class DbService : DbContext
 		modelBuilder.Entity<DdNewsItem>().Property(e => e.OldEntry).HasConversion(entryResponseConverter);
 		modelBuilder.Entity<DdNewsItem>().Property(e => e.NewEntry).HasConversion(entryResponseConverter);
 		modelBuilder.Entity<BestSplit>().Property(e => e.GameInfo).HasConversion(gameInfoConverter);
+
+		// Configure DateTimeOffset converter for SQLite compatibility
+		ValueConverter<DateTimeOffset, DateTime> dateTimeOffsetConverter = new(
+			v => v.UtcDateTime,
+			v => new DateTimeOffset(v, TimeSpan.Zero));
+		modelBuilder.Entity<DdNewsItem>().Property(e => e.TimeOfOccurenceUtc).HasConversion(dateTimeOffsetConverter);
 	}
 }

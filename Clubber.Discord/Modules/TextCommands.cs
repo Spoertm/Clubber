@@ -1,7 +1,7 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -14,7 +14,7 @@ using Serilog;
 namespace Clubber.Discord.Modules;
 
 public sealed class TextCommands(
-	IDatabaseHelper databaseHelper,
+	IUserRepository userRepository,
 	UserService userService,
 	IWebService webService,
 	ScoreRoleService scoreRoleService) : ModuleBase<SocketCommandContext>
@@ -81,7 +81,7 @@ public sealed class TextCommands(
 		{
 			user ??= (SocketGuildUser)Context.User;
 
-			DdUser? ddUser = await databaseHelper.FindRegisteredUser(user.Id);
+			DdUser? ddUser = await userRepository.FindAsync(user.Id);
 
 			if (ddUser is null)
 			{

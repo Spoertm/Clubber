@@ -1,12 +1,13 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Domain.BackgroundTasks;
-using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Configuration;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Services;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -30,7 +31,7 @@ public sealed class DdNewsPostService(
 		await using AsyncServiceScope scope = services.CreateAsyncScope();
 		ServiceCollection serviceCollection = new(scope);
 
-		await serviceCollection.DatabaseHelper.CleanUpNewsItems();
+		await serviceCollection.NewsRepository.RemoveOlderThanAsync(TimeSpan.FromDays(1));
 
 		LeaderboardSnapshot leaderboardData = await GetLeaderboardData(serviceCollection, stoppingToken);
 		if (leaderboardData.IsEmpty)
@@ -51,9 +52,8 @@ public sealed class DdNewsPostService(
 	private static async Task<LeaderboardSnapshot> GetLeaderboardData(
 		ServiceCollection services, CancellationToken cancellationToken)
 	{
-		Dictionary<int, EntryResponse> currentEntries = await services.DbContext.LeaderboardCache
-			.AsNoTracking()
-			.ToDictionaryAsync(e => e.Id, cancellationToken);
+		EntryResponse[] cachedEntries = await services.LeaderboardRepository.GetCachedEntriesAsync();
+		Dictionary<int, EntryResponse> currentEntries = cachedEntries.ToDictionary(e => e.Id);
 
 		ICollection<EntryResponse> newEntries = await services.WebService.GetSufficientLeaderboardEntries(_minimumScoreToTrack);
 		if (newEntries.Count == 0)
@@ -100,7 +100,8 @@ public sealed class DdNewsPostService(
 			try
 			{
 				await PublishSingleNews(update, channel, serviceCollection);
-				await serviceCollection.DatabaseHelper.AddDdNewsItem(update.OldEntry, update.NewEntry, update.Nth);
+				DdNewsItem newsItem = new(update.OldEntry.Id, update.OldEntry, update.NewEntry, DateTime.UtcNow, update.Nth);
+				await serviceCollection.NewsRepository.AddAsync(newsItem);
 			}
 			catch (Exception ex)
 			{
@@ -130,7 +131,7 @@ public sealed class DdNewsPostService(
 		string? username = update.NewEntry.Username;
 
 		// Try to get Discord mention if user is registered
-		DdUser? dbUser = await serviceCollection.DatabaseHelper.FindRegisteredUser(update.NewEntry.Id);
+		DdUser? dbUser = await serviceCollection.UserRepository.FindAsync(update.NewEntry.Id);
 		if (dbUser != null)
 		{
 			SocketGuildUser? guildUser = serviceCollection.DiscordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId);
@@ -166,20 +167,22 @@ public sealed class DdNewsPostService(
 	private static async Task UpdateCache(ICollection<EntryResponse> newEntries, ServiceCollection serviceCollection)
 	{
 		Log.Information("Updating leaderboard cache with {Count} entries", newEntries.Count);
-		await serviceCollection.DatabaseHelper.UpdateLeaderboardCache(newEntries);
+		await serviceCollection.LeaderboardRepository.UpdateCacheAsync(newEntries);
 	}
 
 	// Helper types for better organization
 	private sealed record ServiceCollection(
-		IDatabaseHelper DatabaseHelper,
+		INewsRepository NewsRepository,
+		IUserRepository UserRepository,
+		ILeaderboardRepository LeaderboardRepository,
 		IDiscordHelper DiscordHelper,
-		DbService DbContext,
 		IWebService WebService)
 	{
 		public ServiceCollection(IServiceScope scope) : this(
-			scope.ServiceProvider.GetRequiredService<IDatabaseHelper>(),
+			scope.ServiceProvider.GetRequiredService<INewsRepository>(),
+			scope.ServiceProvider.GetRequiredService<IUserRepository>(),
+			scope.ServiceProvider.GetRequiredService<ILeaderboardRepository>(),
 			scope.ServiceProvider.GetRequiredService<IDiscordHelper>(),
-			scope.ServiceProvider.GetRequiredService<DbService>(),
 			scope.ServiceProvider.GetRequiredService<IWebService>())
 		{
 		}

@@ -1,9 +1,8 @@
-﻿using Clubber.Domain.Helpers;
-using Clubber.Domain.Models;
+﻿using Clubber.Domain.Models;
+using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models.DdSplits;
-using Clubber.Domain.Services;
 using Clubber.Web.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Clubber.Web.Endpoints;
 
@@ -58,56 +57,44 @@ internal static class ClubberEndpoints
 			.Produces<BestSplit?>();
 	}
 
-	private static async Task<BestSplit?> BestSplitByName(string splitName, IServiceScopeFactory scopeFactory)
+	private static async Task<BestSplit?> BestSplitByName(string splitName, ILeaderboardRepository leaderboardRepository)
 	{
-		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.BestSplits.FindAsync(splitName);
+		BestSplit[] splits = await leaderboardRepository.GetBestSplitsAsync();
+		return splits.FirstOrDefault(s => s.Name == splitName);
 	}
 
-	private static async Task<List<BestSplit>> BestSplits(IServiceScopeFactory scopeFactory)
+	private static async Task<BestSplit[]> BestSplits(ILeaderboardRepository leaderboardRepository)
 	{
-		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.BestSplits.AsNoTracking().ToListAsync();
+		return await leaderboardRepository.GetBestSplitsAsync();
 	}
 
-	private static async Task<List<DdNewsItemDto>> DailyNews(IServiceScopeFactory scopeFactory)
+	private static async Task<DdNewsItemDto[]> DailyNews(INewsRepository newsRepository)
 	{
-		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdNews.AsNoTracking()
-			.Select(item => new DdNewsItemDto(item.LeaderboardId,
-				item.OldEntry,
-				item.NewEntry,
-				item.TimeOfOccurenceUtc,
-				item.Nth))
-			.ToListAsync();
+		DdNewsItem[] items = await newsRepository.GetRecentAsync();
+		return [.. items.Select(item => new DdNewsItemDto(item.LeaderboardId,
+			item.OldEntry,
+			item.NewEntry,
+			item.TimeOfOccurenceUtc,
+			item.Nth))];
 	}
 
-	private static async Task<DdUser?> UserByDiscordId(ulong discordId, IServiceScopeFactory scopeFactory)
+	private static async Task<DdUser?> UserByDiscordId(ulong discordId, IUserRepository userRepository)
 	{
-		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(user => user.DiscordId == discordId);
+		return await userRepository.FindAsync(discordId);
 	}
 
-	private static async Task<DdUser?> UserByLeaderboardId(int leaderboardId, IServiceScopeFactory scopeFactory)
+	private static async Task<DdUser?> UserByLeaderboardId(int leaderboardId, IUserRepository userRepository)
 	{
-		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdPlayers.FindAsync(leaderboardId);
+		return await userRepository.FindAsync(leaderboardId);
 	}
 
-	private static async Task<List<DdUser>> RegisteredUsers(IDatabaseHelper dbHelper)
+	private static async Task<List<DdUser>> RegisteredUsers(IUserRepository userRepository)
 	{
-		return await dbHelper.GetRegisteredUsers();
+		return await userRepository.GetAllAsync();
 	}
 
-	private static async Task<int> RegisteredUserCount(IServiceScopeFactory scopeFactory)
+	private static async Task<int> RegisteredUserCount(IUserRepository userRepository)
 	{
-		await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
-		await using DbService dbContext = scope.ServiceProvider.GetRequiredService<DbService>();
-		return await dbContext.DdPlayers.CountAsync();
+		return await userRepository.GetCountAsync();
 	}
 }

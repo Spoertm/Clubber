@@ -1,12 +1,12 @@
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Discord;
 using Microsoft.Extensions.Options;
 
 namespace Clubber.Discord.Services;
 
-public sealed class UserService(IOptions<AppConfig> config, IDatabaseHelper databaseHelper)
+public sealed class UserService(IOptions<AppConfig> config, IUserRepository userRepository)
 {
 	private readonly AppConfig _config = config.Value;
 
@@ -18,7 +18,7 @@ public sealed class UserService(IOptions<AppConfig> config, IDatabaseHelper data
 			return Result.Failure(result.ErrorMsg);
 		}
 
-		if (await databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
+		if (await userRepository.FindAsync(guildUser.Id) is not null)
 		{
 			return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
 		}
@@ -34,7 +34,7 @@ public sealed class UserService(IOptions<AppConfig> config, IDatabaseHelper data
 			return Result.Failure(result.ErrorMsg);
 		}
 
-		if (await databaseHelper.FindRegisteredUser(guildUser.Id) is not null)
+		if (await userRepository.FindAsync(guildUser.Id) is not null)
 		{
 			return Result.Success();
 		}

@@ -1,6 +1,7 @@
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
@@ -18,11 +19,11 @@ public sealed class ScoreRoleService(
 	IOptions<AppConfig> config,
 	IServiceScopeFactory serviceScopeFactory,
 	IWebService webService,
-	IDatabaseHelper databaseHelper)
+	IUserRepository userRepository)
 {
 	private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 	private readonly IWebService _webService = webService;
-	private readonly IDatabaseHelper _databaseHelper = databaseHelper;
+	private readonly IUserRepository _userRepository = userRepository;
 	private readonly IReadOnlyCollection<ulong> _allPossibleRoles = GetAllPossibleRoles(config.Value);
 
 	private static IReadOnlyCollection<ulong> GetAllPossibleRoles(AppConfig cfg)
@@ -34,7 +35,7 @@ public sealed class ScoreRoleService(
 	public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers)
 	{
 		// Single DB call to get registered users
-		List<DdUser> dbUsers = await _databaseHelper.GetRegisteredUsers(guildUsers.Select(gu => gu.Id));
+		List<DdUser> dbUsers = await _userRepository.GetByDiscordIdsAsync(guildUsers.Select(gu => gu.Id));
 
 		// Build a dictionary for O(1) lookup
 		Dictionary<ulong, IGuildUser> guildUserById = guildUsers.ToDictionary(gu => gu.Id);
@@ -46,7 +47,7 @@ public sealed class ScoreRoleService(
 			.ToList();
 
 		// Fetch leaderboard data
-		uint[] lbIdsToRequest = registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId).Distinct().ToArray();
+		uint[] lbIdsToRequest = [.. registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId).Distinct()];
 		IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
 
 		// Fetch world records
@@ -73,7 +74,7 @@ public sealed class ScoreRoleService(
 			}
 		}
 
-		int totalRegistered = await _databaseHelper.GetRegisteredUserCount();
+		int totalRegistered = await _userRepository.GetCountAsync();
 		int nonMemberCount = totalRegistered - registeredUsers.Count;
 		return new BulkUserRoleUpdates(nonMemberCount, roleUpdates);
 	}
@@ -83,9 +84,9 @@ public sealed class ScoreRoleService(
 		try
 		{
 			await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
-			IDatabaseHelper dbHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
+			IUserRepository userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
-			DdUser? ddUser = await dbHelper.FindRegisteredUser(user.Id);
+			DdUser? ddUser = await userRepo.FindAsync(user.Id);
 			if (ddUser is null)
 			{
 				return Result.Failure<RoleChange>("User is not registered.");

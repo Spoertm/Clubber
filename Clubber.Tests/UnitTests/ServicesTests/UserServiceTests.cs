@@ -1,7 +1,7 @@
-﻿using Clubber.Discord.Services;
+using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
+using Clubber.Domain.Repositories;
 using Discord;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -13,7 +13,7 @@ namespace Clubber.Tests.UnitTests.ServicesTests;
 public sealed class UserServiceTests
 {
 	private readonly UserService _sut;
-	private readonly IDatabaseHelper _databaseHelperMock = Substitute.For<IDatabaseHelper>();
+	private readonly IUserRepository _userRepositoryMock = Substitute.For<IUserRepository>();
 	private const ulong _cheaterRoleId = 666;
 	private const ulong _exampleDiscordId = 0;
 
@@ -27,7 +27,7 @@ public sealed class UserServiceTests
 		configMock.Bind(appConfig);
 		IOptions<AppConfig> options = Options.Create(appConfig);
 
-		_sut = new UserService(options, _databaseHelperMock);
+		_sut = new UserService(options, _userRepositoryMock);
 	}
 
 	[Theory]
@@ -66,7 +66,7 @@ public sealed class UserServiceTests
 		guildUser.IsBot.Returns(false);
 		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(default(DdUser));
+		_userRepositoryMock.FindAsync(_exampleDiscordId).Returns(default(DdUser));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
 		Assert.False(isValidForRegistrationResponse.IsFailure);
 	}
@@ -80,7 +80,7 @@ public sealed class UserServiceTests
 		guildUser.Id.Returns(0ul);
 		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(new DdUser(0, 0));
+		_userRepositoryMock.FindAsync(_exampleDiscordId).Returns(new DdUser(0, 0));
 		Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
 		Assert.True(isValidForRegistrationResponse.IsFailure);
 	}
@@ -94,7 +94,7 @@ public sealed class UserServiceTests
 		guildUser.Id.Returns(0ul);
 		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(new DdUser(0, 0));
+		_userRepositoryMock.FindAsync(_exampleDiscordId).Returns(new DdUser(0, 0));
 		Result isValid = await _sut.IsValid(guildUser, true);
 		Assert.False(isValid.IsFailure);
 	}
@@ -108,7 +108,7 @@ public sealed class UserServiceTests
 		guildUser.Id.Returns(0ul);
 		guildUser.RoleIds.Returns([]);
 
-		_databaseHelperMock.FindRegisteredUser(_exampleDiscordId).Returns(default(DdUser));
+		_userRepositoryMock.FindAsync(_exampleDiscordId).Returns(default(DdUser));
 		Result isValid = await _sut.IsValid(guildUser, true);
 		Assert.True(isValid.IsFailure);
 	}

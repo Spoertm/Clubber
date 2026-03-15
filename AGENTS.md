@@ -38,7 +38,8 @@ Contains the core business logic and is independent of external frameworks.
 | `Data/` | Data files copied to output directory |
 | `Extensions/` | Extension methods |
 | `Features/` | Feature implementations organized by domain (DdSplits, HomingPeaks, Leaderboard, News, Roles, Splits, Users) |
-| `Helpers/` | Utility classes (`DatabaseHelper`, `CollectionUtils`, `ExtensionMethods`) |
+| `Helpers/` | Utility classes (`CollectionUtils`, `ExtensionMethods`, `RegistrationTracker`) |
+| `Repositories/` | Data access layer (`IUserRepository`, `INewsRepository`, `ILeaderboardRepository`) |
 | `Models/` | Domain models, DTOs, and API response types |
 | `Services/` | Core services (`DbService`, `WebService`, `UserService`) |
 
@@ -326,6 +327,14 @@ Heavy use of DI throughout:
 
 ### Result Pattern
 The application uses a `Result<T>` and `Result` type for operation results instead of exceptions for expected failures.
+
+### Repository Pattern
+Data access is organized through repository interfaces in `Clubber.Domain/Repositories/`:
+- **IUserRepository** - User registration, Twitch linking, lookups by Discord/Leaderboard ID
+- **INewsRepository** - DD news items and cleanup
+- **ILeaderboardRepository** - Leaderboard cache, best splits, and top homing peaks
+
+Repositories depend on `DbService` (EF Core DbContext) and are registered as transient services.
 
 ### Background Services
 Uses `BackgroundService` base class with a custom `RepeatingBackgroundService` for periodic tasks.

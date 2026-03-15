@@ -79,7 +79,7 @@ public sealed class RunAnalyzerTests
 
 		Assert.Equal(3, result.Count);
 
-		Split[] splits = result.ToArray();
+		Split[] splits = [.. result];
 
 		// First split: "350" at 366
 		Assert.Equal("350", splits[0].Name);
@@ -180,7 +180,7 @@ public sealed class RunAnalyzerTests
 		// "350" is calculated, "700" is skipped, "800" uses 366 as start
 		Assert.Equal(2, result.Count);
 
-		Split[] splits = result.ToArray();
+		Split[] splits = [.. result];
 		Assert.Equal("350", splits[0].Name);
 		Assert.Equal(95, splits[0].Value); // 200 - 0 - 105
 		Assert.Equal("800", splits[1].Name);

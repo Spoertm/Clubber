@@ -1,7 +1,7 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -17,7 +17,7 @@ namespace Clubber.Discord.Modules;
 // ===== SLASH COMMANDS =====
 [Name("👤 User Commands")]
 public sealed class UserManagementCommands(
-	IDatabaseHelper databaseHelper,
+	IUserRepository userRepository,
 	UserService userService,
 	IWebService webService,
 	ScoreRoleService scoreRoleService)
@@ -42,7 +42,7 @@ public sealed class UserManagementCommands(
 				return;
 			}
 
-			Result registrationResult = await databaseHelper.RegisterUser(lbId, user.Id);
+			Result registrationResult = await userRepository.RegisterAsync(lbId, user.Id);
 			if (registrationResult.IsSuccess)
 			{
 				const ulong newPalRoleId = 728663492424499200;
@@ -74,7 +74,7 @@ public sealed class UserManagementCommands(
 		{
 			user ??= (SocketGuildUser)Context.User;
 
-			if (await databaseHelper.RemoveUser(user.Id))
+			if (await userRepository.RemoveAsync(user.Id))
 			{
 				await FollowupAsync("✅ Successfully removed.", ephemeral: true);
 			}
@@ -117,13 +117,13 @@ public sealed class UserManagementCommands(
 				return;
 			}
 
-			if (await databaseHelper.TwitchUsernameIsRegistered(twitchUsername))
+			if (await userRepository.TwitchUsernameExistsAsync(twitchUsername))
 			{
 				await FollowupAsync("That Twitch username is already registered.", ephemeral: true);
 				return;
 			}
 
-			Result registrationResult = await databaseHelper.RegisterTwitch(user.Id, twitchUsername);
+			Result registrationResult = await userRepository.RegisterTwitchAsync(user.Id, twitchUsername);
 			if (registrationResult.IsSuccess)
 			{
 				await FollowupAsync("✅ Successfully linked Twitch.");
@@ -156,7 +156,7 @@ public sealed class UserManagementCommands(
 				return;
 			}
 
-			Result result = await databaseHelper.UnregisterTwitch(user.Id);
+			Result result = await userRepository.UnregisterTwitchAsync(user.Id);
 			if (result.IsSuccess)
 			{
 				await RespondAsync("✅ Successfully unlinked Twitch account.", ephemeral: true);
@@ -185,7 +185,7 @@ public sealed class UserManagementCommands(
 		{
 			user ??= (SocketGuildUser)Context.User;
 
-			DdUser? ddUser = await databaseHelper.FindRegisteredUser(user.Id);
+			DdUser? ddUser = await userRepository.FindAsync(user.Id);
 
 			if (ddUser is null)
 			{

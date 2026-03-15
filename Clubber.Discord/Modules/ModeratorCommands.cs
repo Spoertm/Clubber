@@ -1,6 +1,7 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Exceptions;
@@ -21,7 +22,8 @@ namespace Clubber.Discord.Modules;
 public sealed class ModeratorCommands(
 	IOptions<AppConfig> config,
 	IDiscordHelper discordHelper,
-	IDatabaseHelper databaseHelper,
+	IUserRepository userRepository,
+		ILeaderboardRepository leaderboardRepository,
 	IWebService webService) : InteractionModuleBase<SocketInteractionContext>
 {
 	private readonly AppConfig _config = config.Value;
@@ -178,11 +180,11 @@ public sealed class ModeratorCommands(
 					return;
 				}
 
-				response = await databaseHelper.UpdateBestSplitsIfNeeded([split], ddstatsRun, desc);
+				response = await leaderboardRepository.UpdateBestSplitsAsync([split], ddstatsRun, desc);
 			}
 			else
 			{
-				response = await databaseHelper.UpdateBestSplitsIfNeeded(splits, ddstatsRun, desc);
+				response = await leaderboardRepository.UpdateBestSplitsAsync(splits, ddstatsRun, desc);
 			}
 
 			if (response.UpdatedBestSplits.Length == 0)
@@ -258,7 +260,7 @@ public sealed class ModeratorCommands(
 				Source = $"https://ddstats.com/games/{ddStatsRun.GameInfo.Id}",
 			};
 
-			(HomingPeakRun? OldRun, HomingPeakRun? NewRun) = await databaseHelper.UpdateTopHomingPeaksIfNeeded(possibleNewTopPeakRun);
+			(HomingPeakRun? OldRun, HomingPeakRun? NewRun) = await leaderboardRepository.UpdateTopHomingPeakAsync(possibleNewTopPeakRun);
 			if (NewRun is null)
 			{
 				await FollowupAsync("No updates were needed.");
@@ -267,7 +269,7 @@ public sealed class ModeratorCommands(
 
 			string userName = ddStatsRun.GameInfo.PlayerName;
 			string? avatarUrl = null;
-			DdUser? ddUser = await databaseHelper.FindRegisteredUser(ddStatsRun.GameInfo.PlayerId);
+			DdUser? ddUser = await userRepository.FindAsync(ddStatsRun.GameInfo.PlayerId);
 			if (ddUser != null && Context.Guild.GetUser(ddUser.DiscordId) is { } user)
 			{
 				userName = user.AvailableNameSanitized();

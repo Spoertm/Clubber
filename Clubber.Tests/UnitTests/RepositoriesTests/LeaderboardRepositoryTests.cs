@@ -1,18 +1,18 @@
-using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace Clubber.Tests.UnitTests.HelpersTests;
+namespace Clubber.Tests.UnitTests.RepositoriesTests;
 
-public sealed class DatabaseHelperTests : IDisposable
+public sealed class LeaderboardRepositoryTests : IDisposable
 {
 	private readonly SqliteConnection _connection;
 
-	public DatabaseHelperTests()
+	public LeaderboardRepositoryTests()
 	{
 		_connection = new SqliteConnection("DataSource=:memory:");
 		_connection.Open();
@@ -35,10 +35,10 @@ public sealed class DatabaseHelperTests : IDisposable
 		return context;
 	}
 
-	#region UpdateBestSplitsIfNeeded
+	#region UpdateBestSplitsAsync
 
 	[Fact]
-	public async Task UpdateBestSplitsIfNeeded_EmptyDatabase_AddsAllSplits()
+	public async Task UpdateBestSplitsAsync_EmptyDatabase_AddsAllSplits()
 	{
 		List<Split> splits =
 		[
@@ -48,9 +48,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsIfNeeded(splits, run, "desc");
+		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "desc");
 
 		Assert.Empty(oldSplits);
 		Assert.Equal(2, updatedSplits.Length);
@@ -62,7 +62,7 @@ public sealed class DatabaseHelperTests : IDisposable
 	}
 
 	[Fact]
-	public async Task UpdateBestSplitsIfNeeded_NewSplitBeatsExisting_UpdatesAndReturnsBoth()
+	public async Task UpdateBestSplitsAsync_NewSplitBeatsExisting_UpdatesAndReturnsBoth()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -74,9 +74,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsIfNeeded(splits, run, "new desc");
+		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "new desc");
 
 		Assert.Single(oldSplits);
 		Assert.Equal(50, oldSplits[0].Value);
@@ -90,7 +90,7 @@ public sealed class DatabaseHelperTests : IDisposable
 	}
 
 	[Fact]
-	public async Task UpdateBestSplitsIfNeeded_NewSplitWorseThanExisting_DoesNothing()
+	public async Task UpdateBestSplitsAsync_NewSplitWorseThanExisting_DoesNothing()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -102,9 +102,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsIfNeeded(splits, run, "new desc");
+		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "new desc");
 
 		Assert.Single(oldSplits);
 		Assert.Equal(100, oldSplits[0].Value);
@@ -117,7 +117,7 @@ public sealed class DatabaseHelperTests : IDisposable
 	}
 
 	[Fact]
-	public async Task UpdateBestSplitsIfNeeded_EqualValue_DoesNothing()
+	public async Task UpdateBestSplitsAsync_EqualValue_DoesNothing()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -129,16 +129,16 @@ public sealed class DatabaseHelperTests : IDisposable
 		DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsIfNeeded(splits, run, "new desc");
+		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "new desc");
 
 		Assert.Single(oldSplits);
 		Assert.Empty(updatedSplits);
 	}
 
 	[Fact]
-	public async Task UpdateBestSplitsIfNeeded_MixedResults_OnlyUpdatesBetterOnes()
+	public async Task UpdateBestSplitsAsync_MixedResults_OnlyUpdatesBetterOnes()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -157,9 +157,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsIfNeeded(splits, run, "desc");
+		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "desc");
 
 		Assert.Equal(2, oldSplits.Length);
 		Assert.Single(updatedSplits);
@@ -173,7 +173,7 @@ public sealed class DatabaseHelperTests : IDisposable
 	}
 
 	[Fact]
-	public async Task UpdateBestSplitsIfNeeded_NewSplitNotInDatabase_AddsIt()
+	public async Task UpdateBestSplitsAsync_NewSplitNotInDatabase_AddsIt()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -189,9 +189,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsIfNeeded(splits, run, "desc");
+		(BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "desc");
 
 		Assert.Single(oldSplits);
 		Assert.Single(updatedSplits);
@@ -203,17 +203,17 @@ public sealed class DatabaseHelperTests : IDisposable
 
 	#endregion
 
-	#region UpdateTopHomingPeaksIfNeeded
+	#region UpdateTopHomingPeakAsync
 
 	[Fact]
-	public async Task UpdateTopHomingPeaksIfNeeded_NewPlayer_AddsAndReturnsRun()
+	public async Task UpdateTopHomingPeakAsync_NewPlayer_AddsAndReturnsRun()
 	{
 		HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" };
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeaksIfNeeded(run);
+		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
 
 		Assert.Null(oldRun);
 		Assert.NotNull(newRun);
@@ -225,7 +225,7 @@ public sealed class DatabaseHelperTests : IDisposable
 	}
 
 	[Fact]
-	public async Task UpdateTopHomingPeaksIfNeeded_HigherPeak_UpdatesAndReturnsBoth()
+	public async Task UpdateTopHomingPeakAsync_HigherPeak_UpdatesAndReturnsBoth()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -236,9 +236,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 150, Source = "ddstats" };
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeaksIfNeeded(run);
+		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
 
 		Assert.NotNull(oldRun);
 		Assert.Equal(100, oldRun.HomingPeak);
@@ -251,7 +251,7 @@ public sealed class DatabaseHelperTests : IDisposable
 	}
 
 	[Fact]
-	public async Task UpdateTopHomingPeaksIfNeeded_LowerPeak_DoesNothing()
+	public async Task UpdateTopHomingPeakAsync_LowerPeak_DoesNothing()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -262,9 +262,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 50, Source = "ddstats" };
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeaksIfNeeded(run);
+		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
 
 		Assert.NotNull(oldRun);
 		Assert.Equal(100, oldRun.HomingPeak);
@@ -276,7 +276,7 @@ public sealed class DatabaseHelperTests : IDisposable
 	}
 
 	[Fact]
-	public async Task UpdateTopHomingPeaksIfNeeded_EqualPeak_DoesNothing()
+	public async Task UpdateTopHomingPeakAsync_EqualPeak_DoesNothing()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -287,16 +287,16 @@ public sealed class DatabaseHelperTests : IDisposable
 		HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" };
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeaksIfNeeded(run);
+		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
 
 		Assert.NotNull(oldRun);
 		Assert.Null(newRun);
 	}
 
 	[Fact]
-	public async Task UpdateTopHomingPeaksIfNeeded_DifferentPlayers_TracksSeparately()
+	public async Task UpdateTopHomingPeakAsync_DifferentPlayers_TracksSeparately()
 	{
 		using (DbService seedDb = CreateContext())
 		{
@@ -307,9 +307,9 @@ public sealed class DatabaseHelperTests : IDisposable
 		HomingPeakRun run = new() { PlayerLeaderboardId = 2, PlayerName = "Player2", HomingPeak = 150, Source = "ddstats" };
 
 		using DbService db = CreateContext();
-		DatabaseHelper sut = new(db);
+		LeaderboardRepository sut = new(db);
 
-		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeaksIfNeeded(run);
+		(HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
 
 		Assert.Null(oldRun);
 		Assert.NotNull(newRun);

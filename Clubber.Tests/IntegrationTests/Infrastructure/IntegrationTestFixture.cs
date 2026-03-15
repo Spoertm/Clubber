@@ -1,5 +1,5 @@
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -31,7 +31,7 @@ public sealed class IntegrationTestFixture : IDisposable
 		_connection.Open();
 
 		services.AddDbContext<DbService>(options => options.UseSqlite(_connection));
-		services.AddScoped<IDatabaseHelper, DatabaseHelper>();
+		services.AddScoped<IUserRepository, UserRepository>();
 		services.AddSingleton(_ => CreateMockWebService());
 		services.Configure<AppConfig>(cfg =>
 		{

@@ -1,7 +1,7 @@
 using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Discord;
 using Discord.WebSocket;
@@ -33,9 +33,9 @@ public sealed class UserJoinHandler
 
 		// User is registered
 		await using AsyncServiceScope scope = _services.CreateAsyncScope();
-		IDatabaseHelper dbHelper = scope.ServiceProvider.GetRequiredService<IDatabaseHelper>();
+		IUserRepository userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
-		if (await dbHelper.FindRegisteredUser(joiningUser.Id) is not null)
+		if (await userRepository.FindAsync(joiningUser.Id) is not null)
 		{
 			await UpdateRolesForRegisteredUser(joiningUser);
 		}

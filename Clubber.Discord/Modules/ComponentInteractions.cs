@@ -1,7 +1,8 @@
 ﻿using Clubber.Discord.Helpers;
+using Clubber.Domain.Helpers;
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Helpers;
+using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
@@ -17,7 +18,7 @@ namespace Clubber.Discord.Modules;
 public sealed class ComponentInteractions(
 	IOptions<AppConfig> config,
 	UserService userService,
-	IDatabaseHelper databaseHelper,
+	IUserRepository userRepository,
 	IDiscordHelper discordHelper,
 	RegistrationTracker registrationTracker,
 	IWebService webService) : InteractionModuleBase<SocketInteractionContext>
@@ -147,7 +148,7 @@ public sealed class ComponentInteractions(
 		}
 		else
 		{
-			Result registrationResult = await databaseHelper.RegisterUser((uint)lbId, user.Id);
+			Result registrationResult = await userRepository.RegisterAsync((uint)lbId, user.Id);
 			if (registrationResult.IsFailure)
 			{
 				return Result.Failure($"❌ Failed to execute command: {registrationResult.ErrorMsg}");
