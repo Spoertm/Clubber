@@ -138,66 +138,81 @@ public sealed class DatabaseHelper(DbService dbContext) : IDatabaseHelper
 	public async Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsIfNeeded(
 		IReadOnlyCollection<Split> splitsToBeChecked, DdStatsFullRunResponse ddstatsRun, string description)
 	{
-		BestSplit[] currentBestSplits = await dbContext.BestSplits.AsNoTracking().ToArrayAsync();
-		List<BestSplit> superiorNewSplits = [];
+		Dictionary<string, BestSplit> currentBestSplits = await dbContext.BestSplits
+			.AsNoTracking()
+			.ToDictionaryAsync(cbs => cbs.Name);
+
+		List<BestSplit> updatedSplits = [];
+
 		foreach (Split newSplit in splitsToBeChecked)
 		{
-			BestSplit? currentBestSplit = Array.Find(currentBestSplits, cbs => cbs.Name == newSplit.Name);
-			BestSplit newBest = new()
-			{
-				Name = newSplit.Name,
-				Time = newSplit.Time,
-				Value = newSplit.Value,
-				Description = description,
-				GameInfo = ddstatsRun.GameInfo,
-			};
+			if (currentBestSplits.TryGetValue(newSplit.Name, out BestSplit? currentBest) && newSplit.Value <= currentBest.Value)
+				continue;
 
-			if (currentBestSplit is null)
+			if (currentBest is null)
 			{
-				superiorNewSplits.Add(newBest);
-				await dbContext.BestSplits.AddAsync(newBest);
+				BestSplit newBest = new()
+				{
+					Name = newSplit.Name,
+					Time = newSplit.Time,
+					Value = newSplit.Value,
+					Description = description,
+					GameInfo = ddstatsRun.GameInfo,
+				};
+
+				updatedSplits.Add(newBest);
+				dbContext.BestSplits.Add(newBest);
 			}
-			else if (newSplit.Value > currentBestSplit.Value)
+			else
 			{
-				superiorNewSplits.Add(newBest);
-				dbContext.BestSplits.Update(newBest);
+				BestSplit toUpdate = await dbContext.BestSplits.FindAsync(newSplit.Name)
+					?? throw new InvalidOperationException($"BestSplit {newSplit.Name} not found");
+
+				toUpdate.Value = newSplit.Value;
+				toUpdate.Time = newSplit.Time;
+				toUpdate.Description = description;
+				toUpdate.GameInfo = ddstatsRun.GameInfo;
+				updatedSplits.Add(toUpdate);
 			}
 		}
 
-		if (superiorNewSplits.Count == 0)
-		{
-			return (currentBestSplits, superiorNewSplits.ToArray());
-		}
+		if (updatedSplits.Count != 0)
+			await dbContext.SaveChangesAsync();
 
-		await dbContext.SaveChangesAsync();
-		return (currentBestSplits, superiorNewSplits.ToArray());
+		return ([.. currentBestSplits.Values], updatedSplits.ToArray());
 	}
 
 	public async Task<(HomingPeakRun? OldRun, HomingPeakRun? NewRun)> UpdateTopHomingPeaksIfNeeded(HomingPeakRun runToBeChecked)
 	{
-		HomingPeakRun? oldRun = await dbContext.TopHomingPeaks.AsNoTracking()
+		HomingPeakRun? existing = await dbContext.TopHomingPeaks
 			.FirstOrDefaultAsync(hpr => hpr.PlayerLeaderboardId == runToBeChecked.PlayerLeaderboardId);
-		if (oldRun != null)
+
+		if (existing is not null && runToBeChecked.HomingPeak <= existing.HomingPeak)
+			return (existing, null);
+
+		HomingPeakRun? oldRun = existing is not null ? new HomingPeakRun
 		{
-			if (runToBeChecked.HomingPeak > oldRun.HomingPeak)
-			{
-				runToBeChecked.Id = oldRun.Id;
-				dbContext.TopHomingPeaks.Update(runToBeChecked);
-				Log.Information("Updating top homing peak for {PlayerName}:\n{@NewRun}", runToBeChecked.PlayerName, runToBeChecked);
-			}
-			else
-			{
-				return (oldRun, null);
-			}
+			Id = existing.Id,
+			PlayerLeaderboardId = existing.PlayerLeaderboardId,
+			PlayerName = existing.PlayerName,
+			HomingPeak = existing.HomingPeak,
+			Source = existing.Source,
+		} : null;
+
+		if (existing is not null)
+		{
+			existing.HomingPeak = runToBeChecked.HomingPeak;
+			existing.Source = runToBeChecked.Source;
+			existing.PlayerName = runToBeChecked.PlayerName;
+			Log.Information("Updating top homing peak for {PlayerName}:\n{@NewRun}", runToBeChecked.PlayerName, runToBeChecked);
 		}
 		else
 		{
-			EntityEntry<HomingPeakRun> response = await dbContext.TopHomingPeaks.AddAsync(runToBeChecked);
-			Log.Information("Added new top homing peak run:\n{@NewRun}", response.Entity);
+			dbContext.TopHomingPeaks.Add(runToBeChecked);
+			Log.Information("Added new top homing peak run:\n{@NewRun}", runToBeChecked);
 		}
 
 		await dbContext.SaveChangesAsync();
-
 		return (oldRun, runToBeChecked);
 	}
 
