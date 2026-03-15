@@ -143,7 +143,6 @@ internal static class Program
 		app.MapScalarApiReference(options =>
 		{
 			options.Title = "Clubber API Documentation";
-			options.Theme = ScalarTheme.Mars;
 		});
 
 		// Map MVC routes FIRST
