@@ -31,6 +31,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 			using FormUrlEncodedContent content = new(postValues);
 			using HttpClient client = httpClientFactory.CreateClient();
 			using HttpResponseMessage response = await client.PostAsync(_getMultipleUsersByIdUri, content);
+			response.EnsureSuccessStatusCode();
 			byte[] data = await response.Content.ReadAsByteArrayAsync();
 
 			int bytePosition = 19;
@@ -92,8 +93,8 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 			}
 			catch (Exception e)
 			{
-				Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => failed to fetch LB entries", nameof(WebService));
-				throw;
+				Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => Failed to fetch leaderboard entries", nameof(WebService));
+				throw new ClubberException("DD servers are experiencing issues atm.", e);
 			}
 
 			rank += 100;
@@ -110,15 +111,11 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 		using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("offset", (rankStart - 1).ToString())]);
 		using HttpClient client = httpClientFactory.CreateClient();
 		using HttpResponseMessage response = await client.PostAsync(_getScoresUri, content);
+		response.EnsureSuccessStatusCode();
 
-		MemoryStream ms = new();
-		await response.Content.CopyToAsync(ms);
-		using BinaryReader br = new(ms);
+		using BinaryReader br = new(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));
 
-		LeaderboardResponse leaderboard = new()
-		{
-			DateTime = DateTime.UtcNow,
-		};
+		LeaderboardResponse leaderboard = new() { DateTime = DateTime.UtcNow };
 
 		br.BaseStream.Seek(11, SeekOrigin.Begin);
 		leaderboard.DeathsGlobal = br.ReadUInt64();
@@ -136,12 +133,13 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 		for (int i = 0; i < leaderboard.TotalEntries; i++)
 		{
 			short usernameLength = br.ReadInt16();
-#pragma warning disable IDE0017 // Simplify object initialization
-			EntryResponse entry = new();
-#pragma warning restore IDE0017 // Simplify object initialization
-			entry.Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength));
-			entry.Rank = br.ReadInt32();
-			entry.Id = br.ReadInt32();
+			EntryResponse entry = new()
+			{
+				Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength)),
+				Rank = br.ReadInt32(),
+				Id = br.ReadInt32(),
+			};
+
 			_ = br.ReadInt32();
 			entry.Time = br.ReadInt32();
 			entry.Kills = br.ReadInt32();
@@ -155,9 +153,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 			entry.TimeTotal = br.ReadUInt64();
 			entry.GemsTotal = br.ReadUInt64();
 			entry.DaggersHitTotal = br.ReadUInt64();
-
 			br.BaseStream.Seek(4, SeekOrigin.Current);
-
 			leaderboard.Entries.Add(entry);
 		}
 
@@ -166,50 +162,94 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 
 	public async Task<string?> GetCountryCodeForplayer(int lbId)
 	{
-		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/country-code");
-		using HttpClient client = httpClientFactory.CreateClient();
-		await using Stream responseStream = await client.GetStreamAsync(uri);
-		using JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream);
+		try
+		{
+			Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/country-code");
+			using HttpClient client = httpClientFactory.CreateClient();
+			using HttpResponseMessage response = await client.GetAsync(uri);
+			response.EnsureSuccessStatusCode();
+			await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+			using JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream);
 
-		return jsonDocument.RootElement.TryGetProperty("countryCode", out JsonElement countryCodeElement) ? countryCodeElement.GetString() : null;
+			return jsonDocument.RootElement.TryGetProperty("countryCode", out JsonElement countryCodeElement) ? countryCodeElement.GetString() : null;
+		}
+		catch (Exception e)
+		{
+			Log.Error(e, "{Class}.GetCountryCodeForplayer => Failed to fetch country code for {LeaderboardId}", nameof(WebService), lbId);
+			throw new ClubberException("Failed to fetch country code data.", e);
+		}
 	}
 
 	public async Task<GetPlayerHistory?> GetPlayerHistory(uint lbId)
 	{
-		Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
-		using HttpClient client = httpClientFactory.CreateClient();
-		await using Stream responseStream = await client.GetStreamAsync(uri);
-		return await JsonSerializer.DeserializeAsync<GetPlayerHistory>(responseStream, _serializerOptions);
+		try
+		{
+			Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
+			using HttpClient client = httpClientFactory.CreateClient();
+			using HttpResponseMessage response = await client.GetAsync(uri);
+			response.EnsureSuccessStatusCode();
+			await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+			return await JsonSerializer.DeserializeAsync<GetPlayerHistory>(responseStream, _serializerOptions);
+		}
+		catch (Exception e)
+		{
+			Log.Error(e, "{Class}.GetPlayerHistory => Failed to fetch player history for {LeaderboardId}", nameof(WebService), lbId);
+			throw new ClubberException("Failed to fetch player history data.", e);
+		}
 	}
 
 	public async Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri)
 	{
-		string uriStr = uri.ToString();
-		string runIdStr = string.Empty;
-		if (uriStr.StartsWith("https://ddstats.com/games/", StringComparison.OrdinalIgnoreCase))
-			runIdStr = uriStr[26..];
-		else if (uriStr.StartsWith("https://www.ddstats.com/games/", StringComparison.OrdinalIgnoreCase))
-			runIdStr = uriStr[30..];
-		else if (uriStr.StartsWith("https://ddstats.com/api/v2/game/full", StringComparison.OrdinalIgnoreCase))
-			runIdStr = uriStr[40..];
-		else if (uriStr.StartsWith("https://www.ddstats.com/api/v2/game/full", StringComparison.OrdinalIgnoreCase))
-			runIdStr = uriStr[44..];
-
-		bool successfulParse = uint.TryParse(runIdStr, out uint runId);
-		if (string.IsNullOrEmpty(runIdStr) || !successfulParse)
-			throw new ClubberException("Invalid ddstats URL.");
-
+		uint? runId = ExtractRunIdFromUri(uri) ?? throw new ClubberException("Invalid ddstats URL.");
 		Uri fullRunReqUri = new($"https://ddstats.com/api/v2/game/full?id={runId}");
 		using HttpClient client = httpClientFactory.CreateClient();
-		await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUri);
+		using HttpResponseMessage response = await client.GetAsync(fullRunReqUri);
+		response.EnsureSuccessStatusCode();
+		await using Stream ddstatsResponseStream = await response.Content.ReadAsStreamAsync();
 		return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
+	}
+
+	private static uint? ExtractRunIdFromUri(Uri uri)
+	{
+		// Handle /api/v2/game/full?id={runId} format
+		if (uri.AbsolutePath.StartsWith("/api/v2/game/full", StringComparison.OrdinalIgnoreCase))
+		{
+			string? query = uri.Query;
+			if (query.StartsWith("?id=", StringComparison.OrdinalIgnoreCase) &&
+				uint.TryParse(query.AsSpan(4), out uint apiRunId))
+			{
+				return apiRunId;
+			}
+		}
+
+		// Handle /games/{runId} format
+		if (uri.AbsolutePath.StartsWith("/games/", StringComparison.OrdinalIgnoreCase))
+		{
+			string lastSegment = uri.Segments[^1];
+			if (uint.TryParse(lastSegment, out uint gameRunId))
+			{
+				return gameRunId;
+			}
+		}
+
+		return null;
 	}
 
 	public async Task<GetWorldRecordDataContainer> GetWorldRecords()
 	{
-		using HttpClient client = httpClientFactory.CreateClient();
-		await using Stream responseStream = await client.GetStreamAsync(_getWorldRecordsUri);
-		return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)
-			   ?? throw new SerializationException("Failed to deserialize world records data");
+		try
+		{
+			using HttpClient client = httpClientFactory.CreateClient();
+			using HttpResponseMessage response = await client.GetAsync(_getWorldRecordsUri);
+			response.EnsureSuccessStatusCode();
+			await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+			return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)
+				   ?? throw new SerializationException("Failed to deserialize world records data");
+		}
+		catch (Exception e)
+		{
+			Log.Error(e, "{Class}.GetWorldRecords => Failed to fetch world records", nameof(WebService));
+			throw new ClubberException("Failed to fetch world records data.", e);
+		}
 	}
 }
