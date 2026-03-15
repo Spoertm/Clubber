@@ -11,6 +11,13 @@ namespace Clubber.Discord.Helpers;
 
 public static class EmbedHelper
 {
+	/// <summary>
+	/// Escapes only [ and ] characters for use inside Markdown link text.
+	/// Prevents usernames with brackets from breaking the link syntax.
+	/// Other markdown characters (*, _, etc.) are intentionally not escaped.
+	/// </summary>
+	private static string EscapeLinkText(string text) => text.Replace("[", "\\[").Replace("]", "\\]");
+
 	public static Embed UpdateRoles(UserRoleUpdate userRoleUpdate)
 	{
 		IGuildUser user = userRoleUpdate.User;
@@ -64,7 +71,7 @@ public static class EmbedHelper
 
 				 • For full stats, use `statsf`.
 
-				 {Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
+				 {Format.Url($"{EscapeLinkText(lbPlayer.Username)} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
 				 """)
 			.Build();
 	}
@@ -120,7 +127,7 @@ public static class EmbedHelper
 		}
 
 		embedBuilder.AddField("\u200B",
-			Format.Url($"{sanitizedLbName} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
+			Format.Url($"{EscapeLinkText(lbPlayer.Username)} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
 
 		return embedBuilder.Build();
 	}
