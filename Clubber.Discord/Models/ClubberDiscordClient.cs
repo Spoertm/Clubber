@@ -44,7 +44,7 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 		Serilog.Log.Debug("Initiating {Client}", nameof(ClubberDiscordClient));
 		await LoginAsync(TokenType.Bot, _config.BotToken);
 		await StartAsync();
-		await SetGameAsync("your roles", null, ActivityType.Watching);
+		await SetCustomStatusAsync("Excited for DD2");
 
 		using (IServiceScope scope = _scopeFactory.CreateScope())
 		{
