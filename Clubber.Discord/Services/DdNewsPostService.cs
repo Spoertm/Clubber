@@ -91,8 +91,7 @@ public sealed class DdNewsPostService(
 
 	private async Task PublishNewsIfAvailable(IEnumerable<NewsUpdate> newsUpdates, ServiceCollection serviceCollection)
 	{
-		SocketTextChannel? channel = null;
-
+		SocketTextChannel channel = serviceCollection.DiscordHelper.GetTextChannel(_config.DdNewsChannelId);
 		foreach (NewsUpdate update in newsUpdates)
 		{
 			Log.Information("Publishing news for {Player} - {Score}s",
@@ -100,7 +99,6 @@ public sealed class DdNewsPostService(
 
 			try
 			{
-				channel ??= serviceCollection.DiscordHelper.GetTextChannel(_config.DdNewsChannelId);
 				await PublishSingleNews(update, channel, serviceCollection);
 				await serviceCollection.DatabaseHelper.AddDdNewsItem(update.OldEntry, update.NewEntry, update.Nth);
 			}
