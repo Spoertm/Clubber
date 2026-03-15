@@ -4,30 +4,32 @@ namespace Clubber.Domain.BackgroundTasks;
 
 public sealed class KeepAppAliveService(IHttpClientFactory httpClientFactory) : RepeatingBackgroundService
 {
+	private const string _envVarName = "AppUrls";
+
 	protected override TimeSpan TickInterval => TimeSpan.FromMinutes(5);
 
 	protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
 	{
-		const string envVarName = "AppUrls";
-		if (Environment.GetEnvironmentVariable(envVarName) is not { } appUrlsRaw || string.IsNullOrWhiteSpace(appUrlsRaw))
+		if (Environment.GetEnvironmentVariable(_envVarName) is not { } appUrlsRaw || string.IsNullOrWhiteSpace(appUrlsRaw))
 		{
-			Log.Warning("{EnvVarName} environment variable not set", envVarName);
+			Log.Warning("{EnvVarName} environment variable not set", _envVarName);
 			return;
 		}
 
 		string[] urls = appUrlsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 		if (urls.Length == 0)
 		{
-			Log.Warning("No URLs found in {EnvVarName}", envVarName);
+			Log.Warning("No URLs found in {EnvVarName}", _envVarName);
 			return;
 		}
+
+		using HttpClient client = httpClientFactory.CreateClient(nameof(KeepAppAliveService));
 
 		IEnumerable<Task> tasks = urls.Select(async url =>
 		{
 			try
 			{
-				using HttpClient client = httpClientFactory.CreateClient();
-				await client.GetStringAsync(new Uri(url), stoppingToken).ConfigureAwait(false);
+				_ = await client.GetStringAsync(new Uri(url), stoppingToken).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{
@@ -35,6 +37,6 @@ public sealed class KeepAppAliveService(IHttpClientFactory httpClientFactory) : 
 			}
 		});
 
-		await Task.WhenAll(tasks);
+		await Task.WhenAll(tasks).ConfigureAwait(false);
 	}
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 
 namespace Clubber.Domain.BackgroundTasks;
@@ -17,21 +17,22 @@ public abstract class RepeatingBackgroundService : BackgroundService
 		{
 			try
 			{
-				if (await timer.WaitForNextTickAsync(stoppingToken))
+				if (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
 				{
-					await ExecuteTaskAsync(stoppingToken);
+					await ExecuteTaskAsync(stoppingToken).ConfigureAwait(false);
 				}
 			}
-			catch (OperationCanceledException operationCanceledException)
+			catch (OperationCanceledException)
 			{
-				Log.Warning(operationCanceledException, "{ClassName} => service cancellation requested", nameof(RepeatingBackgroundService));
+				// Normal shutdown, exit cleanly
+				break;
 			}
 			catch (Exception exception)
 			{
-				Log.Error(exception, "Caught exception in {ClassName}", nameof(RepeatingBackgroundService));
+				Log.Error(exception, "Caught exception in {ClassName}", GetType().Name);
 			}
 		}
 
-		Log.Warning("{ClassName} => service cancelled", nameof(RepeatingBackgroundService));
+		Log.Information("{ClassName} => stopped gracefully", GetType().Name);
 	}
 }
