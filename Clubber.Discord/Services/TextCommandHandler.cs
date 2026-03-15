@@ -1,9 +1,10 @@
-﻿using Clubber.Discord.Logging;
+using Clubber.Discord.Logging;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Reflection;
@@ -14,18 +15,18 @@ public sealed class TextCommandHandler
 {
 	private readonly ClubberDiscordClient _client;
 	private readonly CommandService _commandService;
-	private readonly IServiceProvider _services;
+	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly AppConfig _config;
 
 	public TextCommandHandler(
 		ClubberDiscordClient client,
 		CommandService commandService,
-		IServiceProvider services,
+		IServiceScopeFactory scopeFactory,
 		IOptions<AppConfig> config)
 	{
 		_client = client;
 		_commandService = commandService;
-		_services = services;
+		_scopeFactory = scopeFactory;
 		_config = config.Value;
 
 		_commandService.Log += DiscordLogHandler.Log;
@@ -34,7 +35,7 @@ public sealed class TextCommandHandler
 
 	public async Task InstallCommandsAsync()
 	{
-		await _commandService.AddModulesAsync(Assembly.GetAssembly(typeof(TextCommandHandler)), _services);
+		await _commandService.AddModulesAsync(Assembly.GetAssembly(typeof(TextCommandHandler)), _scopeFactory.CreateScope().ServiceProvider);
 		Log.Information("Text commands registered");
 	}
 
@@ -47,8 +48,9 @@ public sealed class TextCommandHandler
 		if (!message.HasStringPrefix(_config.Prefix, ref argumentPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argumentPos))
 			return;
 
+		using IServiceScope scope = _scopeFactory.CreateScope();
 		SocketCommandContext context = new(_client, message);
-		IResult result = await _commandService.ExecuteAsync(context, argumentPos, _services);
+		IResult result = await _commandService.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
 		if (!result.IsSuccess && result.Error.HasValue)
 		{
 			if (result.Error.Value == CommandError.UnknownCommand)

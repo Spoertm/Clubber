@@ -1,4 +1,4 @@
-﻿using Clubber.Discord.Logging;
+using Clubber.Discord.Logging;
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
 using Discord;
@@ -13,7 +13,7 @@ namespace Clubber.Discord.Models;
 public sealed class ClubberDiscordClient : DiscordSocketClient
 {
 	private readonly AppConfig _config;
-	private readonly IServiceProvider _services;
+	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly InteractionService _interactions;
 
 	private static readonly DiscordSocketConfig _socketConfig = new()
@@ -25,9 +25,9 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 		                 ~GatewayIntents.GuildScheduledEvents,
 	};
 
-	public ClubberDiscordClient(IOptions<AppConfig> options, IServiceProvider services) : base(_socketConfig)
+	public ClubberDiscordClient(IOptions<AppConfig> options, IServiceScopeFactory scopeFactory) : base(_socketConfig)
 	{
-		_services = services;
+		_scopeFactory = scopeFactory;
 		_config = options.Value;
 
 		_interactions = new InteractionService(this, new InteractionServiceConfig
@@ -46,21 +46,26 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
 		await StartAsync();
 		await SetGameAsync("your roles", null, ActivityType.Watching);
 
-		await _interactions.AddModulesAsync(Assembly.GetAssembly(typeof(ClubberDiscordClient)), _services);
+		using (IServiceScope scope = _scopeFactory.CreateScope())
+		{
+			await _interactions.AddModulesAsync(Assembly.GetAssembly(typeof(ClubberDiscordClient)), scope.ServiceProvider);
+		}
 
 		Ready += async () =>
 		{
 			await _interactions.RegisterCommandsGloballyAsync();
 			Serilog.Log.Information("Slash commands registered globally");
 
-			TextCommandHandler textCommandHandler = _services.GetRequiredService<TextCommandHandler>();
+			using IServiceScope scope = _scopeFactory.CreateScope();
+			TextCommandHandler textCommandHandler = scope.ServiceProvider.GetRequiredService<TextCommandHandler>();
 			await textCommandHandler.InstallCommandsAsync();
 		};
 
 		InteractionCreated += async (interaction) =>
 		{
+			using IServiceScope scope = _scopeFactory.CreateScope();
 			SocketInteractionContext context = new(this, interaction);
-			IResult result = await _interactions.ExecuteCommandAsync(context, _services);
+			IResult result = await _interactions.ExecuteCommandAsync(context, scope.ServiceProvider);
 
 			if (!result.IsSuccess)
 			{

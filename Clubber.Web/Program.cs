@@ -13,7 +13,7 @@ using Discord.Commands;
 using Npgsql;
 using Serilog;
 using System.Globalization;
-using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 
 namespace Clubber.Web;
 
@@ -63,7 +63,7 @@ internal static class Program
 
 			return commands;
 		});
-		builder.Services.AddSingleton<ComponentInteractions>();
+		builder.Services.AddTransient<ComponentInteractions>();
 		builder.Services.AddSingleton<TextCommandHandler>();
 		builder.Services.AddSingleton<RegistrationTracker>();
 
@@ -76,7 +76,7 @@ internal static class Program
 		builder.Services.AddTransient<IWebService, WebService>();
 
 		builder.Services.AddHttpClient();
-		builder.Services.AddDbContext<DbService>(ServiceLifetime.Transient);
+		builder.Services.AddDbContext<DbService>(ServiceLifetime.Scoped);
 
 		// Production services
 		if (builder.Environment.IsProduction())
@@ -89,29 +89,33 @@ internal static class Program
 			builder.Services.AddHostedService<ChannelClearingService>();
 		}
 
-		// Swagger/OpenAPI
-		builder.Services.AddSwaggerGen(options =>
+		// Scalar OpenAPI documentation
+		builder.Services.AddOpenApi(options =>
 		{
-			options.EnableAnnotations();
-			options.SwaggerDoc("v1", new OpenApiInfo
+			options.AddDocumentTransformer((document, context, cancellationToken) =>
 			{
-				Version = "v1",
-				Title = "Clubber API",
-				Description = """
-				              RESTful API for the Clubber Discord bot. Access Devil Daggers community data including
-				              registered users, daily news, best splits, and more. Perfect for building integrations
-				              and custom applications for the DD community.
-				              """,
-				Contact = new OpenApiContact
+				document.Info = new()
 				{
-					Name = "Spoertm",
-					Url = new Uri("https://github.com/Spoertm")
-				},
-				License = new OpenApiLicense
-				{
-					Name = "View on GitHub",
-					Url = new Uri("https://github.com/Spoertm/Clubber")
-				}
+					Title = "Clubber API",
+					Version = "v1",
+					Description = """
+					              RESTful API for the Clubber Discord bot. Access Devil Daggers community data including
+					              registered users, daily news, best splits, and more. Perfect for building integrations
+					              and custom applications for the DD community.
+					              """,
+					Contact = new()
+					{
+						Name = "Spoertm",
+						Url = new Uri("https://github.com/Spoertm"),
+					},
+					License = new()
+					{
+						Name = "View on GitHub",
+						Url = new Uri("https://github.com/Spoertm/Clubber"),
+					},
+				};
+
+				return Task.CompletedTask;
 			});
 		});
 
@@ -134,13 +138,12 @@ internal static class Program
 		app.UseRouting();
 		app.UseCors();
 
-		// Swagger UI
-		app.UseSwagger();
-		app.UseSwaggerUI(options =>
+		// Scalar API documentation
+		app.MapOpenApi();
+		app.MapScalarApiReference(options =>
 		{
-			options.SwaggerEndpoint("/swagger/v1/swagger.json", "Main");
-			options.RoutePrefix = "swagger";
-			options.DocumentTitle = "Clubber API Documentation";
+			options.Title = "Clubber API Documentation";
+			options.Theme = ScalarTheme.Mars;
 		});
 
 		// Map MVC routes FIRST
