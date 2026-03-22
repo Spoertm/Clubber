@@ -1,4 +1,5 @@
-﻿using Clubber.Domain.Models.Exceptions;
+﻿using Clubber.Domain.Configuration;
+using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Serilog;
@@ -8,12 +9,8 @@ using System.Text.Json;
 
 namespace Clubber.Domain.Services;
 
-public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebService
+public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig appConfig) : IWebService
 {
-	private readonly Uri _getMultipleUsersByIdUri = new("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php");
-	private readonly Uri _getScoresUri = new("http://dd.hasmodai.com/dd3/get_scores.php");
-	private readonly Uri _getWorldRecordsUri = new("https://devildaggers.info/api/world-records");
-
 	private readonly JsonSerializerOptions _serializerOptions = new()
 	{
 		PropertyNameCaseInsensitive = true,
@@ -30,7 +27,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 
 			using FormUrlEncodedContent content = new(postValues);
 			using HttpClient client = httpClientFactory.CreateClient();
-			using HttpResponseMessage response = await client.PostAsync(_getMultipleUsersByIdUri, content);
+			using HttpResponseMessage response = await client.PostAsync(appConfig.GetMultipleUsersByIdUri, content);
 			response.EnsureSuccessStatusCode();
 			byte[] data = await response.Content.ReadAsByteArrayAsync();
 
@@ -110,7 +107,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 	{
 		using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("offset", (rankStart - 1).ToString())]);
 		using HttpClient client = httpClientFactory.CreateClient();
-		using HttpResponseMessage response = await client.PostAsync(_getScoresUri, content);
+		using HttpResponseMessage response = await client.PostAsync(appConfig.GetScoresUri, content);
 		response.EnsureSuccessStatusCode();
 
 		using BinaryReader br = new(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));
@@ -240,7 +237,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory) : IWebServi
 		try
 		{
 			using HttpClient client = httpClientFactory.CreateClient();
-			using HttpResponseMessage response = await client.GetAsync(_getWorldRecordsUri);
+			using HttpResponseMessage response = await client.GetAsync(appConfig.GetWorldRecordsUri);
 			response.EnsureSuccessStatusCode();
 			await using Stream responseStream = await response.Content.ReadAsStreamAsync();
 			return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)

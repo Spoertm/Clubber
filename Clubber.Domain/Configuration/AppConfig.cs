@@ -86,7 +86,7 @@ public sealed class AppConfig
 	public string Prefix { get; set; } = "+";
 
 	[Required]
-	public string BotToken { get; set; } = string.Empty;
+	public required string BotToken { get; set; }
 
 	[Required]
 	[Range(1, ulong.MaxValue)]
@@ -127,4 +127,13 @@ public sealed class AppConfig
 	[Required]
 	[Range(1, ulong.MaxValue)]
 	public ulong NoScoreRoleId { get; set; }
+
+	[Required]
+	public required Uri GetMultipleUsersByIdUri { get; set; }
+
+	[Required]
+	public required Uri GetScoresUri { get; set; }
+
+	[Required]
+	public required Uri GetWorldRecordsUri { get; set; }
 }
