@@ -6,8 +6,8 @@ public sealed class Split(string name, int time, int value)
 {
     [JsonIgnore]
     public static IReadOnlyList<(string Name, int Time)> V3Splits =>
-        [
-            ("350", 366),
+    [
+        ("350", 366),
         ("700", 709),
         ("800", 800),
         ("880", 875),
