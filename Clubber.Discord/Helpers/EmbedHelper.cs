@@ -1,3 +1,4 @@
+using System.Text;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Models.DdSplits;
@@ -5,62 +6,61 @@ using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Discord;
 using Discord.WebSocket;
-using System.Text;
 
 namespace Clubber.Discord.Helpers;
 
 public static class EmbedHelper
 {
-	/// <summary>
-	/// Escapes only [ and ] characters for use inside Markdown link text.
-	/// Prevents usernames with brackets from breaking the link syntax.
-	/// Other markdown characters (*, _, etc.) are intentionally not escaped.
-	/// </summary>
-	private static string EscapeLinkText(string text) => text.Replace("[", "\\[").Replace("]", "\\]");
+    /// <summary>
+    /// Escapes only [ and ] characters for use inside Markdown link text.
+    /// Prevents usernames with brackets from breaking the link syntax.
+    /// Other markdown characters (*, _, etc.) are intentionally not escaped.
+    /// </summary>
+    private static string EscapeLinkText(string text) => text.Replace("[", "\\[").Replace("]", "\\]");
 
-	public static Embed UpdateRoles(UserRoleUpdate userRoleUpdate)
-	{
-		IGuildUser user = userRoleUpdate.User;
-		RoleChange change = userRoleUpdate.RoleChange;
+    public static Embed UpdateRoles(UserRoleUpdate userRoleUpdate)
+    {
+        IGuildUser user = userRoleUpdate.User;
+        RoleChange change = userRoleUpdate.RoleChange;
 
-		EmbedBuilder embed = new EmbedBuilder()
-			.WithTitle($"Updated roles for {user.AvailableNameSanitized()}")
-			.WithDescription($"User: {user.Mention}")
-			.WithThumbnailUrl(user.GetDisplayAvatarUrl() ?? user.GetDefaultAvatarUrl());
+        EmbedBuilder embed = new EmbedBuilder()
+            .WithTitle($"Updated roles for {user.AvailableNameSanitized()}")
+            .WithDescription($"User: {user.Mention}")
+            .WithThumbnailUrl(user.GetDisplayAvatarUrl() ?? user.GetDefaultAvatarUrl());
 
-		if (change.RolesToRemove.Count > 0)
-		{
-			embed.AddField(new EmbedFieldBuilder()
-				.WithName("Removed:")
-				.WithValue(string.Join('\n', change.RolesToRemove.Select(rr => $"<@&{rr}>")))
-				.WithIsInline(true));
-		}
+        if (change.RolesToRemove.Count > 0)
+        {
+            embed.AddField(new EmbedFieldBuilder()
+                .WithName("Removed:")
+                .WithValue(string.Join('\n', change.RolesToRemove.Select(rr => $"<@&{rr}>")))
+                .WithIsInline(true));
+        }
 
-		if (change.RolesToAdd.Count > 0)
-		{
-			embed.AddField(new EmbedFieldBuilder()
-				.WithName("Added:")
-				.WithValue(string.Join('\n', change.RolesToAdd.Select(ar => $"<@&{ar}>")))
-				.WithIsInline(true));
-		}
+        if (change.RolesToAdd.Count > 0)
+        {
+            embed.AddField(new EmbedFieldBuilder()
+                .WithName("Added:")
+                .WithValue(string.Join('\n', change.RolesToAdd.Select(ar => $"<@&{ar}>")))
+                .WithIsInline(true));
+        }
 
-		return embed.Build();
-	}
+        return embed.Build();
+    }
 
-	/// <summary>
-	/// Returns default stats Embed. For the full stats Embed use <see cref="FullStats" />.
-	/// </summary>
-	public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
-	{
-		DateTime? playerPbDatetime = playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
-		string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
-		string sanitizedLbName = Format.Sanitize(lbPlayer.Username);
+    /// <summary>
+    /// Returns default stats Embed. For the full stats Embed use <see cref="FullStats" />.
+    /// </summary>
+    public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
+    {
+        DateTime? playerPbDatetime = playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
+        string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
+        string sanitizedLbName = Format.Sanitize(lbPlayer.Username);
 
-		return new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser?.AvailableNameSanitized() ?? sanitizedLbName}")
-			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription(
-				$"""
+        return new EmbedBuilder()
+            .WithTitle($"Stats for {guildUser?.AvailableNameSanitized() ?? sanitizedLbName}")
+            .WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
+            .WithDescription(
+                $"""
 				 ✏️ Leaderboard name: {sanitizedLbName}
 				 🛂 Leaderboard ID: {lbPlayer.Id}
 				 ⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s {pbDateTimeFormatted}
@@ -73,24 +73,24 @@ public static class EmbedHelper
 
 				 {Format.Url($"{EscapeLinkText(lbPlayer.Username)} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}")}
 				 """)
-			.Build();
-	}
+            .Build();
+    }
 
-	/// <summary>
-	/// Returns full stats Embed. For the default stats Embed use <see cref="Stats" />.
-	/// </summary>
-	public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
-	{
-		GetPlayerHistoryScoreEntry? playerPb = playerHistory?.ScoreHistory.LastOrDefault();
-		string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
-		TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10_000);
-		string sanitizedLbName = Format.Sanitize(lbPlayer.Username);
+    /// <summary>
+    /// Returns full stats Embed. For the default stats Embed use <see cref="Stats" />.
+    /// </summary>
+    public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
+    {
+        GetPlayerHistoryScoreEntry? playerPb = playerHistory?.ScoreHistory.LastOrDefault();
+        string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
+        TimeSpan ts = TimeSpan.FromSeconds((double)lbPlayer.TimeTotal / 10_000);
+        string sanitizedLbName = Format.Sanitize(lbPlayer.Username);
 
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle($"Stats for {guildUser?.AvailableNameSanitized() ?? sanitizedLbName}")
-			.WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
-			.WithDescription(
-				$"""
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+            .WithTitle($"Stats for {guildUser?.AvailableNameSanitized() ?? sanitizedLbName}")
+            .WithThumbnailUrl(guildUser?.GetDisplayAvatarUrl() ?? guildUser?.GetDefaultAvatarUrl() ?? string.Empty)
+            .WithDescription(
+                $"""
 				 ✏️ Leaderboard name: {sanitizedLbName}
 				 🛂 Leaderboard ID: {lbPlayer.Id}
 				 ⏲️ Score: {lbPlayer.Time / 10_000d:0.0000}s
@@ -111,36 +111,36 @@ public static class EmbedHelper
 				 {(playerPb is null ? null : "\u200B")}
 				 """);
 
-		if (playerPb != null)
-		{
-			embedBuilder.AddField("📅 PB achieved on", $"{playerPb.DateTime:yyyy-MM-dd}", true);
-		}
+        if (playerPb != null)
+        {
+            embedBuilder.AddField("📅 PB achieved on", $"{playerPb.DateTime:yyyy-MM-dd}", true);
+        }
 
-		if (playerHistory?.ScoreHistory.Count > 1)
-		{
-			embedBuilder.AddField("🥈 Previous PB", $"{playerHistory.ScoreHistory[^2].Time:0.0000}s", true);
-		}
+        if (playerHistory?.ScoreHistory.Count > 1)
+        {
+            embedBuilder.AddField("🥈 Previous PB", $"{playerHistory.ScoreHistory[^2].Time:0.0000}s", true);
+        }
 
-		if (playerHistory?.ActivityHistory.LastOrDefault(h => h.DeathsIncrement != 0 || h.TimeIncrement != 0) is { } lastActivity)
-		{
-			embedBuilder.AddField("💤 Last active", $"{lastActivity.DateTime:yyyy-MM-dd}", true);
-		}
+        if (playerHistory?.ActivityHistory.LastOrDefault(h => h.DeathsIncrement != 0 || h.TimeIncrement != 0) is { } lastActivity)
+        {
+            embedBuilder.AddField("💤 Last active", $"{lastActivity.DateTime:yyyy-MM-dd}", true);
+        }
 
-		embedBuilder.AddField("\u200B",
-			Format.Url($"{EscapeLinkText(lbPlayer.Username)} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
+        embedBuilder.AddField("\u200B",
+            Format.Url($"{EscapeLinkText(lbPlayer.Username)} on devildaggers.info", $"https://devildaggers.info/leaderboard/player/{lbPlayer.Id}"));
 
-		return embedBuilder.Build();
-	}
+        return embedBuilder.Build();
+    }
 
-	public static Embed[] RegisterEmbeds()
-	{
-		Embed[] embeds = new Embed[2];
+    public static Embed[] RegisterEmbeds()
+    {
+        Embed[] embeds = new Embed[2];
 
-		ulong lowestScoreRoleId = AppConfig.ScoreRoles.MinBy(sr => sr.Key).Value;
-		ulong highestScoreRoleId = AppConfig.ScoreRoles.MaxBy(sr => sr.Key).Value;
+        ulong lowestScoreRoleId = AppConfig.ScoreRoles.MinBy(sr => sr.Key).Value;
+        ulong highestScoreRoleId = AppConfig.ScoreRoles.MaxBy(sr => sr.Key).Value;
 
-		string registerForRolesText =
-			$"""
+        string registerForRolesText =
+            $"""
 			 This bot automatically syncs your roles with your Devil Daggers score. This server has roles corresponding to in-game scores, ranging from <@&{lowestScoreRoleId}> to <@&{highestScoreRoleId}>.
 
 			 If you'd like to have a role and be able to do stuff like in the image below, feel free to register by posting your in-game ID (follow the GIF below).
@@ -150,173 +150,173 @@ public static class EmbedHelper
 			 **After posting the message in this channel, a moderator will then soon register you**.
 			 """;
 
-		const string twitchText =
-			"""
+        const string twitchText =
+            """
 			You can link your Twitch account to your player page on [DDLIVE](https://ddstats.live/) using "`+twitch MyTwitchUserName`", so others can see who you are in-game when you're live on Twitch.
 			""";
 
-		EmbedBuilder embedBuilder = new EmbedBuilder()
-			.WithTitle("Welcome!")
-			.WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/910859022427652096/PB.png")
-			.AddField(":arrow_forward: Registering for roles", registerForRolesText)
-			.AddField(":arrow_forward: Twitch", twitchText);
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+            .WithTitle("Welcome!")
+            .WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/910859022427652096/PB.png")
+            .AddField(":arrow_forward: Registering for roles", registerForRolesText)
+            .AddField(":arrow_forward: Twitch", twitchText);
 
-		embeds[0] = embedBuilder.Build();
+        embeds[0] = embedBuilder.Build();
 
-		embedBuilder = new EmbedBuilder()
-			.WithTitle("How to find your ID")
-			.WithDescription("Go to https://devildaggers.info/Leaderboard/search and follow the GIF below.")
-			.WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/1075788891480670311/HowToFindYourID.gif");
+        embedBuilder = new EmbedBuilder()
+            .WithTitle("How to find your ID")
+            .WithDescription("Go to https://devildaggers.info/Leaderboard/search and follow the GIF below.")
+            .WithImageUrl("https://cdn.discordapp.com/attachments/587335375593144321/1075788891480670311/HowToFindYourID.gif");
 
-		embeds[1] = embedBuilder.Build();
+        embeds[1] = embedBuilder.Build();
 
-		return embeds;
-	}
+        return embeds;
+    }
 
-	public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
-	{
-		Dictionary<string, BestSplit> oldSplitsDict = oldBestSplits.ToDictionary(s => s.Name);
-		Dictionary<string, BestSplit> newSplitsDict = updatedBestSplits.ToDictionary(s => s.Name);
+    public static Embed UpdatedSplits(BestSplit[] oldBestSplits, BestSplit[] updatedBestSplits)
+    {
+        Dictionary<string, BestSplit> oldSplitsDict = oldBestSplits.ToDictionary(s => s.Name);
+        Dictionary<string, BestSplit> newSplitsDict = updatedBestSplits.ToDictionary(s => s.Name);
 
-		StringBuilder sb = new($"`  {"Split",-9}{"Old",-8}New` Run\n");
-		foreach ((string name, int _) in Split.V3Splits)
-		{
-			oldSplitsDict.TryGetValue(name, out BestSplit? oldSplit);
-			newSplitsDict.TryGetValue(name, out BestSplit? newSplit);
+        StringBuilder sb = new($"`  {"Split",-9}{"Old",-8}New` Run\n");
+        foreach ((string name, int _) in Split.V3Splits)
+        {
+            oldSplitsDict.TryGetValue(name, out BestSplit? oldSplit);
+            newSplitsDict.TryGetValue(name, out BestSplit? newSplit);
 
-			bool isUpdated = newSplit is not null;
-			string prefix = isUpdated ? "**`\u22c6 " : "`  ";
-			string suffix = isUpdated ? "`**" : "`";
+            bool isUpdated = newSplit is not null;
+            string prefix = isUpdated ? "**`\u22c6 " : "`  ";
+            string suffix = isUpdated ? "`**" : "`";
 
-			string oldValue = oldSplit?.Value.ToString() ?? "N/A";
-			string newValue = newSplit?.Value.ToString() ?? (oldSplit?.Value.ToString() ?? "N/A");
+            string oldValue = oldSplit?.Value.ToString() ?? "N/A";
+            string newValue = newSplit?.Value.ToString() ?? (oldSplit?.Value.ToString() ?? "N/A");
 
-			string runLink = GetRunLink(newSplit ?? oldSplit);
+            string runLink = GetRunLink(newSplit ?? oldSplit);
 
-			sb.AppendLine($"{prefix}{name,-7} {oldValue,4}  {newValue,6}{suffix} {runLink}");
-		}
+            sb.AppendLine($"{prefix}{name,-7} {oldValue,4}  {newValue,6}{suffix} {runLink}");
+        }
 
-		return new EmbedBuilder()
-			.WithTitle("Updated best splits")
-			.WithDescription(sb.ToString())
-			.Build();
+        return new EmbedBuilder()
+            .WithTitle("Updated best splits")
+            .WithDescription(sb.ToString())
+            .Build();
 
-		static string GetRunLink(BestSplit? split)
-		{
-			return split is not null
-				? $"[{split.Description}]({split.GameInfo?.Url})"
-				: "N/A";
-		}
-	}
+        static string GetRunLink(BestSplit? split)
+        {
+            return split is not null
+                ? $"[{split.Description}]({split.GameInfo?.Url})"
+                : "N/A";
+        }
+    }
 
-	public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
-	{
-		StringBuilder sb = new();
-		sb.Append("Theoretical best peak: ")
-			.AppendLine(GetTheoreticalBestPeak(currentBestSplits).ToString())
-			.Append($"\n`{"Name",-7}{"Time",-7}{"Split",-5}` Run");
+    public static Embed CurrentBestSplits(BestSplit[] currentBestSplits)
+    {
+        StringBuilder sb = new();
+        sb.Append("Theoretical best peak: ")
+            .AppendLine(GetTheoreticalBestPeak(currentBestSplits).ToString())
+            .Append($"\n`{"Name",-7}{"Time",-7}{"Split",-5}` Run");
 
-		foreach ((string Name, int Time) in Split.V3Splits)
-		{
-			BestSplit? currentBestSplit = Array.Find(currentBestSplits, obs => obs.Name == Name);
+        foreach ((string Name, int Time) in Split.V3Splits)
+        {
+            BestSplit? currentBestSplit = Array.Find(currentBestSplits, obs => obs.Name == Name);
 
-			string value = "N/A";
-			string desc = currentBestSplit?.Description ?? "N/A";
-			string descUrl = currentBestSplit is null ? desc : $"[{desc}]({currentBestSplit.GameInfo?.Url})";
+            string value = "N/A";
+            string desc = currentBestSplit?.Description ?? "N/A";
+            string descUrl = currentBestSplit is null ? desc : $"[{desc}]({currentBestSplit.GameInfo?.Url})";
 
-			if (currentBestSplit is not null)
-				value = currentBestSplit.Name == "350" ? (currentBestSplit.Value - 105).ToString() : currentBestSplit.Value.ToString();
+            if (currentBestSplit is not null)
+                value = currentBestSplit.Name == "350" ? (currentBestSplit.Value - 105).ToString() : currentBestSplit.Value.ToString();
 
-			sb.Append($"\n`{Name,-7}{Time,4}  {value,6}` {descUrl}");
-		}
+            sb.Append($"\n`{Name,-7}{Time,4}  {value,6}` {descUrl}");
+        }
 
-		return new EmbedBuilder()
-			.WithTitle("Current best splits")
-			.WithDescription(sb.ToString())
-			.Build();
-	}
+        return new EmbedBuilder()
+            .WithTitle("Current best splits")
+            .WithDescription(sb.ToString())
+            .Build();
+    }
 
-	private static int GetTheoreticalBestPeak(BestSplit[] bestSplits)
-	{
-		int highest = 0;
-		int totalHoming = 0;
+    private static int GetTheoreticalBestPeak(BestSplit[] bestSplits)
+    {
+        int highest = 0;
+        int totalHoming = 0;
 
-		foreach (BestSplit thisSplit in bestSplits)
-		{
-			if (thisSplit.Name == "350")
-				thisSplit.Value += 105;
+        foreach (BestSplit thisSplit in bestSplits)
+        {
+            if (thisSplit.Name == "350")
+                thisSplit.Value += 105;
 
-			totalHoming += thisSplit.Value;
+            totalHoming += thisSplit.Value;
 
-			if (totalHoming > highest)
-				highest = totalHoming;
-		}
+            if (totalHoming > highest)
+                highest = totalHoming;
+        }
 
-		return highest;
-	}
+        return highest;
+    }
 
-	public static Embed UpdateTopPeakRuns(string userName, HomingPeakRun newRun, HomingPeakRun? oldRun = null, string? avatarUrl = null)
-	{
-		EmbedBuilder embedBuilder = new();
-		if (avatarUrl != null)
-		{
-			embedBuilder.WithThumbnailUrl(avatarUrl);
-		}
+    public static Embed UpdateTopPeakRuns(string userName, HomingPeakRun newRun, HomingPeakRun? oldRun = null, string? avatarUrl = null)
+    {
+        EmbedBuilder embedBuilder = new();
+        if (avatarUrl != null)
+        {
+            embedBuilder.WithThumbnailUrl(avatarUrl);
+        }
 
-		string nameApostrophe = userName.EndsWith("s") ? userName + "'" : userName + "'s";
-		if (oldRun != null)
-		{
-			embedBuilder.WithTitle($"Updated {nameApostrophe} homing peak");
-			int homingDiff = newRun.HomingPeak - oldRun.HomingPeak;
-			embedBuilder.WithDescription(
-				$"""
+        string nameApostrophe = userName.EndsWith("s") ? userName + "'" : userName + "'s";
+        if (oldRun != null)
+        {
+            embedBuilder.WithTitle($"Updated {nameApostrophe} homing peak");
+            int homingDiff = newRun.HomingPeak - oldRun.HomingPeak;
+            embedBuilder.WithDescription(
+                $"""
 				 ## [{oldRun.HomingPeak}]({oldRun.Source}) → [{newRun.HomingPeak}]({newRun.Source}) (+{homingDiff})
 				 """
-			);
-		}
-		else
-		{
-			embedBuilder.WithTitle($"Added {nameApostrophe} homing peak");
-			embedBuilder.WithDescription($"## [{newRun.HomingPeak}]({newRun.Source}) <:peak:884397348481019924>");
-		}
+            );
+        }
+        else
+        {
+            embedBuilder.WithTitle($"Added {nameApostrophe} homing peak");
+            embedBuilder.WithDescription($"## [{newRun.HomingPeak}]({newRun.Source}) <:peak:884397348481019924>");
+        }
 
-		return embedBuilder.Build();
-	}
+        return embedBuilder.Build();
+    }
 
-	public static Embed CurrentTopPeakRuns(HomingPeakRun[] currentTopPeakRuns)
-	{
-		StringBuilder sb = new();
-		for (int i = 0; i < currentTopPeakRuns.Length; i++)
-		{
-			HomingPeakRun currentPeakRun = currentTopPeakRuns[i];
-			sb.Append($"\n{i + 1}. [{currentPeakRun.HomingPeak}]({currentPeakRun.Source}) {Format.Sanitize(currentPeakRun.PlayerName)}");
-		}
+    public static Embed CurrentTopPeakRuns(HomingPeakRun[] currentTopPeakRuns)
+    {
+        StringBuilder sb = new();
+        for (int i = 0; i < currentTopPeakRuns.Length; i++)
+        {
+            HomingPeakRun currentPeakRun = currentTopPeakRuns[i];
+            sb.Append($"\n{i + 1}. [{currentPeakRun.HomingPeak}]({currentPeakRun.Source}) {Format.Sanitize(currentPeakRun.PlayerName)}");
+        }
 
-		return new EmbedBuilder()
-			.WithTitle("Top homing peaks")
-			.WithDescription(sb.ToString())
-			.Build();
-	}
+        return new EmbedBuilder()
+            .WithTitle("Top homing peaks")
+            .WithDescription(sb.ToString())
+            .Build();
+    }
 
-	public static Embed RegisterUserModEmbed(string userName, int foundId, string extraInfo)
-	{
-		EmbedBuilder eb = new();
-		eb.WithDescription
-		($"""
+    public static Embed RegisterUserModEmbed(string userName, int foundId, string extraInfo)
+    {
+        EmbedBuilder eb = new();
+        eb.WithDescription
+        ($"""
 		  ## Register {userName} with ID `{foundId}`?
 
 		  ### Info about ID {foundId} [from ddinfo](https://devildaggers.info/leaderboard/player/{foundId}):
 		  {extraInfo}
 		  """);
 
-		return eb.Build();
-	}
+        return eb.Build();
+    }
 
-	public static Embed GiveUserRoleModEmbed(string userName, ulong noScoreRoleId)
-	{
-		EmbedBuilder eb = new();
-		eb.WithDescription($"## Give {userName} {MentionUtils.MentionRole(noScoreRoleId)} role?");
+    public static Embed GiveUserRoleModEmbed(string userName, ulong noScoreRoleId)
+    {
+        EmbedBuilder eb = new();
+        eb.WithDescription($"## Give {userName} {MentionUtils.MentionRole(noScoreRoleId)} role?");
 
-		return eb.Build();
-	}
+        return eb.Build();
+    }
 }

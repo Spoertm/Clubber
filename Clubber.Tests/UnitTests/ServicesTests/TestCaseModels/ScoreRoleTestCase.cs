@@ -4,27 +4,27 @@ namespace Clubber.Tests.UnitTests.ServicesTests.TestCaseModels;
 
 public sealed record ScoreRoleTestCase : IXunitSerializable
 {
-	public int PlayerTimeInSeconds { get; set; }
-	public int ExpectedScoreRoleKey { get; set; }
+    public int PlayerTimeInSeconds { get; set; }
+    public int ExpectedScoreRoleKey { get; set; }
 
-	// ReSharper disable once UnusedMember.Global
-	public ScoreRoleTestCase() { }
+    // ReSharper disable once UnusedMember.Global
+    public ScoreRoleTestCase() { }
 
-	public ScoreRoleTestCase(int playerTimeInSeconds, int expectedScoreRoleKey)
-	{
-		PlayerTimeInSeconds = playerTimeInSeconds;
-		ExpectedScoreRoleKey = expectedScoreRoleKey;
-	}
+    public ScoreRoleTestCase(int playerTimeInSeconds, int expectedScoreRoleKey)
+    {
+        PlayerTimeInSeconds = playerTimeInSeconds;
+        ExpectedScoreRoleKey = expectedScoreRoleKey;
+    }
 
-	public void Deserialize(IXunitSerializationInfo info)
-	{
-		PlayerTimeInSeconds = info.GetValue<int>(nameof(PlayerTimeInSeconds));
-		ExpectedScoreRoleKey = info.GetValue<int>(nameof(ExpectedScoreRoleKey));
-	}
+    public void Deserialize(IXunitSerializationInfo info)
+    {
+        PlayerTimeInSeconds = info.GetValue<int>(nameof(PlayerTimeInSeconds));
+        ExpectedScoreRoleKey = info.GetValue<int>(nameof(ExpectedScoreRoleKey));
+    }
 
-	public void Serialize(IXunitSerializationInfo info)
-	{
-		info.AddValue(nameof(PlayerTimeInSeconds), PlayerTimeInSeconds);
-		info.AddValue(nameof(ExpectedScoreRoleKey), ExpectedScoreRoleKey);
-	}
+    public void Serialize(IXunitSerializationInfo info)
+    {
+        info.AddValue(nameof(PlayerTimeInSeconds), PlayerTimeInSeconds);
+        info.AddValue(nameof(ExpectedScoreRoleKey), ExpectedScoreRoleKey);
+    }
 }

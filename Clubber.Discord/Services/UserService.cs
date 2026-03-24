@@ -1,6 +1,6 @@
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
+using Clubber.Domain.Repositories;
 using Discord;
 using Microsoft.Extensions.Options;
 
@@ -8,72 +8,72 @@ namespace Clubber.Discord.Services;
 
 public sealed class UserService(IOptions<AppConfig> config, IUserRepository userRepository)
 {
-	private readonly AppConfig _config = config.Value;
+    private readonly AppConfig _config = config.Value;
 
-	public async Task<Result> IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
-	{
-		Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
-		if (result.IsFailure)
-		{
-			return Result.Failure(result.ErrorMsg);
-		}
+    public async Task<Result> IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
+    {
+        Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
+        if (result.IsFailure)
+        {
+            return Result.Failure(result.ErrorMsg);
+        }
 
-		if (await userRepository.FindAsync(guildUser.Id) is not null)
-		{
-			return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
-		}
+        if (await userRepository.FindAsync(guildUser.Id) is not null)
+        {
+            return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
+        }
 
-		return Result.Success();
-	}
+        return Result.Success();
+    }
 
-	public async Task<Result> IsValid(IGuildUser guildUser, bool userUsedCommandForThemselves)
-	{
-		Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
-		if (result.IsFailure)
-		{
-			return Result.Failure(result.ErrorMsg);
-		}
+    public async Task<Result> IsValid(IGuildUser guildUser, bool userUsedCommandForThemselves)
+    {
+        Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
+        if (result.IsFailure)
+        {
+            return Result.Failure(result.ErrorMsg);
+        }
 
-		if (await userRepository.FindAsync(guildUser.Id) is not null)
-		{
-			return Result.Success();
-		}
+        if (await userRepository.FindAsync(guildUser.Id) is not null)
+        {
+            return Result.Success();
+        }
 
-		if (guildUser.GuildPermissions.ManageRoles)
-		{
-			return Result.Failure($"`{guildUser.AvailableNameSanitized()}` is not registered.");
-		}
+        if (guildUser.GuildPermissions.ManageRoles)
+        {
+            return Result.Failure($"`{guildUser.AvailableNameSanitized()}` is not registered.");
+        }
 
-		bool userHasUnregRole = guildUser.RoleIds.Contains(_config.UnregisteredRoleId);
+        bool userHasUnregRole = guildUser.RoleIds.Contains(_config.UnregisteredRoleId);
 
-		string message = userUsedCommandForThemselves
-			? $"You're not registered, {guildUser.AvailableNameSanitized()}. Only a <@&{_config.RoleAssignerRoleId}> can register you."
-			: $"`{guildUser.AvailableNameSanitized()}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.";
+        string message = userUsedCommandForThemselves
+            ? $"You're not registered, {guildUser.AvailableNameSanitized()}. Only a <@&{_config.RoleAssignerRoleId}> can register you."
+            : $"`{guildUser.AvailableNameSanitized()}` is not registered. Only a <@&{_config.RoleAssignerRoleId}> can register them.";
 
-		if (userHasUnregRole)
-		{
-			message += $"\nPlease refer to the first message in <#{_config.RegisterChannelId}> for more info.";
-		}
+        if (userHasUnregRole)
+        {
+            message += $"\nPlease refer to the first message in <#{_config.RegisterChannelId}> for more info.";
+        }
 
-		return Result.Failure(message);
-	}
+        return Result.Failure(message);
+    }
 
-	public Result IsNotBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
-	{
-		if (guildUser.IsBot)
-		{
-			return Result.Failure($"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
-		}
+    public Result IsNotBotOrCheater(IGuildUser guildUser, bool userUsedCommandForThemselves)
+    {
+        if (guildUser.IsBot)
+        {
+            return Result.Failure($"{guildUser.Mention} is a bot. It can't be registered as a DD player.");
+        }
 
-		if (guildUser.RoleIds.All(rId => rId != _config.CheaterRoleId))
-		{
-			return Result.Success();
-		}
+        if (guildUser.RoleIds.All(rId => rId != _config.CheaterRoleId))
+        {
+            return Result.Success();
+        }
 
-		string message = userUsedCommandForThemselves
-			? $"{guildUser.AvailableNameSanitized()}, you can't register because you've cheated."
-			: $"{guildUser.AvailableNameSanitized()} can't be registered because they've cheated.";
+        string message = userUsedCommandForThemselves
+            ? $"{guildUser.AvailableNameSanitized()}, you can't register because you've cheated."
+            : $"{guildUser.AvailableNameSanitized()} can't be registered because they've cheated.";
 
-		return Result.Failure(message);
-	}
+        return Result.Failure(message);
+    }
 }

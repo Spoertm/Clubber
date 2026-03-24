@@ -1,8 +1,8 @@
 using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Repositories;
 using Clubber.Domain.Models;
+using Clubber.Domain.Repositories;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,71 +12,71 @@ namespace Clubber.Discord.Services;
 
 public sealed class UserJoinHandler
 {
-	private readonly IServiceScopeFactory _services;
-	private readonly AppConfig _config;
-	private readonly ClubberDiscordClient _discordClient;
+    private readonly IServiceScopeFactory _services;
+    private readonly AppConfig _config;
+    private readonly ClubberDiscordClient _discordClient;
 
-	public UserJoinHandler(
-		IServiceScopeFactory services,
-		IOptions<AppConfig> config,
-		ClubberDiscordClient discordClient)
-	{
-		_services = services;
-		_config = config.Value;
-		_discordClient = discordClient;
-	}
+    public UserJoinHandler(
+        IServiceScopeFactory services,
+        IOptions<AppConfig> config,
+        ClubberDiscordClient discordClient)
+    {
+        _services = services;
+        _config = config.Value;
+        _discordClient = discordClient;
+    }
 
-	public Task InitializeAsync()
-	{
-		_discordClient.UserJoined += OnUserJoined;
-		return Task.CompletedTask;
-	}
+    public Task InitializeAsync()
+    {
+        _discordClient.UserJoined += OnUserJoined;
+        return Task.CompletedTask;
+    }
 
-	private async Task OnUserJoined(SocketGuildUser joiningUser)
-	{
-		if (joiningUser.Guild.Id != _config.DdPalsId || joiningUser.IsBot)
-			return;
+    private async Task OnUserJoined(SocketGuildUser joiningUser)
+    {
+        if (joiningUser.Guild.Id != _config.DdPalsId || joiningUser.IsBot)
+            return;
 
-		// User is registered
-		await using AsyncServiceScope scope = _services.CreateAsyncScope();
-		IUserRepository userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        // User is registered
+        await using AsyncServiceScope scope = _services.CreateAsyncScope();
+        IUserRepository userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
-		if (await userRepository.FindAsync(joiningUser.Id) is not null)
-		{
-			await UpdateRolesForRegisteredUser(joiningUser);
-		}
-		else
-		{
-			await joiningUser.AddRoleAsync(_config.UnregisteredRoleId);
-		}
-	}
+        if (await userRepository.FindAsync(joiningUser.Id) is not null)
+        {
+            await UpdateRolesForRegisteredUser(joiningUser);
+        }
+        else
+        {
+            await joiningUser.AddRoleAsync(_config.UnregisteredRoleId);
+        }
+    }
 
-	private async Task UpdateRolesForRegisteredUser(IGuildUser joiningUser)
-	{
-		await using AsyncServiceScope scope = _services.CreateAsyncScope();
-		ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
-		Result<RoleChange> roleChangeResult = await scoreRoleService.GetRoleChange(joiningUser);
+    private async Task UpdateRolesForRegisteredUser(IGuildUser joiningUser)
+    {
+        await using AsyncServiceScope scope = _services.CreateAsyncScope();
+        ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
+        Result<RoleChange> roleChangeResult = await scoreRoleService.GetRoleChange(joiningUser);
 
-		if (roleChangeResult.IsFailure || !roleChangeResult.Value.HasChanges)
-		{
-			return;
-		}
+        if (roleChangeResult.IsFailure || !roleChangeResult.Value.HasChanges)
+        {
+            return;
+        }
 
-		RoleChange change = roleChangeResult.Value;
-		if (change.RolesToAdd.Count > 0)
-		{
-			await joiningUser.AddRolesAsync(change.RolesToAdd);
-		}
+        RoleChange change = roleChangeResult.Value;
+        if (change.RolesToAdd.Count > 0)
+        {
+            await joiningUser.AddRolesAsync(change.RolesToAdd);
+        }
 
-		if (change.RolesToRemove.Count > 0)
-		{
-			await joiningUser.RemoveRolesAsync(change.RolesToRemove);
-		}
+        if (change.RolesToRemove.Count > 0)
+        {
+            await joiningUser.RemoveRolesAsync(change.RolesToRemove);
+        }
 
-		ulong logChannelId = _config.DailyUpdateLoggingChannelId;
-		if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
-		{
-			await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new UserRoleUpdate(joiningUser, change))]);
-		}
-	}
+        ulong logChannelId = _config.DailyUpdateLoggingChannelId;
+        if (await joiningUser.Guild.GetChannelAsync(logChannelId) is ITextChannel logsChannel)
+        {
+            await logsChannel.SendMessageAsync(embeds: [EmbedHelper.UpdateRoles(new UserRoleUpdate(joiningUser, change))]);
+        }
+    }
 }

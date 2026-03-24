@@ -4,9 +4,9 @@ namespace Clubber.Domain.Repositories;
 
 public interface INewsRepository
 {
-	Task AddAsync(DdNewsItem item);
+    Task AddAsync(DdNewsItem item);
 
-	Task RemoveOlderThanAsync(TimeSpan age);
+    Task RemoveOlderThanAsync(TimeSpan age);
 
-	Task<DdNewsItem[]> GetRecentAsync();
+    Task<DdNewsItem[]> GetRecentAsync();
 }

@@ -4,20 +4,20 @@ namespace Clubber.Domain.Helpers;
 
 public sealed class RegistrationTracker
 {
-	private readonly ConcurrentDictionary<ulong, bool> _userRegistrations = new();
+    private readonly ConcurrentDictionary<ulong, bool> _userRegistrations = new();
 
-	public bool UserIsFlagged(ulong userId)
-	{
-		return _userRegistrations.ContainsKey(userId);
-	}
+    public bool UserIsFlagged(ulong userId)
+    {
+        return _userRegistrations.ContainsKey(userId);
+    }
 
-	public void FlagUser(ulong userId)
-	{
-		_userRegistrations[userId] = true;
-	}
+    public void FlagUser(ulong userId)
+    {
+        _userRegistrations[userId] = true;
+    }
 
-	public void UnflagUser(ulong userId)
-	{
-		_userRegistrations.TryRemove(userId, out _);
-	}
+    public void UnflagUser(ulong userId)
+    {
+        _userRegistrations.TryRemove(userId, out _);
+    }
 }

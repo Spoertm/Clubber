@@ -6,13 +6,13 @@ namespace Clubber.Discord.Helpers;
 
 public interface IDiscordHelper
 {
-	SocketTextChannel GetTextChannel(ulong channelId);
+    SocketTextChannel GetTextChannel(ulong channelId);
 
-	SocketGuildUser? GetGuildUser(ulong guildId, ulong userId);
+    SocketGuildUser? GetGuildUser(ulong guildId, ulong userId);
 
-	SocketGuild? GetGuild(ulong guildId);
+    SocketGuild? GetGuild(ulong guildId);
 
-	Task ClearChannelAsync(ITextChannel channel);
+    Task ClearChannelAsync(ITextChannel channel);
 
-	Task<Result> SendEmbedsEfficientlyAsync(Embed[] embeds, ulong channelId, string? message = null);
+    Task<Result> SendEmbedsEfficientlyAsync(Embed[] embeds, ulong channelId, string? message = null);
 }

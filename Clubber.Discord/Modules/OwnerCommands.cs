@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
@@ -7,7 +8,6 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
-using System.Diagnostics;
 
 namespace Clubber.Discord.Modules;
 
@@ -15,170 +15,170 @@ namespace Clubber.Discord.Modules;
 [global::Discord.Interactions.RequireOwner]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
 public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper)
-	: InteractionModuleBase<SocketInteractionContext>
+    : InteractionModuleBase<SocketInteractionContext>
 {
-	[SlashCommand("update-database", "Force update the database and user roles")]
-	public async Task UpdateDatabase()
-	{
-		// Defer immediately to prevent timeout issues
-		try
-		{
-			await DeferAsync();
-		}
-		catch (Exception ex)
-		{
-			Serilog.Log.Error(ex, "Failed to defer interaction for update-database command");
-			// If we can't defer, try to respond directly instead
-			try
-			{
-				await RespondAsync("❌ Failed to start database update (interaction error). Please try again.", ephemeral: true);
-			}
-			catch
-			{
-				// If both defer and respond fail, there's nothing we can do
-				Serilog.Log.Error("Failed to respond to update-database command after defer failure");
-			}
+    [SlashCommand("update-database", "Force update the database and user roles")]
+    public async Task UpdateDatabase()
+    {
+        // Defer immediately to prevent timeout issues
+        try
+        {
+            await DeferAsync();
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Failed to defer interaction for update-database command");
+            // If we can't defer, try to respond directly instead
+            try
+            {
+                await RespondAsync("❌ Failed to start database update (interaction error). Please try again.", ephemeral: true);
+            }
+            catch
+            {
+                // If both defer and respond fail, there's nothing we can do
+                Serilog.Log.Error("Failed to respond to update-database command after defer failure");
+            }
 
-			return;
-		}
+            return;
+        }
 
-		try
-		{
-			SocketGuild guild = Context.Guild;
+        try
+        {
+            SocketGuild guild = Context.Guild;
 
-			Stopwatch sw = Stopwatch.StartNew();
-			BulkUserRoleUpdates response = await scoreRoleService.GetBulkUserRoleUpdates(guild.Users);
-			sw.Stop();
+            Stopwatch sw = Stopwatch.StartNew();
+            BulkUserRoleUpdates response = await scoreRoleService.GetBulkUserRoleUpdates(guild.Users);
+            sw.Stop();
 
-			if (response.UserRoleUpdates.Count == 0)
-			{
-				string noUpdatesMessage = $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms." +
-										$"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
-				await FollowupAsync(noUpdatesMessage);
-				return;
-			}
+            if (response.UserRoleUpdates.Count == 0)
+            {
+                string noUpdatesMessage = $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms." +
+                                        $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
+                await FollowupAsync(noUpdatesMessage);
+                return;
+            }
 
-			List<UserRoleUpdate> successfulUpdates = [];
-			int skippedUsers = 0;
+            List<UserRoleUpdate> successfulUpdates = [];
+            int skippedUsers = 0;
 
-			foreach (UserRoleUpdate roleUpdate in response.UserRoleUpdates)
-			{
-				SocketGuildUser? refreshedUser = guild.GetUser(roleUpdate.User.Id);
-				if (refreshedUser == null)
-				{
-					Serilog.Log.Information("Skipping role update for user {UserId} ({Username}) - user no longer found in server",
-						roleUpdate.User.Id, roleUpdate.User.Username);
-					skippedUsers++;
-					continue;
-				}
+            foreach (UserRoleUpdate roleUpdate in response.UserRoleUpdates)
+            {
+                SocketGuildUser? refreshedUser = guild.GetUser(roleUpdate.User.Id);
+                if (refreshedUser == null)
+                {
+                    Serilog.Log.Information("Skipping role update for user {UserId} ({Username}) - user no longer found in server",
+                        roleUpdate.User.Id, roleUpdate.User.Username);
+                    skippedUsers++;
+                    continue;
+                }
 
-				try
-				{
-					if (roleUpdate.RoleChange.RolesToAdd.Count > 0)
-					{
-						await refreshedUser.AddRolesAsync(roleUpdate.RoleChange.RolesToAdd);
-					}
+                try
+                {
+                    if (roleUpdate.RoleChange.RolesToAdd.Count > 0)
+                    {
+                        await refreshedUser.AddRolesAsync(roleUpdate.RoleChange.RolesToAdd);
+                    }
 
-					if (roleUpdate.RoleChange.RolesToRemove.Count > 0)
-					{
-						await refreshedUser.RemoveRolesAsync(roleUpdate.RoleChange.RolesToRemove);
-					}
+                    if (roleUpdate.RoleChange.RolesToRemove.Count > 0)
+                    {
+                        await refreshedUser.RemoveRolesAsync(roleUpdate.RoleChange.RolesToRemove);
+                    }
 
-					successfulUpdates.Add(roleUpdate with { User = refreshedUser });
-				}
-				catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.UnknownMember)
-				{
-					Serilog.Log.Information(ex, "Skipping role update for user {UserId} ({Username}) - user left server during update",
-						roleUpdate.User.Id, roleUpdate.User.Username);
-					skippedUsers++;
-				}
-				catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.MissingPermissions)
-				{
-					Serilog.Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - missing permissions",
-						roleUpdate.User.Id, roleUpdate.User.Username);
-					skippedUsers++;
-				}
-				catch (HttpException ex)
-				{
-					Serilog.Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - Discord API error: {ErrorCode}",
-						roleUpdate.User.Id, roleUpdate.User.Username, ex.DiscordCode);
-					skippedUsers++;
-				}
-			}
+                    successfulUpdates.Add(roleUpdate with { User = refreshedUser });
+                }
+                catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.UnknownMember)
+                {
+                    Serilog.Log.Information(ex, "Skipping role update for user {UserId} ({Username}) - user left server during update",
+                        roleUpdate.User.Id, roleUpdate.User.Username);
+                    skippedUsers++;
+                }
+                catch (HttpException ex) when (ex.DiscordCode == DiscordErrorCode.MissingPermissions)
+                {
+                    Serilog.Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - missing permissions",
+                        roleUpdate.User.Id, roleUpdate.User.Username);
+                    skippedUsers++;
+                }
+                catch (HttpException ex)
+                {
+                    Serilog.Log.Warning(ex, "Failed to update roles for user {UserId} ({Username}) - Discord API error: {ErrorCode}",
+                        roleUpdate.User.Id, roleUpdate.User.Username, ex.DiscordCode);
+                    skippedUsers++;
+                }
+            }
 
-			string message = successfulUpdates.Count > 0
-				? $"✅ Successfully updated database and {successfulUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
-				: $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
+            string message = successfulUpdates.Count > 0
+                ? $"✅ Successfully updated database and {successfulUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
+                : $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
 
-			message += $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
+            message += $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
 
-			if (skippedUsers > 0)
-			{
-				message += $"\n⚠️ Skipped {skippedUsers} user(s) due to errors (users left server, permission issues, etc.)";
-			}
+            if (skippedUsers > 0)
+            {
+                message += $"\n⚠️ Skipped {skippedUsers} user(s) due to errors (users left server, permission issues, etc.)";
+            }
 
-			await FollowupAsync(message);
+            await FollowupAsync(message);
 
-			Embed[] roleUpdateEmbeds = [.. successfulUpdates.Select(EmbedHelper.UpdateRoles)];
+            Embed[] roleUpdateEmbeds = [.. successfulUpdates.Select(EmbedHelper.UpdateRoles)];
 
-			Result result = await discordHelper.SendEmbedsEfficientlyAsync(roleUpdateEmbeds, Context.Channel.Id);
-			if (result.IsFailure)
-			{
-				await FollowupAsync($"Failed to send role update embeds: {result.ErrorMsg}");
-			}
-		}
-		catch (Exception ex)
-		{
-			Serilog.Log.Error(ex, "Error updating database");
-			try
-			{
-				await FollowupAsync("❌ Failed to update database. Check logs for details.", ephemeral: true);
-			}
-			catch (Exception followupEx)
-			{
-				Serilog.Log.Error(followupEx, "Failed to send error followup message");
-			}
-		}
-	}
+            Result result = await discordHelper.SendEmbedsEfficientlyAsync(roleUpdateEmbeds, Context.Channel.Id);
+            if (result.IsFailure)
+            {
+                await FollowupAsync($"Failed to send role update embeds: {result.ErrorMsg}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Error updating database");
+            try
+            {
+                await FollowupAsync("❌ Failed to update database. Check logs for details.", ephemeral: true);
+            }
+            catch (Exception followupEx)
+            {
+                Serilog.Log.Error(followupEx, "Failed to send error followup message");
+            }
+        }
+    }
 
-	[SlashCommand("post-welcome", "Post the welcome/registration embed in the current channel")]
-	public async Task PostWelcome()
-	{
-		try
-		{
-			await DeferAsync();
-		}
-		catch (Exception ex)
-		{
-			Serilog.Log.Error(ex, "Failed to defer interaction for post-welcome command");
-			try
-			{
-				await RespondAsync("❌ Failed to start welcome post (interaction error). Please try again.", ephemeral: true);
-			}
-			catch
-			{
-				Serilog.Log.Error("Failed to respond to post-welcome command after defer failure");
-			}
+    [SlashCommand("post-welcome", "Post the welcome/registration embed in the current channel")]
+    public async Task PostWelcome()
+    {
+        try
+        {
+            await DeferAsync();
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Failed to defer interaction for post-welcome command");
+            try
+            {
+                await RespondAsync("❌ Failed to start welcome post (interaction error). Please try again.", ephemeral: true);
+            }
+            catch
+            {
+                Serilog.Log.Error("Failed to respond to post-welcome command after defer failure");
+            }
 
-			return;
-		}
+            return;
+        }
 
-		try
-		{
-			await FollowupAsync("Posting welcome message...");
-			await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
-		}
-		catch (Exception ex)
-		{
-			Serilog.Log.Error(ex, "Error posting welcome message");
-			try
-			{
-				await FollowupAsync("❌ Failed to post welcome message. Check logs for details.", ephemeral: true);
-			}
-			catch (Exception followupEx)
-			{
-				Serilog.Log.Error(followupEx, "Failed to send error followup message");
-			}
-		}
-	}
+        try
+        {
+            await FollowupAsync("Posting welcome message...");
+            await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Error posting welcome message");
+            try
+            {
+                await FollowupAsync("❌ Failed to post welcome message. Check logs for details.", ephemeral: true);
+            }
+            catch (Exception followupEx)
+            {
+                Serilog.Log.Error(followupEx, "Failed to send error followup message");
+            }
+        }
+    }
 }

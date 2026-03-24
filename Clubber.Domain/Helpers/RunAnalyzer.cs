@@ -5,29 +5,35 @@ namespace Clubber.Domain.Helpers;
 
 public static class RunAnalyzer
 {
-	public static IReadOnlyCollection<Split> GetData(DdStatsFullRunResponse ddstatsRun)
-	{
-		List<Split> splits = [];
-		(string Name, int Time) currentSplit = new("0", 0);
-		for (int i = 0; i < Split.V3Splits.Count; i++)
-		{
-			(string nextName, int nextTime) = Split.V3Splits[i];
-			if (ddstatsRun.GameInfo.GameTime < currentSplit.Time)
-				break;
+    public static IReadOnlyCollection<Split> GetData(DdStatsFullRunResponse ddstatsRun)
+    {
+        List<Split> splits = [];
+        (string Name, int Time) currentSplit = new("0", 0);
+        for (int i = 0; i < Split.V3Splits.Count; i++)
+        {
+            (string nextName, int nextTime) = Split.V3Splits[i];
+            if (ddstatsRun.GameInfo.GameTime < currentSplit.Time)
+            {
+                break;
+            }
 
-			State? startOfSplitState = ddstatsRun.States.FirstOrDefault(s => (int)s.GameTime == currentSplit.Time);
-			State? endOfSplitState = ddstatsRun.States.FirstOrDefault(s => (int)s.GameTime == nextTime);
-			if (startOfSplitState is null || endOfSplitState is null)
-				continue;
+            State? startOfSplitState = ddstatsRun.States.FirstOrDefault(s => (int)s.GameTime == currentSplit.Time);
+            State? endOfSplitState = ddstatsRun.States.FirstOrDefault(s => (int)s.GameTime == nextTime);
+            if (startOfSplitState is null || endOfSplitState is null)
+            {
+                continue;
+            }
 
-			int splitValue = endOfSplitState.HomingDaggers - startOfSplitState.HomingDaggers;
-			if (nextName == "350")
-				splitValue -= 105;
+            int splitValue = endOfSplitState.HomingDaggers - startOfSplitState.HomingDaggers;
+            if (nextName == "350")
+            {
+                splitValue -= 105;
+            }
 
-			currentSplit = Split.V3Splits[i];
-			splits.Add(new Split(currentSplit.Name, currentSplit.Time, splitValue));
-		}
+            currentSplit = Split.V3Splits[i];
+            splits.Add(new Split(currentSplit.Name, currentSplit.Time, splitValue));
+        }
 
-		return splits.AsReadOnly();
-	}
+        return splits.AsReadOnly();
+    }
 }

@@ -5,18 +5,18 @@ namespace Clubber.Domain.Repositories;
 
 public interface ILeaderboardRepository
 {
-	Task<EntryResponse[]> GetCachedEntriesAsync();
+    Task<EntryResponse[]> GetCachedEntriesAsync();
 
-	Task UpdateCacheAsync(ICollection<EntryResponse> entries);
+    Task UpdateCacheAsync(ICollection<EntryResponse> entries);
 
-	Task<BestSplit[]> GetBestSplitsAsync();
+    Task<BestSplit[]> GetBestSplitsAsync();
 
-	Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsAsync(
-		IReadOnlyCollection<Split> splits,
-		DdStatsFullRunResponse run,
-		string description);
+    Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsAsync(
+        IReadOnlyCollection<Split> splits,
+        DdStatsFullRunResponse run,
+        string description);
 
-	Task<HomingPeakRun[]> GetTopHomingPeaksAsync();
+    Task<HomingPeakRun[]> GetTopHomingPeaksAsync();
 
-	Task<(HomingPeakRun? OldRun, HomingPeakRun? NewRun)> UpdateTopHomingPeakAsync(HomingPeakRun run);
+    Task<(HomingPeakRun? OldRun, HomingPeakRun? NewRun)> UpdateTopHomingPeakAsync(HomingPeakRun run);
 }

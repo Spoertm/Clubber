@@ -2,35 +2,39 @@
 
 public class Result
 {
-	protected Result(bool isSuccess, string errorMsg)
-	{
-		if (isSuccess ^ string.IsNullOrEmpty(errorMsg))
-			throw new InvalidOperationException();
+    protected Result(bool isSuccess, string errorMsg)
+    {
+        if (isSuccess ^ string.IsNullOrEmpty(errorMsg))
+        {
+            throw new InvalidOperationException();
+        }
 
-		IsSuccess = isSuccess;
-		ErrorMsg = errorMsg;
-	}
+        IsSuccess = isSuccess;
+        ErrorMsg = errorMsg;
+    }
 
-	public bool IsSuccess { get; }
-	public string ErrorMsg { get; }
-	public bool IsFailure => !IsSuccess;
+    public bool IsSuccess { get; }
 
-	public static Result Failure(string message) => new(false, message);
+    public string ErrorMsg { get; }
 
-	public static Result<T> Failure<T>(string message) => new(default!, false, message);
+    public bool IsFailure => !IsSuccess;
 
-	public static Result Success() => new(true, string.Empty);
+    public static Result Failure(string message) => new(false, message);
 
-	public static Result<T> Success<T>(T value) => new(value, true, string.Empty);
+    public static Result<T> Failure<T>(string message) => new(default!, false, message);
+
+    public static Result Success() => new(true, string.Empty);
+
+    public static Result<T> Success<T>(T value) => new(value, true, string.Empty);
 }
 
 public sealed class Result<T> : Result
 {
-	internal Result(T value, bool isSuccess, string errorMsg)
-		: base(isSuccess, errorMsg)
-	{
-		Value = value;
-	}
+    internal Result(T value, bool isSuccess, string errorMsg)
+        : base(isSuccess, errorMsg)
+    {
+        Value = value;
+    }
 
-	public T Value { get; }
+    public T Value { get; }
 }

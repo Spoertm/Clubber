@@ -1,4 +1,21 @@
 {
-	"dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
-	"dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution"
+    // Enable full solution analysis
+    "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
+    "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
+
+    // Organize imports on format (C# Dev Kit)
+    "dotnet.formatting.organizeImportsOnFormat": true,
+
+    // Format on save
+    "editor.formatOnSave": true,
+
+    "formatFiles.excludePattern": "**/obj/**,**/bin/**,**/Migrations/**",
+
+    // Use C# Dev Kit formatter for C# files (Prettier doesn't support C#)
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp"
+    },
+
+    // Ensure EditorConfig is respected
+    "editor.detectIndentation": false
 }

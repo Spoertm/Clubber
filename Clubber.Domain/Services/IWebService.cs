@@ -5,15 +5,15 @@ namespace Clubber.Domain.Services;
 
 public interface IWebService
 {
-	Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
+    Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
 
-	Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
+    Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
 
-	Task<string?> GetCountryCodeForplayer(int lbId);
+    Task<string?> GetCountryCodeForplayer(int lbId);
 
-	Task<GetPlayerHistory?> GetPlayerHistory(uint lbId);
+    Task<GetPlayerHistory?> GetPlayerHistory(uint lbId);
 
-	Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri);
+    Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri);
 
-	Task<GetWorldRecordDataContainer> GetWorldRecords();
+    Task<GetWorldRecordDataContainer> GetWorldRecords();
 }

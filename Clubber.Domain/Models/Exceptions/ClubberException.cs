@@ -2,17 +2,17 @@
 
 public sealed class ClubberException : Exception
 {
-	public ClubberException()
-	{
-	}
+    public ClubberException()
+    {
+    }
 
-	public ClubberException(string message)
-		: base(message)
-	{
-	}
+    public ClubberException(string message)
+        : base(message)
+    {
+    }
 
-	public ClubberException(string? message, Exception innerException)
-		: base(message, innerException)
-	{
-	}
+    public ClubberException(string? message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
 }
