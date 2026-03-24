@@ -1,0 +1,66 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Launch Web",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/Clubber.Web/bin/Debug/net10.0/Clubber.Web.dll",
+			"args": [],
+			"cwd": "${workspaceFolder}/Clubber.Web",
+			"stopAtEntry": false,
+			"serverReadyAction": {
+				"action": "openExternally",
+				"pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+			},
+			"env": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			},
+			"sourceFileMap": {
+				"/Views": "${workspaceFolder}/Views"
+			}
+		},
+		{
+			"name": "Launch Web (watch)",
+			"type": "coreclr",
+			"request": "launch",
+			"program": "dotnet",
+			"args": [
+				"watch",
+				"--project",
+				"${workspaceFolder}/Clubber.Web/Clubber.Web.csproj"
+			],
+			"cwd": "${workspaceFolder}",
+			"env": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			},
+			"serverReadyAction": {
+				"action": "openExternally",
+				"pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+			}
+		},
+		{
+			"name": "Launch Web + Tailwind",
+			"type": "coreclr",
+			"request": "launch",
+			"program": "dotnet",
+			"args": [
+				"watch",
+				"run",
+				"--project",
+				"${workspaceFolder}/Clubber.Web/Clubber.Web.csproj",
+				"--non-interactive"
+			],
+			"cwd": "${workspaceFolder}",
+			"env": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			},
+			"serverReadyAction": {
+				"action": "openExternally",
+				"pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+			},
+			"preLaunchTask": "tailwind-watch"
+		}
+	]
+}
