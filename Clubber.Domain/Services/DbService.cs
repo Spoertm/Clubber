@@ -42,6 +42,8 @@ public class DbService : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("clubber");
+
         modelBuilder.Entity<EntryResponse>().HasKey(lbu => lbu.Id);
         modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
 
@@ -70,6 +72,7 @@ public class DbService : DbContext
         ValueConverter<DateTimeOffset, DateTime> dateTimeOffsetConverter = new(
             v => v.UtcDateTime,
             v => new DateTimeOffset(v, TimeSpan.Zero));
+
         modelBuilder.Entity<DdNewsItem>().Property(e => e.TimeOfOccurenceUtc).HasConversion(dateTimeOffsetConverter);
     }
 }
