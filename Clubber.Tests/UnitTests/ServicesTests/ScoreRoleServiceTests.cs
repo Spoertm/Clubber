@@ -1,5 +1,4 @@
-﻿using Clubber.Discord.Services;
-using Clubber.Domain.Configuration;
+using Clubber.Discord.Services;
 using Clubber.Tests.UnitTests.ServicesTests.TestCaseModels;
 using Xunit;
 
@@ -11,7 +10,7 @@ public sealed class ScoreRoleServiceTests
     [MemberData(nameof(GetScoreRoleToKeepTestData))]
     public void GetScoreRoleToKeep_ReturnsExpectedRole(ScoreRoleTestCase testCase)
     {
-        (int scoreKey, ulong _) = ScoreRoleService.GetScoreRoleToKeep(testCase.PlayerTimeInSeconds * 10_000);
+        (int scoreKey, ulong _) = ScoreRoleService.GetScoreRoleToKeep(testCase.PlayerTimeInSeconds * 10_000, TestData.ScoreRoles);
 
         Assert.Equal(testCase.ExpectedScoreRoleKey, scoreKey);
     }
@@ -22,14 +21,14 @@ public sealed class ScoreRoleServiceTests
         new(playerTimeInSeconds: 1000, expectedScoreRoleKey: 1000),
         new(playerTimeInSeconds: 12, expectedScoreRoleKey: 0),
         new(playerTimeInSeconds: 552, expectedScoreRoleKey: 500),
-        new(playerTimeInSeconds: 1500, expectedScoreRoleKey: AppConfig.ScoreRoles.MaxBy(sr => sr.Key).Key)
+        new(playerTimeInSeconds: 1500, expectedScoreRoleKey: 1300)
     ];
 
     [Theory]
     [MemberData(nameof(GetRankRoleToKeepTestData))]
     public void GetRankRoleToKeep_ReturnsExpectedRole(RankRoleTestCase testCase)
     {
-        (int rankKey, ulong _) = ScoreRoleService.GetRankRoleToKeep(testCase.PlayerRank);
+        (int rankKey, ulong _) = ScoreRoleService.GetRankRoleToKeep(testCase.PlayerRank, TestData.RankRoles);
 
         Assert.Equal(testCase.ExpectedRankKey, rankKey);
     }

@@ -5,6 +5,7 @@ using Clubber.Domain.Configuration;
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 using Clubber.Domain.Repositories;
+using Clubber.Domain.Services;
 using Clubber.Tests.IntegrationTests.Infrastructure;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,8 +27,9 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
         IUserRepository userRepository = new UserRepository(_fixture.DbContext);
         IOptions<AppConfig> appConfig = _fixture.ServiceProvider.GetRequiredService<IOptions<AppConfig>>();
         IServiceScopeFactory scopeFactory = _fixture.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
+        RoleConfigService roleConfigService = _fixture.ServiceProvider.GetRequiredService<RoleConfigService>();
 
-        _scoreRoleService = new ScoreRoleService(appConfig, scopeFactory, _fixture.WebService, userRepository);
+        _scoreRoleService = new ScoreRoleService(appConfig, scopeFactory, _fixture.WebService, userRepository, roleConfigService);
         Substitute.For<IDiscordHelper>();
     }
 
@@ -52,8 +54,8 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
 
         List<IGuildUser> guildUsers =
         [
-            IntegrationTestFixture.CreateMockGuildUser(registeredUserId, "Registered", AppConfig.ScoreRoles[500]),
-            IntegrationTestFixture.CreateMockGuildUser(unregisteredUserId, "NotRegistered", AppConfig.ScoreRoles[500])
+            IntegrationTestFixture.CreateMockGuildUser(registeredUserId, "Registered", TestData.ScoreRoles[500]),
+            IntegrationTestFixture.CreateMockGuildUser(unregisteredUserId, "NotRegistered", TestData.ScoreRoles[500])
         ];
 
         BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers, []);
@@ -67,9 +69,9 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
     {
         const ulong userId = 11111;
         const int lbId = 101;
-        ulong scoreRole500 = AppConfig.ScoreRoles[500];
-        ulong expectedScoreRole = AppConfig.ScoreRoles[1000];
-        ulong expectedRankRole = AppConfig.RankRoles[3];
+        ulong scoreRole500 = TestData.ScoreRoles[500];
+        ulong expectedScoreRole = TestData.ScoreRoles[1000];
+        ulong expectedRankRole = TestData.RankRoles[3];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -122,10 +124,10 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
 
         List<IGuildUser> guildUsers =
         [
-            IntegrationTestFixture.CreateMockGuildUser(user1Id, "User1", AppConfig.ScoreRoles[900]),
-            IntegrationTestFixture.CreateMockGuildUser(user2Id, "User2", AppConfig.ScoreRoles[600]),
-            IntegrationTestFixture.CreateMockGuildUser(user3Id, "User3", AppConfig.ScoreRoles[800]),
-            IntegrationTestFixture.CreateMockGuildUser(user4Id, "User4", AppConfig.ScoreRoles[1200])
+            IntegrationTestFixture.CreateMockGuildUser(user1Id, "User1", TestData.ScoreRoles[900]),
+            IntegrationTestFixture.CreateMockGuildUser(user2Id, "User2", TestData.ScoreRoles[600]),
+            IntegrationTestFixture.CreateMockGuildUser(user3Id, "User3", TestData.ScoreRoles[800]),
+            IntegrationTestFixture.CreateMockGuildUser(user4Id, "User4", TestData.ScoreRoles[1200])
         ];
 
         HashSet<int> formerWrPlayerIds = [lbId4];
@@ -134,12 +136,12 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
         Assert.Equal(3, result.UserRoleUpdates.Count);
 
         UserRoleUpdate user1Update = result.UserRoleUpdates.First(u => u.User.Id == user1Id);
-        Assert.Contains(AppConfig.ScoreRoles[1000], user1Update.RoleChange.RolesToAdd);
-        Assert.Contains(AppConfig.RankRoles[10], user1Update.RoleChange.RolesToAdd);
+        Assert.Contains(TestData.ScoreRoles[1000], user1Update.RoleChange.RolesToAdd);
+        Assert.Contains(TestData.RankRoles[10], user1Update.RoleChange.RolesToAdd);
 
         UserRoleUpdate user2Update = result.UserRoleUpdates.First(u => u.User.Id == user2Id);
-        Assert.Contains(AppConfig.ScoreRoles[500], user2Update.RoleChange.RolesToAdd);
-        Assert.Contains(AppConfig.ScoreRoles[600], user2Update.RoleChange.RolesToRemove);
+        Assert.Contains(TestData.ScoreRoles[500], user2Update.RoleChange.RolesToAdd);
+        Assert.Contains(TestData.ScoreRoles[600], user2Update.RoleChange.RolesToRemove);
 
         UserRoleUpdate user4Update = result.UserRoleUpdates.First(u => u.User.Id == user4Id);
         Assert.Contains(AppConfig.FormerWrRoleId, user4Update.RoleChange.RolesToAdd);
@@ -152,8 +154,8 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
     {
         const ulong userId = 11111;
         const int lbId = 101;
-        ulong oldRole = AppConfig.ScoreRoles[500];
-        ulong expectedNewRole = AppConfig.ScoreRoles[800];
+        ulong oldRole = TestData.ScoreRoles[500];
+        ulong expectedNewRole = TestData.ScoreRoles[800];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -176,3 +178,4 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
         Assert.DoesNotContain(oldRole, finalRoles);
     }
 }
+

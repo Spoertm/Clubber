@@ -27,6 +27,10 @@ public class AppDbContext : DbContext
 
     public DbSet<HomingPeakRun> TopHomingPeaks => Set<HomingPeakRun>();
 
+    public DbSet<ScoreRole> ScoreRoles => Set<ScoreRole>();
+
+    public DbSet<RankRole> RankRoles => Set<RankRole>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("clubber");
@@ -40,6 +44,11 @@ public class AppDbContext : DbContext
             .UseIdentityAlwaysColumn();
 
         modelBuilder.Entity<HomingPeakRun>().Property(hpr => hpr.Id).ValueGeneratedOnAdd();
+
+        modelBuilder.Entity<ScoreRole>().HasKey(sr => sr.Id);
+        modelBuilder.Entity<ScoreRole>().Property(sr => sr.Id).ValueGeneratedNever();
+        modelBuilder.Entity<RankRole>().HasKey(rr => rr.Id);
+        modelBuilder.Entity<RankRole>().Property(rr => rr.Id).ValueGeneratedNever();
 
         modelBuilder.Entity<DdNewsItem>().ComplexProperty(dni => dni.OldEntry);
         modelBuilder.Entity<DdNewsItem>().ComplexProperty(dni => dni.NewEntry);

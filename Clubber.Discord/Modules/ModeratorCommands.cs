@@ -24,9 +24,11 @@ public sealed class ModeratorCommands(
     IDiscordHelper discordHelper,
     IUserRepository userRepository,
         ILeaderboardRepository leaderboardRepository,
-    IWebService webService) : InteractionModuleBase<SocketInteractionContext>
+    IWebService webService,
+    RoleConfigService roleConfigService) : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly AppConfig _config = config.Value;
+    private readonly RoleConfigService _roleConfigService = roleConfigService;
 
     [SlashCommand("edit-news", "Edit a DD news post made by the bot")]
     public async Task EditNewsPost(
@@ -98,7 +100,8 @@ public sealed class ModeratorCommands(
         {
             SocketTextChannel channel = (SocketTextChannel)Context.Channel;
             await discordHelper.ClearChannelAsync(channel);
-            await channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
+            IReadOnlyDictionary<int, ulong> scoreRoles = await _roleConfigService.GetScoreRolesAsync();
+            await channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds(scoreRoles));
             await FollowupAsync("✅ Register channel cleared and reset!");
         }
         catch (Exception ex)

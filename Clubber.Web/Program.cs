@@ -49,7 +49,7 @@ internal static class Program
 
         // Discord Bot Services
         builder.Services.AddSingleton<ClubberDiscordClient>();
-        builder.Services.AddSingleton<CommandService>(_ =>
+        builder.Services.AddSingleton(_ =>
         {
             CommandService commands = new(new CommandServiceConfig
             {
@@ -70,6 +70,9 @@ internal static class Program
         builder.Services.AddTransient<ILeaderboardRepository, LeaderboardRepository>();
         builder.Services.AddTransient<UserService>();
         builder.Services.AddTransient<IWebService, WebService>();
+
+        builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<RoleConfigService>();
 
         builder.Services.AddHttpClient();
         builder.Services.AddDbContext<AppDbContext>(options =>

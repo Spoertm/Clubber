@@ -1,4 +1,3 @@
-﻿using Clubber.Domain.Configuration;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Tests.UnitTests.HelpersTests.TestCaseModels;
@@ -8,7 +7,7 @@ namespace Clubber.Tests.UnitTests.HelpersTests;
 
 public sealed class CollectionUtilsTests
 {
-    private static readonly ulong _topScoreRoleId = AppConfig.ScoreRoles.MaxBy(s => s.Key).Value;
+    private static readonly ulong _topScoreRoleId = TestData.ScoreRoles.MaxBy(s => s.Key).Value;
     private const ulong Sub100RoleId = 461203024128376832;
     private const ulong _100RoleId = 399569183966363648;
     private const ulong _300RoleId = 399569332532674562;
@@ -84,17 +83,17 @@ public sealed class CollectionUtilsTests
     ];
 
     [Theory]
-    [MemberData(nameof(TestData))]
+    [MemberData(nameof(MilestoneTestData))]
     public void GetSecondsAwayFromNextRoleAndNextRoleId_DetectsSecondsInconsistency_ReturnsSecondsAndRoleId(MilestoneTestCase testCase)
     {
         MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(
             (int)(testCase.ScoreInSeconds * 10_000),
-            AppConfig.ScoreRoles);
+            TestData.ScoreRoles);
 
         Assert.Equal(testCase.ExpectedSecondsAwayFromNextRole, milestoneInfo.TimeUntilNextMilestone);
     }
 
-    public static TheoryData<MilestoneTestCase> TestData =>
+    public static TheoryData<MilestoneTestCase> MilestoneTestData =>
     [
         new(scoreInSeconds: 0M, expectedSecondsAwayFromNextRole: 100M),
         new(scoreInSeconds: 35M, expectedSecondsAwayFromNextRole: 65M),

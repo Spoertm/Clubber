@@ -3,7 +3,6 @@ using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
 using Clubber.Domain.Models;
-using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Clubber.Domain.Services;
 using Discord;
@@ -17,7 +16,11 @@ namespace Clubber.Discord.Modules;
 [Name("👑 Owner Commands")]
 [global::Discord.Interactions.RequireOwner]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
-public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper, IWebService webService)
+public sealed class OwnerCommands(
+    ScoreRoleService scoreRoleService,
+    IDiscordHelper discordHelper,
+    IWebService webService,
+    RoleConfigService roleConfigService)
     : InteractionModuleBase<SocketInteractionContext>
 {
     [SlashCommand("update-database", "Force update the database and user roles")]
@@ -174,7 +177,8 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
         try
         {
             await FollowupAsync("Posting welcome message...");
-            await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds());
+            IReadOnlyDictionary<int, ulong> scoreRoles = await roleConfigService.GetScoreRolesAsync();
+            await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds(scoreRoles));
         }
         catch (Exception ex)
         {
@@ -188,5 +192,13 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
                 Serilog.Log.Error(followupEx, "Failed to send error followup message");
             }
         }
+    }
+
+    [SlashCommand("refresh-roles", "Refresh role cache from database")]
+    public async Task RefreshRoles()
+    {
+        roleConfigService.InvalidateCache();
+        await roleConfigService.GetScoreRolesAsync(); // Warm cache
+        await RespondAsync("Role cache refreshed!", ephemeral: true);
     }
 }

@@ -132,12 +132,12 @@ public static class EmbedHelper
         return embedBuilder.Build();
     }
 
-    public static Embed[] RegisterEmbeds()
+    public static Embed[] RegisterEmbeds(IReadOnlyDictionary<int, ulong> scoreRoles)
     {
         Embed[] embeds = new Embed[2];
 
-        ulong lowestScoreRoleId = AppConfig.ScoreRoles.MinBy(sr => sr.Key).Value;
-        ulong highestScoreRoleId = AppConfig.ScoreRoles.MaxBy(sr => sr.Key).Value;
+        ulong lowestScoreRoleId = scoreRoles.MinBy(sr => sr.Key).Value;
+        ulong highestScoreRoleId = scoreRoles.MaxBy(sr => sr.Key).Value;
 
         string registerForRolesText =
             $"""

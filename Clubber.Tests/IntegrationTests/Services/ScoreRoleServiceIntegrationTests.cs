@@ -4,6 +4,7 @@ using Clubber.Domain.Configuration;
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 using Clubber.Domain.Repositories;
+using Clubber.Domain.Services;
 using Clubber.Tests.IntegrationTests.Infrastructure;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,8 +26,9 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
         IUserRepository userRepository = new UserRepository(_fixture.DbContext);
         IOptions<AppConfig> appConfig = _fixture.ServiceProvider.GetRequiredService<IOptions<AppConfig>>();
         IServiceScopeFactory scopeFactory = _fixture.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
+        RoleConfigService roleConfigService = _fixture.ServiceProvider.GetRequiredService<RoleConfigService>();
 
-        _scoreRoleService = new ScoreRoleService(appConfig, scopeFactory, _fixture.WebService, userRepository);
+        _scoreRoleService = new ScoreRoleService(appConfig, scopeFactory, _fixture.WebService, userRepository, roleConfigService);
     }
 
     public void Dispose()
@@ -53,8 +55,8 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong currentRoleId = AppConfig.ScoreRoles[500];
-        ulong expectedNewRoleId = AppConfig.ScoreRoles[600];
+        ulong currentRoleId = TestData.ScoreRoles[500];
+        ulong expectedNewRoleId = TestData.ScoreRoles[600];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -77,7 +79,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong correctRoleId = AppConfig.ScoreRoles[600];
+        ulong correctRoleId = TestData.ScoreRoles[600];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -97,8 +99,8 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong scoreRoleId = AppConfig.ScoreRoles[1000];
-        ulong expectedRankRoleId = AppConfig.RankRoles[3];
+        ulong scoreRoleId = TestData.ScoreRoles[1000];
+        ulong expectedRankRoleId = TestData.RankRoles[3];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -120,7 +122,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong scoreRoleId = AppConfig.ScoreRoles[1300];
+        ulong scoreRoleId = TestData.ScoreRoles[1300];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -145,8 +147,8 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong scoreRoleId = AppConfig.ScoreRoles[1300];
-        ulong top1RoleId = AppConfig.RankRoles[1];
+        ulong scoreRoleId = TestData.ScoreRoles[1300];
+        ulong top1RoleId = TestData.RankRoles[1];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -185,8 +187,8 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
             IntegrationTestFixture.CreateLeaderboardEntry(lbId2, 800)
         );
 
-        IGuildUser guildUser1 = IntegrationTestFixture.CreateMockGuildUser(user1Id, "User1", AppConfig.ScoreRoles[500]);
-        IGuildUser guildUser2 = IntegrationTestFixture.CreateMockGuildUser(user2Id, "User2", AppConfig.ScoreRoles[700]);
+        IGuildUser guildUser1 = IntegrationTestFixture.CreateMockGuildUser(user1Id, "User1", TestData.ScoreRoles[500]);
+        IGuildUser guildUser2 = IntegrationTestFixture.CreateMockGuildUser(user2Id, "User2", TestData.ScoreRoles[700]);
 
         BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates([guildUser1, guildUser2], []);
 
@@ -210,7 +212,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
             IntegrationTestFixture.CreateLeaderboardEntry(lbId1, 600)
         );
 
-        IGuildUser guildUser = IntegrationTestFixture.CreateMockGuildUser(userInGuildId, "User1", AppConfig.ScoreRoles[500]);
+        IGuildUser guildUser = IntegrationTestFixture.CreateMockGuildUser(userInGuildId, "User1", TestData.ScoreRoles[500]);
 
         BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates([guildUser], []);
 
@@ -222,9 +224,9 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong correctScoreRole = AppConfig.ScoreRoles[600];
-        ulong wrongScoreRole1 = AppConfig.ScoreRoles[500];
-        ulong wrongScoreRole2 = AppConfig.ScoreRoles[700];
+        ulong correctScoreRole = TestData.ScoreRoles[600];
+        ulong wrongScoreRole1 = TestData.ScoreRoles[500];
+        ulong wrongScoreRole2 = TestData.ScoreRoles[700];
         const ulong uselessRole = 458375331468935178;
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
@@ -268,8 +270,8 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong currentRoleId = AppConfig.ScoreRoles[700];
-        ulong expectedNewRoleId = AppConfig.ScoreRoles[800];
+        ulong currentRoleId = TestData.ScoreRoles[700];
+        ulong expectedNewRoleId = TestData.ScoreRoles[800];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -292,8 +294,8 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
     {
         const ulong userId = 12345;
         const int lbId = 999;
-        ulong topRoleId = AppConfig.ScoreRoles.MaxBy(sr => sr.Key).Value;
-        ulong top1RankRole = AppConfig.RankRoles[1];
+        ulong topRoleId = TestData.ScoreRoles.MaxBy(sr => sr.Key).Value;
+        ulong top1RankRole = TestData.RankRoles[1];
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
@@ -312,3 +314,4 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 
     #endregion
 }
+
