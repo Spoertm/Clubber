@@ -10,7 +10,7 @@ public sealed class UserService(IOptions<AppConfig> config, IUserRepository user
 {
     private readonly AppConfig _config = config.Value;
 
-    public async Task<Result> IsValidForRegistration(IGuildUser guildUser, bool userUsedCommandForThemselves)
+    public async Task<Result> IsValidForRegistration(IGuildUser guildUser, uint leaderboardId, bool userUsedCommandForThemselves)
     {
         Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
         if (result.IsFailure)
@@ -21,6 +21,11 @@ public sealed class UserService(IOptions<AppConfig> config, IUserRepository user
         if (await userRepository.FindAsync(guildUser.Id) is not null)
         {
             return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
+        }
+
+        if (await userRepository.LeaderboardIdExistsAsync((int)leaderboardId))
+        {
+            return Result.Failure("That leaderboard ID is already registered to another user.");
         }
 
         return Result.Success();

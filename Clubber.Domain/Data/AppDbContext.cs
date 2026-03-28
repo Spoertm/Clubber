@@ -37,6 +37,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<EntryResponse>().HasKey(lbu => lbu.Id);
         modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
+        modelBuilder.Entity<DdUser>().HasIndex(ddu => ddu.DiscordId).IsUnique();
 
         modelBuilder.Entity<DdNewsItem>().HasKey(dni => dni.ItemId);
         modelBuilder.Entity<DdNewsItem>().Property(dni => dni.ItemId)

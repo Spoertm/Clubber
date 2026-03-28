@@ -37,6 +37,11 @@ public sealed class UserRepository(AppDbContext dbContext) : IUserRepository
         return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.DiscordId == discordId);
     }
 
+    public async Task<bool> LeaderboardIdExistsAsync(int leaderboardId)
+    {
+        return await dbContext.DdPlayers.AsNoTracking().AnyAsync(ddp => ddp.LeaderboardId == leaderboardId);
+    }
+
     public async Task<bool> TwitchUsernameExistsAsync(string twitchUsername)
     {
         return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.TwitchUsername == twitchUsername) is not null;

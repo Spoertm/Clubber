@@ -136,7 +136,7 @@ public sealed class ComponentInteractions(
 
     private async Task<Result> CheckUserAndRegister(int lbId, SocketGuildUser user)
     {
-        Result result = await userService.IsValidForRegistration(user, false);
+        Result result = await userService.IsValidForRegistration(user, (uint)lbId, false);
         if (result.IsFailure)
         {
             return Result.Failure($"⚠️ {result.ErrorMsg}");

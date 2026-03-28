@@ -15,6 +15,8 @@ public interface IUserRepository
 
     Task<DdUser?> FindAsync(ulong discordId);
 
+    Task<bool> LeaderboardIdExistsAsync(int leaderboardId);
+
     Task<bool> TwitchUsernameExistsAsync(string twitchUsername);
 
     Task<Result> RegisterAsync(uint leaderboardId, ulong discordId);

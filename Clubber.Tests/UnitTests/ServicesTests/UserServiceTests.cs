@@ -40,7 +40,7 @@ public sealed class UserServiceTests
         guildUser.IsBot.Returns(isBot);
         guildUser.RoleIds.Returns(roleIds);
 
-        Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
+        Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, 1, true);
         Assert.True(isValidForRegistrationResponse.IsFailure);
     }
 
@@ -67,7 +67,8 @@ public sealed class UserServiceTests
         guildUser.RoleIds.Returns([]);
 
         _userRepositoryMock.FindAsync(ExampleDiscordId).Returns(default(DdUser));
-        Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
+        _userRepositoryMock.LeaderboardIdExistsAsync(1).Returns(false);
+        Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, 1, true);
         Assert.False(isValidForRegistrationResponse.IsFailure);
     }
 
@@ -81,7 +82,21 @@ public sealed class UserServiceTests
         guildUser.RoleIds.Returns([]);
 
         _userRepositoryMock.FindAsync(ExampleDiscordId).Returns(new DdUser(0, 0));
-        Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, true);
+        Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, 1, true);
+        Assert.True(isValidForRegistrationResponse.IsFailure);
+    }
+
+    [Fact]
+    public async Task IsValidForRegistration_DetectsAlreadyUsedLeaderboardId_ReturnsError()
+    {
+        IGuildUser guildUser = Substitute.For<IGuildUser>();
+        guildUser.IsBot.Returns(false);
+        guildUser.Id.Returns(999ul);
+        guildUser.RoleIds.Returns([]);
+
+        _userRepositoryMock.FindAsync(999ul).Returns(default(DdUser));
+        _userRepositoryMock.LeaderboardIdExistsAsync(1).Returns(true);
+        Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, 1, true);
         Assert.True(isValidForRegistrationResponse.IsFailure);
     }
 
