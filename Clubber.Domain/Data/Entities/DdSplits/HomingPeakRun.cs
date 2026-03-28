@@ -1,10 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Clubber.Domain.Data.Entities.DdSplits;
+﻿namespace Clubber.Domain.Data.Entities.DdSplits;
 
 public sealed class HomingPeakRun
 {
-    [Key]
     public int Id { get; set; }
 
     public string PlayerName { get; set; } = null!;

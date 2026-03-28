@@ -43,7 +43,10 @@ public class AppDbContext : DbContext
             .ValueGeneratedOnAdd()
             .UseIdentityAlwaysColumn();
 
+        modelBuilder.Entity<HomingPeakRun>().HasKey(hpr => hpr.Id);
         modelBuilder.Entity<HomingPeakRun>().Property(hpr => hpr.Id).ValueGeneratedOnAdd();
+
+        modelBuilder.Entity<BestSplit>().HasKey(bs => bs.Name);
 
         modelBuilder.Entity<ScoreRole>().HasKey(sr => sr.Id);
         modelBuilder.Entity<ScoreRole>().Property(sr => sr.Id).ValueGeneratedNever();
