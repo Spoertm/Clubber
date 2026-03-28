@@ -18,7 +18,7 @@ public sealed class UserService(IOptions<AppConfig> config, IUserRepository user
             return Result.Failure(result.ErrorMsg);
         }
 
-        if (await userRepository.FindAsync(guildUser.Id) is not null)
+        if (await userRepository.DiscordIdExistsAsync(guildUser.Id))
         {
             return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
         }
@@ -39,7 +39,7 @@ public sealed class UserService(IOptions<AppConfig> config, IUserRepository user
             return Result.Failure(result.ErrorMsg);
         }
 
-        if (await userRepository.FindAsync(guildUser.Id) is not null)
+        if (await userRepository.DiscordIdExistsAsync(guildUser.Id))
         {
             return Result.Success();
         }

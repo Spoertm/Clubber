@@ -66,7 +66,7 @@ public sealed class UserServiceTests
         guildUser.IsBot.Returns(false);
         guildUser.RoleIds.Returns([]);
 
-        _userRepositoryMock.FindAsync(ExampleDiscordId).Returns(default(DdUser));
+        _userRepositoryMock.DiscordIdExistsAsync(ExampleDiscordId).Returns(false);
         _userRepositoryMock.LeaderboardIdExistsAsync(1).Returns(false);
         Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, 1, true);
         Assert.False(isValidForRegistrationResponse.IsFailure);
@@ -81,7 +81,7 @@ public sealed class UserServiceTests
         guildUser.Id.Returns(0ul);
         guildUser.RoleIds.Returns([]);
 
-        _userRepositoryMock.FindAsync(ExampleDiscordId).Returns(new DdUser(0, 0));
+        _userRepositoryMock.DiscordIdExistsAsync(ExampleDiscordId).Returns(true);
         Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, 1, true);
         Assert.True(isValidForRegistrationResponse.IsFailure);
     }
@@ -94,7 +94,7 @@ public sealed class UserServiceTests
         guildUser.Id.Returns(999ul);
         guildUser.RoleIds.Returns([]);
 
-        _userRepositoryMock.FindAsync(999ul).Returns(default(DdUser));
+        _userRepositoryMock.DiscordIdExistsAsync(999ul).Returns(false);
         _userRepositoryMock.LeaderboardIdExistsAsync(1).Returns(true);
         Result isValidForRegistrationResponse = await _sut.IsValidForRegistration(guildUser, 1, true);
         Assert.True(isValidForRegistrationResponse.IsFailure);
@@ -109,7 +109,7 @@ public sealed class UserServiceTests
         guildUser.Id.Returns(0ul);
         guildUser.RoleIds.Returns([]);
 
-        _userRepositoryMock.FindAsync(ExampleDiscordId).Returns(new DdUser(0, 0));
+        _userRepositoryMock.DiscordIdExistsAsync(ExampleDiscordId).Returns(true);
         Result isValid = await _sut.IsValid(guildUser, true);
         Assert.False(isValid.IsFailure);
     }
@@ -123,7 +123,7 @@ public sealed class UserServiceTests
         guildUser.Id.Returns(0ul);
         guildUser.RoleIds.Returns([]);
 
-        _userRepositoryMock.FindAsync(ExampleDiscordId).Returns(default(DdUser));
+        _userRepositoryMock.DiscordIdExistsAsync(ExampleDiscordId).Returns(false);
         Result isValid = await _sut.IsValid(guildUser, true);
         Assert.True(isValid.IsFailure);
     }

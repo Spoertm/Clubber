@@ -41,7 +41,7 @@ public sealed class UserJoinHandler
         await using AsyncServiceScope scope = _services.CreateAsyncScope();
         IUserRepository userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
-        if (await userRepository.FindAsync(joiningUser.Id) is not null)
+        if (await userRepository.DiscordIdExistsAsync(joiningUser.Id))
         {
             await UpdateRolesForRegisteredUser(joiningUser);
         }
