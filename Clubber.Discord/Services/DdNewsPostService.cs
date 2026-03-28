@@ -117,8 +117,7 @@ public sealed class DdNewsPostService(
         }
     }
 
-    private async Task PublishSingleNews(
-        NewsUpdate update, SocketTextChannel channel, ServiceCollection serviceCollection)
+    private async Task PublishSingleNews(NewsUpdate update, SocketTextChannel channel, ServiceCollection serviceCollection)
     {
         string message = await CreateNewsMessage(update, serviceCollection);
         string? countryCode = await GetCountryCode(update.NewEntry.Id, serviceCollection);
