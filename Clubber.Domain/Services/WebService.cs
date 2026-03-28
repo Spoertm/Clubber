@@ -27,7 +27,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
 
             using FormUrlEncodedContent content = new(postValues);
             using HttpClient client = httpClientFactory.CreateClient();
-            using HttpResponseMessage response = await client.PostAsync(appConfig.GetMultipleUsersByIdUri, content);
+            using HttpResponseMessage response = await client.PostAsync(appConfig.Endpoints.GetMultipleUsersById, content);
             response.EnsureSuccessStatusCode();
             byte[] data = await response.Content.ReadAsByteArrayAsync();
 
@@ -94,7 +94,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     {
         try
         {
-            Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/country-code");
+            Uri uri = new(string.Format(appConfig.Endpoints.GetCountryCodeForPlayer, lbId));
             using HttpClient client = httpClientFactory.CreateClient();
             using HttpResponseMessage response = await client.GetAsync(uri);
             response.EnsureSuccessStatusCode();
@@ -114,7 +114,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     {
         try
         {
-            Uri uri = new($"https://devildaggers.info/api/clubber/players/{lbId}/history");
+            Uri uri = new(string.Format(appConfig.Endpoints.GetPlayerHistory, lbId));
             using HttpClient client = httpClientFactory.CreateClient();
             using HttpResponseMessage response = await client.GetAsync(uri);
             response.EnsureSuccessStatusCode();
@@ -131,7 +131,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     public async Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri)
     {
         uint? runId = ExtractRunIdFromUri(uri) ?? throw new ClubberException("Invalid ddstats URL.");
-        Uri fullRunReqUri = new($"https://ddstats.com/api/v2/game/full?id={runId}");
+        Uri fullRunReqUri = new(string.Format(appConfig.Endpoints.GetDdstatsResponse, runId));
         using HttpClient client = httpClientFactory.CreateClient();
         using HttpResponseMessage response = await client.GetAsync(fullRunReqUri);
         response.EnsureSuccessStatusCode();
@@ -144,7 +144,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
         try
         {
             using HttpClient client = httpClientFactory.CreateClient();
-            using HttpResponseMessage response = await client.GetAsync(appConfig.GetWorldRecordsUri);
+            using HttpResponseMessage response = await client.GetAsync(appConfig.Endpoints.GetWorldRecords);
             response.EnsureSuccessStatusCode();
             await using Stream responseStream = await response.Content.ReadAsStreamAsync();
             return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)
@@ -201,7 +201,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     {
         using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("offset", (rankStart - 1).ToString())]);
         using HttpClient client = httpClientFactory.CreateClient();
-        using HttpResponseMessage response = await client.PostAsync(appConfig.GetScoresUri, content);
+        using HttpResponseMessage response = await client.PostAsync(appConfig.Endpoints.GetScores, content);
         response.EnsureSuccessStatusCode();
 
         using BinaryReader br = new(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));

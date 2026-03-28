@@ -129,11 +129,5 @@ public sealed class AppConfig
     public ulong NoScoreRoleId { get; set; }
 
     [Required]
-    public required Uri GetMultipleUsersByIdUri { get; set; }
-
-    [Required]
-    public required Uri GetScoresUri { get; set; }
-
-    [Required]
-    public required Uri GetWorldRecordsUri { get; set; }
+    public required Endpoints Endpoints { get; set; }
 }
