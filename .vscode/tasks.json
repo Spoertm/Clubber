@@ -1,117 +1,117 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "build",
-			"command": "dotnet",
-			"type": "process",
-			"args": ["build", "${workspaceFolder}/Clubber.sln"],
-			"problemMatcher": "$msCompile"
-		},
-		{
-			"label": "tailwind-watch",
-			"command": "npx",
-			"type": "process",
-			"args": [
-				"tailwindcss",
-				"-i",
-				"./Styles/input.css",
-				"-o",
-				"./wwwroot/css/site.css",
-				"--watch"
-			],
-			"options": {
-				"cwd": "${workspaceFolder}/Clubber.Web"
-			},
-			"isBackground": true,
-			"problemMatcher": {
-				"pattern": {
-					"regexp": ".*",
-					"message": 0
-				},
-				"background": {
-					"activeOnStart": true,
-					"beginsPattern": "^\\s*\\btailwindcss\\b",
-					"endsPattern": "^(Done|Changed|Created|Removed|Watching)"
-				}
-			}
-		},
-		{
-			"label": "test",
-			"command": "dotnet",
-			"type": "process",
-			"args": ["test", "${workspaceFolder}/Clubber.sln"],
-			"problemMatcher": "$msCompile",
-			"group": {
-				"kind": "test",
-				"isDefault": true
-			}
-		},
-		{
-			"label": "clean",
-			"command": "dotnet",
-			"type": "process",
-			"args": ["clean", "${workspaceFolder}/Clubber.sln"],
-			"problemMatcher": "$msCompile"
-		},
-		{
-			"label": "ef migrations add",
-			"command": "dotnet",
-			"type": "process",
-			"args": [
-				"ef",
-				"migrations",
-				"add",
-				"${input:migrationName}",
-				"--output-dir",
-				"Data/Migrations",
-				"--project",
-				"${workspaceFolder}/Clubber.Domain/Clubber.Domain.csproj",
-				"--startup-project",
-				"${workspaceFolder}/Clubber.Web/Clubber.Web.csproj"
-			],
-			"problemMatcher": []
-		},
-		{
-			"label": "ef database update",
-			"command": "dotnet",
-			"type": "process",
-			"args": [
-				"ef",
-				"database",
-				"update",
-				"--project",
-				"${workspaceFolder}/Clubber.Domain/Clubber.Domain.csproj",
-				"--startup-project",
-				"${workspaceFolder}/Clubber.Web/Clubber.Web.csproj"
-			],
-			"problemMatcher": []
-		},
-		{
-			"label": "npm: build-css",
-			"detail": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --watch",
-			"type": "npm",
-			"script": "build-css",
-			"path": "Clubber.Web",
-			"group": "build",
-			"problemMatcher": []
-		},
-		{
-			"label": "npm: build-css-prod",
-			"detail": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --minify",
-			"type": "npm",
-			"script": "build-css-prod",
-			"path": "Clubber.Web",
-			"group": "build",
-			"problemMatcher": []
-		}
-	],
-	"inputs": [
-		{
-			"id": "migrationName",
-			"type": "promptString",
-			"description": "Name of the migration",
-			"default": "MigrationName"
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["build", "${workspaceFolder}/Clubber.slnx"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "tailwind-watch",
+            "command": "npx",
+            "type": "process",
+            "args": [
+                "tailwindcss",
+                "-i",
+                "./Styles/input.css",
+                "-o",
+                "./wwwroot/css/site.css",
+                "--watch"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/Clubber.Web"
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": ".*",
+                    "message": 0
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^\\s*\\btailwindcss\\b",
+                    "endsPattern": "^(Done|Changed|Created|Removed|Watching)"
+                }
+            }
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["test", "${workspaceFolder}/Clubber.sln"],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["clean", "${workspaceFolder}/Clubber.sln"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "ef migrations add",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "migrations",
+                "add",
+                "${input:migrationName}",
+                "--output-dir",
+                "Data/Migrations",
+                "--project",
+                "${workspaceFolder}/Clubber.Domain/Clubber.Domain.csproj",
+                "--startup-project",
+                "${workspaceFolder}/Clubber.Web/Clubber.Web.csproj"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "ef database update",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "database",
+                "update",
+                "--project",
+                "${workspaceFolder}/Clubber.Domain/Clubber.Domain.csproj",
+                "--startup-project",
+                "${workspaceFolder}/Clubber.Web/Clubber.Web.csproj"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "npm: build-css",
+            "detail": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --watch",
+            "type": "npm",
+            "script": "build-css",
+            "path": "Clubber.Web",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "npm: build-css-prod",
+            "detail": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --minify",
+            "type": "npm",
+            "script": "build-css-prod",
+            "path": "Clubber.Web",
+            "group": "build",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "migrationName",
+            "type": "promptString",
+            "description": "Name of the migration",
+            "default": "MigrationName"
+        }
+    ]
 }
