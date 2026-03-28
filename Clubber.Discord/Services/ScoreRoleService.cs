@@ -46,9 +46,15 @@ public sealed class ScoreRoleService(
             .Where(x => x.GuildUser != null)
             .ToList();
 
-        // Fetch leaderboard data
+        // Fetch leaderboard data and total count in parallel
         uint[] lbIdsToRequest = [.. registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId).Distinct()];
-        IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
+        Task<IReadOnlyList<EntryResponse>> lbTask = _webService.GetLbPlayers(lbIdsToRequest);
+        Task<int> countTask = _userRepository.GetCountAsync();
+
+        await Task.WhenAll(lbTask, countTask);
+
+        IReadOnlyList<EntryResponse> lbPlayers = await lbTask;
+        int totalRegistered = await countTask;
 
         // Build dictionary for leaderboard players
         Dictionary<uint, EntryResponse> lbPlayerById = lbPlayers.ToDictionary(lbp => (uint)lbp.Id);
@@ -70,7 +76,6 @@ public sealed class ScoreRoleService(
             }
         }
 
-        int totalRegistered = await _userRepository.GetCountAsync();
         int nonMemberCount = totalRegistered - registeredUsers.Count;
         return new BulkUserRoleUpdates(nonMemberCount, roleUpdates);
     }
