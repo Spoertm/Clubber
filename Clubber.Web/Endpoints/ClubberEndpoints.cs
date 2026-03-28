@@ -82,7 +82,7 @@ internal static class ClubberEndpoints
         return await userRepository.FindAsync(discordId);
     }
 
-    private static async Task<DdUser?> UserByLeaderboardId(int leaderboardId, IUserRepository userRepository)
+    private static async Task<DdUser?> UserByLeaderboardId(uint leaderboardId, IUserRepository userRepository)
     {
         return await userRepository.FindAsync(leaderboardId);
     }

@@ -91,7 +91,7 @@ public sealed class TextCommands(
                 return;
             }
 
-            uint leaderboardId = (uint)ddUser.LeaderboardId;
+            uint leaderboardId = ddUser.LeaderboardId;
             Task<IReadOnlyList<EntryResponse>> playerEntryTask = webService.GetLbPlayers([leaderboardId]);
             Task<GetPlayerHistory?> playerHistoryTask = webService.GetPlayerHistory(leaderboardId);
             await Task.WhenAll(playerEntryTask, playerHistoryTask);

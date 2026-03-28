@@ -11,13 +11,13 @@ public interface IUserRepository
 
     Task<int> GetCountAsync();
 
-    Task<DdUser?> FindAsync(int leaderboardId);
+    Task<DdUser?> FindAsync(uint leaderboardId);
 
     Task<DdUser?> FindAsync(ulong discordId);
 
     Task<bool> DiscordIdExistsAsync(ulong discordId);
 
-    Task<bool> LeaderboardIdExistsAsync(int leaderboardId);
+    Task<bool> LeaderboardIdExistsAsync(uint leaderboardId);
 
     Task<bool> TwitchUsernameExistsAsync(string twitchUsername);
 

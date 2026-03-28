@@ -23,7 +23,7 @@ public sealed class UserService(IOptions<AppConfig> config, IUserRepository user
             return Result.Failure($"User `{guildUser.AvailableNameSanitized()}` is already registered.");
         }
 
-        if (await userRepository.LeaderboardIdExistsAsync((int)leaderboardId))
+        if (await userRepository.LeaderboardIdExistsAsync(leaderboardId))
         {
             return Result.Failure("That leaderboard ID is already registered to another user.");
         }

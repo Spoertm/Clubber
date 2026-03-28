@@ -158,7 +158,7 @@ public sealed class IntegrationTestFixture : IDisposable
     /// <summary>
     /// Configures the mock WebService to return specific world record holders.
     /// </summary>
-    public void SetupWorldRecords(params int[] formerWrPlayerIds)
+    public void SetupWorldRecords(params uint[] formerWrPlayerIds)
     {
         WebService.GetWorldRecords().Returns(Task.FromResult(new GetWorldRecordDataContainer
         {
@@ -193,7 +193,7 @@ public sealed class IntegrationTestFixture : IDisposable
     /// <summary>
     /// Creates a leaderboard entry for testing.
     /// </summary>
-    public static EntryResponse CreateLeaderboardEntry(int id, int timeInSeconds, int rank = 100)
+    public static EntryResponse CreateLeaderboardEntry(uint id, int timeInSeconds, int rank = 100)
     {
         return new EntryResponse
         {

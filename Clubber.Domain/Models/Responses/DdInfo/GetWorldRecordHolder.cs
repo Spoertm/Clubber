@@ -2,7 +2,7 @@ namespace Clubber.Domain.Models.Responses.DdInfo;
 
 public record GetWorldRecordHolder
 {
-    public required int Id { get; init; }
+    public required uint Id { get; init; }
 
     public required IReadOnlyCollection<string> Usernames { get; init; }
 

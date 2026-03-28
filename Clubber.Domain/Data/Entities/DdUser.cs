@@ -2,7 +2,7 @@
 
 public sealed record DdUser
 {
-    public DdUser(ulong discordId, int leaderboardId, string? twitchUsername = null)
+    public DdUser(ulong discordId, uint leaderboardId, string? twitchUsername = null)
     {
         DiscordId = discordId;
         LeaderboardId = leaderboardId;
@@ -11,7 +11,7 @@ public sealed record DdUser
 
     public ulong DiscordId { get; init; }
 
-    public int LeaderboardId { get; init; }
+    public uint LeaderboardId { get; init; }
 
     public string? TwitchUsername { get; set; }
 }

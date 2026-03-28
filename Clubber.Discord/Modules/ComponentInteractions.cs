@@ -26,7 +26,7 @@ public sealed class ComponentInteractions(
     private readonly AppConfig _config = config.Value;
 
     [ComponentInteraction("register:*:*:*")]
-    public async Task HandleRegistration(ulong userId, int leaderboardId, ulong registerMessageId)
+    public async Task HandleRegistration(ulong userId, uint leaderboardId, ulong registerMessageId)
     {
         if (Context.Guild?.Id is null)
         {
@@ -134,9 +134,9 @@ public sealed class ComponentInteractions(
         }
     }
 
-    private async Task<Result> CheckUserAndRegister(int lbId, SocketGuildUser user)
+    private async Task<Result> CheckUserAndRegister(uint lbId, SocketGuildUser user)
     {
-        Result result = await userService.IsValidForRegistration(user, (uint)lbId, false);
+        Result result = await userService.IsValidForRegistration(user, lbId, false);
         if (result.IsFailure)
         {
             return Result.Failure($"⚠️ {result.ErrorMsg}");
@@ -148,7 +148,7 @@ public sealed class ComponentInteractions(
         }
         else
         {
-            Result registrationResult = await userRepository.RegisterAsync((uint)lbId, user.Id);
+            Result registrationResult = await userRepository.RegisterAsync(lbId, user.Id);
             if (registrationResult.IsFailure)
             {
                 return Result.Failure($"❌ Failed to execute command: {registrationResult.ErrorMsg}");

@@ -50,7 +50,7 @@ public sealed class NewsRepositoryTests : IDisposable
 
         DdNewsItem? dbItem = await db.DdNews.AsNoTracking().FirstOrDefaultAsync();
         Assert.NotNull(dbItem);
-        Assert.Equal(1, dbItem.LeaderboardId);
+        Assert.Equal(1u, dbItem.LeaderboardId);
         Assert.Equal(1, dbItem.Nth);
     }
 
@@ -122,9 +122,9 @@ public sealed class NewsRepositoryTests : IDisposable
         DdNewsItem[] result = await sut.GetRecentAsync();
 
         Assert.Equal(3, result.Length);
-        Assert.Equal(2, result[0].LeaderboardId);
-        Assert.Equal(3, result[1].LeaderboardId);
-        Assert.Equal(1, result[2].LeaderboardId);
+        Assert.Equal(2u, result[0].LeaderboardId);
+        Assert.Equal(3u, result[1].LeaderboardId);
+        Assert.Equal(1u, result[2].LeaderboardId);
     }
 
     [Fact]
@@ -188,7 +188,7 @@ public sealed class NewsRepositoryTests : IDisposable
 
         DdNewsItem[] dbItems = await db.DdNews.AsNoTracking().ToArrayAsync();
         Assert.Single(dbItems);
-        Assert.Equal(2, dbItems[0].LeaderboardId);
+        Assert.Equal(2u, dbItems[0].LeaderboardId);
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public sealed class NewsRepositoryTests : IDisposable
 
     #endregion
 
-    private static DdNewsItem CreateDdNewsItem(int leaderboardId, int nth, DateTimeOffset? timeOfOccurence = null)
+    private static DdNewsItem CreateDdNewsItem(uint leaderboardId, int nth, DateTimeOffset? timeOfOccurence = null)
     {
         return new DdNewsItem
         {

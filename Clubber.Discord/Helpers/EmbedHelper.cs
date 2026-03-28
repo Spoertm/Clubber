@@ -298,7 +298,7 @@ public static class EmbedHelper
             .Build();
     }
 
-    public static Embed RegisterUserModEmbed(string userName, int foundId, string extraInfo)
+    public static Embed RegisterUserModEmbed(string userName, uint foundId, string extraInfo)
     {
         EmbedBuilder eb = new();
         eb.WithDescription

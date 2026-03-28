@@ -66,27 +66,27 @@ public sealed class ExtentionMethodsTests
     }
 
     [Theory]
-    [InlineData("abc 123 def 456", 123)]
-    [InlineData("abc", -1)]
-    [InlineData("123abc", -1)]
-    [InlineData("-50 abc", -50)]
-    [InlineData("", -1)]
-    [InlineData("3.14", -1)]
-    [InlineData("no numbers here", -1)]
-    public void FindFirstInt_ReturnsExpectedResult(string input, int expected)
+    [InlineData("abc 123 def 456", 123u)]
+    [InlineData("abc", null)]
+    [InlineData("123abc", null)]
+    [InlineData("-50 abc", null)]
+    [InlineData("", null)]
+    [InlineData("3.14", null)]
+    [InlineData("no numbers here", null)]
+    public void FindFirstUint_ReturnsExpectedResult(string input, uint? expected)
     {
-        int result = input.FindFirstInt();
+        uint? result = input.FindFirstUint();
 
         Assert.Equal(expected, result);
     }
 
     [Fact]
-    public void FindFirstInt_NullInput_ReturnsMinusOne()
+    public void FindFirstUint_NullInput_ReturnsNull()
     {
         string? input = null;
 
-        int result = input.FindFirstInt();
+        uint? result = input.FindFirstUint();
 
-        Assert.Equal(-1, result);
+        Assert.Null(result);
     }
 }

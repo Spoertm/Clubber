@@ -42,7 +42,7 @@ public sealed class ScoreRoleService(
     }
 
 
-    public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers, HashSet<int> formerWrPlayerIds)
+    public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers, HashSet<uint> formerWrPlayerIds)
     {
         ImmutableSortedDictionary<int, ulong> scoreRoles = await _roleConfigService.GetScoreRolesAsync();
         ImmutableSortedDictionary<int, ulong> rankRoles = await _roleConfigService.GetRankRolesAsync();
@@ -57,19 +57,19 @@ public sealed class ScoreRoleService(
             .Where(x => x.GuildUser != null)
             .ToList();
 
-        uint[] lbIdsToRequest = [.. registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId).Distinct()];
+        uint[] lbIdsToRequest = [.. registeredUsers.Select(ru => ru.DdUser.LeaderboardId).Distinct()];
         Task<IReadOnlyList<EntryResponse>> lbTask = _webService.GetLbPlayers(lbIdsToRequest);
         Task<int> countTask = _userRepository.GetCountAsync();
 
         await Task.WhenAll(lbTask, countTask);
 
-        Dictionary<uint, EntryResponse> lbPlayerById = lbTask.Result.ToDictionary(lbp => (uint)lbp.Id);
+        Dictionary<uint, EntryResponse> lbPlayerById = lbTask.Result.ToDictionary(lbp => lbp.Id);
         int totalRegistered = countTask.Result;
 
         List<UserRoleUpdate> roleUpdates = [];
         foreach (var ru in registeredUsers)
         {
-            if (!lbPlayerById.TryGetValue((uint)ru.DdUser.LeaderboardId, out EntryResponse? lbPlayer))
+            if (!lbPlayerById.TryGetValue(ru.DdUser.LeaderboardId, out EntryResponse? lbPlayer))
                 continue;
 
             RoleChange change = GetRoleChange(ru.GuildUser!.RoleIds, lbPlayer, formerWrPlayerIds, roleContext);
@@ -89,7 +89,7 @@ public sealed class ScoreRoleService(
             if (ddUser is null)
                 return Result.Failure<RoleChange>("User is not registered.");
 
-            uint lbId = (uint)ddUser.LeaderboardId;
+            uint lbId = ddUser.LeaderboardId;
 
             Task<IReadOnlyList<EntryResponse>> lbPlayerTask = _webService.GetLbPlayers([lbId]);
             Task<GetWorldRecordDataContainer> wrTask = _webService.GetWorldRecords();
@@ -104,7 +104,7 @@ public sealed class ScoreRoleService(
                 return Result.Failure<RoleChange>("Player not found on leaderboard.");
             }
 
-            HashSet<int> formerWrPlayerIds = [.. wrTask.Result.WorldRecordHolders.Select(wrh => wrh.Id)];
+            HashSet<uint> formerWrPlayerIds = [.. wrTask.Result.WorldRecordHolders.Select(wrh => wrh.Id)];
             RoleContext roleContext = new(scoreRolesTask.Result, rankRolesTask.Result, _baseRoles);
 
             HashSet<ulong> allPossibleRoles = [.. _baseRoles, .. roleContext.AllPossibleRoles];
@@ -129,7 +129,7 @@ public sealed class ScoreRoleService(
     private static RoleChange GetRoleChange(
         IReadOnlyCollection<ulong> userRoleIds,
         EntryResponse lbUser,
-        HashSet<int> formerWrPlayerIds,
+        HashSet<uint> formerWrPlayerIds,
         RoleContext roleContext)
     {
         ulong scoreRoleToKeep = GetScoreRoleToKeep(lbUser.Time, roleContext.ScoreRoles).Value;

@@ -321,7 +321,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
 
     #endregion
 
-    private static DdStatsFullRunResponse CreateDdStatsRun(string playerName, int playerId)
+    private static DdStatsFullRunResponse CreateDdStatsRun(string playerName, uint playerId)
     {
         return new DdStatsFullRunResponse
         {

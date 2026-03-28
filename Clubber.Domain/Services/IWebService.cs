@@ -9,7 +9,7 @@ public interface IWebService
 
     Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
 
-    Task<string?> GetCountryCodeForplayer(int lbId);
+    Task<string?> GetCountryCodeForplayer(uint lbId);
 
     Task<GetPlayerHistory?> GetPlayerHistory(uint lbId);
 

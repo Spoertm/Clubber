@@ -42,7 +42,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
                 {
                     Username = GetUserName(data, ref bytePosition),
                     Rank = BitConverter.ToInt32(data, bytePosition),
-                    Id = BitConverter.ToInt32(data, bytePosition + 4),
+                    Id = BitConverter.ToUInt32(data, bytePosition + 4),
                     Time = BitConverter.ToInt32(data, bytePosition + 12),
                     Kills = BitConverter.ToInt32(data, bytePosition + 16),
                     Gems = BitConverter.ToInt32(data, bytePosition + 28),
@@ -93,7 +93,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         return entries;
     }
 
-    public async Task<string?> GetCountryCodeForplayer(int lbId)
+    public async Task<string?> GetCountryCodeForplayer(uint lbId)
     {
         try
         {
@@ -231,7 +231,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
             {
                 Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength)),
                 Rank = br.ReadInt32(),
-                Id = br.ReadInt32(),
+                Id = br.ReadUInt32(),
             };
 
             _ = br.ReadInt32();

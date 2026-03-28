@@ -62,7 +62,7 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
 
         // Fetch world records once for all users
         GetWorldRecordDataContainer worldRecords = await webService.GetWorldRecords();
-        HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
+        HashSet<uint> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
 
         BulkUserRoleUpdates bulkUpdate = await scoreRoleService.GetBulkUserRoleUpdates(ddPals.Users, formerWrPlayerIds);
         sw.Stop();

@@ -1,13 +1,10 @@
-﻿// Taken from devildaggers.info and modified
-// Credit goes to Noah Stolk https://github.com/NoahStolk
-
-namespace Clubber.Domain.Models.Responses;
+﻿namespace Clubber.Domain.Models.Responses;
 
 public sealed class EntryResponse
 {
     public int Rank { get; set; }
 
-    public int Id { get; set; }
+    public uint Id { get; set; }
 
     public string Username { get; set; } = null!;
 

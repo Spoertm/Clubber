@@ -3,7 +3,7 @@
 namespace Clubber.Web.Models;
 
 internal readonly record struct DdNewsItemDto(
-    int LeaderboardId,
+    uint LeaderboardId,
     EntryResponse OldEntry,
     EntryResponse NewEntry,
     DateTimeOffset TimeOfOccurenceUtc,

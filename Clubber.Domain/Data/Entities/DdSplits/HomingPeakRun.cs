@@ -6,7 +6,7 @@ public sealed class HomingPeakRun
 
     public string PlayerName { get; set; } = null!;
 
-    public int PlayerLeaderboardId { get; set; }
+    public uint PlayerLeaderboardId { get; set; }
 
     public int HomingPeak { get; set; }
 

@@ -134,7 +134,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 
         IGuildUser guildUser = IntegrationTestFixture.CreateMockGuildUser(userId, "TestUser", scoreRoleId);
 
-        HashSet<int> formerWrPlayerIds = [lbId];
+        HashSet<uint> formerWrPlayerIds = [lbId];
         BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates([guildUser], formerWrPlayerIds);
 
         Assert.Single(result.UserRoleUpdates);
@@ -160,7 +160,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 
         IGuildUser guildUser = IntegrationTestFixture.CreateMockGuildUser(userId, "TestUser", scoreRoleId);
 
-        HashSet<int> formerWrPlayerIds = [lbId];
+        HashSet<uint> formerWrPlayerIds = [lbId];
         BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates([guildUser], formerWrPlayerIds);
 
         Assert.Single(result.UserRoleUpdates);

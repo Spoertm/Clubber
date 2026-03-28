@@ -32,7 +32,7 @@ public sealed class DdNewsPostService(
 
         await serviceCollection.NewsRepository.RemoveOlderThanAsync(TimeSpan.FromDays(1));
 
-        LeaderboardSnapshot leaderboardData = await GetLeaderboardData(serviceCollection, stoppingToken);
+        LeaderboardSnapshot leaderboardData = await GetLeaderboardData(serviceCollection);
         if (leaderboardData.IsEmpty)
         {
             Log.Information("No leaderboard data available");
@@ -48,11 +48,10 @@ public sealed class DdNewsPostService(
         }
     }
 
-    private static async Task<LeaderboardSnapshot> GetLeaderboardData(
-        ServiceCollection services, CancellationToken cancellationToken)
+    private static async Task<LeaderboardSnapshot> GetLeaderboardData(ServiceCollection services)
     {
         EntryResponse[] cachedEntries = await services.LeaderboardRepository.GetCachedEntriesAsync();
-        Dictionary<int, EntryResponse> currentEntries = cachedEntries.ToDictionary(e => e.Id);
+        Dictionary<uint, EntryResponse> currentEntries = cachedEntries.ToDictionary(e => e.Id);
 
         ICollection<EntryResponse> newEntries = await services.WebService.GetSufficientLeaderboardEntries(MinimumScoreToTrack);
         if (newEntries.Count == 0)
@@ -67,7 +66,7 @@ public sealed class DdNewsPostService(
     private static bool LeaderboardChanged(
         IEnumerable<EntryResponse> oldEntries, ICollection<EntryResponse> newEntries)
     {
-        Dictionary<int, int> oldLookup = oldEntries.ToDictionary(e => e.Id, e => e.Time);
+        Dictionary<uint, int> oldLookup = oldEntries.ToDictionary(e => e.Id, e => e.Time);
         return newEntries.Count != oldLookup.Count ||
                newEntries.Any(entry => !oldLookup.TryGetValue(entry.Id, out int oldTime) || oldTime != entry.Time);
     }
@@ -157,15 +156,15 @@ public sealed class DdNewsPostService(
             update.Nth);
     }
 
-    private static async Task<string?> GetCountryCode(int playerId, ServiceCollection serviceCollection)
+    private static async Task<string?> GetCountryCode(uint playerLbId, ServiceCollection serviceCollection)
     {
         try
         {
-            return await serviceCollection.WebService.GetCountryCodeForplayer(playerId);
+            return await serviceCollection.WebService.GetCountryCodeForplayer(playerLbId);
         }
         catch (Exception ex)
         {
-            Log.Debug(ex, "Could not fetch country code for player {PlayerId}", playerId);
+            Log.Debug(ex, "Could not fetch country code for player {PlayerId}", playerLbId);
             return null;
         }
     }
@@ -195,12 +194,12 @@ public sealed class DdNewsPostService(
     }
 
     private readonly record struct LeaderboardSnapshot(
-        IReadOnlyDictionary<int, EntryResponse> CurrentEntries,
+        IReadOnlyDictionary<uint, EntryResponse> CurrentEntries,
         ICollection<EntryResponse> NewEntries,
         bool HasChanges)
     {
         public bool IsEmpty => NewEntries.Count == 0;
-        public static LeaderboardSnapshot Empty => new(new Dictionary<int, EntryResponse>(), Array.Empty<EntryResponse>(), false);
+        public static LeaderboardSnapshot Empty => new(new Dictionary<uint, EntryResponse>(), Array.Empty<EntryResponse>(), false);
     }
 
     private readonly record struct NewsUpdate(

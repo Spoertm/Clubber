@@ -56,7 +56,7 @@ public sealed class OwnerCommands(
 
             // Fetch world records once for all users
             GetWorldRecordDataContainer worldRecords = await webService.GetWorldRecords();
-            HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
+            HashSet<uint> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
 
             BulkUserRoleUpdates response = await scoreRoleService.GetBulkUserRoleUpdates(guild.Users, formerWrPlayerIds);
             sw.Stop();

@@ -27,7 +27,7 @@ public sealed class UserRepository(AppDbContext dbContext) : IUserRepository
         return await dbContext.DdPlayers.CountAsync();
     }
 
-    public async Task<DdUser?> FindAsync(int leaderboardId)
+    public async Task<DdUser?> FindAsync(uint leaderboardId)
     {
         return await dbContext.DdPlayers.FindAsync(leaderboardId);
     }
@@ -42,7 +42,7 @@ public sealed class UserRepository(AppDbContext dbContext) : IUserRepository
         return await dbContext.DdPlayers.AsNoTracking().AnyAsync(ddp => ddp.DiscordId == discordId);
     }
 
-    public async Task<bool> LeaderboardIdExistsAsync(int leaderboardId)
+    public async Task<bool> LeaderboardIdExistsAsync(uint leaderboardId)
     {
         return await dbContext.DdPlayers.AsNoTracking().AnyAsync(ddp => ddp.LeaderboardId == leaderboardId);
     }
@@ -56,7 +56,7 @@ public sealed class UserRepository(AppDbContext dbContext) : IUserRepository
     {
         try
         {
-            DdUser newDdUser = new(discordId, (int)leaderboardId);
+            DdUser newDdUser = new(discordId, leaderboardId);
             await dbContext.DdPlayers.AddAsync(newDdUser);
             await dbContext.SaveChangesAsync();
             return Result.Success();

@@ -68,9 +68,9 @@ public sealed class RegistrationRequestHandler
         ComponentBuilder cb = new();
 
         // User specified an ID
-        if (message.Content.FindFirstInt() is var foundId and > 0)
+        if (message.Content.FindFirstUint() is uint foundId)
         {
-            Result<EntryResponse> playerInfoResponse = await GetEntryResponse((uint)foundId);
+            Result<EntryResponse> playerInfoResponse = await GetEntryResponse(foundId);
 
             string? description;
             if (playerInfoResponse.IsSuccess)

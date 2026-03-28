@@ -50,7 +50,7 @@ public sealed class GameInfo
     public int Id { get; set; }
 
     [JsonPropertyName("player_id")]
-    public int PlayerId { get; set; }
+    public uint PlayerId { get; set; }
 
     [JsonPropertyName("player_game_time")]
     public int PlayerGameTime { get; set; }

@@ -38,21 +38,21 @@ public static class ExtensionMethods
         return count;
     }
 
-    public static int FindFirstInt(this string? input)
+    public static uint? FindFirstUint(this string? input)
     {
         if (string.IsNullOrEmpty(input))
         {
-            return -1;
+            return null;
         }
 
         foreach (string part in input.Split(' ', StringSplitOptions.RemoveEmptyEntries))
         {
-            if (int.TryParse(part, out int result))
+            if (uint.TryParse(part, out uint result))
             {
                 return result;
             }
         }
 
-        return -1;
+        return null;
     }
 }

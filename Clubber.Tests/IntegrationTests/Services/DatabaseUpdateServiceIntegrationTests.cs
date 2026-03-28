@@ -130,7 +130,7 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
             IntegrationTestFixture.CreateMockGuildUser(user4Id, "User4", TestData.ScoreRoles[1200])
         ];
 
-        HashSet<int> formerWrPlayerIds = [lbId4];
+        HashSet<uint> formerWrPlayerIds = [lbId4];
         BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers, formerWrPlayerIds);
 
         Assert.Equal(3, result.UserRoleUpdates.Count);

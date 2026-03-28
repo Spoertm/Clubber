@@ -6,7 +6,7 @@ public sealed class DdNewsItem
 {
     public int ItemId { get; init; }
 
-    public required int LeaderboardId { get; set; }
+    public required uint LeaderboardId { get; set; }
 
     public required EntryResponse OldEntry { get; set; }
 
