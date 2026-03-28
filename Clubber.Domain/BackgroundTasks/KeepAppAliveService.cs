@@ -25,17 +25,19 @@ public sealed class KeepAppAliveService(IHttpClientFactory httpClientFactory) : 
 
         using HttpClient client = httpClientFactory.CreateClient(nameof(KeepAppAliveService));
 
-        IEnumerable<Task> tasks = urls.Select(async url =>
+        Task[] tasks = [.. urls.Select(async url =>
         {
             try
             {
-                _ = await client.GetStringAsync(new Uri(url), stoppingToken).ConfigureAwait(false);
+                using HttpResponseMessage response = await client
+                    .SendAsync(new(HttpMethod.Head, url), HttpCompletionOption.ResponseHeadersRead, stoppingToken)
+                    .ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to ping {AppUrl}", url);
             }
-        });
+        })];
 
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
