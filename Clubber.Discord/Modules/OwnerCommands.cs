@@ -3,6 +3,9 @@ using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
 using Clubber.Domain.Models;
+using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
+using Clubber.Domain.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
@@ -14,7 +17,7 @@ namespace Clubber.Discord.Modules;
 [Name("👑 Owner Commands")]
 [global::Discord.Interactions.RequireOwner]
 [DefaultMemberPermissions(GuildPermission.Administrator)]
-public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper)
+public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHelper discordHelper, IWebService webService)
     : InteractionModuleBase<SocketInteractionContext>
 {
     [SlashCommand("update-database", "Force update the database and user roles")]
@@ -47,7 +50,12 @@ public sealed class OwnerCommands(ScoreRoleService scoreRoleService, IDiscordHel
             SocketGuild guild = Context.Guild;
 
             Stopwatch sw = Stopwatch.StartNew();
-            BulkUserRoleUpdates response = await scoreRoleService.GetBulkUserRoleUpdates(guild.Users);
+
+            // Fetch world records once for all users
+            GetWorldRecordDataContainer worldRecords = await webService.GetWorldRecords();
+            HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
+
+            BulkUserRoleUpdates response = await scoreRoleService.GetBulkUserRoleUpdates(guild.Users, formerWrPlayerIds);
             sw.Stop();
 
             if (response.UserRoleUpdates.Count == 0)

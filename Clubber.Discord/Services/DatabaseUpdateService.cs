@@ -4,6 +4,9 @@ using Clubber.Discord.Models;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Models;
+using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Models.Responses.DdInfo;
+using Clubber.Domain.Services;
 using Discord;
 using Discord.Net;
 using Discord.Rest;
@@ -25,6 +28,7 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
         await using AsyncServiceScope scope = services.CreateAsyncScope();
         ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
         IDiscordHelper discordHelper = scope.ServiceProvider.GetRequiredService<IDiscordHelper>();
+        IWebService webService = scope.ServiceProvider.GetRequiredService<IWebService>();
 
         SocketGuild ddPals = discordHelper.GetGuild(_config.DdPalsId)
             ?? throw new Exception("DD Pals server not found with the provided ID.");
@@ -33,7 +37,7 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
 
         // Execute with retry logic
         Result<BulkUserRoleUpdates> result = await ExecuteWithRetryAsync(
-            () => ExecuteUpdateAsync(scoreRoleService, discordHelper, ddPals, statusMsg),
+            () => ExecuteUpdateAsync(scoreRoleService, discordHelper, webService, ddPals, statusMsg),
             maxRetries: 5,
             onRetry: async (attempt, ex) =>
             {
@@ -51,11 +55,17 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
     private async Task<Result<BulkUserRoleUpdates>> ExecuteUpdateAsync(
         ScoreRoleService scoreRoleService,
         IDiscordHelper discordHelper,
+        IWebService webService,
         SocketGuild ddPals,
         RestUserMessage statusMsg)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        BulkUserRoleUpdates bulkUpdate = await scoreRoleService.GetBulkUserRoleUpdates(ddPals.Users);
+
+        // Fetch world records once for all users
+        GetWorldRecordDataContainer worldRecords = await webService.GetWorldRecords();
+        HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
+
+        BulkUserRoleUpdates bulkUpdate = await scoreRoleService.GetBulkUserRoleUpdates(ddPals.Users, formerWrPlayerIds);
         sw.Stop();
 
         List<UserRoleUpdate> successfulUpdates = [];

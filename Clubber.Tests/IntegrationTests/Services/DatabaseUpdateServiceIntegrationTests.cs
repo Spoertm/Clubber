@@ -55,7 +55,7 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
             IntegrationTestFixture.CreateMockGuildUser(unregisteredUserId, "NotRegistered", AppConfig.ScoreRoles[500])
         ];
 
-        BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers);
+        BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers, []);
 
         Assert.Single(result.UserRoleUpdates);
         Assert.Equal(registeredUserId, result.UserRoleUpdates.First().User.Id);
@@ -81,7 +81,7 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
             IntegrationTestFixture.CreateMockGuildUser(userId, "TopPlayer", scoreRole500)
         ];
 
-        BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers);
+        BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers, []);
 
         Assert.Single(result.UserRoleUpdates);
         UserRoleUpdate update = result.UserRoleUpdates.First();
@@ -127,7 +127,8 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
             IntegrationTestFixture.CreateMockGuildUser(user4Id, "User4", AppConfig.ScoreRoles[1200])
         ];
 
-        BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers);
+        HashSet<int> formerWrPlayerIds = [lbId4];
+        BulkUserRoleUpdates result = await _scoreRoleService.GetBulkUserRoleUpdates(guildUsers, formerWrPlayerIds);
 
         Assert.Equal(3, result.UserRoleUpdates.Count);
 

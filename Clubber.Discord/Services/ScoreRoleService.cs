@@ -32,7 +32,7 @@ public sealed class ScoreRoleService(
         return [.. AppConfig.ScoreRoles.Values, .. AppConfig.RankRoles.Values, AppConfig.FormerWrRoleId, .. uselessRoles];
     }
 
-    public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers)
+    public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers, HashSet<int> formerWrPlayerIds)
     {
         // Single DB call to get registered users
         List<DdUser> dbUsers = await _userRepository.GetByDiscordIdsAsync(guildUsers.Select(gu => gu.Id));
@@ -49,10 +49,6 @@ public sealed class ScoreRoleService(
         // Fetch leaderboard data
         uint[] lbIdsToRequest = [.. registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId).Distinct()];
         IReadOnlyList<EntryResponse> lbPlayers = await _webService.GetLbPlayers(lbIdsToRequest);
-
-        // Fetch world records
-        GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
-        HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
 
         // Build dictionary for leaderboard players
         Dictionary<uint, EntryResponse> lbPlayerById = lbPlayers.ToDictionary(lbp => (uint)lbp.Id);
