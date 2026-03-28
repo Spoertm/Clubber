@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.Serialization;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
@@ -101,13 +102,18 @@ public sealed class ScoreRoleService(
             }
 
             uint lbId = (uint)ddUser.LeaderboardId;
-            IReadOnlyList<EntryResponse> lbPlayerList = await _webService.GetLbPlayers([lbId]);
 
-            GetWorldRecordDataContainer worldRecords = await _webService.GetWorldRecords();
-            HashSet<int> formerWrPlayerIds = [.. worldRecords.WorldRecordHolders.Select(wrh => wrh.Id)];
+            Task<IReadOnlyList<EntryResponse>> lbPlayerTask = _webService.GetLbPlayers([lbId]);
+            Task<GetWorldRecordDataContainer> wrTask = _webService.GetWorldRecords();
+            Task<ImmutableSortedDictionary<int, ulong>> scoreRolesTask = _roleConfigService.GetScoreRolesAsync();
+            Task<ImmutableSortedDictionary<int, ulong>> rankRolesTask = _roleConfigService.GetRankRolesAsync();
 
-            IReadOnlyDictionary<int, ulong> scoreRoles = await _roleConfigService.GetScoreRolesAsync();
-            IReadOnlyDictionary<int, ulong> rankRoles = await _roleConfigService.GetRankRolesAsync();
+            await Task.WhenAll(lbPlayerTask, wrTask, scoreRolesTask, rankRolesTask);
+
+            IReadOnlyList<EntryResponse> lbPlayerList = lbPlayerTask.Result;
+            HashSet<int> formerWrPlayerIds = [.. wrTask.Result.WorldRecordHolders.Select(wrh => wrh.Id)];
+            IReadOnlyDictionary<int, ulong> scoreRoles = scoreRolesTask.Result;
+            IReadOnlyDictionary<int, ulong> rankRoles = rankRolesTask.Result;
 
             RoleChange change = GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds, scoreRoles, rankRoles);
             return Result.Success(change);
