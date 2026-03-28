@@ -1,4 +1,4 @@
-using Clubber.Domain.Models.DdSplits;
+using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Models.Responses;
 
 namespace Clubber.Domain.Repositories;

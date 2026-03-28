@@ -1,4 +1,4 @@
-using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 

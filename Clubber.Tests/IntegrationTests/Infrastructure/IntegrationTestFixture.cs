@@ -1,5 +1,5 @@
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Models;
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Clubber.Domain.Repositories;

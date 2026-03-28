@@ -1,4 +1,4 @@
-﻿namespace Clubber.Domain.Models;
+﻿namespace Clubber.Domain.Data.Entities;
 
 public sealed record DdUser
 {

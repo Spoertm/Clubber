@@ -1,6 +1,7 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;

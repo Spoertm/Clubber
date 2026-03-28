@@ -1,9 +1,9 @@
 ﻿using System.Runtime.Serialization;
 using Clubber.Discord.Helpers;
 using Clubber.Domain.Configuration;
+using Clubber.Domain.Data.Entities;
+using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models;
-using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Repositories;

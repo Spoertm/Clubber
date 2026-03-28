@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Exceptions;

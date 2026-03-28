@@ -1,8 +1,8 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;

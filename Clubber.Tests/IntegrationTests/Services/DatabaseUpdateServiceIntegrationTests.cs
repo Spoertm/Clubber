@@ -2,6 +2,7 @@ using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 using Clubber.Domain.Repositories;
 using Clubber.Tests.IntegrationTests.Infrastructure;

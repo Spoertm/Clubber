@@ -1,5 +1,5 @@
+using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Xunit;
 

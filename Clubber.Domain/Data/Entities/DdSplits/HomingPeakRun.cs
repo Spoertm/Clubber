@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Clubber.Domain.Models.DdSplits;
+namespace Clubber.Domain.Data.Entities.DdSplits;
 
 public sealed class HomingPeakRun
 {

@@ -1,4 +1,4 @@
-using Clubber.Domain.Models.Responses;
+using Clubber.Domain.Data.Entities;
 
 namespace Clubber.Domain.Repositories;
 

@@ -1,3 +1,4 @@
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 
 namespace Clubber.Domain.Repositories;

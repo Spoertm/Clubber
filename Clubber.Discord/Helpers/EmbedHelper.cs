@@ -1,7 +1,7 @@
 using System.Text;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Models.DdSplits;
+using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Discord;

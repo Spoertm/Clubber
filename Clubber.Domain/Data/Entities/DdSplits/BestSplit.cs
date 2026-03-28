@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Clubber.Domain.Models.Responses;
 
-namespace Clubber.Domain.Models.DdSplits;
+namespace Clubber.Domain.Data.Entities.DdSplits;
 
 public sealed class BestSplit
 {

@@ -1,5 +1,5 @@
-using Clubber.Domain.Models;
-using Clubber.Domain.Models.DdSplits;
+using Clubber.Domain.Data.Entities;
+using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

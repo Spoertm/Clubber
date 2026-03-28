@@ -1,4 +1,6 @@
-﻿namespace Clubber.Domain.Models.Responses;
+﻿using Clubber.Domain.Models.Responses;
+
+namespace Clubber.Domain.Data.Entities;
 
 public sealed class DdNewsItem
 {
