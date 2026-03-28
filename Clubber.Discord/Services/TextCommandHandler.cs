@@ -1,5 +1,4 @@
 using System.Reflection;
-using Clubber.Discord.Logging;
 using Clubber.Discord.Models;
 using Clubber.Domain.Configuration;
 using Discord;
@@ -29,8 +28,14 @@ public sealed class TextCommandHandler
         _scopeFactory = scopeFactory;
         _config = config.Value;
 
-        _commandService.Log += DiscordLogHandler.Log;
+        _commandService.Log += LogDiscordMessage;
         _client.MessageReceived += HandleCommandAsync;
+    }
+
+    private static Task LogDiscordMessage(LogMessage msg)
+    {
+        Log.Write(msg.Severity.ToLogEventLevel(), msg.Exception, "[Discord] {Source}: {Message}", msg.Source, msg.Message);
+        return Task.CompletedTask;
     }
 
     public async Task InstallCommandsAsync()

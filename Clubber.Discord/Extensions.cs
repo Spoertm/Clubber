@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Discord;
 using Discord.WebSocket;
+using Serilog.Events;
 
 namespace Clubber.Discord;
 
@@ -27,4 +28,15 @@ public static class Extensions
             await originalMessage.ModifyAsync(msg => msg.Components = new ComponentBuilder().Build());
         }
     }
+
+    public static LogEventLevel ToLogEventLevel(this LogSeverity severity) => severity switch
+    {
+        LogSeverity.Critical => LogEventLevel.Fatal,
+        LogSeverity.Error => LogEventLevel.Error,
+        LogSeverity.Warning => LogEventLevel.Warning,
+        LogSeverity.Info => LogEventLevel.Information,
+        LogSeverity.Verbose => LogEventLevel.Verbose,
+        LogSeverity.Debug => LogEventLevel.Debug,
+        _ => LogEventLevel.Information,
+    };
 }

@@ -1,5 +1,4 @@
 using System.Reflection;
-using Clubber.Discord.Logging;
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
 using Discord;
@@ -38,8 +37,14 @@ public sealed class ClubberDiscordClient : DiscordSocketClient
             DefaultRunMode = RunMode.Sync,
         });
 
-        Log += DiscordLogHandler.Log;
-        _interactions.Log += DiscordLogHandler.Log;
+        Log += LogDiscordMessage;
+        _interactions.Log += LogDiscordMessage;
+    }
+
+    private static Task LogDiscordMessage(LogMessage msg)
+    {
+        Serilog.Log.Write(msg.Severity.ToLogEventLevel(), msg.Exception, "[Discord] {Source}: {Message}", msg.Source, msg.Message);
+        return Task.CompletedTask;
     }
 
     public async Task InitAsync()
