@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Clubber.Domain.Data;
 using Clubber.Domain.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;

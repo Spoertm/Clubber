@@ -4,6 +4,7 @@ using Clubber.Discord.Models;
 using Clubber.Discord.Modules;
 using Clubber.Discord.Services;
 using Clubber.Domain.BackgroundTasks;
+using Clubber.Domain.Data;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;

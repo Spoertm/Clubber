@@ -1,3 +1,4 @@
+using Clubber.Domain.Data;
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 using Clubber.Domain.Services;

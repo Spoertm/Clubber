@@ -4,7 +4,7 @@ using Clubber.Domain.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Clubber.Domain.Services;
+namespace Clubber.Domain.Data;
 
 public class AppDbContext : DbContext
 {
