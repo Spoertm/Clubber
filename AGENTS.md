@@ -195,7 +195,7 @@ In development, the app uses `appsettings.Development.json`:
 ```
 
 ### Database
-The application uses Entity Framework Core with PostgreSQL. The `DbService` class configures the connection via the `PostgresConnectionString` environment variable.
+The application uses Entity Framework Core 10.0 with PostgreSQL. The `AppDbContext` class configures the connection via the `PostgresConnectionString` environment variable.
 
 ## Code Style Guidelines
 
