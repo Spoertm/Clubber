@@ -29,7 +29,7 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
         IServiceScopeFactory scopeFactory = _fixture.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
         RoleConfigService roleConfigService = _fixture.ServiceProvider.GetRequiredService<RoleConfigService>();
 
-        _scoreRoleService = new ScoreRoleService(appConfig, scopeFactory, _fixture.WebService, userRepository, roleConfigService);
+        _scoreRoleService = new ScoreRoleService(appConfig, _fixture.WebService, userRepository, roleConfigService);
         Substitute.For<IDiscordHelper>();
     }
 
