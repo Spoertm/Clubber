@@ -17,12 +17,16 @@ public sealed class LeaderboardImageGenerator
     private const int FontSize = 50;
     private const int TextOriginY = (ImageHeight / 2) - (FontSize / 2);
 
+    private static readonly string _assetsBasePath = Path.Combine(AppContext.BaseDirectory, "Assets");
+    private static readonly string _fontPath = Path.Combine(_assetsBasePath, "GoetheBold.ttf");
+    private static readonly string _flagsBasePath = Path.Combine(_assetsBasePath, "Flags");
+
     private readonly Font _goetheBoldFont;
 
     public LeaderboardImageGenerator()
     {
         FontCollection collection = new();
-        string fontPath = Path.Combine(AppContext.BaseDirectory, "Data", "GoetheBold.ttf");
+        string fontPath = _fontPath;
         FontFamily family = collection.Add(fontPath, CultureInfo.InvariantCulture);
         _goetheBoldFont = family.CreateFont(FontSize, FontStyle.Bold);
     }
@@ -59,7 +63,7 @@ public sealed class LeaderboardImageGenerator
             return null;
         }
 
-        string baseFlagPath = Path.Combine(AppContext.BaseDirectory, "Data", "Flags");
+        string baseFlagPath = _flagsBasePath;
         string flagPath = Path.Combine(baseFlagPath, $"{playerCountryCode}.png");
         if (File.Exists(flagPath))
         {
