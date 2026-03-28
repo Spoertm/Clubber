@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Clubber.Discord/Clubber.Discord.csproj" />
+    <Project Path="Clubber.Domain/Clubber.Domain.csproj" />
+    <Project Path="Clubber.Web/Clubber.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="Clubber.Tests/Clubber.Tests.csproj" />
+  </Folder>
+</Solution>
