@@ -5,12 +5,15 @@ using Clubber.Domain.Configuration;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Clubber.Domain.Services;
 
-public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig appConfig) : IWebService
+public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<AppConfig> appConfig) : IWebService
 {
+    private readonly AppConfig _appConfig = appConfig.Value;
+
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -27,7 +30,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
 
             using FormUrlEncodedContent content = new(postValues);
             using HttpClient client = httpClientFactory.CreateClient();
-            using HttpResponseMessage response = await client.PostAsync(appConfig.Endpoints.GetMultipleUsersById, content);
+            using HttpResponseMessage response = await client.PostAsync(_appConfig.Endpoints.GetMultipleUsersById, content);
             response.EnsureSuccessStatusCode();
             byte[] data = await response.Content.ReadAsByteArrayAsync();
 
@@ -94,7 +97,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     {
         try
         {
-            Uri uri = new(string.Format(appConfig.Endpoints.GetCountryCodeForPlayer, lbId));
+            Uri uri = new(string.Format(_appConfig.Endpoints.GetCountryCodeForPlayer, lbId));
             using HttpClient client = httpClientFactory.CreateClient();
             using HttpResponseMessage response = await client.GetAsync(uri);
             response.EnsureSuccessStatusCode();
@@ -114,7 +117,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     {
         try
         {
-            Uri uri = new(string.Format(appConfig.Endpoints.GetPlayerHistory, lbId));
+            Uri uri = new(string.Format(_appConfig.Endpoints.GetPlayerHistory, lbId));
             using HttpClient client = httpClientFactory.CreateClient();
             using HttpResponseMessage response = await client.GetAsync(uri);
             response.EnsureSuccessStatusCode();
@@ -131,7 +134,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     public async Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri)
     {
         uint? runId = ExtractRunIdFromUri(uri) ?? throw new ClubberException("Invalid ddstats URL.");
-        Uri fullRunReqUri = new(string.Format(appConfig.Endpoints.GetDdstatsResponse, runId));
+        Uri fullRunReqUri = new(string.Format(_appConfig.Endpoints.GetDdstatsResponse, runId));
         using HttpClient client = httpClientFactory.CreateClient();
         using HttpResponseMessage response = await client.GetAsync(fullRunReqUri);
         response.EnsureSuccessStatusCode();
@@ -144,7 +147,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
         try
         {
             using HttpClient client = httpClientFactory.CreateClient();
-            using HttpResponseMessage response = await client.GetAsync(appConfig.Endpoints.GetWorldRecords);
+            using HttpResponseMessage response = await client.GetAsync(_appConfig.Endpoints.GetWorldRecords);
             response.EnsureSuccessStatusCode();
             await using Stream responseStream = await response.Content.ReadAsStreamAsync();
             return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)
@@ -201,7 +204,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, AppConfig a
     {
         using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("offset", (rankStart - 1).ToString())]);
         using HttpClient client = httpClientFactory.CreateClient();
-        using HttpResponseMessage response = await client.PostAsync(appConfig.Endpoints.GetScores, content);
+        using HttpResponseMessage response = await client.PostAsync(_appConfig.Endpoints.GetScores, content);
         response.EnsureSuccessStatusCode();
 
         using BinaryReader br = new(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));
