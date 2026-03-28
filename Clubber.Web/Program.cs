@@ -142,7 +142,7 @@ internal static class Program
         app.MapOpenApi();
         app.MapScalarApiReference(options =>
         {
-            options.Title = "Clubber API Documentation";
+            options.Title = "Clubber API";
         });
 
         // Map MVC routes FIRST
