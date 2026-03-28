@@ -202,7 +202,7 @@ The application uses Entity Framework Core 10.0 with PostgreSQL. The `AppDbConte
 ### EditorConfig
 The project uses `.editorconfig` for consistent code formatting:
 
-- **Indentation**: Tabs (size 4) for C# files
+- **Indentation**: Spaces (size 4) for all files
 - **Project Files**: Spaces (size 2) for `.csproj` files
 - **Encoding**: UTF-8
 - **Line Endings**: Unix-style with final newlines
@@ -228,7 +228,7 @@ The project includes multiple static analysis tools:
 - **Roslynator.Analyzers** - Additional analyzers
 - **AnalysisMode**: Set to `All` for maximum analysis
 
-Many StyleCop rules are explicitly suppressed (see `.editorconfig` lines 196-226).
+Many StyleCop rules are explicitly suppressed (see `.editorconfig` for specific rule severities).
 
 ## Testing Strategy
 
