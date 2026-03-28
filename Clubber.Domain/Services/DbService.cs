@@ -28,18 +28,6 @@ public class DbService : DbContext
 
     public DbSet<HomingPeakRun> TopHomingPeaks => Set<HomingPeakRun>();
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Only configure PostgreSQL if options weren't already configured (e.g., via DI with DbContextOptions)
-        if (!optionsBuilder.IsConfigured)
-        {
-            string? postgresConnectionString = Environment.GetEnvironmentVariable("PostgresConnectionString");
-            ArgumentException.ThrowIfNullOrEmpty(postgresConnectionString);
-
-            optionsBuilder.UseNpgsql(postgresConnectionString);
-        }
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("clubber");
