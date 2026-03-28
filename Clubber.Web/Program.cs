@@ -5,14 +5,12 @@ using Clubber.Discord.Modules;
 using Clubber.Discord.Services;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Helpers;
-using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
 using Clubber.Web.Configuration;
 using Clubber.Web.Endpoints;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -24,9 +22,6 @@ internal static class Program
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
         CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
-#pragma warning disable CS0618 // Type or member is obsolete
-        NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson([typeof(EntryResponse), typeof(GameInfo)]);
-#pragma warning restore CS0618 // Type or member is obsolete
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
