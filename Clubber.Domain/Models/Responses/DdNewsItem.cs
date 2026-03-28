@@ -1,11 +1,16 @@
 ﻿namespace Clubber.Domain.Models.Responses;
 
-public sealed record DdNewsItem(
-    int LeaderboardId,
-    EntryResponse OldEntry,
-    EntryResponse NewEntry,
-    DateTimeOffset TimeOfOccurenceUtc,
-    int Nth)
+public sealed class DdNewsItem
 {
     public int ItemId { get; init; }
+
+    public required int LeaderboardId { get; set; }
+
+    public required EntryResponse OldEntry { get; set; }
+
+    public required EntryResponse NewEntry { get; set; }
+
+    public required DateTimeOffset TimeOfOccurenceUtc { get; set; }
+
+    public required int Nth { get; set; }
 }

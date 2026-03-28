@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.DdSplits;
 using Clubber.Domain.Models.Responses;
@@ -42,19 +41,9 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<HomingPeakRun>().Property(hpr => hpr.Id).ValueGeneratedOnAdd();
 
-        // Configure value converters for complex types to support SQLite/InMemory testing
-        // PostgreSQL uses jsonb type which handles JSON automatically
-        ValueConverter<EntryResponse, string> entryResponseConverter = new(
-            v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-            v => JsonSerializer.Deserialize<EntryResponse>(v, (JsonSerializerOptions)null!)!);
-
-        ValueConverter<GameInfo?, string> gameInfoConverter = new(
-            v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-            v => JsonSerializer.Deserialize<GameInfo>(v, (JsonSerializerOptions)null!)!);
-
-        modelBuilder.Entity<DdNewsItem>().Property(e => e.OldEntry).HasConversion(entryResponseConverter);
-        modelBuilder.Entity<DdNewsItem>().Property(e => e.NewEntry).HasConversion(entryResponseConverter);
-        modelBuilder.Entity<BestSplit>().Property(e => e.GameInfo).HasConversion(gameInfoConverter);
+        modelBuilder.Entity<DdNewsItem>().ComplexProperty(dni => dni.OldEntry);
+        modelBuilder.Entity<DdNewsItem>().ComplexProperty(dni => dni.NewEntry);
+        modelBuilder.Entity<BestSplit>().ComplexProperty(bs => bs.GameInfo, g => g.IsRequired(false));
 
         // Configure DateTimeOffset converter for SQLite compatibility
         ValueConverter<DateTimeOffset, DateTime> dateTimeOffsetConverter = new(

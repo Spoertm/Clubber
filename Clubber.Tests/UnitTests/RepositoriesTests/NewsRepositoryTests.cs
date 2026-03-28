@@ -245,12 +245,13 @@ public sealed class NewsRepositoryTests : IDisposable
 
     private static DdNewsItem CreateDdNewsItem(int leaderboardId, int nth, DateTimeOffset? timeOfOccurence = null)
     {
-        return new DdNewsItem(
-            LeaderboardId: leaderboardId,
-            OldEntry: new EntryResponse { Id = leaderboardId, Username = $"Player{leaderboardId}" },
-            NewEntry: new EntryResponse { Id = leaderboardId, Username = $"Player{leaderboardId}" },
-            TimeOfOccurenceUtc: timeOfOccurence ?? DateTimeOffset.UtcNow,
-            Nth: nth
-        );
+        return new DdNewsItem
+        {
+            LeaderboardId = leaderboardId,
+            OldEntry = new EntryResponse { Id = leaderboardId, Username = $"Player{leaderboardId}" },
+            NewEntry = new EntryResponse { Id = leaderboardId, Username = $"Player{leaderboardId}" },
+            TimeOfOccurenceUtc = timeOfOccurence ?? DateTimeOffset.UtcNow,
+            Nth = nth,
+        };
     }
 }

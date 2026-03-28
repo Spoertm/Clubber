@@ -99,7 +99,15 @@ public sealed class DdNewsPostService(
             try
             {
                 await PublishSingleNews(update, channel, serviceCollection);
-                DdNewsItem newsItem = new(update.OldEntry.Id, update.OldEntry, update.NewEntry, DateTime.UtcNow, update.Nth);
+                DdNewsItem newsItem = new()
+                {
+                    LeaderboardId = update.OldEntry.Id,
+                    OldEntry = update.OldEntry,
+                    NewEntry = update.NewEntry,
+                    TimeOfOccurenceUtc = DateTimeOffset.UtcNow,
+                    Nth = update.Nth,
+                };
+
                 await serviceCollection.NewsRepository.AddAsync(newsItem);
             }
             catch (Exception ex)
