@@ -25,63 +25,56 @@ public sealed class ScoreRoleService(
     private readonly IWebService _webService = webService;
     private readonly IUserRepository _userRepository = userRepository;
     private readonly RoleConfigService _roleConfigService = roleConfigService;
-    private readonly IReadOnlyCollection<ulong> _allPossibleRoles = GetAllPossibleRoles(config.Value);
+    private readonly IReadOnlyCollection<ulong> _baseRoles = GetBaseRoles(config.Value);
 
-    private static IReadOnlyCollection<ulong> GetAllPossibleRoles(AppConfig cfg)
+    // Assumes scoreRoles is sorted descending by key so the first match is the highest earned threshold.
+    public static KeyValuePair<int, ulong> GetScoreRoleToKeep(int playerTime, ImmutableSortedDictionary<int, ulong> scoreRoles)
     {
-        IReadOnlyCollection<ulong> uselessRoles = [
-            cfg.UnregisteredRoleId,
-            458375331468935178, // No score
-            994354086646399066 // Pending PB
-        ];
-
-        return [AppConfig.FormerWrRoleId, .. uselessRoles];
+        int playerTimeSeconds = playerTime / 10_000;
+        return scoreRoles
+            .Where(r => playerTimeSeconds >= r.Key)
+            .FirstOrDefault(scoreRoles.Last());
     }
+
+    public static KeyValuePair<int, ulong> GetRankRoleToKeep(int playerRank, ImmutableSortedDictionary<int, ulong> rankRoles)
+    {
+        return rankRoles.FirstOrDefault(r => playerRank <= r.Key);
+    }
+
 
     public async Task<BulkUserRoleUpdates> GetBulkUserRoleUpdates(IReadOnlyCollection<IGuildUser> guildUsers, HashSet<int> formerWrPlayerIds)
     {
-        // Load roles once for this operation
         ImmutableSortedDictionary<int, ulong> scoreRoles = await _roleConfigService.GetScoreRolesAsync();
         ImmutableSortedDictionary<int, ulong> rankRoles = await _roleConfigService.GetRankRolesAsync();
+        RoleContext roleContext = new(scoreRoles, rankRoles, _baseRoles);
 
-        // Single DB call to get registered users
         List<DdUser> dbUsers = await _userRepository.GetByDiscordIdsAsync(guildUsers.Select(gu => gu.Id));
 
-        // Build a dictionary for O(1) lookup
         Dictionary<ulong, IGuildUser> guildUserById = guildUsers.ToDictionary(gu => gu.Id);
 
-        // Join in memory using dictionary
         var registeredUsers = dbUsers
             .Select(ddu => new { DdUser = ddu, GuildUser = guildUserById.GetValueOrDefault(ddu.DiscordId) })
             .Where(x => x.GuildUser != null)
             .ToList();
 
-        // Fetch leaderboard data and total count in parallel
         uint[] lbIdsToRequest = [.. registeredUsers.Select(ru => (uint)ru.DdUser.LeaderboardId).Distinct()];
         Task<IReadOnlyList<EntryResponse>> lbTask = _webService.GetLbPlayers(lbIdsToRequest);
         Task<int> countTask = _userRepository.GetCountAsync();
 
         await Task.WhenAll(lbTask, countTask);
 
-        IReadOnlyList<EntryResponse> lbPlayers = await lbTask;
-        int totalRegistered = await countTask;
+        Dictionary<uint, EntryResponse> lbPlayerById = lbTask.Result.ToDictionary(lbp => (uint)lbp.Id);
+        int totalRegistered = countTask.Result;
 
-        // Build dictionary for leaderboard players
-        Dictionary<uint, EntryResponse> lbPlayerById = lbPlayers.ToDictionary(lbp => (uint)lbp.Id);
-
-        // Calculate role changes
-        HashSet<ulong> allPossibleRoles = [.. _allPossibleRoles, .. scoreRoles.Values, .. rankRoles.Values];
         List<UserRoleUpdate> roleUpdates = [];
         foreach (var ru in registeredUsers)
         {
             if (!lbPlayerById.TryGetValue((uint)ru.DdUser.LeaderboardId, out EntryResponse? lbPlayer))
                 continue;
 
-            RoleChange change = GetRoleChange(ru.GuildUser!.RoleIds, lbPlayer, formerWrPlayerIds, scoreRoles, rankRoles, allPossibleRoles);
+            RoleChange change = GetRoleChange(ru.GuildUser!.RoleIds, lbPlayer, formerWrPlayerIds, roleContext);
             if (change.HasChanges)
-            {
                 roleUpdates.Add(new UserRoleUpdate(ru.GuildUser, change));
-            }
         }
 
         int nonMemberCount = totalRegistered - registeredUsers.Count;
@@ -94,9 +87,7 @@ public sealed class ScoreRoleService(
         {
             DdUser? ddUser = await _userRepository.FindAsync(user.Id);
             if (ddUser is null)
-            {
                 return Result.Failure<RoleChange>("User is not registered.");
-            }
 
             uint lbId = (uint)ddUser.LeaderboardId;
 
@@ -107,18 +98,15 @@ public sealed class ScoreRoleService(
 
             await Task.WhenAll(lbPlayerTask, wrTask, scoreRolesTask, rankRolesTask);
 
-            IReadOnlyList<EntryResponse> lbPlayerList = await lbPlayerTask;
+            IReadOnlyList<EntryResponse> lbPlayerList = lbPlayerTask.Result;
             if (lbPlayerList.Count == 0)
-            {
                 return Result.Failure<RoleChange>("Player not found on leaderboard.");
-            }
 
-            HashSet<int> formerWrPlayerIds = [.. (await wrTask).WorldRecordHolders.Select(wrh => wrh.Id)];
-            ImmutableSortedDictionary<int, ulong> scoreRoles = await scoreRolesTask;
-            ImmutableSortedDictionary<int, ulong> rankRoles = await rankRolesTask;
+            HashSet<int> formerWrPlayerIds = [.. wrTask.Result.WorldRecordHolders.Select(wrh => wrh.Id)];
+            RoleContext roleContext = new(scoreRolesTask.Result, rankRolesTask.Result, _baseRoles);
 
-            HashSet<ulong> allPossibleRoles = [.. _allPossibleRoles, .. scoreRoles.Values, .. rankRoles.Values];
-            RoleChange change = GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds, scoreRoles, rankRoles, allPossibleRoles);
+            HashSet<ulong> allPossibleRoles = [.. _baseRoles, .. roleContext.AllPossibleRoles];
+            RoleChange change = GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds, roleContext);
             return Result.Success(change);
         }
         catch (Exception ex)
@@ -140,12 +128,10 @@ public sealed class ScoreRoleService(
         IReadOnlyCollection<ulong> userRoleIds,
         EntryResponse lbUser,
         HashSet<int> formerWrPlayerIds,
-        ImmutableSortedDictionary<int, ulong> scoreRoles,
-        ImmutableSortedDictionary<int, ulong> rankRoles,
-        HashSet<ulong> allPossibleRoles)
+        RoleContext roleContext)
     {
-        ulong scoreRoleToKeep = GetScoreRoleToKeep(lbUser.Time, scoreRoles).Value;
-        ulong rankRoleToKeep = GetRankRoleToKeep(lbUser.Rank, rankRoles).Value;
+        ulong scoreRoleToKeep = GetScoreRoleToKeep(lbUser.Time, roleContext.ScoreRoles).Value;
+        ulong rankRoleToKeep = GetRankRoleToKeep(lbUser.Rank, roleContext.RankRoles).Value;
 
         List<ulong> rolesToKeep = [scoreRoleToKeep];
 
@@ -162,28 +148,33 @@ public sealed class ScoreRoleService(
             rolesToKeep.Add(AppConfig.FormerWrRoleId);
         }
 
-        CollectionChange<ulong> collectionChange = CollectionUtils.DetermineCollectionChanges(userRoleIds, allPossibleRoles, rolesToKeep);
+        CollectionChange<ulong> collectionChange = CollectionUtils.DetermineCollectionChanges(userRoleIds, roleContext.AllPossibleRoles, rolesToKeep);
 
         if (collectionChange.ItemsToAdd.Count == 0 && collectionChange.ItemsToRemove.Count == 0)
         {
-            MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(lbUser.Time, scoreRoles);
+            MilestoneInfo<ulong> milestoneInfo = CollectionUtils.GetNextMileStone(lbUser.Time, roleContext.ScoreRoles);
             return RoleChange.None(milestoneInfo.TimeUntilNextMilestone, milestoneInfo.NextMilestoneId);
         }
 
         return new RoleChange(collectionChange.ItemsToAdd, collectionChange.ItemsToRemove);
     }
 
-    public static KeyValuePair<int, ulong> GetScoreRoleToKeep(int playerTime, ImmutableSortedDictionary<int, ulong> scoreRoles)
+    private static IReadOnlyCollection<ulong> GetBaseRoles(AppConfig cfg)
     {
-        // Score is stored in tenths of seconds, convert to seconds for comparison
-        int playerTimeSeconds = playerTime / 10_000;
-        return scoreRoles
-            .Where(r => playerTimeSeconds >= r.Key)
-            .FirstOrDefault(scoreRoles.Last());
+        IReadOnlyCollection<ulong> uselessRoles = [
+            cfg.UnregisteredRoleId,
+            458375331468935178, // No score
+            994354086646399066  // Pending PB
+        ];
+
+        return [AppConfig.FormerWrRoleId, .. uselessRoles];
     }
 
-    public static KeyValuePair<int, ulong> GetRankRoleToKeep(int playerRank, ImmutableSortedDictionary<int, ulong> rankRoles)
+    private record RoleContext(
+        ImmutableSortedDictionary<int, ulong> ScoreRoles,
+        ImmutableSortedDictionary<int, ulong> RankRoles,
+        IReadOnlyCollection<ulong> BaseRoles)
     {
-        return rankRoles.FirstOrDefault(r => playerRank <= r.Key);
+        public HashSet<ulong> AllPossibleRoles { get; } = [.. ScoreRoles.Values, .. RankRoles.Values, .. BaseRoles];
     }
 }
