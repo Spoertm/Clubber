@@ -100,7 +100,9 @@ public sealed class ScoreRoleService(
 
             IReadOnlyList<EntryResponse> lbPlayerList = lbPlayerTask.Result;
             if (lbPlayerList.Count == 0)
+            {
                 return Result.Failure<RoleChange>("Player not found on leaderboard.");
+            }
 
             HashSet<int> formerWrPlayerIds = [.. wrTask.Result.WorldRecordHolders.Select(wrh => wrh.Id)];
             RoleContext roleContext = new(scoreRolesTask.Result, rankRolesTask.Result, _baseRoles);
