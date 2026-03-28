@@ -24,13 +24,13 @@ public sealed class LeaderboardRepositoryTests : IDisposable
         _connection.Dispose();
     }
 
-    private DbService CreateContext()
+    private AppDbContext CreateContext()
     {
-        DbContextOptions<DbService> options = new DbContextOptionsBuilder<DbService>()
+        DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(_connection)
             .Options;
 
-        DbService context = new(options);
+        AppDbContext context = new(options);
         context.Database.EnsureCreated();
         return context;
     }
@@ -47,7 +47,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
         ];
         DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "desc");
@@ -64,7 +64,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateBestSplitsAsync_NewSplitBeatsExisting_UpdatesAndReturnsBoth()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.BestSplits.Add(new BestSplit { Name = "350", Time = 366, Value = 50, Description = "old" });
             await seedDb.SaveChangesAsync();
@@ -73,7 +73,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
         List<Split> splits = [new Split("350", 366, 100)];
         DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "new desc");
@@ -92,7 +92,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateBestSplitsAsync_NewSplitWorseThanExisting_DoesNothing()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.BestSplits.Add(new BestSplit { Name = "350", Time = 366, Value = 100, Description = "old" });
             await seedDb.SaveChangesAsync();
@@ -101,7 +101,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
         List<Split> splits = [new Split("350", 366, 50)];
         DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "new desc");
@@ -119,7 +119,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateBestSplitsAsync_EqualValue_DoesNothing()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.BestSplits.Add(new BestSplit { Name = "350", Time = 366, Value = 100, Description = "old" });
             await seedDb.SaveChangesAsync();
@@ -128,7 +128,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
         List<Split> splits = [new Split("350", 366, 100)];
         DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "new desc");
@@ -140,7 +140,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateBestSplitsAsync_MixedResults_OnlyUpdatesBetterOnes()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.BestSplits.AddRange(
                 new BestSplit { Name = "350", Time = 366, Value = 100, Description = "old" },
@@ -156,7 +156,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
         ];
         DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "desc");
@@ -175,7 +175,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateBestSplitsAsync_NewSplitNotInDatabase_AddsIt()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.BestSplits.Add(new BestSplit { Name = "350", Time = 366, Value = 100, Description = "old" });
             await seedDb.SaveChangesAsync();
@@ -188,7 +188,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
         ];
         DdStatsFullRunResponse run = CreateDdStatsRun("TestPlayer", 1);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (BestSplit[] oldSplits, BestSplit[] updatedSplits) = await sut.UpdateBestSplitsAsync(splits, run, "desc");
@@ -210,7 +210,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     {
         HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" };
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
@@ -227,7 +227,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateTopHomingPeakAsync_HigherPeak_UpdatesAndReturnsBoth()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.TopHomingPeaks.Add(new HomingPeakRun { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" });
             await seedDb.SaveChangesAsync();
@@ -235,7 +235,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
 
         HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 150, Source = "ddstats" };
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
@@ -253,7 +253,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateTopHomingPeakAsync_LowerPeak_DoesNothing()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.TopHomingPeaks.Add(new HomingPeakRun { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" });
             await seedDb.SaveChangesAsync();
@@ -261,7 +261,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
 
         HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 50, Source = "ddstats" };
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
@@ -278,7 +278,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateTopHomingPeakAsync_EqualPeak_DoesNothing()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.TopHomingPeaks.Add(new HomingPeakRun { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" });
             await seedDb.SaveChangesAsync();
@@ -286,7 +286,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
 
         HomingPeakRun run = new() { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" };
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);
@@ -298,7 +298,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateTopHomingPeakAsync_DifferentPlayers_TracksSeparately()
     {
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.TopHomingPeaks.Add(new HomingPeakRun { PlayerLeaderboardId = 1, PlayerName = "Player1", HomingPeak = 100, Source = "ddstats" });
             await seedDb.SaveChangesAsync();
@@ -306,7 +306,7 @@ public sealed class LeaderboardRepositoryTests : IDisposable
 
         HomingPeakRun run = new() { PlayerLeaderboardId = 2, PlayerName = "Player2", HomingPeak = 150, Source = "ddstats" };
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         LeaderboardRepository sut = new(db);
 
         (HomingPeakRun? oldRun, HomingPeakRun? newRun) = await sut.UpdateTopHomingPeakAsync(run);

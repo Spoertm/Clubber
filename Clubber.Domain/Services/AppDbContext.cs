@@ -7,13 +7,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Clubber.Domain.Services;
 
-public class DbService : DbContext
+public class AppDbContext : DbContext
 {
-    public DbService()
+    public AppDbContext()
     {
     }
 
-    public DbService(DbContextOptions<DbService> options)
+    public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
     }

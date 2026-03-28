@@ -19,7 +19,7 @@ namespace Clubber.Tests.IntegrationTests.Infrastructure;
 public sealed class IntegrationTestFixture : IDisposable
 {
     public ServiceProvider ServiceProvider { get; }
-    public DbService DbContext { get; }
+    public AppDbContext DbContext { get; }
     public IWebService WebService { get; }
     private readonly SqliteConnection _connection;
 
@@ -30,7 +30,7 @@ public sealed class IntegrationTestFixture : IDisposable
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
 
-        services.AddDbContext<DbService>(options => options.UseSqlite(_connection));
+        services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddSingleton(_ => CreateMockWebService());
         services.Configure<AppConfig>(cfg =>
@@ -42,7 +42,7 @@ public sealed class IntegrationTestFixture : IDisposable
         });
 
         ServiceProvider = services.BuildServiceProvider();
-        DbContext = ServiceProvider.GetRequiredService<DbService>();
+        DbContext = ServiceProvider.GetRequiredService<AppDbContext>();
         WebService = ServiceProvider.GetRequiredService<IWebService>();
 
         DbContext.Database.EnsureCreated();

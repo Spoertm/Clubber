@@ -5,7 +5,7 @@ using Serilog;
 
 namespace Clubber.Domain.Repositories;
 
-public sealed class UserRepository(DbService dbContext) : IUserRepository
+public sealed class UserRepository(AppDbContext dbContext) : IUserRepository
 {
     public async Task<List<DdUser>> GetAllAsync()
     {

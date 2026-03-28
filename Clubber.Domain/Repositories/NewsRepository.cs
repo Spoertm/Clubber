@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Clubber.Domain.Repositories;
 
-public sealed class NewsRepository(DbService dbContext) : INewsRepository
+public sealed class NewsRepository(AppDbContext dbContext) : INewsRepository
 {
     public async Task AddAsync(DdNewsItem item)
     {

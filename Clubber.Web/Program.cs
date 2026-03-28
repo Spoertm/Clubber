@@ -77,7 +77,7 @@ internal static class Program
         builder.Services.AddTransient<IWebService, WebService>();
 
         builder.Services.AddHttpClient();
-        builder.Services.AddDbContext<DbService>(options =>
+        builder.Services.AddDbContext<AppDbContext>(options =>
         {
             string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

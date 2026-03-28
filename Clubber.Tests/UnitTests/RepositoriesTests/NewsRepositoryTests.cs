@@ -23,13 +23,13 @@ public sealed class NewsRepositoryTests : IDisposable
         _connection.Dispose();
     }
 
-    private DbService CreateContext()
+    private AppDbContext CreateContext()
     {
-        DbContextOptions<DbService> options = new DbContextOptionsBuilder<DbService>()
+        DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(_connection)
             .Options;
 
-        DbService context = new(options);
+        AppDbContext context = new(options);
         context.Database.EnsureCreated();
         return context;
     }
@@ -41,7 +41,7 @@ public sealed class NewsRepositoryTests : IDisposable
     {
         DdNewsItem item = CreateDdNewsItem(leaderboardId: 1, nth: 1);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.AddAsync(item);
@@ -58,7 +58,7 @@ public sealed class NewsRepositoryTests : IDisposable
         DdNewsItem item1 = CreateDdNewsItem(leaderboardId: 1, nth: 1);
         DdNewsItem item2 = CreateDdNewsItem(leaderboardId: 2, nth: 2);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.AddAsync(item1);
@@ -74,7 +74,7 @@ public sealed class NewsRepositoryTests : IDisposable
         DdNewsItem item1 = CreateDdNewsItem(leaderboardId: 1, nth: 1);
         DdNewsItem item2 = CreateDdNewsItem(leaderboardId: 2, nth: 2);
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.AddAsync(item1);
@@ -92,7 +92,7 @@ public sealed class NewsRepositoryTests : IDisposable
     [Fact]
     public async Task GetRecentAsync_EmptyDatabase_ReturnsEmptyArray()
     {
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         DdNewsItem[] result = await sut.GetRecentAsync();
@@ -104,7 +104,7 @@ public sealed class NewsRepositoryTests : IDisposable
     public async Task GetRecentAsync_ReturnsItemsOrderedByTimeDescending()
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.DdNews.AddRange(
                 CreateDdNewsItem(leaderboardId: 1, nth: 1, timeOfOccurence: now.AddHours(-2)),
@@ -114,7 +114,7 @@ public sealed class NewsRepositoryTests : IDisposable
             await seedDb.SaveChangesAsync();
         }
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         DdNewsItem[] result = await sut.GetRecentAsync();
@@ -129,13 +129,13 @@ public sealed class NewsRepositoryTests : IDisposable
     public async Task GetRecentAsync_DoesNotTrackEntities()
     {
         DdNewsItem item = CreateDdNewsItem(leaderboardId: 1, nth: 1);
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.DdNews.Add(item);
             await seedDb.SaveChangesAsync();
         }
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.GetRecentAsync();
@@ -151,13 +151,13 @@ public sealed class NewsRepositoryTests : IDisposable
     public async Task RemoveOlderThanAsync_NoItemsOlderThanCutoff_DoesNotRemoveAnything()
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.DdNews.Add(CreateDdNewsItem(leaderboardId: 1, nth: 1, timeOfOccurence: now.AddHours(-1)));
             await seedDb.SaveChangesAsync();
         }
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.RemoveOlderThanAsync(TimeSpan.FromHours(2));
@@ -170,7 +170,7 @@ public sealed class NewsRepositoryTests : IDisposable
     public async Task RemoveOlderThanAsync_ItemsOlderThanCutoff_RemovesOldItems()
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.DdNews.AddRange(
                 CreateDdNewsItem(leaderboardId: 1, nth: 1, timeOfOccurence: now.AddHours(-3)),
@@ -179,7 +179,7 @@ public sealed class NewsRepositoryTests : IDisposable
             await seedDb.SaveChangesAsync();
         }
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.RemoveOlderThanAsync(TimeSpan.FromHours(2));
@@ -193,7 +193,7 @@ public sealed class NewsRepositoryTests : IDisposable
     public async Task RemoveOlderThanAsync_AllItemsOlderThanCutoff_RemovesAllItems()
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.DdNews.AddRange(
                 CreateDdNewsItem(leaderboardId: 1, nth: 1, timeOfOccurence: now.AddDays(-2)),
@@ -202,7 +202,7 @@ public sealed class NewsRepositoryTests : IDisposable
             await seedDb.SaveChangesAsync();
         }
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.RemoveOlderThanAsync(TimeSpan.FromDays(1));
@@ -215,13 +215,13 @@ public sealed class NewsRepositoryTests : IDisposable
     public async Task RemoveOlderThanAsync_ItemExactlyAtCutoff_RemovesItem()
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        using (DbService seedDb = CreateContext())
+        using (AppDbContext seedDb = CreateContext())
         {
             seedDb.DdNews.Add(CreateDdNewsItem(leaderboardId: 1, nth: 1, timeOfOccurence: now.AddHours(-2)));
             await seedDb.SaveChangesAsync();
         }
 
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         await sut.RemoveOlderThanAsync(TimeSpan.FromHours(2));
@@ -233,7 +233,7 @@ public sealed class NewsRepositoryTests : IDisposable
     [Fact]
     public async Task RemoveOlderThanAsync_EmptyDatabase_DoesNotThrow()
     {
-        using DbService db = CreateContext();
+        using AppDbContext db = CreateContext();
         NewsRepository sut = new(db);
 
         Exception? exception = await Record.ExceptionAsync(() => sut.RemoveOlderThanAsync(TimeSpan.FromDays(1)));

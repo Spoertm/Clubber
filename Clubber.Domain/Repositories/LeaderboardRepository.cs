@@ -6,7 +6,7 @@ using Serilog;
 
 namespace Clubber.Domain.Repositories;
 
-public sealed class LeaderboardRepository(DbService dbContext) : ILeaderboardRepository
+public sealed class LeaderboardRepository(AppDbContext dbContext) : ILeaderboardRepository
 {
     public async Task<EntryResponse[]> GetCachedEntriesAsync()
     {
