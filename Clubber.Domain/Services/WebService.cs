@@ -97,7 +97,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
     {
         try
         {
-            Uri uri = new(string.Format(_appConfig.Endpoints.GetCountryCodeForPlayer, lbId));
+            Uri uri = new($"{_appConfig.Endpoints.GetCountryCodeForPlayer}{lbId}/country-code");
             using HttpClient client = httpClientFactory.CreateClient();
             await using Stream responseStream = await client.GetStreamAsync(uri);
             using JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream);
@@ -115,7 +115,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
     {
         try
         {
-            Uri uri = new(string.Format(_appConfig.Endpoints.GetPlayerHistory, lbId));
+            Uri uri = new($"{_appConfig.Endpoints.GetPlayerHistory}{lbId}/history");
             using HttpClient client = httpClientFactory.CreateClient();
             await using Stream responseStream = await client.GetStreamAsync(uri);
             return await JsonSerializer.DeserializeAsync<GetPlayerHistory>(responseStream, _serializerOptions);
@@ -130,7 +130,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
     public async Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri)
     {
         uint? runId = ExtractRunIdFromUri(uri) ?? throw new ClubberException("Invalid ddstats URL.");
-        Uri fullRunReqUri = new(string.Format(_appConfig.Endpoints.GetDdstatsResponse, runId));
+        Uri fullRunReqUri = new($"{_appConfig.Endpoints.GetDdstatsResponse}?id={runId}");
         using HttpClient client = httpClientFactory.CreateClient();
         await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUri);
         return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
