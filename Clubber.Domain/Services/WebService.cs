@@ -99,9 +99,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         {
             Uri uri = new(string.Format(_appConfig.Endpoints.GetCountryCodeForPlayer, lbId));
             using HttpClient client = httpClientFactory.CreateClient();
-            using HttpResponseMessage response = await client.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
-            await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+            await using Stream responseStream = await client.GetStreamAsync(uri);
             using JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream);
 
             return jsonDocument.RootElement.TryGetProperty("countryCode", out JsonElement countryCodeElement) ? countryCodeElement.GetString() : null;
@@ -119,9 +117,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         {
             Uri uri = new(string.Format(_appConfig.Endpoints.GetPlayerHistory, lbId));
             using HttpClient client = httpClientFactory.CreateClient();
-            using HttpResponseMessage response = await client.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
-            await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+            await using Stream responseStream = await client.GetStreamAsync(uri);
             return await JsonSerializer.DeserializeAsync<GetPlayerHistory>(responseStream, _serializerOptions);
         }
         catch (Exception e)
@@ -136,9 +132,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         uint? runId = ExtractRunIdFromUri(uri) ?? throw new ClubberException("Invalid ddstats URL.");
         Uri fullRunReqUri = new(string.Format(_appConfig.Endpoints.GetDdstatsResponse, runId));
         using HttpClient client = httpClientFactory.CreateClient();
-        using HttpResponseMessage response = await client.GetAsync(fullRunReqUri);
-        response.EnsureSuccessStatusCode();
-        await using Stream ddstatsResponseStream = await response.Content.ReadAsStreamAsync();
+        await using Stream ddstatsResponseStream = await client.GetStreamAsync(fullRunReqUri);
         return await JsonSerializer.DeserializeAsync<DdStatsFullRunResponse>(ddstatsResponseStream) ?? throw new SerializationException();
     }
 
@@ -147,9 +141,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         try
         {
             using HttpClient client = httpClientFactory.CreateClient();
-            using HttpResponseMessage response = await client.GetAsync(_appConfig.Endpoints.GetWorldRecords);
-            response.EnsureSuccessStatusCode();
-            await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+            await using Stream responseStream = await client.GetStreamAsync(_appConfig.Endpoints.GetWorldRecords);
             return await JsonSerializer.DeserializeAsync<GetWorldRecordDataContainer>(responseStream, _serializerOptions)
                    ?? throw new SerializationException("Failed to deserialize world records data");
         }
