@@ -2,7 +2,6 @@ using Clubber.Domain.Data;
 using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Repositories;
-using Clubber.Domain.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Xunit;

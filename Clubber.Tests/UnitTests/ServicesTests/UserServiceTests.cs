@@ -1,6 +1,5 @@
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
-using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 using Clubber.Domain.Repositories;
 using Discord;
