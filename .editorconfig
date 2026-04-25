@@ -185,6 +185,9 @@ dotnet_diagnostic.CA1062.severity = none
 # SA1602: Enumeration items should be documented
 dotnet_diagnostic.SA1602.severity = none
 
+# S3267: Loops should be simplified with "LINQ" expressions
+dotnet_diagnostic.S3267.severity = suggestion
+
 [*.{cpp,h,in}]
 # C++ Files
 curly_bracket_next_line = true

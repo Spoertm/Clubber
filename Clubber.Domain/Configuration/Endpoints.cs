@@ -21,4 +21,7 @@ public sealed class Endpoints
 
     [Required]
     public required string GetDdstatsResponse { get; set; }
+
+    [Required]
+    public required Uri GetRecentScores { get; set; }
 }

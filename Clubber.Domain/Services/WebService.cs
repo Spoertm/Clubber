@@ -152,6 +152,24 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         }
     }
 
+    public async Task<IReadOnlyList<GetRecentResponse>> GetRecentScores(DateTime before, int limit)
+    {
+        try
+        {
+            long unixTime = new DateTimeOffset(before).ToUnixTimeSeconds();
+            Uri uri = new($"{_appConfig.Endpoints.GetRecentScores}?before={unixTime}&limit={limit}");
+            using HttpClient client = httpClientFactory.CreateClient();
+            await using Stream responseStream = await client.GetStreamAsync(uri);
+            return await JsonSerializer.DeserializeAsync<List<GetRecentResponse>>(responseStream, _serializerOptions)
+                   ?? throw new SerializationException("Failed to deserialize recent scores data");
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "{Class}.GetRecentScores => Failed to fetch recent scores", nameof(WebService));
+            throw new ClubberException("Failed to fetch recent scores data.", e);
+        }
+    }
+
     private static uint? ExtractRunIdFromUri(Uri uri)
     {
         // Handle /api/v2/game/full?id={runId} format

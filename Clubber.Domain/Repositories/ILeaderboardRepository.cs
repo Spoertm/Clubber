@@ -5,10 +5,6 @@ namespace Clubber.Domain.Repositories;
 
 public interface ILeaderboardRepository
 {
-    Task<EntryResponse[]> GetCachedEntriesAsync();
-
-    Task UpdateCacheAsync(ICollection<EntryResponse> entries);
-
     Task<BestSplit[]> GetBestSplitsAsync();
 
     Task<(BestSplit[] OldBestSplits, BestSplit[] UpdatedBestSplits)> UpdateBestSplitsAsync(

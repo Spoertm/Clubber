@@ -1,4 +1,4 @@
-﻿using Clubber.Discord.Helpers;
+using Clubber.Discord.Helpers;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Data.Entities;
@@ -17,8 +17,8 @@ public sealed class DdNewsPostService(
     IOptions<AppConfig> config,
     IServiceScopeFactory services) : RepeatingBackgroundService
 {
-    private const int MinimumScoreToTrack = 930;
     private const int NewsWorthyThreshold = 1000;
+    private const int GetRecentLimit = 100;
 
     private readonly AppConfig _config = config.Value;
     private readonly LeaderboardImageGenerator _imageGenerator = new();
@@ -32,59 +32,108 @@ public sealed class DdNewsPostService(
 
         await serviceCollection.NewsRepository.RemoveOlderThanAsync(TimeSpan.FromDays(1));
 
-        LeaderboardSnapshot leaderboardData = await GetLeaderboardData(serviceCollection);
-        if (leaderboardData.IsEmpty)
+        DateTimeOffset? lastCheck = await serviceCollection.AppStateRepository.GetLastNewsCheckAsync();
+        if (lastCheck is null)
         {
-            Log.Information("No leaderboard data available");
+            lastCheck = DateTimeOffset.UtcNow.AddMinutes(-5);
+            await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(lastCheck.Value);
+        }
+
+        List<GetRecentResponse> recentResponses = await FetchRecentRunsWithBackfillAsync(lastCheck.Value, serviceCollection);
+        if (recentResponses.Count == 0)
+        {
+            await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(DateTimeOffset.UtcNow);
             return;
         }
 
-        IEnumerable<NewsUpdate> newsUpdates = DetectNewsWorthyUpdates(leaderboardData);
+        GetRecentResponse[] recentRuns = recentResponses
+            .Where(p => p.Timestamp > lastCheck)
+            .OrderBy(p => p.Timestamp)
+            .ToArray();
+
+        if (recentRuns.Length == 0)
+        {
+            await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(DateTimeOffset.UtcNow);
+            return;
+        }
+
+        List<NewsUpdate> newsUpdates = [];
+        List<(PlayerPb Pb, bool IsNewsWorthy, int Nth)> pendingUpserts = [];
+        foreach (GetRecentResponse submission in recentRuns)
+        {
+            PlayerPb? pb = await serviceCollection.PlayerPbRepository.GetByIdAsync(submission.LeaderboardId);
+
+            if (pb != null && submission.Time <= pb.Time)
+            {
+                continue;
+            }
+
+            bool isNewsWorthy = pb != null && submission.Time >= NewsWorthyThreshold * 10_000;
+
+            int oldTime = pb?.Time ?? 0;
+            int newTime = submission.Time;
+            int oldHundredth = oldTime / 1_000_000;
+            int newHundredth = newTime / 1_000_000;
+            int nth = 0;
+
+            if (newHundredth > oldHundredth)
+            {
+                for (int h = oldHundredth + 1; h <= newHundredth; h++)
+                {
+                    await serviceCollection.HundredthCountRepository.IncrementAsync(h * 100);
+                }
+            }
+
+            if (newHundredth >= 10)
+            {
+                nth = await serviceCollection.HundredthCountRepository.GetCountAsync(newHundredth * 100);
+            }
+
+            pendingUpserts.Add((new PlayerPb
+            {
+                LeaderboardId = submission.LeaderboardId,
+                Username = submission.UserName,
+                Time = submission.Time,
+                Rank = pb?.Rank ?? 0,
+                LastUpdated = submission.Timestamp,
+            }, isNewsWorthy, nth));
+
+            if (isNewsWorthy)
+            {
+                newsUpdates.Add(new NewsUpdate(
+                    new EntryResponse { Id = pb!.LeaderboardId, Username = pb.Username, Time = pb.Time, Rank = pb.Rank },
+                    new EntryResponse { Id = submission.LeaderboardId, Username = submission.UserName, Time = submission.Time, Rank = 0 },
+                    nth));
+            }
+        }
+
+        if (pendingUpserts.Count > 0)
+        {
+            uint[] ids = pendingUpserts.Select(p => p.Pb.LeaderboardId).Distinct().ToArray();
+            IReadOnlyList<EntryResponse> currentPlayers = await serviceCollection.WebService.GetLbPlayers(ids);
+            Dictionary<uint, EntryResponse> rankLookup = currentPlayers.ToDictionary(p => p.Id);
+
+            foreach ((PlayerPb pb, _, _) in pendingUpserts)
+            {
+                if (rankLookup.TryGetValue(pb.LeaderboardId, out EntryResponse? entry))
+                {
+                    pb.Rank = entry.Rank;
+                }
+
+                await serviceCollection.PlayerPbRepository.UpsertAsync(pb);
+            }
+
+            foreach (NewsUpdate update in newsUpdates)
+            {
+                if (rankLookup.TryGetValue(update.NewEntry.Id, out EntryResponse? entry))
+                {
+                    update.NewEntry.Rank = entry.Rank;
+                }
+            }
+        }
+
         await PublishNewsIfAvailable(newsUpdates, serviceCollection);
-
-        if (leaderboardData.HasChanges)
-        {
-            await UpdateCache(leaderboardData.NewEntries, serviceCollection);
-        }
-    }
-
-    private static async Task<LeaderboardSnapshot> GetLeaderboardData(ServiceCollection services)
-    {
-        EntryResponse[] cachedEntries = await services.LeaderboardRepository.GetCachedEntriesAsync();
-        Dictionary<uint, EntryResponse> currentEntries = cachedEntries.ToDictionary(e => e.Id);
-
-        ICollection<EntryResponse> newEntries = await services.WebService.GetSufficientLeaderboardEntries(MinimumScoreToTrack);
-        if (newEntries.Count == 0)
-        {
-            return LeaderboardSnapshot.Empty;
-        }
-
-        bool hasChanges = LeaderboardChanged(currentEntries.Values, newEntries);
-        return new LeaderboardSnapshot(currentEntries, newEntries, hasChanges);
-    }
-
-    private static bool LeaderboardChanged(
-        IEnumerable<EntryResponse> oldEntries, ICollection<EntryResponse> newEntries)
-    {
-        Dictionary<uint, int> oldLookup = oldEntries.ToDictionary(e => e.Id, e => e.Time);
-        return newEntries.Count != oldLookup.Count ||
-               newEntries.Any(entry => !oldLookup.TryGetValue(entry.Id, out int oldTime) || oldTime != entry.Time);
-    }
-
-    private static IEnumerable<NewsUpdate> DetectNewsWorthyUpdates(LeaderboardSnapshot snapshot)
-    {
-        return snapshot.NewEntries
-            .Where(newEntry => snapshot.CurrentEntries.TryGetValue(newEntry.Id, out EntryResponse? oldEntry) &&
-                               newEntry.Time > oldEntry.Time &&
-                               newEntry.Time >= NewsWorthyThreshold * 10_000)
-            .Select(newEntry => CreateNewsUpdate(newEntry, snapshot.CurrentEntries[newEntry.Id], snapshot.NewEntries));
-
-        static NewsUpdate CreateNewsUpdate(
-            EntryResponse newEntry, EntryResponse oldEntry, ICollection<EntryResponse> allNewEntries)
-        {
-            int nth = allNewEntries.Count(e => e.Time / 1_000_000 >= newEntry.Time / 1_000_000);
-            return new NewsUpdate(oldEntry, newEntry, nth);
-        }
+        await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(recentRuns[^1].Timestamp);
     }
 
     private async Task PublishNewsIfAvailable(IEnumerable<NewsUpdate> newsUpdates, ServiceCollection serviceCollection)
@@ -100,7 +149,7 @@ public sealed class DdNewsPostService(
                 await PublishSingleNews(update, channel, serviceCollection);
                 DdNewsItem newsItem = new()
                 {
-                    LeaderboardId = update.OldEntry.Id,
+                    LeaderboardId = update.NewEntry.Id,
                     OldEntry = update.OldEntry,
                     NewEntry = update.NewEntry,
                     TimeOfOccurenceUtc = DateTimeOffset.UtcNow,
@@ -135,7 +184,6 @@ public sealed class DdNewsPostService(
     {
         string? username = update.NewEntry.Username;
 
-        // Try to get Discord mention if user is registered
         DdUser? dbUser = await serviceCollection.UserRepository.FindAsync(update.NewEntry.Id);
         if (dbUser != null)
         {
@@ -169,37 +217,55 @@ public sealed class DdNewsPostService(
         }
     }
 
-    private static async Task UpdateCache(ICollection<EntryResponse> newEntries, ServiceCollection serviceCollection)
+    private static async Task<List<GetRecentResponse>> FetchRecentRunsWithBackfillAsync(DateTimeOffset lastCheck, ServiceCollection serviceCollection)
     {
-        Log.Information("Updating leaderboard cache with {Count} entries", newEntries.Count);
-        await serviceCollection.LeaderboardRepository.UpdateCacheAsync(newEntries);
+        List<GetRecentResponse> allRuns = [];
+        DateTime fetchBefore = DateTime.UtcNow;
+
+        while (true)
+        {
+            IReadOnlyList<GetRecentResponse> batch = await serviceCollection.WebService.GetRecentScores(fetchBefore, GetRecentLimit);
+
+            if (batch.Count == 0)
+            {
+                break;
+            }
+
+            allRuns.AddRange(batch);
+
+            GetRecentResponse oldestInBatch = batch.MinBy(r => r.Timestamp)!;
+
+            if (batch.Count < GetRecentLimit || oldestInBatch.Timestamp <= lastCheck)
+            {
+                break;
+            }
+
+            fetchBefore = oldestInBatch.Timestamp.UtcDateTime;
+        }
+
+        return allRuns;
     }
 
     // Helper types for better organization
     private sealed record ServiceCollection(
         INewsRepository NewsRepository,
         IUserRepository UserRepository,
-        ILeaderboardRepository LeaderboardRepository,
+        IPlayerPbRepository PlayerPbRepository,
+        IHundredthCountRepository HundredthCountRepository,
+        IAppStateRepository AppStateRepository,
         IDiscordHelper DiscordHelper,
         IWebService WebService)
     {
         public ServiceCollection(IServiceScope scope) : this(
             scope.ServiceProvider.GetRequiredService<INewsRepository>(),
             scope.ServiceProvider.GetRequiredService<IUserRepository>(),
-            scope.ServiceProvider.GetRequiredService<ILeaderboardRepository>(),
+            scope.ServiceProvider.GetRequiredService<IPlayerPbRepository>(),
+            scope.ServiceProvider.GetRequiredService<IHundredthCountRepository>(),
+            scope.ServiceProvider.GetRequiredService<IAppStateRepository>(),
             scope.ServiceProvider.GetRequiredService<IDiscordHelper>(),
             scope.ServiceProvider.GetRequiredService<IWebService>())
         {
         }
-    }
-
-    private readonly record struct LeaderboardSnapshot(
-        IReadOnlyDictionary<uint, EntryResponse> CurrentEntries,
-        ICollection<EntryResponse> NewEntries,
-        bool HasChanges)
-    {
-        public bool IsEmpty => NewEntries.Count == 0;
-        public static LeaderboardSnapshot Empty => new(new Dictionary<uint, EntryResponse>(), Array.Empty<EntryResponse>(), false);
     }
 
     private readonly record struct NewsUpdate(

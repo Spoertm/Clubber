@@ -1,7 +1,6 @@
 using Clubber.Domain.Data;
 using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Models.Responses;
-using Clubber.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -9,18 +8,6 @@ namespace Clubber.Domain.Repositories;
 
 public sealed class LeaderboardRepository(AppDbContext dbContext) : ILeaderboardRepository
 {
-    public async Task<EntryResponse[]> GetCachedEntriesAsync()
-    {
-        return await dbContext.LeaderboardCache.AsNoTracking().ToArrayAsync();
-    }
-
-    public async Task UpdateCacheAsync(ICollection<EntryResponse> entries)
-    {
-        await dbContext.LeaderboardCache.ExecuteDeleteAsync();
-        await dbContext.LeaderboardCache.AddRangeAsync(entries);
-        await dbContext.SaveChangesAsync();
-    }
-
     public async Task<BestSplit[]> GetBestSplitsAsync()
     {
         return await dbContext.BestSplits.AsNoTracking().OrderBy(s => s.Time).ToArrayAsync();

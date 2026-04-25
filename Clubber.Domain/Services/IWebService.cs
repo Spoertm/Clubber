@@ -16,4 +16,6 @@ public interface IWebService
     Task<DdStatsFullRunResponse> GetDdstatsResponse(Uri uri);
 
     Task<GetWorldRecordDataContainer> GetWorldRecords();
+
+    Task<IReadOnlyList<GetRecentResponse>> GetRecentScores(DateTime before, int limit);
 }

@@ -1,6 +1,5 @@
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Data.Entities.DdSplits;
-using Clubber.Domain.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -17,7 +16,11 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<EntryResponse> LeaderboardCache => Set<EntryResponse>();
+    public DbSet<PlayerPb> PlayerPbs => Set<PlayerPb>();
+
+    public DbSet<HundredthCount> HundredthCounts => Set<HundredthCount>();
+
+    public DbSet<AppState> AppStates => Set<AppState>();
 
     public DbSet<DdUser> DdPlayers => Set<DdUser>();
 
@@ -35,7 +38,10 @@ public class AppDbContext : DbContext
     {
         modelBuilder.HasDefaultSchema("clubber");
 
-        modelBuilder.Entity<EntryResponse>().HasKey(lbu => lbu.Id);
+        modelBuilder.Entity<PlayerPb>().HasKey(pp => pp.LeaderboardId);
+        modelBuilder.Entity<HundredthCount>().HasKey(hc => hc.Threshold);
+        modelBuilder.Entity<AppState>().HasKey(a => a.Key);
+        modelBuilder.Entity<AppState>().Property(a => a.Key).HasMaxLength(100);
         modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
         modelBuilder.Entity<DdUser>().HasIndex(ddu => ddu.DiscordId).IsUnique();
 
