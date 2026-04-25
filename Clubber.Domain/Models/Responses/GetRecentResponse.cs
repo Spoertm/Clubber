@@ -39,5 +39,5 @@ public record GetRecentResponse
 
     [JsonInclude]
     [JsonPropertyName("timestamp")]
-    private long TimestampUnix { get; init; }
+    internal long TimestampUnix { get; init; }
 }

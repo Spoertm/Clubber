@@ -20,7 +20,7 @@ public class AppDbContext : DbContext
 
     public DbSet<HundredthCount> HundredthCounts => Set<HundredthCount>();
 
-    public DbSet<AppState> AppStates => Set<AppState>();
+    public DbSet<NewsCursor> NewsCursors => Set<NewsCursor>();
 
     public DbSet<DdUser> DdPlayers => Set<DdUser>();
 
@@ -40,8 +40,8 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PlayerPb>().HasKey(pp => pp.LeaderboardId);
         modelBuilder.Entity<HundredthCount>().HasKey(hc => hc.Threshold);
-        modelBuilder.Entity<AppState>().HasKey(a => a.Key);
-        modelBuilder.Entity<AppState>().Property(a => a.Key).HasMaxLength(100);
+        modelBuilder.Entity<NewsCursor>().HasKey(nc => nc.Id);
+        modelBuilder.Entity<NewsCursor>().Property(nc => nc.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
         modelBuilder.Entity<DdUser>().HasIndex(ddu => ddu.DiscordId).IsUnique();
 
@@ -70,5 +70,7 @@ public class AppDbContext : DbContext
             v => new DateTimeOffset(v, TimeSpan.Zero));
 
         modelBuilder.Entity<DdNewsItem>().Property(e => e.TimeOfOccurenceUtc).HasConversion(dateTimeOffsetConverter);
+        modelBuilder.Entity<NewsCursor>().Property(e => e.LastCheckedAt).HasConversion(dateTimeOffsetConverter);
+        modelBuilder.Entity<PlayerPb>().Property(e => e.LastUpdated).HasConversion(dateTimeOffsetConverter);
     }
 }

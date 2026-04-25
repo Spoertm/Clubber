@@ -69,30 +69,6 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         }
     }
 
-    public async Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore)
-    {
-        List<EntryResponse> entries = [];
-        int rank = 1;
-        do
-        {
-            try
-            {
-                entries.AddRange((await GetLeaderboardEntries(rank)).Entries);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "{Class}.GetSufficientLeaderboardEntries => Failed to fetch leaderboard entries", nameof(WebService));
-                throw new ClubberException("DD servers are experiencing issues atm.", e);
-            }
-
-            rank += 100;
-            await Task.Delay(2000);
-        }
-        while (entries[^1].Time / 10_000 >= minimumScore);
-
-        return entries;
-    }
-
     public async Task<string?> GetCountryCodeForplayer(uint lbId)
     {
         try
@@ -152,11 +128,11 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
         }
     }
 
-    public async Task<IReadOnlyList<GetRecentResponse>> GetRecentScores(DateTime before, int limit)
+    public async Task<IReadOnlyList<GetRecentResponse>> GetRecentScores(DateTimeOffset before, int limit)
     {
         try
         {
-            long unixTime = new DateTimeOffset(before).ToUnixTimeSeconds();
+            long unixTime = before.ToUnixTimeSeconds();
             Uri uri = new($"{_appConfig.Endpoints.GetRecentScores}?before={unixTime}&limit={limit}");
             using HttpClient client = httpClientFactory.CreateClient();
             await using Stream responseStream = await client.GetStreamAsync(uri);
@@ -206,61 +182,5 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
 
         bytePos += usernameLength;
         return Encoding.UTF8.GetString(usernameBytes);
-    }
-
-    // Taken from devildaggers.info then modified
-    // Credit goes to Noah Stolk https://github.com/NoahStolk
-    private async Task<LeaderboardResponse> GetLeaderboardEntries(int rankStart)
-    {
-        using FormUrlEncodedContent content = new([new KeyValuePair<string, string>("offset", (rankStart - 1).ToString())]);
-        using HttpClient client = httpClientFactory.CreateClient();
-        using HttpResponseMessage response = await client.PostAsync(_appConfig.Endpoints.GetScores, content);
-        response.EnsureSuccessStatusCode();
-
-        using BinaryReader br = new(new MemoryStream(await response.Content.ReadAsByteArrayAsync()));
-
-        LeaderboardResponse leaderboard = new() { DateTime = DateTime.UtcNow };
-
-        br.BaseStream.Seek(11, SeekOrigin.Begin);
-        leaderboard.DeathsGlobal = br.ReadUInt64();
-        leaderboard.KillsGlobal = br.ReadUInt64();
-        leaderboard.DaggersFiredGlobal = br.ReadUInt64();
-        leaderboard.TimeGlobal = br.ReadUInt64();
-        leaderboard.GemsGlobal = br.ReadUInt64();
-        leaderboard.DaggersHitGlobal = br.ReadUInt64();
-        leaderboard.TotalEntries = br.ReadUInt16();
-
-        br.BaseStream.Seek(14, SeekOrigin.Current);
-        leaderboard.TotalPlayers = br.ReadInt32();
-
-        br.BaseStream.Seek(4, SeekOrigin.Current);
-        for (int i = 0; i < leaderboard.TotalEntries; i++)
-        {
-            short usernameLength = br.ReadInt16();
-            EntryResponse entry = new()
-            {
-                Username = Encoding.UTF8.GetString(br.ReadBytes(usernameLength)),
-                Rank = br.ReadInt32(),
-                Id = br.ReadUInt32(),
-            };
-
-            _ = br.ReadInt32();
-            entry.Time = br.ReadInt32();
-            entry.Kills = br.ReadInt32();
-            entry.DaggersFired = br.ReadInt32();
-            entry.DaggersHit = br.ReadInt32();
-            entry.Gems = br.ReadInt32();
-            entry.DeathType = br.ReadInt32();
-            entry.DeathsTotal = br.ReadUInt64();
-            entry.KillsTotal = br.ReadUInt64();
-            entry.DaggersFiredTotal = br.ReadUInt64();
-            entry.TimeTotal = br.ReadUInt64();
-            entry.GemsTotal = br.ReadUInt64();
-            entry.DaggersHitTotal = br.ReadUInt64();
-            br.BaseStream.Seek(4, SeekOrigin.Current);
-            leaderboard.Entries.Add(entry);
-        }
-
-        return leaderboard;
     }
 }

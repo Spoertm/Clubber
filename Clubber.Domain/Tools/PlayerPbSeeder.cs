@@ -1,7 +1,9 @@
+using Clubber.Domain.Data;
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace Clubber.Domain.Tools;
@@ -13,7 +15,7 @@ namespace Clubber.Domain.Tools;
 public sealed class PlayerPbSeeder(
     IUserRepository userRepository,
     IPlayerPbRepository playerPbRepository,
-    IHundredthCountRepository hundredthCountRepository,
+    AppDbContext dbContext,
     IWebService webService)
 {
     private const int BatchSize = 100;
@@ -85,8 +87,23 @@ public sealed class PlayerPbSeeder(
         if (seedHundredthCounts && successCount > 0)
         {
             Log.Information("Seeding HundredthCounts from PlayerPbs...");
-            await hundredthCountRepository.SeedFromPlayerPbsAsync();
+            await SeedHundredthCountsAsync();
             Log.Information("HundredthCounts seeding complete.");
+        }
+    }
+
+    private async Task SeedHundredthCountsAsync()
+    {
+        List<HundredthCount> counts = await dbContext.PlayerPbs
+            .Where(p => p.Time >= 1000 * 10_000)
+            .GroupBy(p => p.Time / 1_000_000)
+            .Select(g => new HundredthCount { Threshold = g.Key * 100, Count = g.Count() })
+            .ToListAsync();
+
+        if (counts.Count != 0)
+        {
+            await dbContext.HundredthCounts.AddRangeAsync(counts);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

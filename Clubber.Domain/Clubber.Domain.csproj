@@ -37,6 +37,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Clubber.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Data\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

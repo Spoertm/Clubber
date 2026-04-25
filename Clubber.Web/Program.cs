@@ -70,8 +70,6 @@ internal static class Program
         builder.Services.AddTransient<INewsRepository, NewsRepository>();
         builder.Services.AddTransient<ILeaderboardRepository, LeaderboardRepository>();
         builder.Services.AddTransient<IPlayerPbRepository, PlayerPbRepository>();
-        builder.Services.AddTransient<IHundredthCountRepository, HundredthCountRepository>();
-        builder.Services.AddTransient<IAppStateRepository, AppStateRepository>();
         builder.Services.AddTransient<UserService>();
         builder.Services.AddTransient<IWebService, WebService>();
 

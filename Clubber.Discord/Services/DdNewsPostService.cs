@@ -1,12 +1,14 @@
 using Clubber.Discord.Helpers;
 using Clubber.Domain.BackgroundTasks;
 using Clubber.Domain.Configuration;
+using Clubber.Domain.Data;
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -28,117 +30,194 @@ public sealed class DdNewsPostService(
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         await using AsyncServiceScope scope = services.CreateAsyncScope();
-        ServiceCollection serviceCollection = new(scope);
+        ServiceCollection sc = new(scope);
 
-        await serviceCollection.NewsRepository.RemoveOlderThanAsync(TimeSpan.FromDays(1));
+        await sc.NewsRepository.RemoveOlderThanAsync(TimeSpan.FromDays(1));
 
-        DateTimeOffset? lastCheck = await serviceCollection.AppStateRepository.GetLastNewsCheckAsync();
-        if (lastCheck is null)
-        {
-            lastCheck = DateTimeOffset.UtcNow.AddMinutes(-5);
-            await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(lastCheck.Value);
-        }
+        DateTimeOffset lastCheck = await GetLastCheckAsync(sc.DbContext);
+        List<GetRecentResponse> responses = await FetchRecentRunsWithBackfillAsync(lastCheck, sc.WebService);
 
-        List<GetRecentResponse> recentResponses = await FetchRecentRunsWithBackfillAsync(lastCheck.Value, serviceCollection);
-        if (recentResponses.Count == 0)
-        {
-            await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(DateTimeOffset.UtcNow);
-            return;
-        }
-
-        GetRecentResponse[] recentRuns = recentResponses
-            .Where(p => p.Timestamp > lastCheck)
-            .OrderBy(p => p.Timestamp)
+        GetRecentResponse[] recentRuns = responses
+            .Where(r => r.Timestamp >= lastCheck)
+            .OrderBy(r => r.Timestamp)
             .ToArray();
 
         if (recentRuns.Length == 0)
         {
-            await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(DateTimeOffset.UtcNow);
+            await UpdateLastCheckAsync(sc.DbContext, DateTimeOffset.UtcNow);
             return;
         }
 
-        List<NewsUpdate> newsUpdates = [];
-        List<(PlayerPb Pb, bool IsNewsWorthy, int Nth)> pendingUpserts = [];
-        foreach (GetRecentResponse submission in recentRuns)
-        {
-            PlayerPb? pb = await serviceCollection.PlayerPbRepository.GetByIdAsync(submission.LeaderboardId);
+        uint[] runIds = recentRuns.Select(r => r.LeaderboardId).Distinct().ToArray();
+        Dictionary<uint, PlayerPb> existingPbs = await sc.DbContext.PlayerPbs
+            .AsNoTracking()
+            .Where(p => runIds.Contains(p.LeaderboardId))
+            .ToDictionaryAsync(p => p.LeaderboardId);
 
-            if (pb != null && submission.Time <= pb.Time)
+        HashSet<int> hundredthsToTrack = GetRelevantHundredths(recentRuns, existingPbs);
+        Dictionary<int, int> currentHundredthCounts = await sc.DbContext.HundredthCounts
+            .AsNoTracking()
+            .Where(h => hundredthsToTrack.Contains(h.Threshold))
+            .ToDictionaryAsync(h => h.Threshold, h => h.Count);
+
+        ProcessRunsResult result = ProcessRuns(recentRuns, existingPbs, currentHundredthCounts);
+
+        if (result.Upserts.Count > 0)
+        {
+            await ApplyRanksAndSaveAsync(result, sc);
+        }
+
+        await PublishNewsIfAvailable(result.NewsUpdates, sc);
+        await UpdateLastCheckAsync(sc.DbContext, recentRuns[^1].Timestamp);
+    }
+
+    internal static ProcessRunsResult ProcessRuns(
+        GetRecentResponse[] recentRuns,
+        IReadOnlyDictionary<uint, PlayerPb> existingPbs,
+        IReadOnlyDictionary<int, int> currentHundredthCounts)
+    {
+        List<PlayerPb> upserts = [];
+        List<NewsUpdate> newsUpdates = [];
+        Dictionary<int, int> hundredthChanges = new(currentHundredthCounts);
+        Dictionary<uint, PlayerPb> pbLookup = new(existingPbs);
+
+        foreach (GetRecentResponse run in recentRuns)
+        {
+            PlayerPb? oldPb = pbLookup.GetValueOrDefault(run.LeaderboardId);
+            if (oldPb != null && run.Time <= oldPb.Time)
             {
                 continue;
             }
 
-            bool isNewsWorthy = pb != null && submission.Time >= NewsWorthyThreshold * 10_000;
+            int oldHundredth = oldPb?.Time / 1_000_000 ?? 0;
+            int newHundredth = run.Time / 1_000_000;
 
-            int oldTime = pb?.Time ?? 0;
-            int newTime = submission.Time;
-            int oldHundredth = oldTime / 1_000_000;
-            int newHundredth = newTime / 1_000_000;
-            int nth = 0;
-
-            if (newHundredth > oldHundredth)
+            PlayerPb newPb = new()
             {
-                for (int h = oldHundredth + 1; h <= newHundredth; h++)
-                {
-                    await serviceCollection.HundredthCountRepository.IncrementAsync(h * 100);
-                }
+                LeaderboardId = run.LeaderboardId,
+                Username = run.UserName,
+                Time = run.Time,
+                Rank = 0,
+                LastUpdated = run.Timestamp,
+            };
+
+            upserts.Add(newPb);
+            pbLookup[run.LeaderboardId] = newPb;
+
+            for (int h = oldHundredth + 1; h <= newHundredth; h++)
+            {
+                int threshold = h * 100;
+                hundredthChanges[threshold] = hundredthChanges.GetValueOrDefault(threshold) + 1;
             }
 
-            if (newHundredth >= 10)
+            if (oldPb != null && run.Time >= NewsWorthyThreshold * 10_000 && newHundredth > oldHundredth)
             {
-                nth = await serviceCollection.HundredthCountRepository.GetCountAsync(newHundredth * 100);
-            }
+                int threshold = newHundredth * 100;
+                int nth = hundredthChanges[threshold];
 
-            pendingUpserts.Add((new PlayerPb
-            {
-                LeaderboardId = submission.LeaderboardId,
-                Username = submission.UserName,
-                Time = submission.Time,
-                Rank = pb?.Rank ?? 0,
-                LastUpdated = submission.Timestamp,
-            }, isNewsWorthy, nth));
-
-            if (isNewsWorthy)
-            {
                 newsUpdates.Add(new NewsUpdate(
-                    new EntryResponse { Id = pb!.LeaderboardId, Username = pb.Username, Time = pb.Time, Rank = pb.Rank },
-                    new EntryResponse { Id = submission.LeaderboardId, Username = submission.UserName, Time = submission.Time, Rank = 0 },
+                    new EntryResponse { Id = oldPb.LeaderboardId, Username = oldPb.Username, Time = oldPb.Time, Rank = oldPb.Rank },
+                    new EntryResponse { Id = run.LeaderboardId, Username = run.UserName, Time = run.Time, Rank = 0 },
                     nth));
             }
         }
 
-        if (pendingUpserts.Count > 0)
+        return new ProcessRunsResult(upserts, newsUpdates, hundredthChanges);
+    }
+
+    private static HashSet<int> GetRelevantHundredths(GetRecentResponse[] recentRuns, IReadOnlyDictionary<uint, PlayerPb> existingPbs)
+    {
+        HashSet<int> hundredths = [];
+        foreach (GetRecentResponse run in recentRuns)
         {
-            uint[] ids = pendingUpserts.Select(p => p.Pb.LeaderboardId).Distinct().ToArray();
-            IReadOnlyList<EntryResponse> currentPlayers = await serviceCollection.WebService.GetLbPlayers(ids);
-            Dictionary<uint, EntryResponse> rankLookup = currentPlayers.ToDictionary(p => p.Id);
+            PlayerPb? oldPb = existingPbs.GetValueOrDefault(run.LeaderboardId);
+            if (oldPb != null && run.Time <= oldPb.Time)
+                continue;
 
-            foreach ((PlayerPb pb, _, _) in pendingUpserts)
+            int oldH = oldPb?.Time / 1_000_000 ?? 0;
+            int newH = run.Time / 1_000_000;
+            for (int h = Math.Max(oldH + 1, 10); h <= newH; h++)
+                hundredths.Add(h * 100);
+        }
+
+        return hundredths;
+    }
+
+    private static async Task ApplyRanksAndSaveAsync(ProcessRunsResult result, ServiceCollection sc)
+    {
+        uint[] ids = result.Upserts.Select(p => p.LeaderboardId).Distinct().ToArray();
+        IReadOnlyList<EntryResponse> currentPlayers = await sc.WebService.GetLbPlayers(ids);
+        Dictionary<uint, EntryResponse> rankLookup = currentPlayers.ToDictionary(p => p.Id);
+
+        uint[] existingIds = result.Upserts.Select(p => p.LeaderboardId).ToArray();
+        Dictionary<uint, PlayerPb> existingPbs = await sc.DbContext.PlayerPbs
+            .Where(p => existingIds.Contains(p.LeaderboardId))
+            .ToDictionaryAsync(p => p.LeaderboardId);
+
+        foreach (PlayerPb pb in result.Upserts)
+        {
+            if (rankLookup.TryGetValue(pb.LeaderboardId, out EntryResponse? entry))
             {
-                if (rankLookup.TryGetValue(pb.LeaderboardId, out EntryResponse? entry))
-                {
-                    pb.Rank = entry.Rank;
-                }
-
-                await serviceCollection.PlayerPbRepository.UpsertAsync(pb);
+                pb.Rank = entry.Rank;
             }
 
-            foreach (NewsUpdate update in newsUpdates)
+            if (existingPbs.TryGetValue(pb.LeaderboardId, out PlayerPb? existing))
             {
-                if (rankLookup.TryGetValue(update.NewEntry.Id, out EntryResponse? entry))
+                existing.Username = pb.Username;
+                existing.Time = pb.Time;
+                existing.Rank = pb.Rank;
+                existing.LastUpdated = pb.LastUpdated;
+            }
+            else
+            {
+                sc.DbContext.PlayerPbs.Add(pb);
+            }
+        }
+
+        foreach (NewsUpdate update in result.NewsUpdates)
+        {
+            if (rankLookup.TryGetValue(update.NewEntry.Id, out EntryResponse? entry))
+            {
+                update.NewEntry.Rank = entry.Rank;
+            }
+        }
+
+        int[] allThresholds = result.HundredthChanges.Keys.ToArray();
+        Dictionary<int, int> dbCounts = await sc.DbContext.HundredthCounts
+            .Where(h => allThresholds.Contains(h.Threshold))
+            .ToDictionaryAsync(h => h.Threshold, h => h.Count);
+
+        int[] modifiedThresholds = result.HundredthChanges
+            .Where(kvp => !dbCounts.TryGetValue(kvp.Key, out int existingCount) || existingCount != kvp.Value)
+            .Select(kvp => kvp.Key)
+            .ToArray();
+
+        if (modifiedThresholds.Length > 0)
+        {
+            Dictionary<int, HundredthCount> existingCounts = await sc.DbContext.HundredthCounts
+                .Where(h => modifiedThresholds.Contains(h.Threshold))
+                .ToDictionaryAsync(h => h.Threshold);
+
+            foreach (int threshold in modifiedThresholds)
+            {
+                int count = result.HundredthChanges[threshold];
+                if (existingCounts.TryGetValue(threshold, out HundredthCount? existing))
                 {
-                    update.NewEntry.Rank = entry.Rank;
+                    existing.Count = count;
+                }
+                else
+                {
+                    sc.DbContext.HundredthCounts.Add(new HundredthCount { Threshold = threshold, Count = count });
                 }
             }
         }
 
-        await PublishNewsIfAvailable(newsUpdates, serviceCollection);
-        await serviceCollection.AppStateRepository.SetLastNewsCheckAsync(recentRuns[^1].Timestamp);
+        await sc.DbContext.SaveChangesAsync();
     }
 
-    private async Task PublishNewsIfAvailable(IEnumerable<NewsUpdate> newsUpdates, ServiceCollection serviceCollection)
+    private async Task PublishNewsIfAvailable(IEnumerable<NewsUpdate> newsUpdates, ServiceCollection sc)
     {
-        SocketTextChannel channel = serviceCollection.DiscordHelper.GetTextChannel(_config.DdNewsChannelId);
+        SocketTextChannel channel = sc.DiscordHelper.GetTextChannel(_config.DdNewsChannelId);
         foreach (NewsUpdate update in newsUpdates)
         {
             Log.Information("Publishing news for {Player} - {Score}s",
@@ -146,7 +225,7 @@ public sealed class DdNewsPostService(
 
             try
             {
-                await PublishSingleNews(update, channel, serviceCollection);
+                await PublishSingleNews(update, channel, sc);
                 DdNewsItem newsItem = new()
                 {
                     LeaderboardId = update.NewEntry.Id,
@@ -156,7 +235,7 @@ public sealed class DdNewsPostService(
                     Nth = update.Nth,
                 };
 
-                await serviceCollection.NewsRepository.AddAsync(newsItem);
+                await sc.NewsRepository.AddAsync(newsItem);
             }
             catch (Exception ex)
             {
@@ -165,10 +244,10 @@ public sealed class DdNewsPostService(
         }
     }
 
-    private async Task PublishSingleNews(NewsUpdate update, SocketTextChannel channel, ServiceCollection serviceCollection)
+    private async Task PublishSingleNews(NewsUpdate update, SocketTextChannel channel, ServiceCollection sc)
     {
-        string message = await CreateNewsMessage(update, serviceCollection);
-        string? countryCode = await GetCountryCode(update.NewEntry.Id, serviceCollection);
+        string message = await CreateNewsMessage(update, sc);
+        string? countryCode = await GetCountryCode(update.NewEntry.Id, sc);
 
         using MemoryStream image = _imageGenerator.CreateImage(
             update.NewEntry.Rank,
@@ -180,14 +259,14 @@ public sealed class DdNewsPostService(
         await channel.SendFileAsync(image, filename, message);
     }
 
-    private async Task<string> CreateNewsMessage(NewsUpdate update, ServiceCollection serviceCollection)
+    private async Task<string> CreateNewsMessage(NewsUpdate update, ServiceCollection sc)
     {
         string? username = update.NewEntry.Username;
 
-        DdUser? dbUser = await serviceCollection.UserRepository.FindAsync(update.NewEntry.Id);
+        DdUser? dbUser = await sc.UserRepository.FindAsync(update.NewEntry.Id);
         if (dbUser != null)
         {
-            SocketGuildUser? guildUser = serviceCollection.DiscordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId);
+            SocketGuildUser? guildUser = sc.DiscordHelper.GetGuildUser(_config.DdPalsId, dbUser.DiscordId);
             if (guildUser != null)
             {
                 username = guildUser.Mention;
@@ -204,11 +283,11 @@ public sealed class DdNewsPostService(
             update.Nth);
     }
 
-    private static async Task<string?> GetCountryCode(uint playerLbId, ServiceCollection serviceCollection)
+    private static async Task<string?> GetCountryCode(uint playerLbId, ServiceCollection sc)
     {
         try
         {
-            return await serviceCollection.WebService.GetCountryCodeForplayer(playerLbId);
+            return await sc.WebService.GetCountryCodeForplayer(playerLbId);
         }
         catch (Exception ex)
         {
@@ -217,14 +296,14 @@ public sealed class DdNewsPostService(
         }
     }
 
-    private static async Task<List<GetRecentResponse>> FetchRecentRunsWithBackfillAsync(DateTimeOffset lastCheck, ServiceCollection serviceCollection)
+    private static async Task<List<GetRecentResponse>> FetchRecentRunsWithBackfillAsync(DateTimeOffset lastCheck, IWebService webService)
     {
         List<GetRecentResponse> allRuns = [];
-        DateTime fetchBefore = DateTime.UtcNow;
+        DateTimeOffset fetchBefore = DateTimeOffset.UtcNow;
 
         while (true)
         {
-            IReadOnlyList<GetRecentResponse> batch = await serviceCollection.WebService.GetRecentScores(fetchBefore, GetRecentLimit);
+            IReadOnlyList<GetRecentResponse> batch = await webService.GetRecentScores(fetchBefore, GetRecentLimit);
 
             if (batch.Count == 0)
             {
@@ -240,36 +319,65 @@ public sealed class DdNewsPostService(
                 break;
             }
 
-            fetchBefore = oldestInBatch.Timestamp.UtcDateTime;
+            fetchBefore = oldestInBatch.Timestamp;
         }
 
         return allRuns;
     }
 
-    // Helper types for better organization
+    private static async Task<DateTimeOffset> GetLastCheckAsync(AppDbContext dbContext)
+    {
+        NewsCursor? cursor = await dbContext.NewsCursors.FirstOrDefaultAsync();
+        if (cursor != null)
+        {
+            return cursor.LastCheckedAt;
+        }
+
+        DateTimeOffset fallback = DateTimeOffset.UtcNow.AddMinutes(-5);
+        dbContext.NewsCursors.Add(new NewsCursor { LastCheckedAt = fallback });
+        await dbContext.SaveChangesAsync();
+        return fallback;
+    }
+
+    private static async Task UpdateLastCheckAsync(AppDbContext dbContext, DateTimeOffset value)
+    {
+        NewsCursor? cursor = await dbContext.NewsCursors.FirstOrDefaultAsync();
+        if (cursor != null)
+        {
+            cursor.LastCheckedAt = value;
+        }
+        else
+        {
+            dbContext.NewsCursors.Add(new NewsCursor { LastCheckedAt = value });
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
     private sealed record ServiceCollection(
         INewsRepository NewsRepository,
         IUserRepository UserRepository,
-        IPlayerPbRepository PlayerPbRepository,
-        IHundredthCountRepository HundredthCountRepository,
-        IAppStateRepository AppStateRepository,
+        AppDbContext DbContext,
         IDiscordHelper DiscordHelper,
         IWebService WebService)
     {
         public ServiceCollection(IServiceScope scope) : this(
             scope.ServiceProvider.GetRequiredService<INewsRepository>(),
             scope.ServiceProvider.GetRequiredService<IUserRepository>(),
-            scope.ServiceProvider.GetRequiredService<IPlayerPbRepository>(),
-            scope.ServiceProvider.GetRequiredService<IHundredthCountRepository>(),
-            scope.ServiceProvider.GetRequiredService<IAppStateRepository>(),
+            scope.ServiceProvider.GetRequiredService<AppDbContext>(),
             scope.ServiceProvider.GetRequiredService<IDiscordHelper>(),
             scope.ServiceProvider.GetRequiredService<IWebService>())
         {
         }
     }
-
-    private readonly record struct NewsUpdate(
-        EntryResponse OldEntry,
-        EntryResponse NewEntry,
-        int Nth);
 }
+
+internal sealed record ProcessRunsResult(
+    List<PlayerPb> Upserts,
+    List<NewsUpdate> NewsUpdates,
+    Dictionary<int, int> HundredthChanges);
+
+internal readonly record struct NewsUpdate(
+    EntryResponse OldEntry,
+    EntryResponse NewEntry,
+    int Nth);

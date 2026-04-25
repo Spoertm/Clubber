@@ -7,8 +7,6 @@ public interface IWebService
 {
     Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids);
 
-    Task<ICollection<EntryResponse>> GetSufficientLeaderboardEntries(int minimumScore);
-
     Task<string?> GetCountryCodeForplayer(uint lbId);
 
     Task<GetPlayerHistory?> GetPlayerHistory(uint lbId);
@@ -17,5 +15,5 @@ public interface IWebService
 
     Task<GetWorldRecordDataContainer> GetWorldRecords();
 
-    Task<IReadOnlyList<GetRecentResponse>> GetRecentScores(DateTime before, int limit);
+    Task<IReadOnlyList<GetRecentResponse>> GetRecentScores(DateTimeOffset before, int limit);
 }

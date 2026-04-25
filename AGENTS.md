@@ -39,7 +39,7 @@ Contains the core business logic and is independent of external frameworks.
 | `Data/` | Entity Framework entities and `AppDbContext` |
 | `Extensions/` | Extension methods (`ExtensionMethods.cs`) |
 | `Helpers/` | Utility classes (`CollectionUtils`, `LeaderboardImageGenerator`, `RegistrationTracker`, `RunAnalyzer`) |
-| `Repositories/` | Data access layer (`IUserRepository`, `INewsRepository`, `ILeaderboardRepository`, `IPlayerPbRepository`, `IHundredthCountRepository`, `IAppStateRepository`) |
+| `Repositories/` | Data access layer (`IUserRepository`, `INewsRepository`, `ILeaderboardRepository`, `IPlayerPbRepository`) |
 | `Models/` | Domain models, DTOs, and API response types |
 | `Services/` | Core services (`IWebService`, `WebService`, `RoleConfigService`) |
 
@@ -365,8 +365,6 @@ Data access is organized through repository interfaces in `Clubber.Domain/Reposi
 - **INewsRepository** - DD news items and cleanup
 - **ILeaderboardRepository** - Best splits, and top homing peaks
 - **IPlayerPbRepository** - Player personal best tracking for news detection
-- **IHundredthCountRepository** - Hundredth threshold counts (e.g. 1000s, 1100s) for news ordinal calculation
-- **IAppStateRepository** - Application state key-value store (e.g. news polling cursor)
 
 Repositories are registered as transient services.
 
