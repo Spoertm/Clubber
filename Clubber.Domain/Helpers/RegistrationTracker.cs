@@ -11,6 +11,11 @@ public sealed class RegistrationTracker
         return _userRegistrations.ContainsKey(userId);
     }
 
+    public bool TryFlagUser(ulong userId)
+    {
+        return _userRegistrations.TryAdd(userId, true);
+    }
+
     public void FlagUser(ulong userId)
     {
         _userRegistrations[userId] = true;

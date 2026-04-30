@@ -58,7 +58,7 @@ public sealed class RegistrationRequestHandler
             return;
         }
 
-        if (_registrationTracker.UserIsFlagged(message.Author.Id))
+        if (!_registrationTracker.TryFlagUser(message.Author.Id))
         {
             await message.ReplyAsync(embed: new EmbedBuilder().WithDescription("ℹ️ You've already provided an ID. Mods will register you soon.").Build());
             return;
@@ -103,10 +103,9 @@ public sealed class RegistrationRequestHandler
         }
         else
         {
+            _registrationTracker.UnflagUser(message.Author.Id);
             return;
         }
-
-        _registrationTracker.FlagUser(message.Author.Id);
 
         SocketTextChannel modsChannel = _discordHelper.GetTextChannel(_config.ModsChannelId);
         await modsChannel.SendMessageAsync(embed: registerEmbed, components: cb.Build());
