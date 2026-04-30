@@ -38,7 +38,10 @@ public sealed class IntegrationTestFixture : IDisposable
         services.AddSingleton(_ => CreateMockWebService());
         services.Configure<AppConfig>(cfg =>
         {
+            cfg.FormerWrRoleId = 444444;
             cfg.UnregisteredRoleId = 999999;
+            cfg.NoScoreRoleId = 555555;
+            cfg.PendingPbRoleId = 666666;
             cfg.DdPalsId = 111111;
             cfg.DailyUpdateChannelId = 222222;
             cfg.DailyUpdateLoggingChannelId = 333333;

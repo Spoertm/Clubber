@@ -20,6 +20,7 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
 {
     private readonly IntegrationTestFixture _fixture;
     private readonly ScoreRoleService _scoreRoleService;
+    private readonly AppConfig _appConfig;
 
     public DatabaseUpdateServiceIntegrationTests(IntegrationTestFixture fixture)
     {
@@ -29,6 +30,7 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
         IServiceScopeFactory scopeFactory = _fixture.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
         RoleConfigService roleConfigService = _fixture.ServiceProvider.GetRequiredService<RoleConfigService>();
 
+        _appConfig = appConfig.Value;
         _scoreRoleService = new ScoreRoleService(appConfig, _fixture.WebService, userRepository, roleConfigService);
         Substitute.For<IDiscordHelper>();
     }
@@ -144,7 +146,7 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
         Assert.Contains(TestData.ScoreRoles[600], user2Update.RoleChange.RolesToRemove);
 
         UserRoleUpdate user4Update = result.UserRoleUpdates.First(u => u.User.Id == user4Id);
-        Assert.Contains(AppConfig.FormerWrRoleId, user4Update.RoleChange.RolesToAdd);
+        Assert.Contains(_appConfig.FormerWrRoleId, user4Update.RoleChange.RolesToAdd);
 
         Assert.DoesNotContain(result.UserRoleUpdates, u => u.User.Id == user3Id);
     }

@@ -1,6 +1,7 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
@@ -11,6 +12,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Clubber.Discord.Modules;
@@ -21,7 +23,8 @@ public sealed class UserManagementCommands(
     IUserRepository userRepository,
     UserService userService,
     IWebService webService,
-    ScoreRoleService scoreRoleService)
+    ScoreRoleService scoreRoleService,
+    IOptions<AppConfig> config)
     : InteractionModuleBase<SocketInteractionContext>
 {
     [SlashCommand("register", "Register a user with their Devil Daggers leaderboard ID")]
@@ -46,10 +49,8 @@ public sealed class UserManagementCommands(
             Result registrationResult = await userRepository.RegisterAsync(lbId, user.Id);
             if (registrationResult.IsSuccess)
             {
-                const ulong newPalRoleId = 728663492424499200;
-                const ulong pendingPbRoleId = 994354086646399066;
-                await user.RemoveRoleAsync(newPalRoleId);
-                await user.AddRoleAsync(pendingPbRoleId);
+                await user.RemoveRoleAsync(config.Value.NewPalRoleId);
+                await user.AddRoleAsync(config.Value.PendingPbRoleId);
                 await FollowupAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get assigned a role.");
             }
             else

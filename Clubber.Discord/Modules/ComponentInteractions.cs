@@ -154,10 +154,8 @@ public sealed class ComponentInteractions(
                 return Result.Failure($"❌ Failed to execute command: {registrationResult.ErrorMsg}");
             }
 
-            const ulong newPalRoleId = 728663492424499200;
-            const ulong pendingPbRoleId = 994354086646399066;
-            await user.RemoveRoleAsync(newPalRoleId);
-            await user.AddRoleAsync(pendingPbRoleId);
+            await user.RemoveRoleAsync(_config.NewPalRoleId);
+            await user.AddRoleAsync(_config.PendingPbRoleId);
         }
 
         return Result.Success();

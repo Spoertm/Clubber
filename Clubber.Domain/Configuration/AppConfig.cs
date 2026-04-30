@@ -5,8 +5,6 @@ namespace Clubber.Domain.Configuration;
 
 public sealed class AppConfig
 {
-    public const ulong FormerWrRoleId = 1383750696754483200;
-
     public static FrozenDictionary<int, string> DeathTypes { get; } = new Dictionary<int, string>
     {
         [0] = "FALLEN",
@@ -33,6 +31,9 @@ public sealed class AppConfig
 
     [Required]
     public required string BotToken { get; set; }
+
+    [Required]
+    public ulong FormerWrRoleId { get; set; }
 
     [Required]
     public ulong RegisterChannelId { get; set; }
@@ -65,5 +66,18 @@ public sealed class AppConfig
     public ulong NoScoreRoleId { get; set; }
 
     [Required]
+    public ulong PendingPbRoleId { get; set; }
+
+    [Required]
+    public ulong NewPalRoleId { get; set; }
+
+    [Required]
     public required Endpoints Endpoints { get; set; }
+
+    public IReadOnlyCollection<ulong> BaseRoles => [
+        FormerWrRoleId,
+        UnregisteredRoleId,
+        NoScoreRoleId,
+        PendingPbRoleId
+    ];
 }

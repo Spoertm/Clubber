@@ -18,6 +18,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 {
     private readonly IntegrationTestFixture _fixture;
     private readonly ScoreRoleService _scoreRoleService;
+    private readonly AppConfig _appConfig;
 
     public ScoreRoleServiceIntegrationTests(IntegrationTestFixture fixture)
     {
@@ -28,6 +29,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
         IServiceScopeFactory scopeFactory = _fixture.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
         RoleConfigService roleConfigService = _fixture.ServiceProvider.GetRequiredService<RoleConfigService>();
 
+        _appConfig = appConfig.Value;
         _scoreRoleService = new ScoreRoleService(appConfig, _fixture.WebService, userRepository, roleConfigService);
     }
 
@@ -139,7 +141,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 
         Assert.Single(result.UserRoleUpdates);
         UserRoleUpdate update = result.UserRoleUpdates.First();
-        Assert.Contains(AppConfig.FormerWrRoleId, update.RoleChange.RolesToAdd);
+        Assert.Contains(_appConfig.FormerWrRoleId, update.RoleChange.RolesToAdd);
     }
 
     [Fact]
@@ -166,7 +168,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
         Assert.Single(result.UserRoleUpdates);
         UserRoleUpdate update = result.UserRoleUpdates.First();
         Assert.Contains(top1RoleId, update.RoleChange.RolesToAdd);
-        Assert.DoesNotContain(AppConfig.FormerWrRoleId, update.RoleChange.RolesToAdd);
+        Assert.DoesNotContain(_appConfig.FormerWrRoleId, update.RoleChange.RolesToAdd);
     }
 
     [Fact]
@@ -227,7 +229,7 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
         ulong correctScoreRole = TestData.ScoreRoles[600];
         ulong wrongScoreRole1 = TestData.ScoreRoles[500];
         ulong wrongScoreRole2 = TestData.ScoreRoles[700];
-        const ulong uselessRole = 458375331468935178;
+        ulong uselessRole = _appConfig.NoScoreRoleId;
 
         await _fixture.SeedUsersAsync(new DdUser(userId, lbId));
 
