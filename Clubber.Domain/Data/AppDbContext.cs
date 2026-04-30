@@ -42,8 +42,8 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<HundredthCount>().HasKey(hc => hc.Threshold);
         modelBuilder.Entity<NewsCursor>().HasKey(nc => nc.Id);
         modelBuilder.Entity<NewsCursor>().Property(nc => nc.Id).ValueGeneratedOnAdd();
-        modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.LeaderboardId);
-        modelBuilder.Entity<DdUser>().HasIndex(ddu => ddu.DiscordId).IsUnique();
+        modelBuilder.Entity<DdUser>().HasKey(ddu => ddu.DiscordId);
+        modelBuilder.Entity<DdUser>().HasIndex(ddu => ddu.LeaderboardId);
 
         modelBuilder.Entity<DdNewsItem>().HasKey(dni => dni.ItemId);
         modelBuilder.Entity<DdNewsItem>().Property(dni => dni.ItemId)

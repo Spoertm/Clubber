@@ -28,12 +28,12 @@ public sealed class UserRepository(AppDbContext dbContext) : IUserRepository
 
     public async Task<DdUser?> FindAsync(uint leaderboardId)
     {
-        return await dbContext.DdPlayers.FindAsync(leaderboardId);
+        return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.LeaderboardId == leaderboardId);
     }
 
     public async Task<DdUser?> FindAsync(ulong discordId)
     {
-        return await dbContext.DdPlayers.AsNoTracking().FirstOrDefaultAsync(ddp => ddp.DiscordId == discordId);
+        return await dbContext.DdPlayers.FindAsync(discordId);
     }
 
     public async Task<bool> DiscordIdExistsAsync(ulong discordId)
