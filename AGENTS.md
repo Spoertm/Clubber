@@ -81,7 +81,6 @@ The ASP.NET Core web application that hosts both the web UI and the Discord bot.
 
 | Directory | Purpose |
 |-----------|---------|
-| `Configuration/` | Configuration setup (`ConfigurationSetup.cs`) |
 | `Controllers/` | MVC controllers (`HomeController`) |
 | `Endpoints/` | Minimal API endpoints (`ClubberEndpoints.cs`) |
 | `Models/` | View models and DTOs |
@@ -166,9 +165,14 @@ dotnet publish -c Release -o ./publish
 ## Configuration
 
 ### Environment Variables (Production)
-The application uses environment variables for configuration in production:
+The application uses standard .NET environment variable configuration in production. Hierarchical settings are mapped using double underscores (`__`) as section delimiters.
 
-- `Configuration` - JSON string containing full app configuration (see `AppConfig.cs` for structure)
+Examples:
+- `BotConfig__BotToken` - Discord bot token
+- `BotConfig__Prefix` - Command prefix (default: `+`)
+- `ConnectionStrings__DefaultConnection` - PostgreSQL connection string
+
+See `AppConfig.cs` for all available configuration keys.
 
 ### Development Configuration
 In development, the app uses `appsettings.Development.json`:

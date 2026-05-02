@@ -4,11 +4,11 @@ using Clubber.Discord.Models;
 using Clubber.Discord.Modules;
 using Clubber.Discord.Services;
 using Clubber.Domain.BackgroundTasks;
+using Clubber.Domain.Configuration;
 using Clubber.Domain.Data;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
-using Clubber.Web.Configuration;
 using Clubber.Web.Endpoints;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +26,10 @@ internal static class Program
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        builder.ConfigureConfiguration();
+        builder.Services.AddOptions<AppConfig>()
+            .Bind(builder.Configuration.GetSection("BotConfig"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
         builder.Host.UseSerilog();
