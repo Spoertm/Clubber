@@ -1,6 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Models.Exceptions;
 using Clubber.Domain.Models.Responses;
@@ -17,6 +18,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString,
     };
 
     public async Task<IReadOnlyList<EntryResponse>> GetLbPlayers(IEnumerable<uint> ids)
@@ -135,8 +137,17 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
             long unixTime = before.ToUnixTimeSeconds();
             Uri uri = new($"{_appConfig.Endpoints.GetRecentScores}?before={unixTime}&limit={limit}");
             using HttpClient client = httpClientFactory.CreateClient();
-            await using Stream responseStream = await client.GetStreamAsync(uri);
-            return await JsonSerializer.DeserializeAsync<List<GetRecentResponse>>(responseStream, _serializerOptions)
+            string responseString = await client.GetStringAsync(uri);
+
+            if (string.IsNullOrWhiteSpace(responseString))
+            {
+                return [];
+            }
+
+            // API returns concatenated JSON objects: {...}{...}
+            // Wrap them in a JSON array so we can deserialize normally.
+            string jsonArray = '[' + responseString.Replace("}{", "},{", StringComparison.Ordinal) + ']';
+            return JsonSerializer.Deserialize<List<GetRecentResponse>>(jsonArray, _serializerOptions)
                    ?? throw new SerializationException("Failed to deserialize recent scores data");
         }
         catch (Exception e)
