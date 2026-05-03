@@ -58,7 +58,7 @@ internal static class Program
             CommandService commands = new(new CommandServiceConfig
             {
                 IgnoreExtraArgs = true,
-                DefaultRunMode = RunMode.Async,
+                DefaultRunMode = RunMode.Sync,
             });
 
             return commands;
