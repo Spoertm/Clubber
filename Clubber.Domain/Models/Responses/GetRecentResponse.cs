@@ -32,7 +32,7 @@ public record GetRecentResponse
     public required string Country { get; init; }
 
     [JsonPropertyName("user_name")]
-    public required string UserName { get; init; }
+    public string? UserName { get; init; }
 
     [JsonIgnore]
     public DateTimeOffset Timestamp => DateTimeOffset.FromUnixTimeSeconds(TimestampUnix);

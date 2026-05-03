@@ -39,6 +39,7 @@ public sealed class DdNewsPostService(
 
         GetRecentResponse[] recentRuns = responses
             .Where(r => r.Timestamp >= lastCheck)
+            .Where(r => !string.IsNullOrWhiteSpace(r.UserName))
             .OrderBy(r => r.Timestamp)
             .ToArray();
 
@@ -83,6 +84,11 @@ public sealed class DdNewsPostService(
 
         foreach (GetRecentResponse run in recentRuns)
         {
+            if (string.IsNullOrWhiteSpace(run.UserName))
+            {
+                continue;
+            }
+
             PlayerPb? oldPb = pbLookup.GetValueOrDefault(run.LeaderboardId);
             if (oldPb != null && run.Time <= oldPb.Time)
             {
