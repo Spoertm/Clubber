@@ -32,7 +32,7 @@ public sealed class DdNewsPostServiceTests
     {
         GetRecentResponse[] runs =
         [
-            CreateRun(1, 500_0000),
+            CreateRun(1, 750_0000),
         ];
         Dictionary<uint, PlayerPb> existingPbs = [];
         Dictionary<int, int> hundredthCounts = [];
@@ -40,8 +40,47 @@ public sealed class DdNewsPostServiceTests
         ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
 
         Assert.Single(result.Upserts);
-        Assert.Equal(500_0000, result.Upserts[0].Time);
+        Assert.Equal(750_0000, result.Upserts[0].Time);
         Assert.Empty(result.NewsUpdates);
+    }
+
+    [Fact]
+    public void ProcessRuns_NewPlayerBelow700_Skipped()
+    {
+        GetRecentResponse[] runs =
+        [
+            CreateRun(1, 500_0000),
+        ];
+        Dictionary<uint, PlayerPb> existingPbs = [];
+        Dictionary<int, int> hundredthCounts = [];
+
+        ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
+
+        Assert.Empty(result.Upserts);
+        Assert.Empty(result.NewsUpdates);
+        Assert.Empty(result.HundredthChanges);
+    }
+
+    [Fact]
+    public void ProcessRuns_ExistingPlayerCrossing700_UpdatesAndTracksHundredth()
+    {
+        GetRecentResponse[] runs =
+        [
+            CreateRun(1, 750_0000),
+        ];
+        Dictionary<uint, PlayerPb> existingPbs = new()
+        {
+            [1] = CreatePb(1, 650_0000),
+        };
+        Dictionary<int, int> hundredthCounts = [];
+
+        ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
+
+        Assert.Single(result.Upserts);
+        Assert.Equal(750_0000, result.Upserts[0].Time);
+        Assert.Empty(result.NewsUpdates);
+        Assert.Single(result.HundredthChanges);
+        Assert.Equal(1, result.HundredthChanges[700]);
     }
 
     [Fact]

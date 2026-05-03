@@ -20,6 +20,7 @@ public sealed class DdNewsPostService(
     IServiceScopeFactory services) : RepeatingBackgroundService
 {
     private const int NewsWorthyThreshold = 1000;
+    private const int MinimumTrackableScore = 700;
     private const int GetRecentLimit = 100;
 
     private readonly AppConfig _config = config.Value;
@@ -95,6 +96,11 @@ public sealed class DdNewsPostService(
                 continue;
             }
 
+            if (oldPb == null && run.Time < MinimumTrackableScore * 10_000)
+            {
+                continue;
+            }
+
             int oldHundredth = oldPb?.Time / 1_000_000 ?? 0;
             int newHundredth = run.Time / 1_000_000;
 
@@ -110,7 +116,7 @@ public sealed class DdNewsPostService(
             upserts.Add(newPb);
             pbLookup[run.LeaderboardId] = newPb;
 
-            for (int h = oldHundredth + 1; h <= newHundredth; h++)
+            for (int h = Math.Max(oldHundredth + 1, MinimumTrackableScore / 100); h <= newHundredth; h++)
             {
                 int threshold = h * 100;
                 hundredthChanges[threshold] = hundredthChanges.GetValueOrDefault(threshold) + 1;
@@ -147,7 +153,7 @@ public sealed class DdNewsPostService(
 
             int oldH = oldPb?.Time / 1_000_000 ?? 0;
             int newH = run.Time / 1_000_000;
-            for (int h = Math.Max(oldH + 1, 10); h <= newH; h++)
+            for (int h = Math.Max(oldH + 1, MinimumTrackableScore / 100); h <= newH; h++)
                 hundredths.Add(h * 100);
         }
 
