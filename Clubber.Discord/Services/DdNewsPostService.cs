@@ -122,7 +122,12 @@ public sealed class DdNewsPostService(
             }
         }
 
-        return new ProcessRunsResult(upserts, newsUpdates, hundredthChanges);
+        List<PlayerPb> dedupedUpserts = upserts
+            .GroupBy(p => p.LeaderboardId)
+            .Select(g => g.Last())
+            .ToList();
+
+        return new ProcessRunsResult(dedupedUpserts, newsUpdates, hundredthChanges);
     }
 
     private static HashSet<int> GetRelevantHundredths(GetRecentResponse[] recentRuns, IReadOnlyDictionary<uint, PlayerPb> existingPbs)

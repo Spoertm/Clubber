@@ -146,7 +146,8 @@ public sealed class DdNewsPostServiceTests
 
         ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
 
-        Assert.Equal(2, result.Upserts.Count);
+        Assert.Single(result.Upserts);
+        Assert.Equal(1150_0000, result.Upserts[0].Time);
         Assert.Single(result.NewsUpdates);
         Assert.Equal(1100_0000, result.NewsUpdates[0].NewEntry.Time);
     }
