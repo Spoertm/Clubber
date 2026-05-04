@@ -89,10 +89,11 @@ public sealed class ScoreRoleService(
 
             Task<IReadOnlyList<EntryResponse>> lbPlayerTask = webService.GetLbPlayers([lbId]);
             Task<GetWorldRecordDataContainer> wrTask = webService.GetWorldRecords();
-            Task<ImmutableSortedDictionary<int, ulong>> scoreRolesTask = roleConfigService.GetScoreRolesAsync();
-            Task<ImmutableSortedDictionary<int, ulong>> rankRolesTask = roleConfigService.GetRankRolesAsync();
 
-            await Task.WhenAll(lbPlayerTask, wrTask, scoreRolesTask, rankRolesTask);
+            ImmutableSortedDictionary<int, ulong> scoreRoles = await roleConfigService.GetScoreRolesAsync();
+            ImmutableSortedDictionary<int, ulong> rankRoles = await roleConfigService.GetRankRolesAsync();
+
+            await Task.WhenAll(lbPlayerTask, wrTask);
 
             IReadOnlyList<EntryResponse> lbPlayerList = lbPlayerTask.Result;
             if (lbPlayerList.Count == 0)
@@ -101,7 +102,7 @@ public sealed class ScoreRoleService(
             }
 
             HashSet<uint> formerWrPlayerIds = [.. wrTask.Result.WorldRecordHolders.Select(wrh => wrh.Id)];
-            RoleContext roleContext = new(scoreRolesTask.Result, rankRolesTask.Result, _appConfig.BaseRoles);
+            RoleContext roleContext = new(scoreRoles, rankRoles, _appConfig.BaseRoles);
 
             HashSet<ulong> allPossibleRoles = [.. _appConfig.BaseRoles, .. roleContext.AllPossibleRoles];
             RoleChange change = GetRoleChange(user.RoleIds, lbPlayerList[0], formerWrPlayerIds, roleContext);
