@@ -24,6 +24,8 @@ public sealed class TextCommands(
     [Summary("Update your Devil Daggers score roles")]
     public async Task UpdateRoles()
     {
+        await Context.Channel.TriggerTypingAsync();
+
         try
         {
             SocketGuildUser user = (SocketGuildUser)Context.User;
@@ -78,6 +80,8 @@ public sealed class TextCommands(
     [Summary("Get Devil Daggers statistics for a user")]
     public async Task Stats(SocketGuildUser? user = null)
     {
+        await Context.Channel.TriggerTypingAsync();
+
         try
         {
             user ??= (SocketGuildUser)Context.User;
