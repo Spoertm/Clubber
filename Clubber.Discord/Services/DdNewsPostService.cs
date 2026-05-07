@@ -54,13 +54,13 @@ public sealed class DdNewsPostService(
         Dictionary<uint, PlayerPb> existingPbs = await sc.DbContext.PlayerPbs
             .AsNoTracking()
             .Where(p => runIds.Contains(p.LeaderboardId))
-            .ToDictionaryAsync(p => p.LeaderboardId);
+            .ToDictionaryAsync(p => p.LeaderboardId, cancellationToken: stoppingToken);
 
         HashSet<int> hundredthsToTrack = GetRelevantHundredths(recentRuns, existingPbs);
         Dictionary<int, int> currentHundredthCounts = await sc.DbContext.HundredthCounts
             .AsNoTracking()
             .Where(h => hundredthsToTrack.Contains(h.Threshold))
-            .ToDictionaryAsync(h => h.Threshold, h => h.Count);
+            .ToDictionaryAsync(h => h.Threshold, h => h.Count, cancellationToken: stoppingToken);
 
         ProcessRunsResult result = ProcessRuns(recentRuns, existingPbs, currentHundredthCounts);
 
@@ -82,6 +82,7 @@ public sealed class DdNewsPostService(
         List<NewsUpdate> newsUpdates = [];
         Dictionary<int, int> hundredthChanges = new(currentHundredthCounts);
         Dictionary<uint, PlayerPb> pbLookup = new(existingPbs);
+        Dictionary<uint, PlayerPb> newsBaseline = new(existingPbs);
 
         foreach (GetRecentResponse run in recentRuns)
         {
@@ -122,15 +123,18 @@ public sealed class DdNewsPostService(
                 hundredthChanges[threshold] = hundredthChanges.GetValueOrDefault(threshold) + 1;
             }
 
-            if (oldPb != null && run.Time >= NewsWorthyThreshold * 10_000 && newHundredth > oldHundredth)
+            PlayerPb? newsOldPb = newsBaseline.GetValueOrDefault(run.LeaderboardId);
+            if (newsOldPb != null && run.Time >= NewsWorthyThreshold * 10_000 && newHundredth > oldHundredth)
             {
                 int threshold = newHundredth * 100;
                 int nth = hundredthChanges[threshold];
 
                 newsUpdates.Add(new NewsUpdate(
-                    new EntryResponse { Id = oldPb.LeaderboardId, Username = oldPb.Username, Time = oldPb.Time, Rank = oldPb.Rank },
+                    new EntryResponse { Id = newsOldPb.LeaderboardId, Username = newsOldPb.Username, Time = newsOldPb.Time, Rank = newsOldPb.Rank },
                     new EntryResponse { Id = run.LeaderboardId, Username = run.UserName, Time = run.Time, Rank = 0 },
                     nth));
+
+                newsBaseline[run.LeaderboardId] = newPb;
             }
         }
 

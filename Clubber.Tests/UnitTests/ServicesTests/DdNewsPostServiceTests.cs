@@ -211,6 +211,76 @@ public sealed class DdNewsPostServiceTests
         Assert.Single(result.NewsUpdates);
     }
 
+    [Fact]
+    public void ProcessRuns_IntermediateRunInSameBatch_UsesOriginalDbPbForNews()
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        GetRecentResponse[] runs =
+        [
+            CreateRun(1, 736_4309, timestamp: now.AddSeconds(1)),
+            CreateRun(1, 1052_1064, timestamp: now.AddSeconds(2)),
+        ];
+        Dictionary<uint, PlayerPb> existingPbs = new()
+        {
+            [1] = CreatePb(1, 500_0000),
+        };
+        Dictionary<int, int> hundredthCounts = [];
+
+        ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
+
+        Assert.Single(result.Upserts);
+        Assert.Equal(1052_1064, result.Upserts[0].Time);
+        Assert.Single(result.NewsUpdates);
+        Assert.Equal(500_0000, result.NewsUpdates[0].OldEntry.Time);
+        Assert.Equal(1052_1064, result.NewsUpdates[0].NewEntry.Time);
+        Assert.Equal(1, result.NewsUpdates[0].Nth);
+    }
+
+    [Fact]
+    public void ProcessRuns_NewPlayerWithMultipleRunsInBatch_NoNews()
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        GetRecentResponse[] runs =
+        [
+            CreateRun(1, 736_4309, timestamp: now.AddSeconds(1)),
+            CreateRun(1, 1052_1064, timestamp: now.AddSeconds(2)),
+        ];
+        Dictionary<uint, PlayerPb> existingPbs = [];
+        Dictionary<int, int> hundredthCounts = [];
+
+        ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
+
+        Assert.Single(result.Upserts);
+        Assert.Equal(1052_1064, result.Upserts[0].Time);
+        Assert.Empty(result.NewsUpdates);
+    }
+
+    [Fact]
+    public void ProcessRuns_MultipleNewsworthyRunsInSameBatch_UsesPreviousNewsForBaseline()
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        GetRecentResponse[] runs =
+        [
+            CreateRun(1, 1100_0000, timestamp: now.AddSeconds(1)),
+            CreateRun(1, 1200_0000, timestamp: now.AddSeconds(2)),
+        ];
+        Dictionary<uint, PlayerPb> existingPbs = new()
+        {
+            [1] = CreatePb(1, 1050_0000),
+        };
+        Dictionary<int, int> hundredthCounts = new() { [1100] = 3, [1200] = 5 };
+
+        ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
+
+        Assert.Equal(2, result.NewsUpdates.Count);
+        Assert.Equal(1050_0000, result.NewsUpdates[0].OldEntry.Time);
+        Assert.Equal(1100_0000, result.NewsUpdates[0].NewEntry.Time);
+        Assert.Equal(4, result.NewsUpdates[0].Nth);
+        Assert.Equal(1100_0000, result.NewsUpdates[1].OldEntry.Time);
+        Assert.Equal(1200_0000, result.NewsUpdates[1].NewEntry.Time);
+        Assert.Equal(6, result.NewsUpdates[1].Nth);
+    }
+
     private static GetRecentResponse CreateRun(uint leaderboardId, int time, DateTimeOffset? timestamp = null)
     {
         return new GetRecentResponse
