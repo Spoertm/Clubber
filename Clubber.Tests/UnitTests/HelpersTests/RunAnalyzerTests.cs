@@ -101,10 +101,10 @@ public sealed class RunAnalyzerTests
     public void GetData_RunReachesAllSplits_ReturnsAllSplits()
     {
         // Last split "1290" at time 1290
-        List<State> states = new()
-        {
+        List<State> states =
+        [
             CreateState(gameTime: 0, homingDaggers: 0),
-        };
+        ];
 
         int homingDaggers = 0;
         foreach ((string name, int time) in Split.V3Splits)

@@ -26,7 +26,7 @@ public sealed class InfoCommands(ILeaderboardRepository leaderboardRepository, C
             .WithColor(Color.Blue)
             .WithFooter("Use Discord's built-in slash command autocomplete to see parameter details.");
 
-        Dictionary<string, List<SlashCommandInfo>> commandsByModule = new();
+        Dictionary<string, List<SlashCommandInfo>> commandsByModule = [];
         InteractionService interactionService = discordClient.GetInteractionService();
         foreach (ModuleInfo module in interactionService.Modules)
         {
