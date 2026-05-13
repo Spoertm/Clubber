@@ -124,10 +124,14 @@ public sealed class DdNewsPostService(
             }
 
             PlayerPb? newsOldPb = newsBaseline.GetValueOrDefault(run.LeaderboardId);
-            if (newsOldPb != null && run.Time >= NewsWorthyThreshold * 10_000 && newHundredth > oldHundredth)
+            if (newsOldPb != null && run.Time >= NewsWorthyThreshold * 10_000 && run.Time > newsOldPb.Time)
             {
-                int threshold = newHundredth * 100;
-                int nth = hundredthChanges[threshold];
+                int nth = 0;
+                if (newHundredth > oldHundredth)
+                {
+                    int threshold = newHundredth * 100;
+                    nth = hundredthChanges[threshold];
+                }
 
                 newsUpdates.Add(new NewsUpdate(
                     new EntryResponse { Id = newsOldPb.LeaderboardId, Username = newsOldPb.Username, Time = newsOldPb.Time, Rank = newsOldPb.Rank },

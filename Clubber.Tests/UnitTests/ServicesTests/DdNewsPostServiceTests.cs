@@ -187,8 +187,33 @@ public sealed class DdNewsPostServiceTests
 
         Assert.Single(result.Upserts);
         Assert.Equal(1150_0000, result.Upserts[0].Time);
-        Assert.Single(result.NewsUpdates);
+        Assert.Equal(2, result.NewsUpdates.Count);
         Assert.Equal(1100_0000, result.NewsUpdates[0].NewEntry.Time);
+        Assert.Equal(1050_0000, result.NewsUpdates[0].OldEntry.Time);
+        Assert.Equal(1150_0000, result.NewsUpdates[1].NewEntry.Time);
+        Assert.Equal(1100_0000, result.NewsUpdates[1].OldEntry.Time);
+    }
+
+    [Fact]
+    public void ProcessRuns_SameHundredthImprovementOver1000_GeneratesNews()
+    {
+        GetRecentResponse[] runs =
+        [
+            CreateRun(1, 1080_0000),
+        ];
+        Dictionary<uint, PlayerPb> existingPbs = new()
+        {
+            [1] = CreatePb(1, 1050_0000),
+        };
+        Dictionary<int, int> hundredthCounts = [];
+
+        ProcessRunsResult result = DdNewsPostService.ProcessRuns(runs, existingPbs, hundredthCounts);
+
+        Assert.Single(result.Upserts);
+        Assert.Single(result.NewsUpdates);
+        Assert.Equal(1050_0000, result.NewsUpdates[0].OldEntry.Time);
+        Assert.Equal(1080_0000, result.NewsUpdates[0].NewEntry.Time);
+        Assert.Equal(0, result.NewsUpdates[0].Nth);
     }
 
     [Fact]
