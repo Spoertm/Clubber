@@ -1,14 +1,9 @@
-using System.Globalization;
 using Clubber.Domain.Extensions;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 
 namespace Clubber.Domain.Helpers;
 
-public sealed class LeaderboardImageGenerator
+public sealed class LeaderboardImageGenerator : IDisposable
 {
     private const int ImageWidth = 1100;
     private const int ImageHeight = 84;
@@ -21,39 +16,58 @@ public sealed class LeaderboardImageGenerator
     private static readonly string _fontPath = Path.Combine(_assetsBasePath, "GoetheBold.ttf");
     private static readonly string _flagsBasePath = Path.Combine(_assetsBasePath, "Flags");
 
-    private readonly Font _goetheBoldFont;
+    private readonly SKTypeface _typeface;
+    private readonly SKFont _font;
+    private readonly float _baselineY;
 
     public LeaderboardImageGenerator()
     {
-        FontCollection collection = new();
-        string fontPath = _fontPath;
-        FontFamily family = collection.Add(fontPath, CultureInfo.InvariantCulture);
-        _goetheBoldFont = family.CreateFont(FontSize, FontStyle.Bold);
+        _typeface = SKTypeface.FromFile(_fontPath) ?? SKTypeface.Default;
+        _font = new SKFont(_typeface, FontSize);
+
+        // Measure ascent to align baseline with the original top-based positioning
+        _baselineY = TextOriginY - _font.Metrics.Ascent;
+    }
+
+    public void Dispose()
+    {
+        _font.Dispose();
+        if (_typeface != SKTypeface.Default)
+        {
+            _typeface.Dispose();
+        }
     }
 
     public MemoryStream CreateImage(int rank, string username, int time, string? playerCountryCode)
     {
-        using Image<Rgba32> image = new(ImageWidth, ImageHeight);
-        image.Mutate(ctx => ctx.BackgroundColor(Color.Black));
+        using SKBitmap bitmap = new(ImageWidth, ImageHeight);
+        using SKCanvas canvas = new(bitmap);
+        canvas.Clear(SKColors.Black);
 
-        image.Mutate(ctx => ctx.DrawText(rank.ToString(), _goetheBoldFont, Color.White, new Point(PaddingHorizontal, TextOriginY)));
+        using SKPaint whitePaint = new() { Color = SKColors.White };
+        using SKPaint redPaint = new() { Color = SKColors.Red };
 
         int rankEnd = PaddingHorizontal + (rank.DigitCount() * 20);
-
         int flagPos = rankEnd + PaddingHorizontal;
+
+        canvas.DrawText(rank.ToString(), PaddingHorizontal, _baselineY, SKTextAlign.Left, _font, whitePaint);
+
         string? flagPath = GetPathToFlagPng(playerCountryCode);
         if (flagPath != null)
         {
-            Image flag = Image.Load(flagPath);
-            image.Mutate(ctx => ctx.DrawImage(flag, new Point(flagPos, 8), 1));
+            using SKBitmap flag = SKBitmap.Decode(flagPath);
+            if (flag != null)
+            {
+                canvas.DrawBitmap(flag, flagPos, 8);
+            }
         }
 
-        image.Mutate(ctx => ctx.DrawText(username, _goetheBoldFont, Color.Red, new Point(flagPos + 80, TextOriginY)));
-        image.Mutate(ctx => ctx.DrawText((time / 10_000d).ToString("0.0000"), _goetheBoldFont, Color.Red, new Point(890, TextOriginY)));
+        canvas.DrawText(username, flagPos + 80, _baselineY, SKTextAlign.Left, _font, redPaint);
+        canvas.DrawText((time / 10_000d).ToString("0.0000"), 890, _baselineY, SKTextAlign.Left, _font, redPaint);
 
-        MemoryStream stream = new();
-        image.SaveAsPng(stream);
-        return stream;
+        using SKImage image = SKImage.FromBitmap(bitmap);
+        using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
+        return new MemoryStream(data.ToArray());
     }
 
     private static string? GetPathToFlagPng(string? playerCountryCode)
@@ -63,8 +77,7 @@ public sealed class LeaderboardImageGenerator
             return null;
         }
 
-        string baseFlagPath = _flagsBasePath;
-        string flagPath = Path.Combine(baseFlagPath, $"{playerCountryCode}.png");
+        string flagPath = Path.Combine(_flagsBasePath, $"{playerCountryCode}.png");
         if (File.Exists(flagPath))
         {
             return flagPath;

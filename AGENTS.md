@@ -311,34 +311,33 @@ The project includes Docker configuration:
 ## Key Dependencies
 
 ### Clubber.Domain
-- `Microsoft.EntityFrameworkCore` 10.0.4
-- `Microsoft.EntityFrameworkCore.Design` 10.0.4
-- `Npgsql.EntityFrameworkCore.PostgreSQL` 10.0.1
-- `SixLabors.ImageSharp` 3.1.12 - Image generation for leaderboard
-- `SixLabors.ImageSharp.Drawing` 2.1.7 - Image drawing primitives
-- `SixLabors.Fonts` 2.1.3 - Font rendering
-- `Serilog` 4.3.1 - Logging
-- `Roslynator.Analyzers` 4.15.0 - Code analyzers
-- `SonarAnalyzer.CSharp` 10.22.0.136894 - Code quality analyzers
-- `StyleCop.Analyzers` 1.2.0-beta.556 - Style analyzers
+- `Microsoft.EntityFrameworkCore`
+- `Microsoft.EntityFrameworkCore.Design`
+- `Npgsql.EntityFrameworkCore.PostgreSQL`
+- `SkiaSharp` - Image generation for leaderboard
+- `SkiaSharp.NativeAssets.Linux` - Linux native assets for cross-platform deployment
+- `Serilog` - Logging
+- `Roslynator.Analyzers` - Code analyzers
+- `SonarAnalyzer.CSharp` - Code quality analyzers
+- `StyleCop.Analyzers` - Style analyzers
 
 ### Clubber.Discord
-- `Discord.Net` 3.19.1 - Discord bot framework
-- `Serilog` 4.3.1 - Logging
+- `Discord.Net` - Discord bot framework
+- `Serilog` - Logging
 
 ### Clubber.Web
-- `Microsoft.AspNetCore.OpenApi` 10.0.5 - OpenAPI support
-- `Microsoft.EntityFrameworkCore.Relational` 10.0.5
-- `Scalar.AspNetCore` 2.13.16 - API documentation UI
-- `Serilog.Extensions.Hosting` 10.0.0
-- `Serilog.Settings.Configuration` 10.0.0
-- `Serilog.Sinks.Console` 6.1.1
+- `Microsoft.AspNetCore.OpenApi` - OpenAPI support
+- `Microsoft.EntityFrameworkCore.Relational`
+- `Scalar.AspNetCore` - API documentation UI
+- `Serilog.Extensions.Hosting`
+- `Serilog.Settings.Configuration`
+- `Serilog.Sinks.Console`
 
 ### Clubber.Tests
-- `xUnit` 2.9.3
-- `NSubstitute` 5.3.0
-- `Microsoft.NET.Test.Sdk` 18.3.0
-- `Microsoft.EntityFrameworkCore.Sqlite` 10.0.5 - In-memory testing
+- `xUnit`
+- `NSubstitute`
+- `Microsoft.NET.Test.Sdk`
+- `Microsoft.EntityFrameworkCore.Sqlite` - In-memory testing
 
 ## Security Considerations
 
