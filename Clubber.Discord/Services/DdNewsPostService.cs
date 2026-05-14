@@ -7,6 +7,7 @@ using Clubber.Domain.Helpers;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
+using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +47,11 @@ public sealed class DdNewsPostService(
 
         if (recentRuns.Length == 0)
         {
-            await UpdateLastCheckAsync(sc.DbContext, DateTimeOffset.UtcNow);
+            if (responses.Count == 0)
+            {
+                await UpdateLastCheckAsync(sc.DbContext, DateTimeOffset.UtcNow);
+            }
+
             return;
         }
 
@@ -66,11 +71,12 @@ public sealed class DdNewsPostService(
 
         if (result.Upserts.Count > 0)
         {
-            await ApplyRanksAndSaveAsync(result, sc);
+            await ApplyRanksAsync(result, sc);
         }
 
         await PublishNewsIfAvailable(result.NewsUpdates, sc);
         await UpdateLastCheckAsync(sc.DbContext, recentRuns[^1].Timestamp);
+        await sc.DbContext.SaveChangesAsync(stoppingToken);
     }
 
     internal static ProcessRunsResult ProcessRuns(
@@ -168,7 +174,7 @@ public sealed class DdNewsPostService(
         return hundredths;
     }
 
-    private static async Task ApplyRanksAndSaveAsync(ProcessRunsResult result, ServiceCollection sc)
+    private static async Task ApplyRanksAsync(ProcessRunsResult result, ServiceCollection sc)
     {
         uint[] ids = result.Upserts.Select(p => p.LeaderboardId).Distinct().ToArray();
         IReadOnlyList<EntryResponse> currentPlayers = await sc.WebService.GetLbPlayers(ids);
@@ -236,8 +242,6 @@ public sealed class DdNewsPostService(
                 }
             }
         }
-
-        await sc.DbContext.SaveChangesAsync();
     }
 
     private async Task PublishNewsIfAvailable(IEnumerable<NewsUpdate> newsUpdates, ServiceCollection sc)
@@ -248,24 +252,18 @@ public sealed class DdNewsPostService(
             Log.Information("Publishing news for {Player} - {Score}s",
                 update.NewEntry.Username, update.NewEntry.Time / 10_000d);
 
-            try
-            {
-                await PublishSingleNews(update, channel, sc);
-                DdNewsItem newsItem = new()
-                {
-                    LeaderboardId = update.NewEntry.Id,
-                    OldEntry = update.OldEntry,
-                    NewEntry = update.NewEntry,
-                    TimeOfOccurenceUtc = DateTimeOffset.UtcNow,
-                    Nth = update.Nth,
-                };
+            await PublishSingleNews(update, channel, sc);
 
-                await sc.NewsRepository.AddAsync(newsItem);
-            }
-            catch (Exception ex)
+            DdNewsItem newsItem = new()
             {
-                Log.Error(ex, "Failed to publish news for player {PlayerId}", update.NewEntry.Id);
-            }
+                LeaderboardId = update.NewEntry.Id,
+                OldEntry = update.OldEntry,
+                NewEntry = update.NewEntry,
+                TimeOfOccurenceUtc = DateTimeOffset.UtcNow,
+                Nth = update.Nth,
+            };
+
+            sc.DbContext.DdNews.Add(newsItem);
         }
     }
 
@@ -324,7 +322,9 @@ public sealed class DdNewsPostService(
     private static async Task<List<GetRecentResponse>> FetchRecentRunsWithBackfillAsync(DateTimeOffset lastCheck, IWebService webService)
     {
         List<GetRecentResponse> allRuns = [];
+        HashSet<(uint LeaderboardId, long Timestamp, int Time)> seen = [];
         DateTimeOffset fetchBefore = DateTimeOffset.UtcNow;
+        DateTimeOffset previousFetchBefore = DateTimeOffset.MinValue;
 
         while (true)
         {
@@ -335,7 +335,13 @@ public sealed class DdNewsPostService(
                 break;
             }
 
-            allRuns.AddRange(batch);
+            foreach (GetRecentResponse run in batch)
+            {
+                if (seen.Add((run.LeaderboardId, run.Timestamp.ToUnixTimeSeconds(), run.Time)))
+                {
+                    allRuns.Add(run);
+                }
+            }
 
             GetRecentResponse oldestInBatch = batch.MinBy(r => r.Timestamp)!;
 
@@ -344,7 +350,24 @@ public sealed class DdNewsPostService(
                 break;
             }
 
-            fetchBefore = oldestInBatch.Timestamp;
+            int sameTimestampCount = batch.Count(r => r.Timestamp == oldestInBatch.Timestamp);
+            if (sameTimestampCount > 1)
+            {
+                Log.Warning(
+                    "Pagination boundary at timestamp {Timestamp} has {Count} entries; some entries may be lost due to API limit of {Limit}",
+                    oldestInBatch.Timestamp,
+                    sameTimestampCount,
+                    GetRecentLimit);
+            }
+
+            if (fetchBefore == previousFetchBefore)
+            {
+                Log.Warning("Pagination loop detected at timestamp {Timestamp}; stopping to avoid infinite loop", oldestInBatch.Timestamp);
+                break;
+            }
+
+            previousFetchBefore = fetchBefore;
+            fetchBefore = oldestInBatch.Timestamp.AddSeconds(1);
         }
 
         return allRuns;
@@ -375,8 +398,6 @@ public sealed class DdNewsPostService(
         {
             dbContext.NewsCursors.Add(new NewsCursor { LastCheckedAt = value });
         }
-
-        await dbContext.SaveChangesAsync();
     }
 
     private sealed record ServiceCollection(
