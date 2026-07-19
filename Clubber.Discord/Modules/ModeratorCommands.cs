@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using Clubber.Discord.Helpers;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Data.Entities;
@@ -19,7 +20,7 @@ namespace Clubber.Discord.Modules;
 
 [Name("🛡️ Moderator Commands")]
 [DefaultMemberPermissions(GuildPermission.ManageRoles)]
-public sealed class ModeratorCommands(
+public sealed partial class ModeratorCommands(
     IOptions<AppConfig> config,
     IDiscordHelper discordHelper,
     IUserRepository userRepository,
@@ -56,7 +57,7 @@ public sealed class ModeratorCommands(
             {
                 string preview = string.IsNullOrWhiteSpace(message.Content)
                     ? "(no text content)"
-                    : message.Content.ReplaceLineEndings(" ");
+                    : ResolveMentions(message.Content.ReplaceLineEndings(" "));
 
                 if (preview.Length > 95)
                 {
@@ -138,6 +139,20 @@ public sealed class ModeratorCommands(
             await RespondAsync("Failed to edit message.", ephemeral: true);
             Log.Error(ex, "Error editing news post");
         }
+    }
+
+    private string ResolveMentions(string content)
+    {
+        return MentionRegex().Replace(content, match =>
+        {
+            if (ulong.TryParse(match.Groups[1].Value, out ulong userId) &&
+                Context.Guild?.GetUser(userId) is { } user)
+            {
+                return $"@{user.AvailableNameSanitized()}";
+            }
+
+            return match.Value;
+        });
     }
 
     [SlashCommand("clear-register", "Clear all messages but the first one in register channel")]
@@ -352,4 +367,7 @@ public sealed class ModeratorCommands(
             await FollowupAsync($"Failed to check homing peak: {errorMsg}", ephemeral: true);
         }
     }
+
+    [GeneratedRegex(@"<@!?(\d+)>")]
+    private static partial Regex MentionRegex();
 }
