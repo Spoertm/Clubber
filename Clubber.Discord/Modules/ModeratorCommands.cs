@@ -1,4 +1,4 @@
-﻿using System.Runtime.Serialization;
+using System.Runtime.Serialization;
 using Clubber.Discord.Helpers;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Data.Entities;
@@ -31,12 +31,90 @@ public sealed class ModeratorCommands(
     private readonly RoleConfigService _roleConfigService = roleConfigService;
 
     [SlashCommand("edit-news", "Edit a DD news post made by the bot")]
-    public async Task EditNewsPost(
-        [global::Discord.Interactions.Summary("message-id", "ID of the message to edit (leave empty for latest)")]
-        string? messageId = null,
-        [global::Discord.Interactions.Summary("content", "New content for the message")]
-        string newContent = "")
+    public async Task EditNewsPost()
     {
+        try
+        {
+            SocketTextChannel ddnewsPostChannel = discordHelper.GetTextChannel(_config.DdNewsChannelId);
+            IMessage[] messages = (await ddnewsPostChannel.GetMessagesAsync(25).FlattenAsync())
+                .Where(m => m.Author.Id == Context.Client.CurrentUser.Id)
+                .OrderByDescending(m => m.CreatedAt)
+                .Take(10)
+                .ToArray();
+
+            if (messages.Length == 0)
+            {
+                await RespondAsync("Couldn't find any recent news posts made by the bot.", ephemeral: true);
+                return;
+            }
+
+            SelectMenuBuilder menuBuilder = new SelectMenuBuilder()
+                .WithCustomId("edit-news-select")
+                .WithPlaceholder("Select the message to edit");
+
+            foreach (IMessage message in messages)
+            {
+                string preview = string.IsNullOrWhiteSpace(message.Content)
+                    ? "(no text content)"
+                    : message.Content.ReplaceLineEndings(" ");
+
+                if (preview.Length > 95)
+                {
+                    preview = preview[..95] + "…";
+                }
+
+                menuBuilder.AddOption(preview, message.Id.ToString(), $"Posted {message.CreatedAt:yyyy-MM-dd HH:mm} UTC");
+            }
+
+            ComponentBuilder componentBuilder = new ComponentBuilder().WithSelectMenu(menuBuilder);
+            await RespondAsync("Select the news post to edit:", components: componentBuilder.Build(), ephemeral: true);
+        }
+        catch (Exception ex)
+        {
+            await RespondAsync("Failed to fetch news posts.", ephemeral: true);
+            Log.Error(ex, "Error fetching news posts");
+        }
+    }
+
+    [ComponentInteraction("edit-news-select")]
+    public async Task EditNewsPostSelect(string[] values)
+    {
+        try
+        {
+            ulong messageId = ulong.Parse(values[0]);
+            SocketTextChannel ddnewsPostChannel = discordHelper.GetTextChannel(_config.DdNewsChannelId);
+            if (await ddnewsPostChannel.GetMessageAsync(messageId) is not IUserMessage messageToEdit)
+            {
+                await RespondAsync("Could not find that message.", ephemeral: true);
+                return;
+            }
+
+            ModalBuilder modalBuilder = new ModalBuilder()
+                .WithTitle("Edit news post")
+                .WithCustomId($"edit-news-modal:{messageId}")
+                .AddTextInput(
+                    label: "Content",
+                    customId: "edit-news-content",
+                    style: TextInputStyle.Paragraph,
+                    placeholder: "New content for the news post",
+                    maxLength: 2000,
+                    value: string.IsNullOrEmpty(messageToEdit.Content) ? null : messageToEdit.Content);
+
+            await RespondWithModalAsync(modalBuilder.Build());
+        }
+        catch (Exception ex)
+        {
+            await RespondAsync("Failed to open editor.", ephemeral: true);
+            Log.Error(ex, "Error opening news post editor");
+        }
+    }
+
+    [ModalInteraction("edit-news-modal:*")]
+    public async Task EditNewsPostModal(ulong messageId)
+    {
+        SocketModal modal = (SocketModal)Context.Interaction;
+        string newContent = modal.Data.Components.First(x => x.CustomId == "edit-news-content").Value;
+
         if (string.IsNullOrWhiteSpace(newContent))
         {
             await RespondAsync("Message content cannot be empty.", ephemeral: true);
@@ -46,36 +124,14 @@ public sealed class ModeratorCommands(
         try
         {
             SocketTextChannel ddnewsPostChannel = discordHelper.GetTextChannel(_config.DdNewsChannelId);
-            IUserMessage? messageToEdit = null;
-
-            if (!string.IsNullOrEmpty(messageId) && ulong.TryParse(messageId, out ulong parsedMessageId))
+            if (await ddnewsPostChannel.GetMessageAsync(messageId) is not IUserMessage messageToEdit)
             {
-                if (await ddnewsPostChannel.GetMessageAsync(parsedMessageId) is IUserMessage specificMessage)
-                {
-                    messageToEdit = specificMessage;
-                }
-            }
-            else
-            {
-                IEnumerable<IMessage> messages = await ddnewsPostChannel.GetMessagesAsync(5).FlattenAsync();
-                messageToEdit = messages.Where(m => m.Author.Id == Context.Client.CurrentUser.Id)
-                    .MaxBy(m => m.CreatedAt) as IUserMessage;
-            }
-
-            if (messageToEdit == null)
-            {
-                await RespondAsync("Could not find message.", ephemeral: true);
-                return;
-            }
-
-            if (messageToEdit.Author.Id != Context.Client.CurrentUser.Id)
-            {
-                await RespondAsync("That message wasn't posted by the bot.", ephemeral: true);
+                await RespondAsync("Could not find that message.", ephemeral: true);
                 return;
             }
 
             await messageToEdit.ModifyAsync(m => m.Content = newContent);
-            await RespondAsync("✅ Message updated successfully!");
+            await RespondAsync("✅ Message updated successfully!", ephemeral: true);
         }
         catch (Exception ex)
         {
