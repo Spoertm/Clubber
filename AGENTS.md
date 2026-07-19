@@ -5,6 +5,7 @@
 Clubber is a Discord bot for the DD Pals Discord server that integrates with the Devil Daggers game leaderboard. It automatically manages user roles based on their game scores, posts daily news about player achievements, and provides a web API for accessing community data.
 
 **Primary Features:**
+
 - **Role Management**: Automatically updates Discord roles based on Devil Daggers scores (ranging from 0s to 1300s)
 - **DD News**: Notifies when players achieve personal bests above 1000 seconds
 - **Personal Stats**: Provides detailed player statistics via the `stats` command
@@ -27,23 +28,25 @@ Clubber is a Discord bot for the DD Pals Discord server that integrates with the
 The solution follows a **Clean Architecture** pattern with three main projects:
 
 ### 1. Clubber.Domain (Core Layer)
+
 Location: `Clubber.Domain/`
 
 Contains the core business logic and is independent of external frameworks.
 
-| Directory | Purpose |
-|-----------|---------|
-| `Assets/` | Static assets (fonts, flags) copied to output directory |
+| Directory          | Purpose                                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `Assets/`          | Static assets (fonts, flags) copied to output directory                                                         |
 | `BackgroundTasks/` | Background service base classes (`RepeatingBackgroundService`, `ExactBackgroundService`, `KeepAppAliveService`) |
-| `Configuration/` | Application configuration (`AppConfig.cs`, `Endpoints.cs`) including role IDs and Discord settings |
-| `Data/` | Entity Framework entities and `AppDbContext` |
-| `Extensions/` | Extension methods (`ExtensionMethods.cs`) |
-| `Helpers/` | Utility classes (`CollectionUtils`, `LeaderboardImageGenerator`, `RegistrationTracker`, `RunAnalyzer`) |
-| `Repositories/` | Data access layer (`IUserRepository`, `INewsRepository`, `ILeaderboardRepository`, `IPlayerPbRepository`) |
-| `Models/` | Domain models, DTOs, and API response types |
-| `Services/` | Core services (`IWebService`, `WebService`, `RoleConfigService`) |
+| `Configuration/`   | Application configuration (`AppConfig.cs`, `Endpoints.cs`) including role IDs and Discord settings              |
+| `Data/`            | Entity Framework entities and `AppDbContext`                                                                    |
+| `Extensions/`      | Extension methods (`ExtensionMethods.cs`)                                                                       |
+| `Helpers/`         | Utility classes (`CollectionUtils`, `LeaderboardImageGenerator`, `RegistrationTracker`, `RunAnalyzer`)          |
+| `Repositories/`    | Data access layer (`IUserRepository`, `INewsRepository`, `ILeaderboardRepository`, `IPlayerPbRepository`)       |
+| `Models/`          | Domain models, DTOs, and API response types                                                                     |
+| `Services/`        | Core services (`IWebService`, `WebService`, `RoleConfigService`)                                                |
 
 **Key Models:**
+
 - `DdUser` - Registered user linking Discord ID to Devil Daggers leaderboard ID
 - `EntryResponse` - Leaderboard entry data from ddinfo API
 - `DdNewsItem` - News item for player achievements
@@ -53,21 +56,23 @@ Contains the core business logic and is independent of external frameworks.
 - `RankRole` - Configurable rank role threshold
 
 ### 2. Clubber.Discord (Discord Bot Layer)
+
 Location: `Clubber.Discord/`
 
 Contains the Discord bot implementation including commands and interactions.
 
-| Directory | Purpose |
-|-----------|---------|
-| `Commands/` | Empty directory (commands are defined in Modules) |
-| `Helpers/` | Discord-specific helpers (`DiscordHelper`, `EmbedHelper`, `DdNewsMessageBuilder`) |
-| `Logging/` | Custom Serilog sink for Discord logging |
-| `Models/` | Discord-specific models and response types |
-| `Modules/` | Discord interaction modules (`InfoCommands`, `ModeratorCommands`, `UserManagementCommands`, `OwnerCommands`, `TextCommands`, `ComponentInteractions`) |
-| `Preconditions/` | Command preconditions for access control |
-| `Services/` | Discord services (`ScoreRoleService`, `RegistrationRequestHandler`, `UserService`, `DatabaseUpdateService`, `DdNewsPostService`, `ChannelClearingService`, `TextCommandHandler`, `UserJoinHandler`) |
+| Directory        | Purpose                                                                                                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Commands/`      | Empty directory (commands are defined in Modules)                                                                                                                                                   |
+| `Helpers/`       | Discord-specific helpers (`DiscordHelper`, `EmbedHelper`, `DdNewsMessageBuilder`)                                                                                                                   |
+| `Logging/`       | Custom Serilog sink for Discord logging                                                                                                                                                             |
+| `Models/`        | Discord-specific models and response types                                                                                                                                                          |
+| `Modules/`       | Discord interaction modules (`InfoCommands`, `ModeratorCommands`, `UserManagementCommands`, `OwnerCommands`, `TextCommands`, `ComponentInteractions`)                                               |
+| `Preconditions/` | Command preconditions for access control                                                                                                                                                            |
+| `Services/`      | Discord services (`ScoreRoleService`, `RegistrationRequestHandler`, `UserService`, `DatabaseUpdateService`, `DdNewsPostService`, `ChannelClearingService`, `TextCommandHandler`, `UserJoinHandler`) |
 
 **Command Categories:**
+
 - **Info Commands** (`InfoCommands.cs`): `help`, `bestsplits`, `toppeaks`
 - **User Management** (`UserManagementCommands.cs`): `register`, `unregister`, `update`, `stats`
 - **Moderator Commands** (`ModeratorCommands.cs`): Admin operations
@@ -75,19 +80,21 @@ Contains the Discord bot implementation including commands and interactions.
 - **Text Commands** (`TextCommands.cs`): Message-based commands
 
 ### 3. Clubber.Web (Presentation/Entry Point Layer)
+
 Location: `Clubber.Web/`
 
 The ASP.NET Core web application that hosts both the web UI and the Discord bot.
 
-| Directory | Purpose |
-|-----------|---------|
-| `Controllers/` | MVC controllers (`HomeController`) |
-| `Endpoints/` | Minimal API endpoints (`ClubberEndpoints.cs`) |
-| `Models/` | View models and DTOs |
-| `Views/` | Razor views and layouts |
-| `wwwroot/` | Static files (CSS, images, client-side libraries) |
+| Directory      | Purpose                                           |
+| -------------- | ------------------------------------------------- |
+| `Controllers/` | MVC controllers (`HomeController`)                |
+| `Endpoints/`   | Minimal API endpoints (`ClubberEndpoints.cs`)     |
+| `Models/`      | View models and DTOs                              |
+| `Views/`       | Razor views and layouts                           |
+| `wwwroot/`     | Static files (CSS, images, client-side libraries) |
 
 **API Endpoints:**
+
 - `GET /users` - All registered users
 - `GET /user-count` - Registered user count
 - `GET /users/by-leaderboardId` - Find user by leaderboard ID
@@ -97,36 +104,39 @@ The ASP.NET Core web application that hosts both the web UI and the Discord bot.
 - `GET /bestsplits/by-splitname` - Best split by name
 
 ### 4. Clubber.Tests (Test Layer)
+
 Location: `Clubber.Tests/`
 
 Test project containing both unit tests and integration tests using xUnit framework with NSubstitute for mocking.
 
-| Folder | Purpose |
-|--------|---------|
-| `UnitTests/` | Unit tests for isolated component testing |
-| `IntegrationTests/` | Integration tests for end-to-end testing |
+| Folder              | Purpose                                   |
+| ------------------- | ----------------------------------------- |
+| `UnitTests/`        | Unit tests for isolated component testing |
+| `IntegrationTests/` | Integration tests for end-to-end testing  |
 
 **Unit Tests:**
 
-| Test File | Coverage |
-|-----------|----------|
-| `CollectionUtilsTests.cs` | Collection manipulation utilities |
-| `DdNewsMessageBuilderTests.cs` | News message formatting |
-| `ExtentionMethodsTests.cs` | Extension method tests (note: filename has typo) |
-| `RunAnalyzerTests.cs` | Run analysis logic |
-| `ScoreRoleServiceTests.cs` | Score role calculation logic |
-| `UserServiceTests.cs` | User service operations |
-| `LeaderboardRepositoryTests.cs` | Leaderboard repository operations |
-| `NewsRepositoryTests.cs` | News repository operations |
+| Test File                       | Coverage                                         |
+| ------------------------------- | ------------------------------------------------ |
+| `CollectionUtilsTests.cs`       | Collection manipulation utilities                |
+| `DdNewsMessageBuilderTests.cs`  | News message formatting                          |
+| `ExtentionMethodsTests.cs`      | Extension method tests (note: filename has typo) |
+| `RunAnalyzerTests.cs`           | Run analysis logic                               |
+| `ScoreRoleServiceTests.cs`      | Score role calculation logic                     |
+| `UserServiceTests.cs`           | User service operations                          |
+| `LeaderboardRepositoryTests.cs` | Leaderboard repository operations                |
+| `NewsRepositoryTests.cs`        | News repository operations                       |
 
 ## Build and Run Commands
 
 ### Prerequisites
+
 - .NET 10.0 SDK
 - PostgreSQL database
 - Discord Bot Token
 
 ### Build
+
 ```bash
 # Build the entire solution
 dotnet build
@@ -136,6 +146,7 @@ dotnet build --configuration Release
 ```
 
 ### Run
+
 ```bash
 # Run the web application (entry point)
 dotnet run --project Clubber.Web
@@ -145,6 +156,7 @@ dotnet run --project Clubber.Web --configuration Release
 ```
 
 ### Test
+
 ```bash
 # Run all tests
 dotnet test
@@ -157,6 +169,7 @@ dotnet test Clubber.Tests
 ```
 
 ### Publish
+
 ```bash
 # Publish for deployment
 dotnet publish -c Release -o ./publish
@@ -165,9 +178,11 @@ dotnet publish -c Release -o ./publish
 ## Configuration
 
 ### Environment Variables (Production)
+
 The application uses standard .NET environment variable configuration in production. Hierarchical settings are mapped using double underscores (`__`) as section delimiters.
 
 Examples:
+
 - `BotConfig__BotToken` - Discord bot token
 - `BotConfig__Prefix` - Command prefix (default: `+`)
 - `ConnectionStrings__DefaultConnection` - PostgreSQL connection string
@@ -175,56 +190,59 @@ Examples:
 See `AppConfig.cs` for all available configuration keys.
 
 ### Development Configuration
+
 In development, the app uses `appsettings.Development.json`:
 
 ```json
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=postgres;"
-  },
-  "Serilog": {
-    "Using": ["Serilog.Sinks.Console"],
-    "MinimumLevel": {
-      "Default": "Debug"
+    "ConnectionStrings": {
+        "DefaultConnection": "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=postgres;"
     },
-    "WriteTo": [
-      {
-        "Name": "Console"
-      }
-    ],
-    "Enrich": ["FromLogContext"]
-  },
-  "BotConfig": {
-    "Prefix": "+",
-    "BotToken": "your-discord-bot-token",
-    "RegisterChannelId": 123456789,
-    "RoleAssignerRoleId": 123456789,
-    "CheaterRoleId": 123456789,
-    "DdPalsId": 123456789,
-    "UnregisteredRoleId": 123456789,
-    "DailyUpdateChannelId": 123456789,
-    "DailyUpdateLoggingChannelId": 123456789,
-    "DdNewsChannelId": 123456789,
-    "ModsChannelId": 123456789,
-    "NoScoreRoleId": 123456789,
-    "Endpoints": {
-        "GetMultipleUsersById": "",
-        "GetScores": "",
-        "GetWorldRecords": "",
-        "GetCountryCodeForPlayer": "",
-        "GetPlayerHistory": "",
-        "GetDdstatsResponse": ""
+    "Serilog": {
+        "Using": ["Serilog.Sinks.Console"],
+        "MinimumLevel": {
+            "Default": "Debug"
+        },
+        "WriteTo": [
+            {
+                "Name": "Console"
+            }
+        ],
+        "Enrich": ["FromLogContext"]
+    },
+    "BotConfig": {
+        "Prefix": "+",
+        "BotToken": "your-discord-bot-token",
+        "RegisterChannelId": 123456789,
+        "RoleAssignerRoleId": 123456789,
+        "CheaterRoleId": 123456789,
+        "DdPalsId": 123456789,
+        "UnregisteredRoleId": 123456789,
+        "DailyUpdateChannelId": 123456789,
+        "DailyUpdateLoggingChannelId": 123456789,
+        "DdNewsChannelId": 123456789,
+        "ModsChannelId": 123456789,
+        "NoScoreRoleId": 123456789,
+        "Endpoints": {
+            "GetMultipleUsersById": "",
+            "GetScores": "",
+            "GetWorldRecords": "",
+            "GetCountryCodeForPlayer": "",
+            "GetPlayerHistory": "",
+            "GetDdstatsResponse": ""
+        }
     }
-  }
 }
 ```
 
 ### Database
+
 The application uses Entity Framework Core 10.0 with PostgreSQL. The connection string is read from configuration (`ConnectionStrings:DefaultConnection`).
 
 ## Code Style Guidelines
 
 ### EditorConfig
+
 The project uses `.editorconfig` for consistent code formatting:
 
 - **Indentation**: Spaces (size 4) for all files
@@ -233,6 +251,7 @@ The project uses `.editorconfig` for consistent code formatting:
 - **Line Endings**: Unix-style with final newlines
 
 ### Naming Conventions
+
 - **Private Fields**: `_camelCase` (e.g., `_databaseHelper`)
 - **Public Members**: `PascalCase`
 - **Interfaces**: `IPascalCase` with `I` prefix
@@ -241,13 +260,16 @@ The project uses `.editorconfig` for consistent code formatting:
 - **Constants**: `PascalCase`
 
 ### Language Preferences
+
 - **var**: Disabled - always use explicit types
 - **Expression-bodied Members**: Allowed for accessors and properties
 - **this.**: Not required (set to suggestion)
 - **Nullable**: Enabled project-wide
 
 ### Analyzers
+
 The project includes multiple static analysis tools:
+
 - **StyleCop.Analyzers** - Style enforcement
 - **SonarAnalyzer.CSharp** - Code quality
 - **Roslynator.Analyzers** - Additional analyzers
@@ -258,22 +280,27 @@ Many StyleCop rules are explicitly suppressed (see `.editorconfig` for specific 
 ## Testing Strategy
 
 ### Test Framework
+
 - **xUnit** - Primary testing framework
 - **NSubstitute** - Mocking framework
 - **Microsoft.NET.Test.Sdk** - Test SDK
 
 ### Test Organization
+
 Tests are organized by the class they test:
+
 - `ScoreRoleServiceTests` tests `ScoreRoleService`
 - `CollectionUtilsTests` tests `CollectionUtils`
 - etc.
 
 ### Test Data
+
 Test configuration files:
+
 - `appsettings.Testing.json` - Test-specific configuration
-- `appsettings.Dingling.json` - Additional test configuration
 
 ### Running Tests
+
 ```bash
 # Run all tests
 dotnet test
@@ -297,6 +324,7 @@ The application runs several background services in production:
 ## Deployment
 
 ### Railway
+
 The project is hosted on [Railway](https://railway.app/) using their managed platform:
 
 - **CI/CD**: Automatic deployments triggered by commits to the connected GitHub repository
@@ -304,13 +332,16 @@ The project is hosted on [Railway](https://railway.app/) using their managed pla
 - **Database**: PostgreSQL hosted on Supabase
 
 ### Docker Support
+
 The project includes Docker configuration:
+
 - `DockerDefaultTargetOS` set to Linux in `Clubber.Web.csproj`
 - `.dockerignore` file configured
 
 ## Key Dependencies
 
 ### Clubber.Domain
+
 - `Microsoft.EntityFrameworkCore`
 - `Microsoft.EntityFrameworkCore.Design`
 - `Npgsql.EntityFrameworkCore.PostgreSQL`
@@ -322,10 +353,12 @@ The project includes Docker configuration:
 - `StyleCop.Analyzers` - Style analyzers
 
 ### Clubber.Discord
+
 - `Discord.Net` - Discord bot framework
 - `Serilog` - Logging
 
 ### Clubber.Web
+
 - `Microsoft.AspNetCore.OpenApi` - OpenAPI support
 - `Microsoft.EntityFrameworkCore.Relational`
 - `Scalar.AspNetCore` - API documentation UI
@@ -334,6 +367,7 @@ The project includes Docker configuration:
 - `Serilog.Sinks.Console`
 
 ### Clubber.Tests
+
 - `xUnit`
 - `NSubstitute`
 - `Microsoft.NET.Test.Sdk`
@@ -349,21 +383,27 @@ The project includes Docker configuration:
 ## Architecture Patterns
 
 ### Clean Architecture
+
 - Domain layer has no external dependencies
 - Discord layer depends on Domain
 - Web layer depends on both Discord and Domain
 
 ### Dependency Injection
+
 Heavy use of DI throughout:
+
 - Singleton services for Discord client and handlers
 - Transient services for database operations
 - Scoped services for request handling
 
 ### Result Pattern
+
 The application uses a `Result<T>` and `Result` type for operation results instead of exceptions for expected failures.
 
 ### Repository Pattern
+
 Data access is organized through repository interfaces in `Clubber.Domain/Repositories/`:
+
 - **IUserRepository** - User registration, Twitch linking, lookups by Discord/Leaderboard ID
 - **INewsRepository** - DD news items and cleanup
 - **ILeaderboardRepository** - Best splits, and top homing peaks
@@ -372,26 +412,28 @@ Data access is organized through repository interfaces in `Clubber.Domain/Reposi
 Repositories are registered as transient services.
 
 ### Background Services
+
 Uses `BackgroundService` base class with custom implementations:
+
 - `RepeatingBackgroundService` - For periodic tasks
 - `ExactBackgroundService` - For tasks running at specific UTC times
 
 ## External APIs
 
 1. **Hasmodai API** - `http://dd.hasmodai.com/`
-   - Official Devil Daggers leaderboard data
-   - Player scores and IDs
+    - Official Devil Daggers leaderboard data
+    - Player scores and IDs
 
 2. **Devil Daggers Info API** (ddinfo) - `https://devildaggers.info/`
-   - Extended leaderboard data
-   - Player statistics and history
-   - World records
-   - Country codes
+    - Extended leaderboard data
+    - Player statistics and history
+    - World records
+    - Country codes
 
 3. **DDStats** - `https://ddstats.com/`
-   - Full run data and statistics
+    - Full run data and statistics
 
 4. **Discord API** - Via Discord.Net
-   - Bot interactions
-   - Role management
-   - Message operations
+    - Bot interactions
+    - Role management
+    - Message operations
