@@ -58,7 +58,7 @@ public sealed class LeaderboardImageGenerator : IDisposable
             using SKBitmap flag = SKBitmap.Decode(flagPath);
             if (flag != null)
             {
-                canvas.DrawBitmap(flag, flagPos, 8);
+                canvas.DrawBitmap(flag, flagPos, 8, default(SKSamplingOptions));
             }
         }
 

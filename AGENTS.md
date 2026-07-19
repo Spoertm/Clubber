@@ -344,6 +344,7 @@ The project includes Docker configuration:
 
 - `Microsoft.EntityFrameworkCore`
 - `Microsoft.EntityFrameworkCore.Design`
+- `Microsoft.EntityFrameworkCore.Relational`
 - `Npgsql.EntityFrameworkCore.PostgreSQL`
 - `SkiaSharp` - Image generation for leaderboard
 - `SkiaSharp.NativeAssets.Linux` - Linux native assets for cross-platform deployment
