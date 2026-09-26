@@ -123,6 +123,27 @@ public sealed class ScoreRoleService(
         }
     }
 
+    /// <summary>
+    /// Strips every Devil Daggers related role (score, rank and base roles) from the user and
+    /// assigns the unregistered role. Used when a user is unregistered while still in the guild.
+    /// </summary>
+    public async Task StripDdRolesAsync(IGuildUser user)
+    {
+        ImmutableSortedDictionary<int, ulong> scoreRoles = await roleConfigService.GetScoreRolesAsync();
+        ImmutableSortedDictionary<int, ulong> rankRoles = await roleConfigService.GetRankRolesAsync();
+
+        HashSet<ulong> ddRoles = [.. scoreRoles.Values, .. rankRoles.Values, .. _appConfig.BaseRoles];
+        List<ulong> rolesToRemove = [.. user.RoleIds.Where(ddRoles.Contains)];
+        rolesToRemove.Remove(_appConfig.UnregisteredRoleId);
+
+        if (rolesToRemove.Count > 0)
+        {
+            await user.RemoveRolesAsync(rolesToRemove);
+        }
+
+        await user.AddRoleAsync(_appConfig.UnregisteredRoleId);
+    }
+
     private RoleChange GetRoleChange(
         IReadOnlyCollection<ulong> userRoleIds,
         EntryResponse lbUser,

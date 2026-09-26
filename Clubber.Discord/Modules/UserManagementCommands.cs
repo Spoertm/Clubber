@@ -24,9 +24,12 @@ public sealed class UserManagementCommands(
     UserService userService,
     IWebService webService,
     ScoreRoleService scoreRoleService,
+    IDiscordHelper discordHelper,
     IOptions<AppConfig> config)
     : InteractionModuleBase<SocketInteractionContext>
 {
+    private readonly AppConfig _config = config.Value;
+
     [SlashCommand("register", "Register a user with their Devil Daggers leaderboard ID")]
     [DefaultMemberPermissions(GuildPermission.ManageRoles)]
     public async Task Register(
@@ -65,30 +68,165 @@ public sealed class UserManagementCommands(
     }
 
     [SlashCommand("unregister", "Remove a user from the database")]
-    [global::Discord.Interactions.RequireUserPermission(GuildPermission.ManageRoles)]
     public async Task Unregister(
-        [global::Discord.Interactions.Summary("user", "User to unregister")]
-        SocketGuildUser? user = null)
+        [global::Discord.Interactions.Summary("user", "User to unregister (leave empty for yourself)")]
+        SocketGuildUser? user = null,
+        // Kept as a string: Discord snowflakes exceed Discord's INTEGER option range (max 2^53-1).
+        [global::Discord.Interactions.Summary("discord-id", "Discord ID to unregister (use when the user has left the server)")]
+        string? discordId = null,
+        [global::Discord.Interactions.Summary("leaderboard-id", "Devil Daggers leaderboard ID to unregister")]
+        uint? leaderboardId = null)
     {
-        await DeferAsync();
-
         try
         {
-            user ??= (SocketGuildUser)Context.User;
-
-            if (await userRepository.RemoveAsync(user.Id))
+            int providedIdentifiers = (user is not null ? 1 : 0) + (discordId is not null ? 1 : 0) + (leaderboardId is not null ? 1 : 0);
+            if (providedIdentifiers > 1)
             {
-                await FollowupAsync("✅ Successfully removed.", ephemeral: true);
+                await RespondAsync("Provide only one of `user`, `discord-id`, or `leaderboard-id`.", ephemeral: true);
+                return;
+            }
+
+            ulong targetDiscordId;
+            DdUser? target = null;
+
+            if (user is not null)
+            {
+                targetDiscordId = user.Id;
+            }
+            else if (discordId is not null)
+            {
+                if (!ulong.TryParse(discordId.Trim(), out targetDiscordId))
+                {
+                    await RespondAsync("That's not a valid Discord ID.", ephemeral: true);
+                    return;
+                }
+            }
+            else if (leaderboardId is not null)
+            {
+                target = await userRepository.FindAsync(leaderboardId.Value);
+                if (target is null)
+                {
+                    await RespondAsync("No user is registered with that leaderboard ID.", ephemeral: true);
+                    return;
+                }
+
+                targetDiscordId = target.DiscordId;
             }
             else
             {
-                await FollowupAsync("User not registered to begin with.", ephemeral: true);
+                targetDiscordId = Context.User.Id;
             }
+
+            bool isSelfCommand = targetDiscordId == Context.User.Id;
+
+            if (!isSelfCommand && !((SocketGuildUser)Context.User).GuildPermissions.ManageRoles)
+            {
+                await RespondAsync("You can only unregister yourself, or you need ManageRoles permission to unregister others.", ephemeral: true);
+                return;
+            }
+
+            target ??= await userRepository.FindAsync(targetDiscordId);
+            if (target is null)
+            {
+                await RespondAsync("That user isn't registered.", ephemeral: true);
+                return;
+            }
+
+            // Self-unregistrations are private; moderator actions on others are public.
+            await DeferAsync(ephemeral: isSelfCommand);
+
+            ComponentBuilder components = new ComponentBuilder()
+                .WithButton("Confirm", $"unregister-confirm:{Context.User.Id}:{targetDiscordId}", ButtonStyle.Danger)
+                .WithButton("Cancel", $"unregister-cancel:{Context.User.Id}", ButtonStyle.Secondary);
+
+            string targetDescription = user is not null ? user.Mention : MentionUtils.MentionUser(targetDiscordId);
+
+            string prompt = $"⚠️ Are you sure you want to unregister {targetDescription}?\n" +
+                $"Discord ID: `{targetDiscordId}`\n" +
+                $"Leaderboard ID: `{target.LeaderboardId}`";
+
+            await FollowupAsync(prompt, components: components.Build(), ephemeral: isSelfCommand);
         }
         catch (Exception ex)
         {
             await HandleSlashCommandError(ex);
         }
+    }
+
+    [ComponentInteraction("unregister-confirm:*:*")]
+    public async Task ConfirmUnregister(ulong requesterId, ulong targetDiscordId)
+    {
+        if (Context.User.Id != requesterId)
+        {
+            await RespondAsync("Only the user who ran the command can confirm this.", ephemeral: true);
+            return;
+        }
+
+        bool isSelfCommand = requesterId == targetDiscordId;
+
+        if (!isSelfCommand && !((SocketGuildUser)Context.User).GuildPermissions.ManageRoles)
+        {
+            await RespondAsync("You need ManageRoles permission to unregister others.", ephemeral: true);
+            return;
+        }
+
+        try
+        {
+            await DeferAsync();
+
+            DdUser? ddUser = await userRepository.FindAsync(targetDiscordId);
+            if (ddUser is null)
+            {
+                await UpdateUnregisterPromptAsync("❌ That user isn't registered.");
+                return;
+            }
+
+            // If they're still in the server, strip their DD roles and give them the unregistered role.
+            // If they left, the DB row being gone is enough - UserJoinHandler handles them on rejoin.
+            SocketGuildUser? guildUser = discordHelper.GetGuildUser(_config.DdPalsId, targetDiscordId);
+            if (guildUser is not null)
+            {
+                await scoreRoleService.StripDdRolesAsync(guildUser);
+            }
+
+            await userRepository.RemoveAsync(targetDiscordId);
+
+            await UpdateUnregisterPromptAsync(
+                $"✅ Unregistered {MentionUtils.MentionUser(targetDiscordId)}.\n" +
+                $"Discord ID: `{targetDiscordId}`\n" +
+                $"Leaderboard ID: `{ddUser.LeaderboardId}`");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error confirming unregister for {TargetDiscordId}", targetDiscordId);
+            await UpdateUnregisterPromptAsync("❌ An error occurred while unregistering.");
+        }
+    }
+
+    [ComponentInteraction("unregister-cancel:*")]
+    public async Task CancelUnregister(ulong requesterId)
+    {
+        if (Context.User.Id != requesterId)
+        {
+            await RespondAsync("Only the user who ran the command can cancel this.", ephemeral: true);
+            return;
+        }
+
+        await DeferAsync();
+        await UpdateUnregisterPromptAsync("ℹ️ Unregistration cancelled.");
+    }
+
+    /// <summary>
+    /// Replaces the confirmation prompt with the given result and removes its buttons.
+    /// Must be called after <see cref="DeferAsync"/>.
+    /// </summary>
+    private Task UpdateUnregisterPromptAsync(string message)
+    {
+        return Context.Interaction.ModifyOriginalResponseAsync(m =>
+        {
+            m.Content = message;
+            m.Components = new ComponentBuilder().Build();
+        });
     }
 
     [SlashCommand("link-twitch", "Link a Twitch account to your Devil Daggers profile on DDLIVE")]
