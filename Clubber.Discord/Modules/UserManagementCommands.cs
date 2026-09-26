@@ -45,7 +45,7 @@ public sealed class UserManagementCommands(
             Result result = await userService.IsValidForRegistration(user, lbId, user.Id == Context.User.Id);
             if (result.IsFailure)
             {
-                await RespondAsync(result.ErrorMsg, ephemeral: true);
+                await FollowupAsync(result.ErrorMsg, ephemeral: true);
                 return;
             }
 
