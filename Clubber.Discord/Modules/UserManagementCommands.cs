@@ -54,7 +54,9 @@ public sealed class UserManagementCommands(
             {
                 await user.RemoveRoleAsync(config.Value.NewPalRoleId);
                 await user.AddRoleAsync(config.Value.PendingPbRoleId);
-                await FollowupAsync("✅ Successfully registered.\n\nDo `+pb` anywhere to get assigned a role.");
+                await FollowupAsync(
+                    $"✅ Registered {user.Mention} with leaderboard ID `{lbId}`.\n\n" +
+                    "They can now do `+pb` anywhere to get assigned a score role.");
             }
             else
             {
@@ -213,7 +215,7 @@ public sealed class UserManagementCommands(
         }
 
         await DeferAsync();
-        await UpdateUnregisterPromptAsync("ℹ️ Unregistration cancelled.");
+        await UpdateUnregisterPromptAsync("ℹ️ Unregistration cancelled. No changes were made.");
     }
 
     /// <summary>
@@ -266,7 +268,7 @@ public sealed class UserManagementCommands(
             Result registrationResult = await userRepository.RegisterTwitchAsync(user.Id, twitchUsername);
             if (registrationResult.IsSuccess)
             {
-                await FollowupAsync("✅ Successfully linked Twitch.");
+                await FollowupAsync($"✅ Linked Twitch account `{twitchUsername}` to {user.Mention}.");
             }
             else
             {
@@ -299,7 +301,7 @@ public sealed class UserManagementCommands(
             Result result = await userRepository.UnregisterTwitchAsync(user.Id);
             if (result.IsSuccess)
             {
-                await RespondAsync("✅ Successfully unlinked Twitch account.", ephemeral: true);
+                await RespondAsync($"✅ Unlinked the Twitch account from {user.Mention}.", ephemeral: true);
             }
             else
             {
@@ -400,7 +402,7 @@ public sealed class UserManagementCommands(
             }
             else
             {
-                string msg = "No updates were needed.";
+                string msg = "ℹ️ No role changes were needed - your roles are already up to date.";
                 if (change.SecondsToNextMilestone == 0)
                 {
                     msg += "\n\nYou already have the highest role in the server!";

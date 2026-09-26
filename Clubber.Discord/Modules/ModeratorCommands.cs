@@ -132,7 +132,11 @@ public sealed partial class ModeratorCommands(
             }
 
             await messageToEdit.ModifyAsync(m => m.Content = newContent);
-            await RespondAsync("✅ Message updated successfully!", ephemeral: true);
+            await RespondAsync(
+                $"✅ News post edited in <#{_config.DdNewsChannelId}>.\n" +
+                $"Message: [jump to post]({messageToEdit.GetJumpUrl()})\n" +
+                $"Edited by {Context.User.Mention}.",
+                ephemeral: true);
         }
         catch (Exception ex)
         {
@@ -173,7 +177,9 @@ public sealed partial class ModeratorCommands(
             await discordHelper.ClearChannelAsync(channel);
             IReadOnlyDictionary<int, ulong> scoreRoles = await _roleConfigService.GetScoreRolesAsync();
             await channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds(scoreRoles));
-            await FollowupAsync("✅ Register channel cleared and reset!");
+            await FollowupAsync(
+                $"✅ Cleared <#{registerChannelId}> and reposted the registration embed with the current score roles.\n" +
+                "All previous messages were removed.");
         }
         catch (Exception ex)
         {
@@ -263,7 +269,8 @@ public sealed partial class ModeratorCommands(
 
             if (response.UpdatedBestSplits.Length == 0)
             {
-                await FollowupAsync("No updates were needed.");
+                string scope = splitName.HasValue ? $"split `{splitName.Value}`" : "any splits";
+                await FollowupAsync($"ℹ️ No improvements found for {scope} in that run, so the best splits list was left unchanged.");
                 return;
             }
 
@@ -337,7 +344,7 @@ public sealed partial class ModeratorCommands(
             (HomingPeakRun? OldRun, HomingPeakRun? NewRun) = await leaderboardRepository.UpdateTopHomingPeakAsync(possibleNewTopPeakRun);
             if (NewRun is null)
             {
-                await FollowupAsync("No updates were needed.");
+                await FollowupAsync($"ℹ️ No update needed: {ddStatsRun.GameInfo.PlayerName}'s homing peak didn't beat the current top peaks.");
                 return;
             }
 

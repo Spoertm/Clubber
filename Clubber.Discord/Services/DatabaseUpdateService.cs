@@ -148,8 +148,8 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
     private static string BuildStatusMessage(int successCount, int nonMemberCount, int skippedCount, long elapsedMs)
     {
         string message = successCount > 0
-            ? $"✅ Successfully updated database and {successCount} user(s).\n🕐 Execution took {elapsedMs} ms."
-            : $"No updates needed today.\nExecution took {elapsedMs} ms.";
+            ? $"✅ Updated roles for {successCount} user(s).\n🕐 Execution took {elapsedMs} ms."
+            : $"ℹ️ No role updates were needed today.\n🕐 Execution took {elapsedMs} ms.";
 
         message += $"\nℹ️ {nonMemberCount} user(s) are registered but aren't in the server.";
 

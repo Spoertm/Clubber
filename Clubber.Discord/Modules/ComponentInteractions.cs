@@ -1,6 +1,7 @@
 ﻿using Clubber.Discord.Helpers;
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
+using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Helpers;
 using Clubber.Domain.Models;
 using Clubber.Domain.Models.Responses;
@@ -63,16 +64,23 @@ public sealed class ComponentInteractions(
             Log.Warning(e, "Failed to retrieve Register channel");
         }
 
-        string modsSuccessEmbedDescription = "✅ Done!";
+        // A "no score" registration isn't stored in the database, so a DB hit doubles as a
+        // reliable way to tell which kind of registration just happened.
+        DdUser? registeredUser = await userRepository.FindAsync(guildUser.Id);
+
+        string modsSuccessEmbedDescription = registeredUser is not null
+            ? $"✅ Registered {guildUser.Mention} with leaderboard ID `{registeredUser.LeaderboardId}`."
+            : $"✅ Registered {guildUser.Mention} with the **No Score** role.";
+
         if (registerChannel == null)
         {
             modsSuccessEmbedDescription += "\n\n⚠️ Register channel couldn't be found so the user couldn't be informed of their registration.";
         }
         else
         {
-            string userSuccessMsg = leaderboardId > 0
-                ? "✅ You've been registered!\n\nPlease do `+pb` anywhere to get the role."
-                : "✅ Done!\n\nℹ️ Keep in mind you'll have limited channel access, but you can always ping the mods to get registered.";
+            string userSuccessMsg = registeredUser is not null
+                ? $"✅ You've been registered with leaderboard ID `{registeredUser.LeaderboardId}`.\n\nPlease do `+pb` anywhere to get the role."
+                : "✅ You've been registered with the **No Score** role.\n\nℹ️ Keep in mind you'll have limited channel access, but you can always ping the mods to get registered.";
 
             Embed userSuccessEmbed = new EmbedBuilder().WithDescription(userSuccessMsg).Build();
             if (await registerChannel.GetMessageAsync(registerMessageId) is IUserMessage userMsg)
@@ -96,7 +104,7 @@ public sealed class ComponentInteractions(
     [ComponentInteraction("deny_button")]
     public async Task HandleDeny()
     {
-        await RespondAsync(embeds: [new EmbedBuilder().WithDescription("ℹ️ Interaction closed.").Build()]);
+        await RespondAsync(embeds: [new EmbedBuilder().WithDescription("🚫 Registration request denied. The user was **not** registered.").Build()]);
         await ClearComponents();
     }
 

@@ -56,7 +56,7 @@ public sealed class TextCommands(
             }
             else
             {
-                string msg = "No updates were needed.";
+                string msg = "ℹ️ No role changes were needed - your roles are already up to date.";
                 if (change.SecondsToNextMilestone == 0)
                 {
                     msg += "\n\nYou already have the highest role in the server!";

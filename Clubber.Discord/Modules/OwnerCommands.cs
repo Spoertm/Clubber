@@ -63,7 +63,7 @@ public sealed class OwnerCommands(
 
             if (response.UserRoleUpdates.Count == 0)
             {
-                string noUpdatesMessage = $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms." +
+                string noUpdatesMessage = $"ℹ️ No role updates were needed today.\n🕐 Execution took {sw.ElapsedMilliseconds} ms." +
                                         $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
                 await FollowupAsync(noUpdatesMessage);
                 return;
@@ -118,8 +118,8 @@ public sealed class OwnerCommands(
             }
 
             string message = successfulUpdates.Count > 0
-                ? $"✅ Successfully updated database and {successfulUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
-                : $"No updates needed today.\nExecution took {sw.ElapsedMilliseconds} ms.";
+                ? $"✅ Updated roles for {successfulUpdates.Count} user(s).\n🕐 Execution took {sw.ElapsedMilliseconds} ms."
+                : $"ℹ️ No role updates were needed today.\n🕐 Execution took {sw.ElapsedMilliseconds} ms.";
 
             message += $"\nℹ️ {response.NonMemberCount} user(s) are registered but aren't in the server.";
 
@@ -179,6 +179,7 @@ public sealed class OwnerCommands(
             await FollowupAsync("Posting welcome message...");
             IReadOnlyDictionary<int, ulong> scoreRoles = await roleConfigService.GetScoreRolesAsync();
             await Context.Channel.SendMessageAsync(embeds: EmbedHelper.RegisterEmbeds(scoreRoles));
+            await FollowupAsync($"✅ Welcome/registration embed posted in <#{Context.Channel.Id}>.");
         }
         catch (Exception ex)
         {
@@ -199,6 +200,8 @@ public sealed class OwnerCommands(
     {
         roleConfigService.InvalidateCache();
         await roleConfigService.GetScoreRolesAsync(); // Warm cache
-        await RespondAsync("Role cache refreshed!", ephemeral: true);
+        await RespondAsync(
+            "✅ Role cache refreshed from the database.\nScore and rank role thresholds will be re-read on the next role update.",
+            ephemeral: true);
     }
 }
