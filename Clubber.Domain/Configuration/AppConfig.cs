@@ -78,6 +78,6 @@ public sealed class AppConfig
         FormerWrRoleId,
         UnregisteredRoleId,
         NoScoreRoleId,
-        PendingPbRoleId
+        PendingPbRoleId,
     ];
 }

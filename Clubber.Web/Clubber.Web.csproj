@@ -29,9 +29,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
     <!-- Transitive security pin - GHSA-v5pm-xwqc-g5wc (CVE-2026-49451, patched in 2.7.5).
-         Do NOT bump to 3.x: Microsoft.AspNetCore.OpenApi 10.0.12 constrains this to
-         [2.12.0, 3.0.0); 3.x resolves but breaks the documented contract (NU1608). -->
-    <PackageReference Include="Microsoft.OpenApi" Version="3.10.2" />
+         Do NOT bump to 3.x: Microsoft.AspNetCore.OpenApi 10.0.13 requires
+         [2.12.2, 3.0.0); 3.10.2 resolves but fails the build (NU1608 + CS0200 in
+         the generated OpenAPI XML comment support). 2.12.2 is the newest 2.x. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.12.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
