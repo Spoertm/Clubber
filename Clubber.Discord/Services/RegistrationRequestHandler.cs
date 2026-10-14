@@ -17,6 +17,10 @@ namespace Clubber.Discord.Services;
 
 public sealed class RegistrationRequestHandler
 {
+    // Sentinel leaderboard ID for a "no score" registration request. It must be a non-negative
+    // number so the Confirm button's wildcard capture parses back into a uint.
+    public const uint NoScoreLeaderboardId = 0;
+
     private readonly AppConfig _config;
     private readonly RegistrationTracker _registrationTracker;
     private readonly IWebService _webService;
@@ -58,19 +62,34 @@ public sealed class RegistrationRequestHandler
             return;
         }
 
-        if (!_registrationTracker.TryFlagUser(message.Author.Id))
+        uint? foundId = message.Content.FindFirstUint();
+        bool containsNoScore = message.Content.Contains("no score", StringComparison.OrdinalIgnoreCase);
+
+        // Unrelated chatter in the register channel is ignored.
+        if (foundId is null && !containsNoScore)
         {
-            await message.ReplyAsync(embed: new EmbedBuilder().WithDescription("ℹ️ You've already provided an ID. Mods will register you soon.").Build());
             return;
         }
 
-        Embed? registerEmbed;
+        if (!_registrationTracker.TryFlagUser(message.Author.Id))
+        {
+            // The user already has a pending registration request. Remind them only once, then
+            // stay silent so that every additional message doesn't get a reply.
+            if (_registrationTracker.TryMarkUserReminded(message.Author.Id))
+            {
+                await message.ReplyAsync(embed: new EmbedBuilder().WithDescription("ℹ️ You've already provided an ID. Mods will register you soon.").Build());
+            }
+
+            return;
+        }
+
+        Embed registerEmbed;
         ComponentBuilder cb = new();
 
         // User specified an ID
-        if (message.Content.FindFirstUint() is uint foundId)
+        if (foundId is uint id)
         {
-            Result<EntryResponse> playerInfoResponse = await GetEntryResponse(foundId);
+            Result<EntryResponse> playerInfoResponse = await GetEntryResponse(id);
 
             string? description;
             if (playerInfoResponse.IsSuccess)
@@ -83,29 +102,26 @@ public sealed class RegistrationRequestHandler
                 description = playerInfoResponse.ErrorMsg;
             }
 
-            registerEmbed = EmbedHelper.RegisterUserModEmbed(message.Author.Mention, foundId, description);
+            registerEmbed = EmbedHelper.RegisterUserModEmbed(message.Author.Mention, id, description);
 
-            // Refer to RegistrationContext.Parse in InteractionHandler
-            string buttonId = $"register:{message.Author.Id}:{foundId}:{message.Id}";
+            // Keep in sync with HandleRegistration in ComponentInteractions
+            string buttonId = $"register:{message.Author.Id}:{id}:{message.Id}";
 
             cb.WithButton("Register", buttonId, ButtonStyle.Success);
-            cb.WithButton("Deny", "deny_button", ButtonStyle.Danger);
         }
         // User specified "no score"
-        else if (message.Content.Contains("no score", StringComparison.OrdinalIgnoreCase))
+        else
         {
             registerEmbed = EmbedHelper.GiveUserRoleModEmbed(message.Author.Mention, _config.NoScoreRoleId);
 
-            string buttonId = $"register:{message.Author.Id}:-1:{message.Id}";
+            // The no-score request has no leaderboard ID, so the placeholder NoScoreLeaderboardId
+            // is used. It must be a non-negative number so the button ID parses back into a uint.
+            string buttonId = $"register:{message.Author.Id}:{NoScoreLeaderboardId}:{message.Id}";
 
             cb.WithButton("Confirm", buttonId, ButtonStyle.Success);
-            cb.WithButton("Deny", "deny_button", ButtonStyle.Danger);
         }
-        else
-        {
-            _registrationTracker.UnflagUser(message.Author.Id);
-            return;
-        }
+
+        cb.WithButton("Deny", $"deny:{message.Author.Id}", ButtonStyle.Danger);
 
         SocketTextChannel modsChannel = _discordHelper.GetTextChannel(_config.ModsChannelId);
         await modsChannel.SendMessageAsync(embed: registerEmbed, components: cb.Build());

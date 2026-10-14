@@ -39,20 +39,25 @@ public sealed class ComponentInteractions(
         SocketGuildUser? guildUser = discordHelper.GetGuildUser(Context.Guild.Id, userId);
         if (guildUser is null)
         {
+            // The request can't be completed, so relax the flag in case they rejoin and retry.
+            registrationTracker.UnflagUser(userId);
             await RespondAsync(embeds: [new EmbedBuilder().WithDescription("⚠️ Couldn't find the user. They likely left the server.").Build()]);
             await ClearComponents();
             return;
         }
 
         Result registrationResult = await CheckUserAndRegister(leaderboardId, guildUser);
+
+        // The request is no longer pending either way: on success the user is registered, on
+        // failure they're free to submit a new one (e.g. with a corrected ID).
+        registrationTracker.UnflagUser(guildUser.Id);
+
         if (registrationResult.IsFailure)
         {
             await RespondAsync(embeds: [new EmbedBuilder().WithDescription($"{registrationResult.ErrorMsg}").Build()]);
             await ClearComponents();
             return;
         }
-
-        registrationTracker.UnflagUser(guildUser.Id);
 
         SocketTextChannel? registerChannel = null;
         try
@@ -101,9 +106,11 @@ public sealed class ComponentInteractions(
         await RespondAsync(embeds: [modsSuccessEmbed]);
     }
 
-    [ComponentInteraction("deny_button")]
-    public async Task HandleDeny()
+    [ComponentInteraction("deny:*")]
+    public async Task HandleDeny(ulong userId)
     {
+        // The request is resolved, so let the user submit a new one.
+        registrationTracker.UnflagUser(userId);
         await RespondAsync(embeds: [new EmbedBuilder().WithDescription("🚫 Registration request denied. The user was **not** registered.").Build()]);
         await ClearComponents();
     }
@@ -150,7 +157,7 @@ public sealed class ComponentInteractions(
             return Result.Failure($"⚠️ {result.ErrorMsg}");
         }
 
-        if (lbId < 0)
+        if (lbId == RegistrationRequestHandler.NoScoreLeaderboardId)
         {
             await user.AddRoleAsync(_config.NoScoreRoleId);
         }
