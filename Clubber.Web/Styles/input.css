@@ -1,61 +1,80 @@
-@import "tailwindcss";
+/* Tailwind CSS v4.1.8.
+   The engine stylesheet is vendored (../vendor/tailwind/index.css) so the build
+   needs no node_modules and no local install. To upgrade, replace that file with
+   the index.css from the matching tailwindcss package version. */
 
-@config "../tailwind.config.js";
+@import "../vendor/tailwind/index.css";
 
+/* Content sources, relative to this file. Build output and the vendored engine
+   are excluded so only real markup can introduce classes. */
+@source not "../wwwroot/**";
+@source not "../vendor/**";
+
+@source "../Views/**/*.cshtml";
+
+/* Class-based dark mode, toggled by the .dark class on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+    --font-display: Inter, system-ui, sans-serif;
+    --font-body: Inter, system-ui, sans-serif;
+
+    --animate-fade-in: fadeIn 0.5s ease-in-out;
+    --animate-slide-up: slideUp 0.6s ease-out;
+}
+
 @keyframes fadeIn {
-	0% {
-		opacity: 0;
-	}
-	100% {
-		opacity: 1;
-	}
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-	0% {
-		opacity: 0;
-		transform: translateY(30px);
-	}
-	100% {
-		opacity: 1;
-		transform: translateY(0);
-	}
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @layer base {
-	body {
-		font-family: var(--font-family-body), sans-serif;
-	}
+    body {
+        font-family: var(--font-body);
+    }
 }
 
 @layer utilities {
-	.scrollbar-hide {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 
-	.scrollbar-hide::-webkit-scrollbar {
-		display: none;
-	}
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
 
-	.scrollbar-thin {
-		scrollbar-width: thin;
-		scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-	}
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    }
 
-	.scrollbar-thin::-webkit-scrollbar {
-		height: 4px;
-		width: 4px;
-	}
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 4px;
+        width: 4px;
+    }
 
-	.scrollbar-thin::-webkit-scrollbar-track {
-		background: transparent;
-	}
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-	.scrollbar-thin::-webkit-scrollbar-thumb {
-		background-color: rgba(156, 163, 175, 0.5);
-		border-radius: 2px;
-	}
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 2px;
+    }
 }

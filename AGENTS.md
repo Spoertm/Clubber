@@ -175,6 +175,25 @@ dotnet test Clubber.Tests
 dotnet publish -c Release -o ./publish
 ```
 
+### Frontend CSS (Tailwind)
+
+`Clubber.Web` has **no npm project and no committed binary**. The input is
+`Clubber.Web/Styles/input.css` (CSS-first config) and the output
+`Clubber.Web/wwwroot/css/site.css` is committed. Rebuild only when you add or change
+utility classes in `Views/**/*.cshtml`:
+
+```bash
+cd Clubber.Web
+npx -y @tailwindcss/cli@4.1.8 -i ./Styles/input.css -o ./wwwroot/css/site.css --minify
+```
+
+- Do **not** add `package.json`, `node_modules`, or a Tailwind executable — the engine
+  stylesheet is vendored at `Clubber.Web/vendor/tailwind/index.css` (see the README
+  there for the upgrade procedure).
+- `npx` is only needed on a machine that edits views; `dotnet build`, `dotnet publish`,
+  Docker, and Railway never touch Node.
+- VS Code tasks: `css:build` (one-shot) and `tailwind-watch` (watch mode).
+
 ## Configuration
 
 ### Environment Variables (Production)

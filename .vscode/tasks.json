@@ -12,8 +12,12 @@
             "label": "tailwind-watch",
             "command": "npx",
             "type": "process",
+            "windows": {
+                "command": "npx.cmd"
+            },
             "args": [
-                "tailwindcss",
+                "-y",
+                "@tailwindcss/cli@4.1.8",
                 "-i",
                 "./Styles/input.css",
                 "-o",
@@ -88,20 +92,25 @@
             "problemMatcher": []
         },
         {
-            "label": "npm: build-css",
-            "detail": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --watch",
-            "type": "npm",
-            "script": "build-css",
-            "path": "Clubber.Web",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "npm: build-css-prod",
-            "detail": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/site.css --minify",
-            "type": "npm",
-            "script": "build-css-prod",
-            "path": "Clubber.Web",
+            "label": "css:build",
+            "detail": "Regenerate wwwroot/css/site.css through npx (minified)",
+            "command": "npx",
+            "type": "process",
+            "windows": {
+                "command": "npx.cmd"
+            },
+            "args": [
+                "-y",
+                "@tailwindcss/cli@4.1.8",
+                "-i",
+                "./Styles/input.css",
+                "-o",
+                "./wwwroot/css/site.css",
+                "--minify"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/Clubber.Web"
+            },
             "group": "build",
             "problemMatcher": []
         }
