@@ -82,15 +82,16 @@ public sealed class LeaderboardRepository(AppDbContext dbContext) : ILeaderboard
             return (existing, null);
         }
 
-        HomingPeakRun? oldRun = existing is not null ? new HomingPeakRun
-        {
-            Id = existing.Id,
-            PlayerLeaderboardId = existing.PlayerLeaderboardId,
-            PlayerName = existing.PlayerName,
-            HomingPeak = existing.HomingPeak,
-            Source = existing.Source,
-        }
-        : null;
+        HomingPeakRun? oldRun = existing is not null
+            ? new HomingPeakRun
+            {
+                Id = existing.Id,
+                PlayerLeaderboardId = existing.PlayerLeaderboardId,
+                PlayerName = existing.PlayerName,
+                HomingPeak = existing.HomingPeak,
+                Source = existing.Source,
+            }
+            : null;
 
         if (existing is not null)
         {

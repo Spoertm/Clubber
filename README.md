@@ -8,10 +8,10 @@ Clubber is a bot for the [DD Pals Discord server](https://discord.gg/jMRumVerj2)
 * Personal stats: The `stats` command shows more detailed information about the player, including score, leaderboard ID, rank, number of kills, and more.
 
 ### Framework
-- .NET 10.0
+- .NET 11.0
 
 ### Language
-- C# 14.0
+- C# 15.0
 
 ### Architecture
 There was an attempt at following [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), where:

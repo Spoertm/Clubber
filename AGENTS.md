@@ -14,10 +14,10 @@ Clubber is a Discord bot for the DD Pals Discord server that integrates with the
 
 ## Technology Stack
 
-- **Framework**: .NET 10.0
-- **Language**: C# 14.0
-- **Database**: PostgreSQL with Entity Framework Core 10.0
-- **Discord Library**: Discord.Net 3.19.1
+- **Framework**: .NET 11.0
+- **Language**: C# 15.0
+- **Database**: PostgreSQL with Entity Framework Core 10.0 (held at 10.x until `Npgsql.EntityFrameworkCore.PostgreSQL` ships a stable 11.0.0 provider)
+- **Discord Library**: Discord.Net 3.20.2
 - **Web Framework**: ASP.NET Core with MVC and Razor Pages
 - **API Documentation**: Scalar (OpenAPI/Swagger alternative)
 - **Logging**: Serilog
@@ -131,7 +131,7 @@ Test project containing both unit tests and integration tests using xUnit framew
 
 ### Prerequisites
 
-- .NET 10.0 SDK
+- .NET 11.0 SDK
 - PostgreSQL database
 - Discord Bot Token
 

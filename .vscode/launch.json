@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Clubber.Web/bin/Debug/net10.0/Clubber.Web.dll",
+            "program": "${workspaceFolder}/Clubber.Web/bin/Debug/net11.0/Clubber.Web.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Clubber.Web",
             "stopAtEntry": false,

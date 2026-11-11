@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>14</LangVersion>
+    <LangVersion>15</LangVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <AnalysisMode>All</AnalysisMode>
   </PropertyGroup>
@@ -27,21 +27,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
     <!-- Transitive security pin - GHSA-v5pm-xwqc-g5wc (CVE-2026-49451, patched in 2.7.5).
-         Do NOT bump to 3.x: Microsoft.AspNetCore.OpenApi 10.0.13 requires
-         [2.12.2, 3.0.0); 3.10.2 resolves but fails the build (NU1608 + CS0200 in
-         the generated OpenAPI XML comment support). 2.12.2 is the newest 2.x. -->
-    <PackageReference Include="Microsoft.OpenApi" Version="2.12.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
+         Keep in sync with the range Microsoft.AspNetCore.OpenApi allows and re-verify a
+         clean build (no NU1608/CS0200) whenever either package moves. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="3.11.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.20.0" />
   </ItemGroup>
 
   <ItemGroup>
