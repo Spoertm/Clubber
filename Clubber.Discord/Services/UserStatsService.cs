@@ -7,14 +7,13 @@ using Clubber.Domain.Models.Responses.DdInfo;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
 using Discord;
-using Discord.WebSocket;
 
 namespace Clubber.Discord.Services;
 
 /// <summary>Shared `stats` flow: resolves the registered player and builds the stats embed.</summary>
 public sealed class UserStatsService(IUserRepository userRepository, UserService userService, IWebService webService)
 {
-    public async Task<Result<StatsOutcome>> GetStatsAsync(SocketGuildUser user, bool requestingUserIsStatsUser, bool full)
+    public async Task<Result<StatsOutcome>> GetStatsAsync(IGuildUser user, bool requestingUserIsStatsUser, bool full)
     {
         DdUser? ddUser = await userRepository.FindAsync(user.Id);
         if (ddUser is null)

@@ -2,14 +2,13 @@ using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Domain.Models;
 using Discord;
-using Discord.WebSocket;
 
 namespace Clubber.Discord.Services;
 
 /// <summary>Shared `pb` flow: validates the user, then applies the role changes the user is entitled to.</summary>
 public sealed class RoleUpdateService(UserService userService, ScoreRoleService scoreRoleService)
 {
-    public async Task<Result<RoleUpdateOutcome>> PrepareAsync(SocketGuildUser user)
+    public async Task<Result<RoleUpdateOutcome>> PrepareAsync(IGuildUser user)
     {
         Result validation = await userService.IsValid(user, true);
         if (validation is Failure validationFailure)
@@ -25,7 +24,7 @@ public sealed class RoleUpdateService(UserService userService, ScoreRoleService 
         };
     }
 
-    private static async Task<Result<RoleUpdateOutcome>> ApplyRoleChangeAsync(SocketGuildUser user, RoleChange change)
+    private static async Task<Result<RoleUpdateOutcome>> ApplyRoleChangeAsync(IGuildUser user, RoleChange change)
     {
         if (!change.HasChanges)
         {

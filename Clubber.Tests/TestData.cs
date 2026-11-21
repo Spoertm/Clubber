@@ -1,4 +1,7 @@
 using System.Collections.Immutable;
+using Clubber.Domain.Configuration;
+using Discord;
+using NSubstitute;
 
 namespace Clubber.Tests;
 
@@ -59,4 +62,47 @@ public static class TestData
         [10] = 10,
         [25] = 25,
     }.ToImmutableSortedDictionary();
+
+    /// <summary>Builds a complete <see cref="AppConfig"/> without depending on appsettings files.</summary>
+    public static AppConfig CreateAppConfig() => new()
+    {
+        BotToken = "SomeToken",
+        FormerWrRoleId = 1383750696754483200,
+        RegisterChannelId = 743463356710649866,
+        RoleAssignerRoleId = 611855024653336606,
+        CheaterRoleId = 666,
+        DdPalsId = 743463356710649866,
+        UnregisteredRoleId = 728663492424499200,
+        DailyUpdateChannelId = 743463356710649866,
+        DailyUpdateLoggingChannelId = 743463356710649866,
+        DdNewsChannelId = 743463356710649866,
+        ModsChannelId = 743463356710649866,
+        NoScoreRoleId = 1266817935704588309,
+        PendingPbRoleId = 994354086646399066,
+        NewPalRoleId = 728663492424499200,
+        Endpoints = new Endpoints
+        {
+            GetMultipleUsersById = new Uri("http://dd.hasmodai.com/dd3/get_multiple_users_by_id_public.php"),
+            GetScores = new Uri("http://dd.hasmodai.com/dd3/get_scores.php"),
+            GetWorldRecords = new Uri("https://devildaggers.info/api/world-records"),
+            GetCountryCodeForPlayer = "https://devildaggers.info/api/clubber/players/",
+            GetPlayerHistory = "https://devildaggers.info/api/clubber/players/",
+            GetDdstatsResponse = "https://ddstats.com/api/v2/game/full",
+            GetRecentScores = new Uri("https://dd.hasmodai.com/dd3/get_recent.php"),
+        },
+    };
+
+    /// <summary>Creates a mocked guild user with a display name and the given roles.</summary>
+    public static IGuildUser CreateGuildUser(ulong id, string name, IReadOnlyCollection<ulong> roleIds)
+    {
+        IGuildUser user = Substitute.For<IGuildUser>();
+        user.Id.Returns(id);
+        user.IsBot.Returns(false);
+        user.GuildPermissions.Returns(GuildPermissions.None);
+        user.RoleIds.Returns(roleIds);
+        user.Nickname.Returns(name);
+        user.GlobalName.Returns(name);
+        user.Username.Returns(name);
+        return user;
+    }
 }

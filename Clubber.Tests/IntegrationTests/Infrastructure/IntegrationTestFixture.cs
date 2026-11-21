@@ -183,15 +183,8 @@ public sealed class IntegrationTestFixture : IDisposable
     /// <summary>
     /// Creates a mock IGuildUser for testing.
     /// </summary>
-    public static IGuildUser CreateMockGuildUser(ulong id, string username, params ulong[] roleIds)
-    {
-        IGuildUser user = Substitute.For<IGuildUser>();
-        user.Id.Returns(id);
-        user.Username.Returns(username);
-        user.GuildPermissions.Returns(GuildPermissions.None);
-        user.RoleIds.Returns(roleIds);
-        return user;
-    }
+    public static IGuildUser CreateMockGuildUser(ulong id, string username, params ulong[] roleIds) =>
+        TestData.CreateGuildUser(id, username, roleIds);
 
     /// <summary>
     /// Creates a leaderboard entry for testing.

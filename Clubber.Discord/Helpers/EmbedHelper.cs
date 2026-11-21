@@ -5,7 +5,6 @@ using Clubber.Domain.Data.Entities.DdSplits;
 using Clubber.Domain.Models.Responses;
 using Clubber.Domain.Models.Responses.DdInfo;
 using Discord;
-using Discord.WebSocket;
 
 namespace Clubber.Discord.Helpers;
 
@@ -50,7 +49,7 @@ public static class EmbedHelper
     /// <summary>
     /// Returns default stats Embed. For the full stats Embed use <see cref="FullStats" />.
     /// </summary>
-    public static Embed Stats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
+    public static Embed Stats(EntryResponse lbPlayer, IGuildUser? guildUser, GetPlayerHistory? playerHistory)
     {
         DateTime? playerPbDatetime = playerHistory?.ScoreHistory.LastOrDefault()?.DateTime;
         string? pbDateTimeFormatted = playerPbDatetime is null ? null : $"\n📅 Achieved on: {playerPbDatetime:yyyy-MM-dd}";
@@ -79,7 +78,7 @@ public static class EmbedHelper
     /// <summary>
     /// Returns full stats Embed. For the default stats Embed use <see cref="Stats" />.
     /// </summary>
-    public static Embed FullStats(EntryResponse lbPlayer, SocketGuildUser? guildUser, GetPlayerHistory? playerHistory)
+    public static Embed FullStats(EntryResponse lbPlayer, IGuildUser? guildUser, GetPlayerHistory? playerHistory)
     {
         GetPlayerHistoryScoreEntry? playerPb = playerHistory?.ScoreHistory.LastOrDefault();
         string? peakRankFormatted = playerHistory?.BestRank is null ? null : $"(Best: {playerHistory.BestRank})";
