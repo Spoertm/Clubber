@@ -91,16 +91,11 @@ public sealed class RegistrationRequestHandler
         {
             Result<EntryResponse> playerInfoResponse = await GetEntryResponse(id);
 
-            string? description;
-            if (playerInfoResponse.IsSuccess)
+            string? description = playerInfoResponse switch
             {
-                Embed fullstatsEmbed = EmbedHelper.FullStats(playerInfoResponse.Value, null, null);
-                description = fullstatsEmbed.Description;
-            }
-            else
-            {
-                description = playerInfoResponse.ErrorMsg;
-            }
+                Success<EntryResponse> success => EmbedHelper.FullStats(success.Value, null, null).Description,
+                Failure failure => failure.Message,
+            };
 
             registerEmbed = EmbedHelper.RegisterUserModEmbed(message.Author.Mention, id, description);
 
@@ -147,7 +142,7 @@ public sealed class RegistrationRequestHandler
                 _ => "Internal error.",
             };
 
-            return Result.Failure<EntryResponse>(errorMsg)!;
+            return Result.Failure<EntryResponse>(errorMsg);
         }
     }
 }

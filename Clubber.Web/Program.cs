@@ -68,6 +68,8 @@ internal static class Program
         builder.Services.AddSingleton<RegistrationTracker>();
 
         builder.Services.AddTransient<ScoreRoleService>();
+        builder.Services.AddTransient<RoleUpdateService>();
+        builder.Services.AddTransient<UserStatsService>();
         builder.Services.AddTransient<IDiscordHelper, DiscordHelper>();
         builder.Services.AddTransient<IUserRepository, UserRepository>();
         builder.Services.AddTransient<INewsRepository, NewsRepository>();

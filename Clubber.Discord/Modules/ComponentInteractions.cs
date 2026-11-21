@@ -52,9 +52,9 @@ public sealed class ComponentInteractions(
         // failure they're free to submit a new one (e.g. with a corrected ID).
         registrationTracker.UnflagUser(guildUser.Id);
 
-        if (registrationResult.IsFailure)
+        if (registrationResult is Failure registrationFailure)
         {
-            await RespondAsync(embeds: [new EmbedBuilder().WithDescription($"{registrationResult.ErrorMsg}").Build()]);
+            await RespondAsync(embeds: [new EmbedBuilder().WithDescription(registrationFailure.Message).Build()]);
             await ClearComponents();
             return;
         }
@@ -152,9 +152,9 @@ public sealed class ComponentInteractions(
     private async Task<Result> CheckUserAndRegister(uint lbId, SocketGuildUser user)
     {
         Result result = await userService.IsValidForRegistration(user, lbId, false);
-        if (result.IsFailure)
+        if (result is Failure validationFailure)
         {
-            return Result.Failure($"⚠️ {result.ErrorMsg}");
+            return Result.Failure($"⚠️ {validationFailure.Message}");
         }
 
         if (lbId == RegistrationRequestHandler.NoScoreLeaderboardId)
@@ -164,9 +164,9 @@ public sealed class ComponentInteractions(
         else
         {
             Result registrationResult = await userRepository.RegisterAsync(lbId, user.Id);
-            if (registrationResult.IsFailure)
+            if (registrationResult is Failure registrationFailure)
             {
-                return Result.Failure($"❌ Failed to execute command: {registrationResult.ErrorMsg}");
+                return Result.Failure($"❌ Failed to execute command: {registrationFailure.Message}");
             }
 
             await user.RemoveRoleAsync(_config.NewPalRoleId);

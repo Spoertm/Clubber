@@ -263,8 +263,8 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 
         Result<RoleChange> result = await _scoreRoleService.GetRoleChange(user);
 
-        Assert.True(result.IsFailure);
-        Assert.Contains("not registered", result.ErrorMsg, StringComparison.OrdinalIgnoreCase);
+        Failure failure = Assert.IsType<Failure>(result.Value);
+        Assert.Contains("not registered", failure.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -285,10 +285,10 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 
         Result<RoleChange> result = await _scoreRoleService.GetRoleChange(user);
 
-        Assert.True(result.IsSuccess, $"Expected success but got: {result.ErrorMsg}");
-        Assert.True(result.Value.HasChanges);
-        Assert.Contains(expectedNewRoleId, result.Value.RolesToAdd);
-        Assert.Contains(currentRoleId, result.Value.RolesToRemove);
+        Success<RoleChange> success = Assert.IsType<Success<RoleChange>>(result.Value);
+        Assert.True(success.Value.HasChanges);
+        Assert.Contains(expectedNewRoleId, success.Value.RolesToAdd);
+        Assert.Contains(currentRoleId, success.Value.RolesToRemove);
     }
 
     [Fact]
@@ -309,9 +309,9 @@ public sealed class ScoreRoleServiceIntegrationTests : IDisposable
 
         Result<RoleChange> result = await _scoreRoleService.GetRoleChange(user);
 
-        Assert.True(result.IsSuccess);
-        Assert.False(result.Value.HasChanges);
-        Assert.Equal(0, result.Value.SecondsToNextMilestone);
+        Success<RoleChange> success = Assert.IsType<Success<RoleChange>>(result.Value);
+        Assert.False(success.Value.HasChanges);
+        Assert.Equal(0, success.Value.SecondsToNextMilestone);
     }
 
     #endregion

@@ -133,9 +133,9 @@ public sealed class OwnerCommands(
             Embed[] roleUpdateEmbeds = [.. successfulUpdates.Select(EmbedHelper.UpdateRoles)];
 
             Result result = await discordHelper.SendEmbedsEfficientlyAsync(roleUpdateEmbeds, Context.Channel.Id);
-            if (result.IsFailure)
+            if (result is Failure failure)
             {
-                await FollowupAsync($"Failed to send role update embeds: {result.ErrorMsg}");
+                await FollowupAsync($"Failed to send role update embeds: {failure.Message}");
             }
         }
         catch (Exception ex)

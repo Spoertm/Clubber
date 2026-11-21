@@ -13,6 +13,9 @@ namespace Clubber.Domain.Services;
 
 public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<AppConfig> appConfig) : IWebService
 {
+    private const int FixedEntrySize = 88;
+    private const int MinEntrySize = FixedEntrySize + 2; // 2-byte username length prefix
+
     private readonly AppConfig _appConfig = appConfig.Value;
 
     private readonly JsonSerializerOptions _serializerOptions = new()
@@ -37,7 +40,9 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
             byte[] data = await response.Content.ReadAsByteArrayAsync();
 
             int bytePosition = 19;
-            List<EntryResponse> users = [];
+
+            // Each entry takes at least MinEntrySize bytes, so this is an upper bound that allocates the list once.
+            List<EntryResponse> users = [with(capacity: Math.Max(0, (data.Length - bytePosition) / MinEntrySize))];
             while (bytePosition < data.Length)
             {
                 users.Add(new EntryResponse
@@ -59,7 +64,7 @@ public sealed class WebService(IHttpClientFactory httpClientFactory, IOptions<Ap
                     DaggersFiredTotal = BitConverter.ToUInt64(data, bytePosition + 52),
                 });
 
-                bytePosition += 88;
+                bytePosition += FixedEntrySize;
             }
 
             return users;

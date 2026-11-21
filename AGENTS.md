@@ -69,7 +69,7 @@ Contains the Discord bot implementation including commands and interactions.
 | `Models/`        | Discord-specific models and response types                                                                                                                                                          |
 | `Modules/`       | Discord interaction modules (`InfoCommands`, `ModeratorCommands`, `UserManagementCommands`, `OwnerCommands`, `TextCommands`, `ComponentInteractions`)                                               |
 | `Preconditions/` | Command preconditions for access control                                                                                                                                                            |
-| `Services/`      | Discord services (`ScoreRoleService`, `RegistrationRequestHandler`, `UserService`, `DatabaseUpdateService`, `DdNewsPostService`, `ChannelClearingService`, `TextCommandHandler`, `UserJoinHandler`) |
+| `Services/`      | Discord services (`ScoreRoleService`, `RoleUpdateService`, `UserStatsService`, `RegistrationRequestHandler`, `UserService`, `DatabaseUpdateService`, `DdNewsPostService`, `ChannelClearingService`, `TextCommandHandler`, `UserJoinHandler`) |
 
 **Command Categories:**
 
@@ -418,7 +418,21 @@ Heavy use of DI throughout:
 
 ### Result Pattern
 
-The application uses a `Result<T>` and `Result` type for operation results instead of exceptions for expected failures.
+The application uses `Result` and `Result<T>` for operation results instead of exceptions for expected failures. Both are
+C# 15 [union types](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/union) over the case types
+`Success` / `Success<T>` / `Failure`:
+
+- Create them with the static factories `Result.Success()`, `Result.Success(value)`, `Result.Failure(message)`
+  or `Result.Failure<T>(message)`.
+- Match on the union itself — `if (result is Failure failure)`, `if (result is not Success<T> success)`, or an
+  exhaustive `switch` with one arm per case type. There are no `IsSuccess` / `ErrorMsg` members.
+- `Success` marks a success without a value; `Success<T>` carries the value in its `Value` property; `Failure` carries the
+  user-facing message in its `Message` property.
+- `Result.Value` is the union's boxed case (`object`), not the success payload: read a payload through a `Success<T>`
+  pattern (`Success<T> success => success.Value`), never through `Result<T>.Value`.
+- The unions are hand-written `[Union]` structs rather than `union` declarations, so an uninitialized (`default`) result
+  reports an internal `Failure` (`Internal error.`) instead of matching no case. Keep it that way: a `union` declaration
+  leaks a null `Value`, which `if (result is Failure)` and arm-less switches silently treat as success.
 
 ### Repository Pattern
 

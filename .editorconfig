@@ -191,6 +191,17 @@ dotnet_diagnostic.SA1413.severity = none
 # S3267: Loops should be simplified with "LINQ" expressions
 dotnet_diagnostic.S3267.severity = suggestion
 
+# C# 15 union types: StyleCop doesn't count `struct` declarations when it picks a file's first type, so
+# SA1649 points at the first record instead of `Result`. The union structs have no equality members
+# (CA1815), and `Success` is deliberately a memberless marker case (S2094). The case is stored in a
+# field rather than an auto-property so that an uninitialized result can report `Failure.Uninitialized`
+# instead of a null `Value` (IDE0032).
+[Clubber.Domain/Models/Result.cs]
+dotnet_diagnostic.SA1649.severity = none
+dotnet_diagnostic.CA1815.severity = none
+dotnet_diagnostic.S2094.severity = none
+dotnet_diagnostic.IDE0032.severity = none
+
 [*.{cpp,h,in}]
 # C++ Files
 curly_bracket_next_line = true

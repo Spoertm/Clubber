@@ -45,9 +45,9 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
                 await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             });
 
-        if (result.IsFailure)
+        if (result is Failure failure)
         {
-            await loggingChannel.SendMessageAsync("❌ Failed to update DB after 5 attempts.");
+            await loggingChannel.SendMessageAsync($"❌ Failed to update DB after 5 attempts: {failure.Message}");
         }
     }
 
@@ -122,26 +122,21 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
         Func<int, Exception, Task> onRetry)
         where T : notnull
     {
-        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        for (int attempt = 1; ; attempt++)
         {
             try
             {
                 return await action();
             }
-            catch (Exception ex) when (attempt < maxRetries)
+            catch (Exception ex)
             {
+                if (attempt >= maxRetries)
+                {
+                    return Result.Failure<T>(ex.Message);
+                }
+
                 await onRetry(attempt, ex);
             }
-        }
-
-        // Final attempt
-        try
-        {
-            return await action();
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<T>(ex.Message);
         }
     }
 
@@ -166,19 +161,19 @@ public sealed class DatabaseUpdateService(IOptions<AppConfig> config, IServiceSc
         Result dailyResult = await discordHelper.SendEmbedsEfficientlyAsync(
             embeds, _config.DailyUpdateChannelId, $"Updated {embeds.Length} {userStr} today.");
 
-        if (dailyResult.IsFailure)
+        if (dailyResult is Failure dailyFailure)
         {
             SocketTextChannel logCh = discordHelper.GetTextChannel(_config.DailyUpdateLoggingChannelId);
-            await logCh.SendMessageAsync($"❌ Failed to send embeds in daily channel: {dailyResult.ErrorMsg}");
+            await logCh.SendMessageAsync($"❌ Failed to send embeds in daily channel: {dailyFailure.Message}");
         }
 
         Result loggingResult = await discordHelper.SendEmbedsEfficientlyAsync(
             embeds, _config.DailyUpdateLoggingChannelId);
 
-        if (loggingResult.IsFailure)
+        if (loggingResult is Failure loggingFailure)
         {
             SocketTextChannel logCh = discordHelper.GetTextChannel(_config.DailyUpdateLoggingChannelId);
-            await logCh.SendMessageAsync($"❌ Failed to send embeds in logging channel: {loggingResult.ErrorMsg}");
+            await logCh.SendMessageAsync($"❌ Failed to send embeds in logging channel: {loggingFailure.Message}");
         }
     }
 }

@@ -169,12 +169,12 @@ public sealed class DatabaseUpdateServiceIntegrationTests : IDisposable
 
         Result<RoleChange> result = await _scoreRoleService.GetRoleChange(user);
 
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value.HasChanges);
+        Success<RoleChange> success = Assert.IsType<Success<RoleChange>>(result.Value);
+        Assert.True(success.Value.HasChanges);
 
         List<ulong> finalRoles = [.. user.RoleIds];
-        finalRoles.RemoveAll(r => result.Value.RolesToRemove.Contains(r));
-        finalRoles.AddRange(result.Value.RolesToAdd);
+        finalRoles.RemoveAll(r => success.Value.RolesToRemove.Contains(r));
+        finalRoles.AddRange(success.Value.RolesToAdd);
 
         Assert.Contains(expectedNewRole, finalRoles);
         Assert.DoesNotContain(oldRole, finalRoles);

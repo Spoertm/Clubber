@@ -57,12 +57,12 @@ public sealed class UserJoinHandler
         ScoreRoleService scoreRoleService = scope.ServiceProvider.GetRequiredService<ScoreRoleService>();
         Result<RoleChange> roleChangeResult = await scoreRoleService.GetRoleChange(joiningUser);
 
-        if (roleChangeResult.IsFailure || !roleChangeResult.Value.HasChanges)
+        if (roleChangeResult is not Success<RoleChange> success || !success.Value.HasChanges)
         {
             return;
         }
 
-        RoleChange change = roleChangeResult.Value;
+        RoleChange change = success.Value;
         if (change.RolesToAdd.Count > 0)
         {
             await joiningUser.AddRolesAsync(change.RolesToAdd);

@@ -13,9 +13,9 @@ public sealed class UserService(IOptions<AppConfig> config, IUserRepository user
     public async Task<Result> IsValidForRegistration(IGuildUser guildUser, uint leaderboardId, bool userUsedCommandForThemselves)
     {
         Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
-        if (result.IsFailure)
+        if (result is Failure failure)
         {
-            return Result.Failure(result.ErrorMsg);
+            return failure;
         }
 
         if (await userRepository.DiscordIdExistsAsync(guildUser.Id))
@@ -34,9 +34,9 @@ public sealed class UserService(IOptions<AppConfig> config, IUserRepository user
     public async Task<Result> IsValid(IGuildUser guildUser, bool userUsedCommandForThemselves)
     {
         Result result = IsNotBotOrCheater(guildUser, userUsedCommandForThemselves);
-        if (result.IsFailure)
+        if (result is Failure failure)
         {
-            return Result.Failure(result.ErrorMsg);
+            return failure;
         }
 
         if (await userRepository.DiscordIdExistsAsync(guildUser.Id))

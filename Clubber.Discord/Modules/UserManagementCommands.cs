@@ -1,11 +1,9 @@
-﻿using Clubber.Discord.Helpers;
+using Clubber.Discord.Helpers;
 using Clubber.Discord.Models;
 using Clubber.Discord.Services;
 using Clubber.Domain.Configuration;
 using Clubber.Domain.Data.Entities;
 using Clubber.Domain.Models;
-using Clubber.Domain.Models.Responses;
-using Clubber.Domain.Models.Responses.DdInfo;
 using Clubber.Domain.Repositories;
 using Clubber.Domain.Services;
 using Discord;
@@ -22,9 +20,10 @@ namespace Clubber.Discord.Modules;
 public sealed class UserManagementCommands(
     IUserRepository userRepository,
     UserService userService,
-    IWebService webService,
     ScoreRoleService scoreRoleService,
     IDiscordHelper discordHelper,
+    RoleUpdateService roleUpdateService,
+    UserStatsService userStatsService,
     IOptions<AppConfig> config)
     : InteractionModuleBase<SocketInteractionContext>
 {
@@ -43,25 +42,24 @@ public sealed class UserManagementCommands(
         try
         {
             Result result = await userService.IsValidForRegistration(user, lbId, user.Id == Context.User.Id);
-            if (result.IsFailure)
+            if (result is Failure validationFailure)
             {
-                await FollowupAsync(result.ErrorMsg, ephemeral: true);
+                await FollowupAsync(validationFailure.Message, ephemeral: true);
                 return;
             }
 
             Result registrationResult = await userRepository.RegisterAsync(lbId, user.Id);
-            if (registrationResult.IsSuccess)
+            if (registrationResult is Failure registrationFailure)
             {
-                await user.RemoveRoleAsync(config.Value.NewPalRoleId);
-                await user.AddRoleAsync(config.Value.PendingPbRoleId);
-                await FollowupAsync(
-                    $"✅ Registered {user.Mention} with leaderboard ID `{lbId}`.\n\n" +
-                    "They can now do `+pb` anywhere to get assigned a score role.");
+                await FollowupAsync($"Failed to execute command: {registrationFailure.Message}", ephemeral: true);
+                return;
             }
-            else
-            {
-                await FollowupAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
-            }
+
+            await user.RemoveRoleAsync(config.Value.NewPalRoleId);
+            await user.AddRoleAsync(config.Value.PendingPbRoleId);
+            await FollowupAsync(
+                $"✅ Registered {user.Mention} with leaderboard ID `{lbId}`.\n\n" +
+                "They can now do `+pb` anywhere to get assigned a score role.");
         }
         catch (Exception ex)
         {
@@ -253,9 +251,9 @@ public sealed class UserManagementCommands(
             }
 
             Result result = userService.IsNotBotOrCheater(user, isSelfCommand);
-            if (result.IsFailure)
+            if (result is Failure validationFailure)
             {
-                await FollowupAsync(result.ErrorMsg, ephemeral: true);
+                await FollowupAsync(validationFailure.Message, ephemeral: true);
                 return;
             }
 
@@ -266,14 +264,13 @@ public sealed class UserManagementCommands(
             }
 
             Result registrationResult = await userRepository.RegisterTwitchAsync(user.Id, twitchUsername);
-            if (registrationResult.IsSuccess)
+            if (registrationResult is Failure registrationFailure)
             {
-                await FollowupAsync($"✅ Linked Twitch account `{twitchUsername}` to {user.Mention}.");
+                await FollowupAsync($"Failed to execute command: {registrationFailure.Message}", ephemeral: true);
+                return;
             }
-            else
-            {
-                await FollowupAsync($"Failed to execute command: {registrationResult.ErrorMsg}", ephemeral: true);
-            }
+
+            await FollowupAsync($"✅ Linked Twitch account `{twitchUsername}` to {user.Mention}.");
         }
         catch (Exception ex)
         {
@@ -299,14 +296,13 @@ public sealed class UserManagementCommands(
             }
 
             Result result = await userRepository.UnregisterTwitchAsync(user.Id);
-            if (result.IsSuccess)
+            if (result is Failure failure)
             {
-                await RespondAsync($"✅ Unlinked the Twitch account from {user.Mention}.", ephemeral: true);
+                await RespondAsync($"Failed to execute command: {failure.Message}", ephemeral: true);
+                return;
             }
-            else
-            {
-                await RespondAsync($"Failed to execute command: {result.ErrorMsg}", ephemeral: true);
-            }
+
+            await RespondAsync($"✅ Unlinked the Twitch account from {user.Mention}.", ephemeral: true);
         }
         catch (Exception ex)
         {
@@ -326,40 +322,7 @@ public sealed class UserManagementCommands(
         try
         {
             user ??= (SocketGuildUser)Context.User;
-
-            DdUser? ddUser = await userRepository.FindAsync(user.Id);
-
-            if (ddUser is null)
-            {
-                Result userValidationResult = await userService.IsValid(user, user.Id == Context.User.Id);
-                await FollowupAsync(userValidationResult.ErrorMsg, ephemeral: true);
-                return;
-            }
-
-            uint leaderboardId = ddUser.LeaderboardId;
-            Task<IReadOnlyList<EntryResponse>> playerEntryTask = webService.GetLbPlayers([leaderboardId]);
-            Task<GetPlayerHistory?> playerHistoryTask = webService.GetPlayerHistory(leaderboardId);
-            await Task.WhenAll(playerEntryTask, playerHistoryTask);
-
-            EntryResponse playerEntry = (await playerEntryTask)[0];
-            GetPlayerHistory? playerHistory = await playerHistoryTask;
-
-            Embed statsEmbed;
-            MessageComponent? components = null;
-
-            if (full)
-            {
-                statsEmbed = EmbedHelper.FullStats(playerEntry, user, playerHistory);
-            }
-            else
-            {
-                statsEmbed = EmbedHelper.Stats(playerEntry, user, playerHistory);
-                ComponentBuilder cb = new();
-                cb.WithButton("Full stats", $"stats:{user.Id}:{leaderboardId}");
-                components = cb.Build();
-            }
-
-            await FollowupAsync(embed: statsEmbed, components: components);
+            await SendAsync(await userStatsService.GetStatsAsync(user, user.Id == Context.User.Id, full));
         }
         catch (Exception ex)
         {
@@ -375,51 +338,33 @@ public sealed class UserManagementCommands(
         try
         {
             SocketGuildUser user = (SocketGuildUser)Context.User;
-            Result result = await userService.IsValid(user, true);
-            if (result.IsFailure)
-            {
-                await FollowupAsync(result.ErrorMsg, ephemeral: true);
-                return;
-            }
-
-            Result<RoleChange> roleChangeResult = await scoreRoleService.GetRoleChange(user);
-            if (roleChangeResult.IsFailure)
-            {
-                await FollowupAsync(roleChangeResult.ErrorMsg, ephemeral: true);
-                return;
-            }
-
-            RoleChange change = roleChangeResult.Value;
-            if (change.HasChanges)
-            {
-                if (change.RolesToAdd.Count > 0)
-                    await user.AddRolesAsync(change.RolesToAdd);
-
-                if (change.RolesToRemove.Count > 0)
-                    await user.RemoveRolesAsync(change.RolesToRemove);
-
-                await FollowupAsync(embed: EmbedHelper.UpdateRoles(new UserRoleUpdate(user, change)));
-            }
-            else
-            {
-                string msg = "ℹ️ No role changes were needed - your roles are already up to date.";
-                if (change.SecondsToNextMilestone == 0)
-                {
-                    msg += "\n\nYou already have the highest role in the server!";
-                }
-                else
-                {
-                    msg += $"\n\nYou're **{change.SecondsToNextMilestone:0.0000}s** away from the next role: {MentionUtils.MentionRole(change.NextRoleId!.Value)}";
-                }
-
-                await FollowupAsync(msg);
-            }
+            await SendAsync(await roleUpdateService.PrepareAsync(user));
         }
         catch (Exception ex)
         {
             await HandleSlashCommandError(ex);
         }
     }
+
+    private Task SendAsync(Result<RoleUpdateOutcome> result) => result switch
+    {
+        Success<RoleUpdateOutcome> success => SendAsync(success.Value),
+        Failure failure => SendAsync(failure.Message),
+    };
+
+    private Task SendAsync(Result<StatsOutcome> result) => result switch
+    {
+        Success<StatsOutcome> success => SendAsync(success.Value),
+        Failure failure => SendAsync(failure.Message),
+    };
+
+    private Task SendAsync(RoleUpdateOutcome outcome) => outcome.Embed is not null
+        ? FollowupAsync(embed: outcome.Embed)
+        : FollowupAsync(outcome.Text ?? string.Empty);
+
+    private Task SendAsync(StatsOutcome outcome) => FollowupAsync(embed: outcome.Embed, components: outcome.Components);
+
+    private Task SendAsync(string message) => FollowupAsync(message, ephemeral: true);
 
     private async Task HandleSlashCommandError(Exception ex)
     {
